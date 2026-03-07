@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Inter:wght@400;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background-color: #FDF5E6; /* Warm Beige */
+  color: #2F4F4F; /* Dark Slate Gray / Itako Grey */
+}
+
+body {
+  margin: 0;
+  font-family: 'Noto Serif JP', serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar for horizontal timeline */
+.itako-scrollbar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.itako-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.itako-scrollbar::-webkit-scrollbar-thumb {
+  background: #FF8C00;
+  border-radius: 10px;
+}
+
+.timeline-slot {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.timeline-container {
+  scroll-snap-type: x mandatory;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
