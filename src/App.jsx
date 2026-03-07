@@ -57,6 +57,7 @@ const PostCard = ({ title, content, author, flavor }) => (
 
 function App() {
   const [userName, setUserName] = useState('無名の参列者');
+  const [geminiKey, setGeminiKey] = useState(localStorage.getItem('itako_gemini_key') || '');
   const [activeSlot, setActiveSlot] = useState(1);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
@@ -144,13 +145,13 @@ function App() {
     }
 
     // Generate AI response with physical status, underground info, and external context
-    const aiResp = await generateCharacterResponse(currentChar, userMsg, isUnderground, externalContext);
+    const aiResp = await generateCharacterResponse(currentChar, userMsg, isUnderground, externalContext, geminiKey);
     setMessages(prev => [...prev, { role: 'ai', content: aiResp, charId: selectedCharId }]);
 
     // 自律増殖の評価
     if (messages.length % 3 === 0) {
       import('./gemini').then(async ({ evaluateExpansion }) => {
-        const expansion = await evaluateExpansion(userMsg + " " + aiResp);
+        const expansion = await evaluateExpansion(userMsg + " " + aiResp, geminiKey);
         if (expansion) {
           if (expansion.type === 'character' && !characters.find(c => c.id === expansion.id)) {
             setCharacters(prev => [...prev, {
@@ -167,7 +168,7 @@ function App() {
 
     // 2036年スロットの更新
     if (activeSlot === 2) {
-      const critique = await evaluateFutureSelf(bookmarks);
+      const critique = await evaluateFutureSelf(bookmarks, geminiKey);
       setFutureSelfCritique(critique);
     }
 
@@ -189,7 +190,7 @@ function App() {
     setActiveSlot(index);
     if (index === 2) {
       setLoading(true);
-      const critique = await evaluateFutureSelf(bookmarks);
+      const critique = await evaluateFutureSelf(bookmarks, geminiKey);
       setFutureSelfCritique(critique);
       setLoading(false);
     }
@@ -208,9 +209,23 @@ function App() {
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-itako-warm-beige text-itako-grey">
       {/* Header */}
       <header className="h-16 flex items-center justify-between px-6 border-b border-orange-100 bg-white/50 backdrop-blur-md z-10 shrink-0">
-        <div className="flex items-center gap-2">
-          <Ghost className="text-itako-orange" />
-          <h1 className="text-xl font-bold tracking-tight">ITAKO PLAZA</h1>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Ghost className="text-itako-orange" />
+            <h1 className="text-xl font-bold tracking-tight">ITAKO PLAZA</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="password"
+              placeholder="Gemini API Keyを入力..."
+              value={geminiKey}
+              onChange={(e) => {
+                setGeminiKey(e.target.value);
+                localStorage.setItem('itako_gemini_key', e.target.value);
+              }}
+              className="px-3 py-1 text-xs border border-orange-200 rounded-md bg-white/80 focus:outline-none focus:ring-1 focus:ring-itako-orange shadow-sm w-48"
+            />
+          </div>
         </div>
         <div className="flex items-center gap-4">
           <button

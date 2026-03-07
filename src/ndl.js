@@ -5,23 +5,16 @@ export const searchNDLArchive = async (keyword) => {
     if (!keyword) return [];
 
     try {
-        const baseUrl = "https://iss.ndl.go.jp/api/opensearch";
-        const query = `?cnt=3&mediatype=1&title=${encodeURIComponent(keyword)}`;
+        const baseUrl = "/api/ndl";
+        const query = `?keyword=${encodeURIComponent(keyword)}`;
 
-        // NDL API returns XML by default. For this context, we simulate the logic.
+        // プロキシ経由でアクセス
         const response = await fetch(baseUrl + query);
 
         if (!response.ok) throw new Error("NDL Access Failed");
 
-        return [
-            {
-                id: `ndl-${Date.now()}-1`,
-                title: `${keyword}に関する書誌`,
-                author: "国立国会図書館",
-                quote: "この記録は時を超えて、あなたの言葉に呼応している。",
-                ref: "NDL Digital Collection"
-            }
-        ];
+        const data = await response.json();
+        return data;
     } catch (error) {
         // 連携失敗時の文学的フォールバック（深淵のアーカイブ）
         return [

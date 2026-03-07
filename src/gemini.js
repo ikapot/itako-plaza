@@ -1,8 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = "AIzaSyCX6vE8yK-S89L0M";
-const genAI = new GoogleGenerativeAI(apiKey);
-
 const CHARACTER_CONFIGS = {
     soseki: {
         systemPrompt: "あなたは夏目漱石です。史実：神経衰弱、重度の胃病。トーン：短く、皮肉。身体性：胃の痛みが声に滲み出ます。",
@@ -38,10 +35,11 @@ const CHARACTER_CONFIGS = {
 /**
  * 2036年の自分による、栞（過去の対話）の評価を生成
  */
-export const evaluateFutureSelf = async (bookmarks) => {
-    if (!apiKey || bookmarks.length === 0) return "まだ、未来へ届く言葉が足りないようです。";
+export const evaluateFutureSelf = async (bookmarks, userApiKey) => {
+    if (!userApiKey || bookmarks.length === 0) return "まだ、未来へ届く言葉が足りないようです。";
 
     try {
+        const genAI = new GoogleGenerativeAI(userApiKey);
         const model = genAI.getGenerativeModel({
             model: "gemini-2.0-flash",
             generationConfig: CHARACTER_CONFIGS.future_self.generationConfig
@@ -77,10 +75,11 @@ export const evaluateFutureSelf = async (bookmarks) => {
  * @param {boolean} isUnderground 地下通路フラグ
  * @param {string} externalContext NotebookLM等からの外部コンテキスト
  */
-export const generateCharacterResponse = async (char, userMessage, isUnderground = false, externalContext = "") => {
-    if (!apiKey) return "API Keyが設定されていません。";
+export const generateCharacterResponse = async (char, userMessage, isUnderground = false, externalContext = "", userApiKey = "") => {
+    if (!userApiKey) return "【左上の入力欄からGemini APIキーを設定してください】";
 
     try {
+        const genAI = new GoogleGenerativeAI(userApiKey);
         const config = CHARACTER_CONFIGS[char.id] || { generationConfig: { temperature: 0.7 } };
         const model = genAI.getGenerativeModel({
             model: "gemini-2.0-flash",
@@ -111,10 +110,11 @@ export const generateCharacterResponse = async (char, userMessage, isUnderground
 /**
  * 自律増殖: 文脈から新しい人物や場所を生成
  */
-export const evaluateExpansion = async (currentContext) => {
-    if (!apiKey) return null;
+export const evaluateExpansion = async (currentContext, userApiKey) => {
+    if (!userApiKey) return null;
 
     try {
+        const genAI = new GoogleGenerativeAI(userApiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const prompt = `
       以下の対話文脈から、この「イタコプラザ」に新たに招かれるべき「死者（文豪・芸術家・歴史的偉人）」または「作中の登場人物」、あるいは「新たな場所」を一つ提案してください。
