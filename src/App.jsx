@@ -4,6 +4,7 @@ import { MessageSquare, TrendingUp, BookOpen, User, MapPin, Ghost, Settings, Loa
 import { loginAnonymously, saveBookmark, fetchBookmarks } from './firebase';
 import { generateCharacterResponse, evaluateFutureSelf } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
+import { searchNDLArchive } from './ndl';
 
 // --- 初期データ ---
 const INITIAL_CHARACTERS = [
