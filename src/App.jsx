@@ -260,7 +260,7 @@ function App() {
           <div className="max-w-xl mx-auto">
             <div className="flex items-center gap-2 mb-6 text-itako-orange">
               <TrendingUp size={20} />
-              <h2 className="text-lg font-bold">Trends / 現実の変奏（流行）</h2>
+              <h2 className="text-lg font-bold">Timeline: Trends（流行）</h2>
             </div>
             {news.map(n => (
               <div key={n.id} className="mb-8">
@@ -293,7 +293,7 @@ function App() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2 text-itako-orange">
                 <MessageSquare size={20} />
-                <h2 className="text-lg font-bold">{isUnderground ? '地下通路（本音）' : 'Main Dialog（主対話）'}</h2>
+                <h2 className="text-lg font-bold">Timeline: Main Dialog（主対話）</h2>
               </div>
               <button
                 onClick={() => setIsUnderground(!isUnderground)}
@@ -402,7 +402,7 @@ function App() {
           <div className="max-w-xl mx-auto">
             <div className="flex items-center gap-2 mb-6 text-itako-orange">
               <Ghost size={20} className="animate-pulse" />
-              <h2 className="text-lg font-bold">2036 / Future Self（未来の自己）</h2>
+              <h2 className="text-lg font-bold">Timeline: Classics & Abyss（古典と深淵）</h2>
             </div>
 
             {loading ? (
