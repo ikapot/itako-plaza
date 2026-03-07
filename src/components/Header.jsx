@@ -1,5 +1,6 @@
 import React from 'react';
-import { Ghost, BookOpen, User, Settings } from 'lucide-react';
+import { BookOpen, User, Settings } from 'lucide-react';
+import Logo from './Logo';
 
 export default function Header({
     userName,
@@ -19,11 +20,8 @@ export default function Header({
     };
     return (
         <header className="h-16 flex items-center justify-between px-6 border-b border-orange-100 bg-white/50 backdrop-blur-md z-10 shrink-0">
-            <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                    <Ghost className="text-itako-orange" />
-                    <h1 className="text-xl font-bold tracking-tight">ITAKO PLAZA</h1>
-                </div>
+            <div className="flex items-center gap-6">
+                <Logo />
                 <div className="flex items-center gap-2">
                     <div className="flex items-center gap-2 bg-white/80 border border-orange-200 p-1 rounded-md shadow-sm">
                         <input
