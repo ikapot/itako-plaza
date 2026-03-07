@@ -48,17 +48,22 @@ export const evaluateFutureSelf = async (bookmarks, userApiKey) => {
         const bookmarkText = bookmarks.map(b => `[${b.charId}との対話] 私: "${b.userMsg}" -> 相手: "${b.aiMsg}"`).join('\n');
 
         const prompt = `
-      設定: ${CHARACTER_CONFIGS.future_self.systemPrompt}
-      
-      以下はあなたが10年前（2026年）に残した「栞（重要な対話の記録）」です。
-      -----
-      ${bookmarkText}
-      -----
-      
-      これらの言葉を読み、2036年のあなたとして、当時の自分へメッセージを送ってください。
-      「あの時のあの言葉が、後の納得に繋がったのだ」という具体的な批評を含め、
-      今のあなたが到達した静かな境地から、かつての自分を肯定してください。
-    `;
+<role>
+${CHARACTER_CONFIGS.future_self.systemPrompt}
+</role>
+
+<context>
+以下はあなたが10年前（2026年）に残した「栞（重要な対話の記録）」です。
+${bookmarkText}
+</context>
+
+<rules>
+- これらの言葉を読み、2036年のあなたとして、当時の自分へメッセージを送ってください。
+- 「あの時のあの言葉が、後の納得に繋がったのだ」という具体的な批評を含めてください。
+- 今のあなたが到達した静かな境地から、かつての自分を肯定してください。
+- AIアシスタントとしてではなく、完全に2036年の自分として出力してください。
+</rules>
+`;
 
         const result = await model.generateContent(prompt);
         return result.response.text();
@@ -89,16 +94,28 @@ export const generateCharacterResponse = async (char, userMessage, isUnderground
         const statusText = char.status ? Object.entries(char.status).map(([k, v]) => `${k}: ${v}`).join('、') : "";
 
         const prompt = `
-      設定: ${config.systemPrompt || char.systemPrompt}
-      追加コンテキスト（NotebookLM解析等）: ${externalContext || 'なし'}
-      史実エピソード: ${char.history || '特記事項なし'}
-      現在の身体状態: ${statusText}
-      特殊環境: ${isUnderground ? '地下通路（本音・共謀モード。建前を捨て、生々しい欲望やユーザーへの共謀を語ってください）' : '地表（通常の対話）'}
-      
-      ユーザーのメッセージ: "${userMessage}"
-      
-      これに一度きりの言葉を返してください。定型文は厳禁。
-    `;
+<role>
+${config.systemPrompt || char.systemPrompt}
+</role>
+
+<context>
+追加コンテキスト（NotebookLM解析等）: ${externalContext || 'なし'}
+史実エピソード: ${char.history || '特記事項なし'}
+現在の身体状態: ${statusText}
+特殊環境: ${isUnderground ? '地下通路（本音・共謀モード。建前を捨て、生々しい欲望やユーザーへの共謀を語ってください）' : '地表（通常の対話）'}
+</context>
+
+<rules>
+- あなたはAIアシスタントではなく、<role>で定義されたキャラクターとして完全に振る舞います。
+- ユーザーのメッセージに対して、キャラクターの個性、トーン、身体的状況、特殊環境を統合した「一度きりの言葉」を返してください。
+- 定型文やAI特有の無難な回答、免責事項は絶対に含めないでください。
+- キャラクターの抱える痛み、執着、あるいは思想が生々しく思考に影響を与えている様子を表現してください。
+</rules>
+
+<user_message>
+${userMessage}
+</user_message>
+`;
         const result = await model.generateContent(prompt);
         return result.response.text();
     } catch (error) {
@@ -117,20 +134,30 @@ export const evaluateExpansion = async (currentContext, userApiKey) => {
         const genAI = new GoogleGenerativeAI(userApiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const prompt = `
-      以下の対話文脈から、この「イタコプラザ」に新たに招かれるべき「死者（文豪・芸術家・歴史的偉人）」または「作中の登場人物」、あるいは「新たな場所」を一つ提案してください。
-      
-      文脈: "${currentContext}"
-      
-      出力は以下のJSON形式のみで行ってください:
-      {
-        "type": "character" | "location",
-        "name": "名称",
-        "description": "簡潔な説明",
-        "history": "特異な史実や執念のエピソード",
-        "id": "英字ID",
-        "flavor": "身体的苦痛または執着のキーワード"
-      }
-    `;
+<task>
+以下の対話文脈から、この「イタコプラザ」に新たに招かれるべき「死者（文豪・芸術家・歴史的偉人）」または「作中の登場人物」、あるいは「新たな場所」を一つ提案してください。
+</task>
+
+<context>
+${currentContext}
+</context>
+
+<rules>
+- 文脈に最も響き合う（共鳴する、あるいは対立する）存在を選んでください。
+- 出力は必ず以下のJSONフォーマットに厳密に従ってください。マークダウンの装飾はしないでください。
+</rules>
+
+<json_format>
+{
+  "type": "character" | "location",
+  "name": "名称",
+  "description": "簡潔な説明",
+  "history": "特異な史実や執念のエピソード",
+  "id": "英字ID",
+  "flavor": "身体的苦痛または執着のキーワード"
+}
+</json_format>
+`;
         const result = await model.generateContent(prompt);
         const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
         return JSON.parse(jsonStr);
