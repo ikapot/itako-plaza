@@ -421,7 +421,7 @@ function App() {
                     <Quote size={40} />
                   </div>
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[10px] font-bold bg-itako-grey text-white px-3 py-1 rounded-full uppercase tracking-tighter">Evaluation from 2036</span>
+                    <span className="text-[10px] font-bold bg-itako-orange text-white px-3 py-1 rounded-full uppercase tracking-tighter">Evaluation from 2036</span>
                   </div>
                   <p className="text-sm leading-relaxed text-itako-grey/80 whitespace-pre-wrap font-serif">
                     {futureSelfCritique || "まだ、未来の自分に届く言葉が保存されていないようです。メイン対話で「栞を挟む」を行ってください。"}

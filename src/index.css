@@ -5,8 +5,10 @@
 @tailwind utilities;
 
 :root {
-  background-color: #FDF5E6; /* Warm Beige */
-  color: #2F4F4F; /* Dark Slate Gray / Itako Grey */
+  background-color: #0b0b0b;
+  /* Deep Black */
+  color: #eeeeee;
+  /* Soft White */
 }
 
 body {

@@ -7,14 +7,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        'itako-beige': '#F5F5DC',
-        'itako-orange': '#FF8C00',
-        'itako-grey': '#2F4F4F',
-        'itako-warm-beige': '#FDF5E6',
+        'itako-beige': '#1c1c1c',     /* Dark panel background */
+        'itako-orange': '#FF8C00',    /* Keep orange */
+        'itako-grey': '#eeeeee',      /* Light text */
+        'itako-warm-beige': '#0b0b0b',/* Darkest background */
       },
       fontFamily: {
         serif: ['"Noto Serif JP"', 'serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      backgroundColor: {
+        'white': '#1c1c1c',
       },
       borderRadius: {
         '2xl': '1rem',
