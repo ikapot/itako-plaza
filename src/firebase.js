@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInAnonymously } from "firebase/auth";
+import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy } from "firebase/firestore";
 
 // TODO: 環境変数（.envファイル）からFirebase設定を読み込む
@@ -15,6 +15,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+const googleProvider = new GoogleAuthProvider();
+
+export const loginWithGoogle = async () => {
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        return result.user;
+    } catch (error) {
+        console.error("Google Auth Error:", error);
+        return null;
+    }
+};
+
+export const logout = () => signOut(auth);
 
 export const loginAnonymously = async () => {
     try {

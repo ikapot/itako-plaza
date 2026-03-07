@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, TrendingUp, BookOpen, User, MapPin, Ghost, Settings, Loader2, Quote } from 'lucide-react';
-import { loginAnonymously, saveBookmark, fetchBookmarks } from './firebase';
+import { auth, fetchBookmarks, saveBookmark } from './firebase';
 import { generateCharacterResponse, evaluateFutureSelf } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
 import { searchNDLArchive } from './ndl';
 import Header from './components/Header';
+import LandingPage from './components/LandingPage';
 
 // --- 初期データ ---
 const INITIAL_CHARACTERS = [
@@ -57,8 +58,10 @@ const PostCard = ({ title, content, author, flavor }) => (
 );
 
 function App() {
+  const [user, setUser] = useState(null);
   const [userName, setUserName] = useState('無名の参列者');
   const [geminiKey, setGeminiKey] = useState(localStorage.getItem('itako_gemini_key') || '');
+  const [isAppReady, setIsAppReady] = useState(false);
   const [activeSlot, setActiveSlot] = useState(1);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
@@ -92,27 +95,41 @@ function App() {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    const initApp = async () => {
-      // 匿名認証
-      const user = await loginAnonymously();
-      if (user) setUserName(user.displayName || '彷徨える魂');
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        setUserName(currentUser.displayName || '彷徨える魂');
 
-      // ニュース取得（柴田元幸トーン）
+        // ログイン後のデータ取得
+        const savedBookMarks = await fetchBookmarks();
+        setBookmarks(savedBookMarks);
+
+        // APIキーがあれば準備完了
+        if (geminiKey) setIsAppReady(true);
+      } else {
+        setUser(null);
+        setIsAppReady(false);
+      }
+    });
+
+    const loadGlobalData = async () => {
+      // ニュース取得などは認証前でも裏で進めておく
       const initialNews = await fetchFictionalizedNews();
       setNews(initialNews);
-
-      // 市川房枝の叱咤を1件生成
       if (initialNews.length > 0) {
         const scold = await generateIchikawaScolding(initialNews[0]);
         setIchikawaScolds({ [initialNews[0].id]: scold });
       }
-
-      // 栞の取得
-      const savedBookMarks = await fetchBookmarks();
-      setBookmarks(savedBookMarks);
     };
-    initApp();
-  }, []);
+
+    loadGlobalData();
+    return () => unsubscribe();
+  }, [geminiKey]);
+
+  const handleLoginComplete = (key) => {
+    setGeminiKey(key);
+    setIsAppReady(true);
+  };
 
   const handleBookmark = async (msgIndex) => {
     const userMsg = messages[msgIndex - 1]?.content;
@@ -205,6 +222,10 @@ function App() {
       handleSlotChange(index);
     }
   };
+
+  if (!isAppReady) {
+    return <LandingPage onLoginComplete={handleLoginComplete} />;
+  }
 
   return (
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-itako-warm-beige text-itako-grey">
