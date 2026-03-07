@@ -8,6 +8,15 @@ export default function Header({
     showContextUI,
     setShowContextUI
 }) {
+    const [isConnected, setIsConnected] = React.useState(!!geminiKey);
+    const [tempKey, setTempKey] = React.useState(geminiKey);
+
+    const handleConnect = () => {
+        setGeminiKey(tempKey);
+        localStorage.setItem('itako_gemini_key', tempKey);
+        if (tempKey) setIsConnected(true);
+        else setIsConnected(false);
+    };
     return (
         <header className="h-16 flex items-center justify-between px-6 border-b border-orange-100 bg-white/50 backdrop-blur-md z-10 shrink-0">
             <div className="flex items-center gap-4">
@@ -16,16 +25,27 @@ export default function Header({
                     <h1 className="text-xl font-bold tracking-tight">ITAKO PLAZA</h1>
                 </div>
                 <div className="flex items-center gap-2">
-                    <input
-                        type="password"
-                        placeholder="Gemini API Keyを入力..."
-                        value={geminiKey}
-                        onChange={(e) => {
-                            setGeminiKey(e.target.value);
-                            localStorage.setItem('itako_gemini_key', e.target.value);
-                        }}
-                        className="px-3 py-1 text-xs border border-orange-200 rounded-md bg-white/80 focus:outline-none focus:ring-1 focus:ring-itako-orange shadow-sm w-48"
-                    />
+                    <div className="flex items-center gap-2 bg-white/80 border border-orange-200 p-1 rounded-md shadow-sm">
+                        <input
+                            type="password"
+                            placeholder="Gemini API Key..."
+                            value={tempKey}
+                            onChange={(e) => {
+                                setTempKey(e.target.value);
+                                setIsConnected(false);
+                            }}
+                            className="px-2 py-0.5 text-xs bg-transparent focus:outline-none w-40 text-itako-grey/80"
+                        />
+                        <button
+                            onClick={handleConnect}
+                            className={`px-3 py-1 text-[10px] font-bold rounded transition-colors ${isConnected
+                                ? 'bg-green-500/20 text-green-500 border border-green-500/30'
+                                : 'bg-itako-orange text-white hover:bg-orange-600'
+                                }`}
+                        >
+                            {isConnected ? '連携済み ✓' : '連携する'}
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className="flex items-center gap-4">

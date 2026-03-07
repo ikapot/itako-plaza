@@ -13,8 +13,8 @@ export default {
         'itako-warm-beige': '#0b0b0b',/* Darkest background */
       },
       fontFamily: {
+        sans: ['"BIZ UDGothic"', 'sans-serif'],
         serif: ['"Noto Serif JP"', 'serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       backgroundColor: {
         'white': '#1c1c1c',
