@@ -101,6 +101,8 @@ function App() {
   const [archives, setArchives] = useState([
     { id: 1, author: 'Soseki', quote: '「月が綺麗ですね」と言ったのは、私だっただろうか。', ref: '三四郎より' },
   ]);
+  const [brightness, setBrightness] = useState(parseFloat(localStorage.getItem('itako_brightness')) || 1.0);
+  const [showSettings, setShowSettings] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
   const [futureSelfCritique, setFutureSelfCritique] = useState('');
   const [notebookInput, setNotebookInput] = useState('');
@@ -323,14 +325,18 @@ function App() {
       {/* Tabs for Manager */}
       <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 mb-8">
         {[
-          { id: 'directory', icon: <User size={14} />, label: 'Registry' },
-          { id: 'map', icon: <Globe size={14} />, label: 'Map' },
-          { id: 'connect', icon: <Cpu size={14} />, label: 'Connect' },
+          { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
+          { id: 'map', icon: <Globe size={14} />, label: 'Map', color: '#fdb913' },
+          { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
         ].map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveManagerTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all font-oswald ${activeManagerTab === tab.id ? 'bg-zinc-200 text-black shadow-lg' : 'text-white/30 hover:text-white/60'}`}
+            style={{
+              backgroundColor: activeManagerTab === tab.id ? tab.color : 'transparent',
+              color: activeManagerTab === tab.id ? '#000' : 'rgba(255,255,255,0.3)'
+            }}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all font-oswald shadow-inner`}
           >
             {tab.icon}
             <span className="hidden md:inline">{tab.label}</span>
@@ -450,7 +456,10 @@ function App() {
 
 
   return (
-    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#050505] text-itako-grey font-sans selection:bg-[#bd8a78]/30">
+    <div
+      className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#050505] text-itako-grey font-sans selection:bg-[#fdb913]/30"
+      style={{ '--itako-brightness': brightness }}
+    >
 
       {/* Mobile Drawer */}
       <AnimatePresence>
@@ -485,449 +494,400 @@ function App() {
       {/* Header (Clean Architecture: Components / UI) */}
       <Header
         userName={userName}
-        isPC={true} // For determining mobile/PC behavior if needed
         openDrawer={() => setIsDrawerOpen(true)}
+        openSettings={() => setShowSettings(true)}
       />
 
-      {/* PC Top Manager (Collapsible) */}
-      <div className="hidden md:block bg-black/20 border-b border-white/5 backdrop-blur-xl overflow-hidden">
-        <div className="max-w-4xl mx-auto py-6 px-12">
-          <ManagerContent />
-        </div>
-      </div>
-
-      {/* NotebookLM Context Injection UI */}
+      {/* Settings Overlay */}
       <AnimatePresence>
-        {showContextUI && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="bg-white border-b border-orange-100 overflow-hidden"
-          >
-            <div className="p-4 max-w-xl mx-auto">
-              <label className="text-[10px] font-bold text-itako-orange mb-2 block uppercase tracking-wider">NotebookLM Analysis / 作家特有の論理・語彙</label>
-              <textarea
-                value={externalContext}
-                onChange={(e) => setExternalContext(e.target.value)}
-                placeholder="ここにNotebookLMで解析した作家の癖や思想をペーストしてください。AIの応答に反映されます。"
-                className="w-full h-24 p-3 bg-itako-warm-beige/30 border border-orange-50 rounded-xl text-xs focus:ring-1 ring-itako-orange/30 outline-none resize-none"
-              />
-            </div>
-          </motion.div>
+        {showSettings && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSettings(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110]"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 bg-zinc-900 border border-white/10 p-8 rounded-[40px] z-[120] shadow-3xl"
+            >
+              <div className="flex items-center justify-between mb-10">
+                <span className="text-xl font-bold font-oswald tracking-widest text-white uppercase">Settings</span>
+                <button onClick={() => setShowSettings(false)} className="text-white/20 hover:text-white"><X size={20} /></button>
+              </div>
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald">Luminance / 輝度</label>
+                    <span className="text-[10px] font-bold text-[#fdb913] font-oswald">{Math.round(brightness * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.4"
+                    max="1.0"
+                    step="0.05"
+                    value={brightness}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setBrightness(val);
+                      localStorage.setItem('itako_brightness', val);
+                    }}
+                    className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-[#fdb913]"
+                  />
+                </div>
+                <div className="pt-4 border-t border-white/5">
+                  <p className="text-[9px] leading-relaxed text-white/20 font-serif italic text-center">背景の静寂はそのままに、言葉の光を調整します。</p>
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
-      {/* Main Timeline Scrollable Area */}
-      <main
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="timeline-container flex-1 itako-scrollbar"
-      >
-        <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
-          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
-            <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
-              <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
-              <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">The Fictionalized Reality</p>
-            </header>
-
-            <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
-              <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] font-oswald">Current Echoes ({news.length})</span>
-              <span className="text-[10px] font-bold text-white/40 hover:text-white cursor-pointer transition-all tracking-widest uppercase font-oswald">Live Pulse</span>
-            </div>
-
-            {news.map((n, idx) => {
-              const cardColors = ['bg-itako-sand', 'bg-itako-sage', 'bg-itako-clay'];
-              return (
-                <div key={n.id} className="mb-12">
-                  <SpiritCard
-                    title={n.title}
-                    content={n.content}
-                    author="Soseki Natsume"
-                    portraitUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg"
-                    flavor="Narrator"
-                    colorClass="bg-white/5 text-white/80 border-white/10"
-                  />
-                  {ichikawaScolds[n.id] && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 15 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      className="ml-auto w-[85%] mt-[-4rem] bg-white p-10 rounded-[40px] border border-black/5 shadow-2xl relative z-20"
-                    >
-                      <div className="flex items-center gap-3 mb-4">
-                        <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg" colorClass="bg-itako-sage" size="w-8 h-8" isSelected />
-                        <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-400 uppercase">Ichikawa's Verdict / 叱咤</span>
-                      </div>
-                      <p className="text-base leading-relaxed italic text-black/80 font-serif">「{ichikawaScolds[n.id]}」</p>
-                    </motion.div>
-                  )}
-                </div>
-              );
-            })}
+      <div className="flex-1 flex overflow-hidden">
+        {/* PC Left Manager (Sidebar) */}
+        <div className="hidden md:block w-96 border-r border-white/5 bg-black/20 backdrop-blur-sm overflow-y-auto">
+          <div className="p-10">
+            <ManagerContent />
           </div>
-        </section>
+        </div>
 
-        {/* Slot 2: Main Dialog */}
-        <section className={`timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-[#1a1a1a]`}>
-          <div className="max-w-2xl mx-auto h-full flex flex-col pb-64 md:pb-48">
-            <header className="flex flex-col gap-2 mb-10 md:mb-12 px-2 md:px-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
-                <button
-                  onClick={() => setIsUnderground(!isUnderground)}
-                  className={`px-5 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
-                >
-                  {isUnderground ? 'Surface' : 'Deep Trace'}
-                </button>
+        {/* NotebookLM Context Injection UI */}
+        <AnimatePresence>
+          {showContextUI && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-white border-b border-orange-100 overflow-hidden"
+            >
+              <div className="p-4 max-w-xl mx-auto">
+                <label className="text-[10px] font-bold text-itako-orange mb-2 block uppercase tracking-wider">NotebookLM Analysis / 作家特有の論理・語彙</label>
+                <textarea
+                  value={externalContext}
+                  onChange={(e) => setExternalContext(e.target.value)}
+                  placeholder="ここにNotebookLMで解析した作家の癖や思想をペーストしてください。AIの応答に反映されます。"
+                  className="w-full h-24 p-3 bg-itako-warm-beige/30 border border-orange-50 rounded-xl text-xs focus:ring-1 ring-itako-orange/30 outline-none resize-none"
+                />
               </div>
-              <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald truncate">{userName} / Speaking</p>
-            </header>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            <div className="flex-1 flex flex-col gap-12 mt-8">
-              {/* Chat Thread as Stacked Cards */}
-              <div className="space-y-8 px-2 pb-24">
-                <AnimatePresence>
-                  {messages.map((m, i) => {
-                    const isUser = m.role === 'user';
-                    const charObj = characters.find(c => c.id === m.charId);
-                    return (
+        {/* Main Timeline Scrollable Area */}
+        <main
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="timeline-container flex-1 itako-scrollbar"
+          style={{ opacity: 'var(--itako-brightness)', filter: `contrast(${0.8 + (1 - brightness) * 0.4})` }}
+        >
+          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
+            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
+              <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
+                <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
+                <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">The Fictionalized Reality</p>
+              </header>
+
+              <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
+                <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] font-oswald">Current Echoes ({news.length})</span>
+                <span className="text-[10px] font-bold text-white/40 hover:text-white cursor-pointer transition-all tracking-widest uppercase font-oswald">Live Pulse</span>
+              </div>
+
+              {news.map((n, idx) => {
+                const cardColors = ['bg-itako-sand', 'bg-itako-sage', 'bg-itako-clay'];
+                return (
+                  <div key={n.id} className="mb-12">
+                    <SpiritCard
+                      title={n.title}
+                      content={n.content}
+                      author="Soseki Natsume"
+                      portraitUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg"
+                      flavor="Narrator"
+                      colorClass="bg-white/5 text-white/80 border-white/10"
+                    />
+                    {ichikawaScolds[n.id] && (
                       <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+                        initial={{ opacity: 0, y: 15 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        className="ml-auto w-[85%] mt-[-4rem] bg-white p-10 rounded-[40px] border border-black/5 shadow-2xl relative z-20"
                       >
-                        <div className={`p-8 rounded-[35px] shadow-sm max-w-[90%] ${isUser ? 'bg-white text-[#1a1a1a] rounded-tr-none' : 'bg-white/5 text-white/80 border border-white/10 rounded-tl-none'}`}>
-                          {!isUser && (
-                            <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
-                              <div className="flex items-center gap-3">
-                                {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected />}
-                                <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/20">{m.charId}</span>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <button
-                                  onClick={() => setNotebookInput(prev => prev + (prev ? '\n\n' : '') + `${m.charId}: ${m.content}`)}
-                                  className="text-[9px] font-bold tracking-widest text-[#bd8a78] hover:scale-110 transition-transform flex items-center gap-1"
-                                >
-                                  PUSH
-                                </button>
-                                <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/40 hover:text-white transition-colors">
-                                  Bookmark
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                          <p className={`text-lg leading-relaxed ${!isUser ? 'font-serif' : 'font-sans'}`}>{m.content}</p>
+                        <div className="flex items-center gap-3 mb-4">
+                          <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg" colorClass="bg-itako-sage" size="w-8 h-8" isSelected />
+                          <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-400 uppercase">Ichikawa's Verdict / 叱咤</span>
                         </div>
+                        <p className="text-base leading-relaxed italic text-black/80 font-serif">「{ichikawaScolds[n.id]}」</p>
                       </motion.div>
-                    );
-                  })}
-                  {loading && (
-                    <div className="flex items-center gap-4 text-white/20 text-[10px] font-bold tracking-[0.4em] uppercase px-4 animate-pulse">
-                      Channeling spirit...
-                    </div>
-                  )}
-                </AnimatePresence>
-              </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          </section>
 
-            {/* Unified Black Pill Input Bar */}
-            <div className="fixed bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 md:px-6 z-40">
-              <div className="bg-black/90 backdrop-blur-xl rounded-[40px] p-1.5 md:p-2 flex items-center shadow-2xl border border-white/10">
-                <div className="flex-1 px-4 md:px-6">
-                  <textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
-                    placeholder="Message..."
-                    className="w-full bg-transparent border-none focus:ring-0 text-white placeholder:text-white/20 resize-none h-10 py-2.5 leading-relaxed text-sm"
-                  />
-                </div>
-                <div className="flex items-center gap-1 pr-1.5 md:pr-2">
+          {/* Slot 2: Main Dialog */}
+          <section className={`timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-[#1a1a1a]`}>
+            <div className="max-w-2xl mx-auto h-full flex flex-col pb-64 md:pb-48">
+              <header className="flex flex-col gap-2 mb-10 md:mb-12 px-2 md:px-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
                   <button
-                    onClick={handleSendMessage}
-                    disabled={loading || !input.trim()}
-                    className="w-10 h-10 md:w-12 md:h-12 bg-zinc-200 rounded-full flex items-center justify-center text-black font-bold transition-transform active:scale-90 disabled:opacity-20 shadow-lg"
+                    onClick={() => setIsUnderground(!isUnderground)}
+                    className={`px-5 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
                   >
-                    <span className="text-xl">+</span>
+                    {isUnderground ? 'Surface' : 'Deep Trace'}
                   </button>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
+                <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald truncate">{userName} / Speaking</p>
+              </header>
 
-        {/* Slot 3: Abyss / Future Records */}
-        <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#1a1a1a]">
-          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
-            <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
-              <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Abyss</h2>
-              <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald">The Eternal Records</p>
-            </header>
-
-            {loading ? (
-              <div className="py-32 flex flex-col items-center gap-6 text-itako-clay/40 italic text-xs tracking-widest uppercase font-bold animate-pulse">
-                Exploring the deep...
-              </div>
-            ) : (
-              <div className="space-y-16">
-                {/* NotebookLM Integration Bridge */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="relative p-12 rounded-[50px] bg-gradient-to-br from-white/10 to-transparent border border-white/20 shadow-2xl overflow-hidden group mb-8"
-                >
-                  <div className="flex flex-col gap-8 relative z-10">
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-zinc-200 flex items-center justify-center">
-                            <span className="text-black font-black text-[10px]">LM</span>
-                          </div>
-                          <span className="text-[12px] font-bold tracking-[0.4em] text-zinc-400 uppercase">NotebookLM / Bridge</span>
-                        </div>
-                        <h3 className="text-3xl font-bold text-white tracking-tighter leading-tight">Channeling sources to NotebookLM</h3>
-                        <p className="text-sm text-zinc-500 max-w-lg leading-relaxed font-medium">
-                          Plazaの対話をNotebookLMへ。そしてNotebookLMの知見を、再びこの深淵へと「プッシュ（Push）」します。
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-4">
-                          <button
-                            onClick={() => {
-                              const content = archives.map(a => `${a.title}\n${a.quote}`).join('\n\n');
-                              navigator.clipboard.writeText(content);
-                              alert('Archives copied for NotebookLM');
-                              window.open('https://notebooklm.google.com/', '_blank');
-                            }}
-                            className="whitespace-nowrap px-8 py-3 bg-zinc-800 border border-white/10 text-zinc-300 text-[9px] font-bold tracking-[0.2em] uppercase rounded-full hover:bg-zinc-700 transition-all"
-                          >
-                            Export to Source
-                          </button>
-                          <button
-                            onClick={handleOpenAccumulations}
-                            className="whitespace-nowrap px-8 py-3 bg-zinc-200 text-black text-[9px] font-bold tracking-[0.2em] uppercase rounded-full shadow-lg hover:scale-105 transition-all"
-                          >
-                            View History
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 mt-8 pt-8 border-t border-white/5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase">Gather Insights (Paste from NotebookLM)</span>
-                      </div>
-                      <div className="relative">
-                        <textarea
-                          value={notebookInput}
-                          onChange={(e) => setNotebookInput(e.target.value)}
-                          placeholder="Paste insights from NotebookLM here..."
-                          className="w-full bg-black border border-white/10 rounded-[40px] p-8 text-white placeholder:text-white/10 focus:ring-1 focus:ring-white/20 text-sm h-32 resize-none transition-all"
-                        />
-                        <button
-                          onClick={handlePushNotebook}
-                          disabled={!notebookInput.trim() || loading}
-                          className="absolute bottom-6 right-6 bg-zinc-200 text-black px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-2xl active:scale-95 disabled:opacity-20 transition-all"
-                        >
-                          PUSH TO ABYSS
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="absolute -bottom-16 -right-16 opacity-5 pointer-events-none transform rotate-12">
-                    <BookOpen size={280} />
-                  </div>
-                </motion.div>
-                {/* Future Self's Critique - Neutral Glass Aesthetic */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="relative p-8 md:p-12 rounded-[40px] md:rounded-[50px] bg-white/5 border border-white/10 shadow-2xl group overflow-hidden backdrop-blur-md"
-                >
-                  <div className="absolute top-0 right-0 p-4 md:p-8 opacity-5 pointer-events-none text-white">
-                    <Quote size={80} md:size={120} />
-                  </div>
-                  <div className="flex items-center gap-4 mb-6 md:mb-8">
-                    <span className="text-[10px] md:text-[12px] font-bold tracking-[0.4em] text-white/40 uppercase border-l-2 border-white/20 pl-4">The Verdict from 2036</span>
-                  </div>
-                  <p className="text-lg md:text-2xl leading-[1.6] text-white/80 font-serif italic tracking-tight">
-                    {futureSelfCritique || "まだ、未来の自分に届く言葉が保存されていないようです。"}
-                  </p>
-
-                  <div className="mt-12 flex justify-end">
-                    <button className="bg-white text-[#1a1a1a] px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-lg hover:bg-white/90 transition-colors">
-                      Preserve Memory
-                    </button>
-                  </div>
-                </motion.div>
-
-                {/* Abyssal Records as Neutral Grid Cards */}
-                <div className="space-y-8">
-                  <h3 className="text-sm font-bold text-white/20 uppercase tracking-[0.6em] px-4">Spirit Fragments</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {archives.map((c, idx) => {
-                      const charObj = characters.find(ch => ch.author === c.author || ch.id.toLowerCase() === (c.author || '').toLowerCase());
+              <div className="flex-1 flex flex-col gap-12 mt-8">
+                {/* Chat Thread */}
+                <div className="space-y-8 px-2 pb-24">
+                  <AnimatePresence>
+                    {messages.map((m, i) => {
+                      const isUser = m.role === 'user';
+                      const charObj = characters.find(c => c.id === m.charId);
                       return (
                         <motion.div
-                          initial={{ opacity: 0 }}
-                          whileInView={{ opacity: 1 }}
-                          key={`${c.id}-${idx}`}
-                          className={`p-8 md:p-10 bg-white/5 border border-white/10 rounded-[35px] md:rounded-[40px] shadow-sm flex flex-col gap-4 group cursor-pointer hover:bg-white/10 transition-all duration-500`}
+                          key={i}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                         >
-                          <div className="flex items-center gap-3 justify-between">
-                            <div className="text-[9px] md:text-[10px] font-bold text-white/20 uppercase tracking-widest">{c.author || 'Archive'}</div>
-                            {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-5 h-5 md:w-6 h-6" isSelected />}
+                          <div className={`p-8 rounded-[35px] shadow-sm max-w-[90%] ${isUser ? 'bg-white text-[#1a1a1a] rounded-tr-none' : 'bg-white/5 text-white/80 border border-white/10 rounded-tl-none'}`}>
+                            {!isUser && (
+                              <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                                <div className="flex items-center gap-3">
+                                  {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected />}
+                                  <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/20">{m.charId}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <button
+                                    onClick={() => setNotebookInput(prev => prev + (prev ? '\n\n' : '') + `${m.charId}: ${m.content}`)}
+                                    className="text-[9px] font-bold tracking-widest text-[#bd8a78] hover:scale-110 transition-transform flex items-center gap-1"
+                                  >
+                                    PUSH
+                                  </button>
+                                  <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/40 hover:text-white transition-colors">
+                                    Bookmark
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            <p className={`text-lg leading-relaxed ${!isUser ? 'font-serif' : 'font-sans'}`}>{m.content}</p>
                           </div>
-                          <div className="text-lg md:text-xl font-bold text-white/80 leading-tight">{c.title}</div>
-                          <div className="text-xs md:text-sm leading-relaxed text-white/40 italic font-serif">" {c.quote} "</div>
                         </motion.div>
                       );
                     })}
-                  </div>
-                </div>
-
-                {/* Past Traces (Bookmarks) */}
-                <div className="space-y-8">
-                  <h3 className="text-sm font-bold text-white/20 uppercase tracking-[0.6em] px-4">Tied Spirits</h3>
-                  <div className="space-y-4">
-                    {bookmarks.map(b => {
-                      const charObj = characters.find(c => c.id === b.charId);
-                      return (
-                        <div key={b.id} className="p-8 md:p-12 rounded-[40px] md:rounded-[50px] bg-white text-[#1a1a1a] shadow-xl transition-transform hover:scale-[1.01]">
-                          <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center gap-3">
-                              {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-5 h-5 md:w-6 h-6" isSelected />}
-                              <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase opacity-40">{b.charId}</span>
-                            </div>
-                            <span className="text-[9px] opacity-20 font-bold">{b.timestamp?.toDate().toLocaleDateString()}</span>
-                          </div>
-                          <div className="mb-4 md:mb-6 text-lg md:text-xl font-medium leading-relaxed italic">" {b.userMsg} "</div>
-                          <div className="pl-6 md:pl-8 border-l border-black/10 italic text-sm md:text-base opacity-60 font-serif">" {b.aiMsg} "</div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                    {loading && (
+                      <div className="flex items-center gap-4 text-white/20 text-[10px] font-bold tracking-[0.4em] uppercase px-4 animate-pulse">
+                        Channeling spirit...
+                      </div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+          </section>
 
-        {/* Slot 4: NotebookLM Gateway */}
-        <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
-          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
-            <header className="flex flex-col gap-2 mb-12 md:mb-24 px-2 md:px-4">
-              <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Knowledge</h2>
-              <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">Bridge to NotebookLM</p>
-            </header>
+          {/* Slot 3: Abyss / Future Records */}
+          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#1a1a1a]">
+            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
+              <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
+                <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Abyss</h2>
+                <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald">The Eternal Records</p>
+              </header>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative p-12 rounded-[50px] bg-white/5 border border-white/10 shadow-3xl overflow-hidden"
-            >
-              <div className="flex flex-col gap-12 relative z-10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg" colorClass="bg-zinc-800" size="w-16 h-16" isSelected />
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold tracking-widest text-[#bd8a78] uppercase">The Scribe</span>
-                      <span className="text-[10px] text-white/30 uppercase tracking-[0.4em]">Knowledge Spirit</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleOpenAccumulations}
-                    className="px-8 py-3 bg-zinc-200 text-black text-[10px] font-bold tracking-widest uppercase rounded-full shadow-2xl hover:bg-white transition-all scale-110"
+              {loading ? (
+                <div className="py-32 flex flex-col items-center gap-6 text-itako-clay/40 italic text-xs tracking-widest uppercase font-bold animate-pulse">
+                  Exploring the deep...
+                </div>
+              ) : (
+                <div className="space-y-16">
+                  {/* NotebookLM Integration Bridge */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative p-12 rounded-[50px] bg-gradient-to-br from-white/10 to-transparent border border-white/20 shadow-2xl overflow-hidden group mb-8"
                   >
-                    View Insights
-                  </button>
-                </div>
+                    <div className="flex flex-col gap-8 relative z-10">
+                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-zinc-200 flex items-center justify-center">
+                              <span className="text-black font-black text-[10px]">LM</span>
+                            </div>
+                            <span className="text-[12px] font-bold tracking-[0.4em] text-zinc-400 uppercase">NotebookLM / Bridge</span>
+                          </div>
+                          <h3 className="text-3xl font-bold text-white tracking-tighter leading-tight">Channeling sources to NotebookLM</h3>
+                          <p className="text-sm text-zinc-500 max-w-lg leading-relaxed font-medium">
+                            Plazaの対話をNotebookLMへ。そしてNotebookLMの知見を、再びこの深淵へと「プッシュ（Push）」します。
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-4">
+                            <button
+                              onClick={() => {
+                                const content = archives.map(a => `${a.title}\n${a.quote}`).join('\n\n');
+                                navigator.clipboard.writeText(content);
+                                alert('Archives copied for NotebookLM');
+                                window.open('https://notebooklm.google.com/', '_blank');
+                              }}
+                              className="whitespace-nowrap px-8 py-3 bg-zinc-800 border border-white/10 text-zinc-300 text-[9px] font-bold tracking-[0.2em] uppercase rounded-full hover:bg-zinc-700 transition-all"
+                            >
+                              Export to Source
+                            </button>
+                            <button
+                              onClick={handleOpenAccumulations}
+                              className="whitespace-nowrap px-8 py-3 bg-zinc-200 text-black text-[9px] font-bold tracking-[0.2em] uppercase rounded-full shadow-lg hover:scale-105 transition-all"
+                            >
+                              View History
+                            </button>
+                          </div>
+                        </div>
+                      </div>
 
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-2xl font-bold text-white tracking-tight">Spirit Broadcasting</h3>
-                    <div className="flex gap-1">
-                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" />
-                      <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                      <div className="space-y-4 mt-8 pt-8 border-t border-white/5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase">Gather Insights (Paste from NotebookLM)</span>
+                        </div>
+                        <div className="relative">
+                          <textarea
+                            value={notebookInput}
+                            onChange={(e) => setNotebookInput(e.target.value)}
+                            placeholder="Paste insights from NotebookLM here..."
+                            className="w-full bg-black border border-white/10 rounded-[40px] p-8 text-white placeholder:text-white/10 focus:ring-1 focus:ring-white/20 text-sm h-32 resize-none transition-all"
+                          />
+                          <button
+                            onClick={handlePushNotebook}
+                            disabled={!notebookInput.trim() || loading}
+                            className="absolute bottom-6 right-6 bg-zinc-200 text-black px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-2xl active:scale-95 disabled:opacity-20 transition-all"
+                          >
+                            PUSH TO ABYSS
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                  {/* Future Self's Critique */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="relative p-8 md:p-12 rounded-[40px] md:rounded-[50px] bg-white/5 border border-white/10 shadow-2xl overflow-hidden backdrop-blur-md"
+                  >
+                    <div className="flex flex-col gap-6">
+                      <span className="text-[10px] md:text-[12px] font-bold tracking-[0.4em] text-white/40 uppercase border-l-2 border-white/20 pl-4">The Verdict from 2036</span>
+                      <p className="text-lg md:text-2xl leading-[1.6] text-white/80 font-serif italic tracking-tight">
+                        {futureSelfCritique || "まだ、未来の自分に届く言葉が保存されていないようです。"}
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  {/* Abyssal Records */}
+                  <div className="space-y-8">
+                    <h3 className="text-sm font-bold text-white/20 uppercase tracking-[0.6em] px-4">Spirit Fragments</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {archives.map((c, idx) => (
+                        <motion.div
+                          key={`${c.id}-${idx}`}
+                          className="p-8 md:p-10 bg-white/5 border border-white/10 rounded-[40px] flex flex-col gap-4 group hover:bg-white/10 transition-all"
+                        >
+                          <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{c.author || 'Archive'}</div>
+                          <div className="text-lg font-bold text-white/80 leading-tight">{c.title}</div>
+                          <div className="text-xs leading-relaxed text-white/40 italic font-serif">" {c.quote} "</div>
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
-                  <p className="text-sm text-white/40 leading-relaxed max-w-lg">
-                    NotebookLMでの解析結果をここに同期させます。一度「PUSH」された知見は、あなたのアカウントを通じて全てのキャラクターの思考に**自動注入**され、対話の質を根本から変容させます。
-                  </p>
                 </div>
+              )}
+            </div>
+          </section>
 
-                <div className="space-y-4">
-                  <div className="relative">
+          {/* Slot 4: NotebookLM Gateway */}
+          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
+            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
+              <header className="flex flex-col gap-2 mb-12 md:mb-24 px-2 md:px-4">
+                <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Knowledge</h2>
+                <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">Bridge to NotebookLM</p>
+              </header>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative p-12 rounded-[50px] bg-white/5 border border-white/10 shadow-3xl overflow-hidden"
+              >
+                <div className="flex flex-col gap-12">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg" colorClass="bg-zinc-800" size="w-16 h-16" isSelected />
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold tracking-widest text-[#bd8a78] uppercase">The Scribe</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
                     <textarea
                       value={notebookInput}
                       onChange={(e) => setNotebookInput(e.target.value)}
                       placeholder="Paste insights from NotebookLM here..."
-                      className="w-full bg-black border border-white/10 rounded-[40px] p-8 text-white placeholder:text-white/5 focus:ring-1 focus:ring-[#bd8a78]/40 text-sm h-64 resize-none transition-all"
+                      className="w-full bg-black border border-white/10 rounded-[40px] p-8 text-white text-sm h-64 resize-none"
                     />
-                    <div className="absolute bottom-6 right-6 flex items-center gap-4">
-                      <button
-                        onClick={() => {
-                          const content = archives.map(a => `${a.title}\n${a.quote}`).join('\n\n');
-                          navigator.clipboard.writeText(content);
-                          alert('Source copied for NotebookLM');
-                          window.open('https://notebooklm.google.com/', '_blank');
-                        }}
-                        className="px-6 py-2 border border-white/5 bg-zinc-900 text-white/40 text-[9px] font-bold tracking-widest uppercase rounded-full hover:bg-zinc-800 transition-all"
-                      >
-                        Export Source
-                      </button>
-                      <button
-                        onClick={handlePushNotebook}
-                        disabled={!notebookInput.trim() || loading}
-                        className="bg-[#bd8a78] text-black px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-2xl active:scale-95 disabled:opacity-20 transition-all font-black"
-                      >
-                        PUSH TO ABYSS
-                      </button>
-                    </div>
+                    <button
+                      onClick={handlePushNotebook}
+                      className="w-full bg-[#bd8a78] text-black py-4 rounded-full font-bold uppercase tracking-widest"
+                    >
+                      PUSH TO ABYSS
+                    </button>
                   </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
+          </section>
+        </main>
+
+        {/* Floating Input Bar */}
+        <div className="fixed bottom-14 left-0 right-0 p-4 md:p-6 z-[100] pointer-events-none">
+          <div className="max-w-3xl mx-auto flex items-center gap-3 bg-black/80 backdrop-blur-3xl border border-white/10 p-2 rounded-full shadow-2xl pointer-events-auto">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Message..."
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+              className="flex-1 bg-transparent border-none focus:outline-none text-white text-sm px-6 py-3 resize-none h-14 leading-relaxed placeholder:text-white/10"
+            />
+            <button
+              onClick={handleSendMessage}
+              className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center font-black text-2xl font-oswald shadow-xl"
+            >
+              +
+            </button>
           </div>
-        </section>
-      </main>
-
-      {/* Floating Input Bar (Fixed at bottom) */}
-      <div className="fixed bottom-14 left-0 right-0 p-4 md:p-6 z-[100] pointer-events-none">
-        <div className="max-w-3xl mx-auto flex items-center gap-3 bg-black/80 backdrop-blur-3xl border border-white/10 p-2 md:p-3 rounded-full shadow-2xl pointer-events-auto">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Message..."
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
-            className="flex-1 bg-transparent border-none focus:outline-none text-white text-sm px-4 md:px-6 py-2 md:py-3 resize-none max-h-32 min-h-[44px] md:min-h-[56px] leading-relaxed placeholder:text-white/20"
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={!input.trim() || loading}
-            className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-white text-black flex items-center justify-center shrink-0 hover:scale-105 active:scale-95 transition-all disabled:opacity-20"
-          >
-            {loading ? <Loader2 className="animate-spin" size={20} /> : <div className="text-xl md:text-2xl font-black font-oswald">+</div>}
-          </button>
         </div>
+
+        {/* Footer Navigation */}
+        <footer className="h-14 border-t border-white/5 bg-black/95 backdrop-blur-md flex items-center justify-center gap-12 px-6 z-[100] shrink-0">
+          {[
+            { id: 0, icon: <TrendingUp size={20} />, color: '#98a436' },
+            { id: 1, icon: <MessageSquare size={20} />, color: '#fdb913' },
+            { id: 2, icon: <Ghost size={20} />, color: '#f15a24' },
+            { id: 3, icon: <BookOpen size={20} />, color: '#8e63aa' },
+          ].map(item => (
+            <div
+              key={item.id}
+              onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth * item.id, behavior: 'smooth' })}
+              style={{ color: activeSlot === item.id ? item.color : 'rgba(255,255,255,0.1)' }}
+              className={`p-2 transition-all cursor-pointer transform ${activeSlot === item.id ? 'scale-125' : 'hover:text-white/40'}`}
+            >
+              {item.icon}
+            </div>
+          ))}
+        </footer>
       </div>
-
-      {/* Footer Navigation (Indicator) */}
-      <footer className="h-14 border-t border-white/5 bg-black/90 backdrop-blur-md flex items-center justify-center gap-10 px-6 z-[100] shrink-0">
-        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 0 ? 'text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/10 hover:text-white/30'}`} onClick={() => scrollRef.current?.scrollTo({ left: 0, behavior: 'smooth' })}>
-          <TrendingUp size={18} />
-        </div>
-        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 1 ? 'text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/10 hover:text-white/30'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth, behavior: 'smooth' })}>
-          <MessageSquare size={18} />
-        </div>
-        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 2 ? 'text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/10 hover:text-white/30'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth * 2, behavior: 'smooth' })}>
-          <Ghost size={18} />
-        </div>
-        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 3 ? 'text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/10 hover:text-white/30'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth * 3, behavior: 'smooth' })}>
-          <BookOpen size={18} />
-        </div>
-      </footer>
     </div>
   );
 }

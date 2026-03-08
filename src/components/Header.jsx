@@ -4,7 +4,8 @@ import Logo from './Logo';
 
 export default function Header({
     userName,
-    openDrawer
+    openDrawer,
+    openSettings
 }) {
     return (
         <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-black/40 backdrop-blur-3xl z-50 shrink-0">
@@ -23,7 +24,9 @@ export default function Header({
                     <User size={14} className="text-white/40" />
                     <span className="text-[11px] font-bold tracking-tight text-white/80">{userName}</span>
                 </div>
-                <Settings size={18} className="text-white/20 cursor-pointer hover:rotate-90 transition-transform duration-700 hover:text-white" />
+                <button onClick={openSettings} className="p-2 -mr-2 text-white/20 hover:text-white transition-all transform hover:rotate-90">
+                    <Settings size={18} />
+                </button>
             </div>
         </header>
     );
