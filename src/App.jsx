@@ -9,18 +9,20 @@ import Header from './components/Header';
 import LandingPage from './components/LandingPage';
 
 const INITIAL_CHARACTERS = [
-  { id: 'soseki', name: '夏目漱石', flavor: '胃痛', color: 'bg-itako-clay', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg' },
-  { id: 'dosto', name: 'ドストエフスキー', flavor: '借金', color: 'bg-itako-sand', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Dostoevsky_1872.jpg/330px-Dostoevsky_1872.jpg' },
-  { id: 'ichikawa', name: '市川房枝', flavor: '厳格', color: 'bg-itako-sage', avatar: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg' },
-  { id: 'atsuko', name: 'Atsuko', flavor: '見守り', color: 'bg-itako-sand', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/O_Tsuta-san_c1900.jpg/330px-O_Tsuta-san_c1900.jpg' },
-  { id: 'k_kokoro', name: 'K', flavor: '絶望', color: 'bg-zinc-800', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Japanese_student_c1900.jpg/330px-Japanese_student_c1900.jpg' },
-  { id: 'alyosha', name: 'アリョーシャ', flavor: '信仰', color: 'bg-itako-sage', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alyosha_Vanya.jpg/330px-Alyosha_Vanya.jpg' },
+  { id: 'soseki', name: '夏目漱石', flavor: '胃痛', color: 'bg-itako-clay', description: '日本の小説家、評論家。代表作『吾輩は猫である』。深く鋭い人間洞察を持つ。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg' },
+  { id: 'dosto', name: 'ドストエフスキー', flavor: '借金', color: 'bg-itako-sand', description: 'ロシアの小説家。代表作『罪と罰』。魂の極限状態を描くリアリズムの巨匠。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Dostoevsky_1872.jpg/330px-Dostoevsky_1872.jpg' },
+  { id: 'ichikawa', name: '市川房枝', flavor: '厳格', color: 'bg-itako-sage', description: '日本の婦人運動家。女性参政権運動を主導し、政治の浄化を訴え続けた。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg' },
+  { id: 'atsuko', name: 'Atsuko', flavor: '見守り', color: 'bg-itako-sand', description: '広場の片隅で静かにすべてを記録し続ける、超越的な観察者の魂。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/O_Tsuta-san_c1900.jpg/330px-O_Tsuta-san_c1900.jpg' },
+  { id: 'k_kokoro', name: 'K', flavor: '絶望', color: 'bg-zinc-800', description: '『こころ』の登場人物。宗教的理想と人間的感情の間で苦悩する孤高の青年。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Japanese_student_c1900.jpg/330px-Japanese_student_c1900.jpg' },
+  { id: 'alyosha', name: 'アリョーシャ', flavor: '信仰', color: 'bg-itako-sage', description: '『カラマーゾフの兄弟』の末弟。純真な心を持ち、世界のあらゆる罪を背負おうとする。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alyosha_Vanya.jpg/330px-Alyosha_Vanya.jpg' },
 ];
 
 const INITIAL_LOCATIONS = [
-  { id: 'cafe', name: 'カフェ', icon: <MapPin size={16} /> },
-  { id: 'library', name: '図書館', icon: <MapPin size={16} /> },
-  { id: 'passage', name: '地下通路', icon: <MapPin size={16} /> },
+  { id: 'cafe', name: 'カフェ', icon: <MapPin size={16} />, pos: 0 },
+  { id: 'library', name: '図書館', icon: <MapPin size={16} />, pos: 4 },
+  { id: 'passage', name: '地下通路', icon: <MapPin size={16} />, pos: 8 },
+  { id: 'shrine', name: '神社', icon: <MapPin size={16} />, pos: 2 },
+  { id: 'bridge', name: '橋', icon: <MapPin size={16} />, pos: 6 },
 ];
 
 // --- コンポーネント ---
@@ -86,6 +88,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCharId, setSelectedCharId] = useState('soseki');
+  const [selectedLocationId, setSelectedLocationId] = useState('cafe');
   const [isUnderground, setIsUnderground] = useState(false);
   const [externalContext, setExternalContext] = useState('');
   const [showContextUI, setShowContextUI] = useState(false);
@@ -417,25 +420,63 @@ function App() {
               <p className="text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em]">{userName} / Now Speaking</p>
             </header>
 
-            <div className="flex-1 flex flex-col gap-12 mb-24">
-              {/* Character Selection as Neutral Gallery */}
-              <div className="scrollbar-hide overflow-x-auto flex gap-6 pb-4 px-2">
-                {characters.map(c => {
-                  const isSelected = selectedCharId === c.id;
-                  return (
-                    <button
-                      key={c.id}
-                      onClick={() => setSelectedCharId(c.id)}
-                      className={`flex-shrink-0 flex items-center gap-4 p-4 pr-10 rounded-[40px] transition-all duration-700 border ${isSelected ? 'bg-white/5 border-white/20 shadow-2xl scale-105' : 'bg-transparent border-transparent'}`}
-                    >
-                      <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} />
-                      <div className="flex flex-col items-start">
-                        <span className={`text-xs font-bold tracking-[0.2em] uppercase transition-colors ${isSelected ? 'text-white' : 'text-white/20'}`}>{c.name}</span>
-                        <span className={`text-[9px] font-bold uppercase tracking-[0.3em] transition-colors ${isSelected ? 'text-white/40' : 'text-white/10'}`}>{c.flavor}</span>
-                      </div>
-                    </button>
-                  );
-                })}
+            <div className="flex-1 flex flex-col gap-16 mb-24">
+              {/* Grid Map (碁盤の目) */}
+              <div className="px-4 space-y-6">
+                <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Map / Location Grid</span>
+                <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-sm border border-white/5 aspect-square max-w-[240px]">
+                  {Array.from({ length: 9 }).map((_, i) => {
+                    const loc = locations.find(l => l.pos === i);
+                    const isSelected = selectedLocationId === loc?.id;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => loc && setSelectedLocationId(loc.id)}
+                        className={`aspect-square flex items-center justify-center relative transition-all duration-500 overflow-hidden ${isSelected ? 'bg-zinc-200' : 'bg-black hover:bg-white/5'}`}
+                      >
+                        {loc ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <MapPin size={12} className={isSelected ? 'text-black' : 'text-white/20'} />
+                            <span className={`text-[8px] font-bold tracking-tighter ${isSelected ? 'text-black' : 'text-white/40'}`}>{loc.name}</span>
+                          </div>
+                        ) : (
+                          <div className="w-1 h-1 rounded-full bg-white/5" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Character Directory (Vertical List with Profile) */}
+              <div className="px-4 space-y-8">
+                <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Persons / Directory</span>
+                <div className="space-y-4">
+                  {characters.map(c => {
+                    const isSelected = selectedCharId === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => setSelectedCharId(c.id)}
+                        className={`w-full group text-left flex items-start gap-6 p-6 rounded-[35px] transition-all duration-700 border ${isSelected ? 'bg-white/5 border-white/20 shadow-2xl translate-x-4' : 'bg-transparent border-transparent'}`}
+                      >
+                        <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-16 h-16" />
+                        <div className="flex-1 space-y-2 py-1">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className={`text-base font-bold tracking-tight transition-colors ${isSelected ? 'text-white' : 'text-white/30'}`}>{c.name}</span>
+                              <span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-[#bd8a78]/20 text-[#bd8a78]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
+                            </div>
+                            {isSelected && <span className="text-[10px] text-[#bd8a78] font-bold animate-pulse">ACTIVE</span>}
+                          </div>
+                          <p className={`text-xs leading-relaxed transition-opacity ${isSelected ? 'text-white/60' : 'text-white/10 opacity-40'}`}>
+                            {c.description}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Chat Thread as Stacked Cards */}
