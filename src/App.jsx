@@ -549,55 +549,104 @@ function App() {
       </AnimatePresence>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* PC Left Manager (Sidebar) */}
-        <div className="hidden md:flex flex-col w-96 border-r border-white/5 bg-zinc-950/20 backdrop-blur-sm overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-10 scrollbar-hide">
-            <ManagerContent />
-          </div>
-
-          {/* User Profile & Settings Control (Hover to Expand) */}
-          <motion.div
-            initial={{ height: 60 }}
-            whileHover={{ height: 'auto' }}
-            className="border-t border-white/5 bg-black/60 backdrop-blur-3xl px-8 py-2.5 group overflow-hidden transition-colors hover:bg-black/90 cursor-pointer"
-          >
-            <div className="flex items-center gap-4 h-10">
-              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shrink-0 group-hover:bg-white/10 transition-colors">
-                <User size={16} className="text-white/40 group-hover:text-white transition-colors" />
-              </div>
-              <div className="flex-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none group-hover:pointer-events-auto">
-                <div className="flex items-center justify-between">
+        {/* PC Expanding Side Dashboard (Super Engineer Edition) */}
+        <motion.div
+          initial={{ width: 80 }}
+          whileHover={{ width: 420 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+          className="hidden md:flex flex-col border-r border-white/5 bg-[#050505]/40 backdrop-blur-3xl overflow-hidden group/sidebar z-[110]"
+        >
+          <div className="flex-1 flex flex-col h-full">
+            {/* 1. Account & Gear (The Control Header) */}
+            <div className="p-4 border-b border-white/5 flex flex-col overflow-hidden">
+              <div className="flex items-center gap-4 h-12">
+                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shrink-0 group-hover/sidebar:bg-white/10 transition-colors">
+                  <User size={18} className="text-white/40 group-hover/sidebar:text-white" />
+                </div>
+                <div className="flex-1 flex items-center justify-between opacity-0 group-hover/sidebar:opacity-100 transition-all duration-500 delay-100 whitespace-nowrap">
                   <div className="flex flex-col">
                     <input
                       type="text"
                       value={userName}
                       onChange={(e) => setUserName(e.target.value)}
-                      className="bg-transparent border-none text-[11px] font-bold tracking-tight text-white/90 focus:ring-0 p-0 w-36"
-                      placeholder="Identity Name..."
+                      className="bg-transparent border-none text-sm font-bold tracking-tight text-white focus:ring-0 p-0 w-44"
+                      placeholder="Account Name..."
                     />
-                    <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.3em] font-oswald">Participant</span>
+                    <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em] font-oswald">Participant ID</span>
                   </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); setShowSettings(true); }}
-                    className="p-2 -mr-2 text-white/20 hover:text-white transform hover:rotate-90 transition-all duration-700"
+                    onClick={() => setShowSettings(true)}
+                    className="p-3 text-white/20 hover:text-white transform hover:rotate-90 transition-all duration-700"
                   >
-                    <Settings size={18} />
+                    <Settings size={20} />
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex flex-col gap-2">
-              <p className="text-[9px] text-zinc-500 uppercase tracking-[0.2em] font-bold flex items-center gap-2">
-                <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                Connection: Active
-              </p>
-              <p className="text-[10px] text-white/30 italic font-serif">
-                名前を変更して、広場の記憶に刻むことができます。
-              </p>
+            {/* 2. Registry & Map (The Core Context) */}
+            <div className="flex-1 overflow-y-auto itako-scrollbar p-4 space-y-12">
+              {/* Characters Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-6 h-10 overflow-hidden">
+                  <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                    <Ghost size={20} className="text-white/20 group-hover/sidebar:text-[#98a436] transition-colors" />
+                  </div>
+                  <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-white/40 opacity-0 group-hover/sidebar:opacity-100 transition-opacity">Registry</h3>
+                </div>
+
+                <div className="opacity-0 group-hover/sidebar:opacity-100 transition-all duration-700 delay-200 pl-10 pr-4 space-y-3">
+                  {characters.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedCharId(c.id)}
+                      className={`w-full flex items-center gap-4 p-3 rounded-2xl border transition-all ${selectedCharId === c.id ? 'bg-white/5 border-white/20 shadow-lg' : 'bg-transparent border-transparent opacity-20 hover:opacity-100'}`}
+                    >
+                      <WarholAvatar src={c.avatar} size="w-8 h-8" isSelected={selectedCharId === c.id} colorClass={c.color} />
+                      <span className="text-[11px] font-bold tracking-wide text-white/80">{c.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Map Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-6 h-10 overflow-hidden">
+                  <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                    <Globe size={20} className="text-white/20 group-hover/sidebar:text-[#fdb913] transition-colors" />
+                  </div>
+                  <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-white/40 opacity-0 group-hover/sidebar:opacity-100 transition-opacity">Grid Map</h3>
+                </div>
+
+                <div className="opacity-0 group-hover/sidebar:opacity-100 transition-all duration-700 delay-300 pl-12 pr-6">
+                  <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-lg border border-white/5 aspect-square max-w-[180px]">
+                    {Array.from({ length: 9 }).map((_, i) => {
+                      const loc = locations.find(l => l.pos === i);
+                      const isSelected = selectedLocationId === loc?.id;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => loc && setSelectedLocationId(loc.id)}
+                          className={`aspect-square flex items-center justify-center transition-all ${isSelected ? 'bg-zinc-200' : 'bg-black/40 hover:bg-white/5'}`}
+                        >
+                          {loc && <MapPin size={10} className={isSelected ? 'text-black' : 'text-white/20'} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
-          </motion.div>
-        </div>
+
+            {/* Connection Status Foot */}
+            <div className="p-6 opacity-0 group-hover/sidebar:opacity-100 transition-opacity">
+              <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-white/20 tracking-widest uppercase">System Online</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
         {/* NotebookLM Context Injection UI */}
         <AnimatePresence>
