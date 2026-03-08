@@ -1,9 +1,30 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const FALLBACK_MODELS = [
+    "gemini-2.5-flash",
     "gemini-2.0-flash",
-    "gemini-2.0-flash-lite"
+    "gemini-1.5-flash"
 ];
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function executeWithRetry(operation, maxRetries = 3) {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            return await operation();
+        } catch (error) {
+            const is429 = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota') || error.message?.includes('RESOURCE_EXHAUSTED');
+            if (is429) {
+                if (attempt === maxRetries - 1) throw error;
+                const delayMs = Math.pow(2, attempt) * 1000 + (Math.random() * 500); // Exponential backoff with jitter
+                console.warn(`[Gemini] Rate limited (429). Retrying in ${Math.round(delayMs)}ms... (Attempt ${attempt + 1}/${maxRetries})`);
+                await sleep(delayMs);
+                continue;
+            }
+            throw error; // If not 429, throw immediately
+        }
+    }
+}
 
 const CHARACTER_CONFIGS = {
     soseki: {
@@ -49,16 +70,13 @@ export const evaluateFutureSelf = async (bookmarks, userApiKey) => {
             const genAI = new GoogleGenerativeAI(sanitizedKey);
             const model = genAI.getGenerativeModel({
                 model: modelName,
-                generationConfig: CHARACTER_CONFIGS.future_self.generationConfig
+                generationConfig: CHARACTER_CONFIGS.future_self.generationConfig,
+                systemInstruction: CHARACTER_CONFIGS.future_self.systemPrompt
             });
 
             const bookmarkText = bookmarks.map(b => `[${b.charId}との対話] 私: "${b.userMsg}" -> 相手: "${b.aiMsg}"`).join('\n');
 
             const prompt = `
-<role>
-${CHARACTER_CONFIGS.future_self.systemPrompt}
-</role>
-
 <context>
 以下はあなたが10年前（2026年）に残した「栞（重要な対話の記録）」です。
 ${bookmarkText}
@@ -72,21 +90,21 @@ ${bookmarkText}
 </rules>
 `;
 
-            const result = await model.generateContent(prompt);
+            const result = await executeWithRetry(() => model.generateContent(prompt));
             console.log(`[Multi-Brain] FutureSelf using: ${modelName}`);
             return result.response.text();
         } catch (error) {
             const is429 = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
             const is404 = error.status === 404 || error.message?.includes('404') || error.message?.includes('not found');
             if (is429 || is404) {
-                console.warn(`[Multi-Brain] ${modelName} unavailable (${is429 ? '429' : '404'}). Switching layer...`);
+                console.warn(`[Multi-Brain] ${modelName} unavailable or exhausted. Switching to next fallback model...`);
                 continue;
             }
             console.error("Future Self Eval Error:", error);
             return "未来の自分との通信が、ノイズに消えてしまいました。";
         }
     }
-    return "すべての意識層が極限に達しました。しばらく沈黙が必要です。";
+    return "すべての意識層が極限に達しました。しばらく時間をおいてください。";
 };
 
 /**
@@ -106,16 +124,13 @@ export const generateCharacterResponse = async (char, userMessage, isUnderground
             const config = CHARACTER_CONFIGS[char.id] || { generationConfig: { temperature: 0.7 } };
             const model = genAI.getGenerativeModel({
                 model: modelName,
-                generationConfig: config.generationConfig
+                generationConfig: config.generationConfig,
+                systemInstruction: config.systemPrompt || char.systemPrompt
             });
 
             const statusText = char.status ? Object.entries(char.status).map(([k, v]) => `${k}: ${v}`).join('、') : "";
 
             const prompt = `
-<role>
-${config.systemPrompt || char.systemPrompt}
-</role>
-
 <context>
 追加コンテキスト（NotebookLM解析等）: ${externalContext || 'なし'}
 史実エピソード: ${char.history || '特記事項なし'}
@@ -124,7 +139,7 @@ ${config.systemPrompt || char.systemPrompt}
 </context>
 
 <rules>
-- あなたはAIアシスタントではなく、<role>で定義されたキャラクターとして完全に振る舞います。
+- あなたはAIアシスタントではなく、システムプロンプトで定義されたキャラクターとして完全に振る舞います。
 - ユーザーのメッセージに対して、キャラクターの個性、トーン、身体的状況、特殊環境を統合した「一度きりの言葉」を返してください。
 - 定型文やAI特有の無難な回答、免責事項は絶対に含めないでください。
 - キャラクターの抱える痛み、執着、あるいは思想が生々しく思考に影響を与えている様子を表現してください。
@@ -134,21 +149,21 @@ ${config.systemPrompt || char.systemPrompt}
 ${userMessage}
 </user_message>
 `;
-            const result = await model.generateContent(prompt);
+            const result = await executeWithRetry(() => model.generateContent(prompt));
             console.log(`[Multi-Brain] ${char.id} responding via: ${modelName}`);
             return result.response.text();
         } catch (error) {
             const is429 = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
             const is404 = error.status === 404 || error.message?.includes('404') || error.message?.includes('not found');
             if (is429 || is404) {
-                console.warn(`[Multi-Brain] ${modelName} unavailable (${is429 ? '429' : '404'}). Shifting conscious layer...`);
+                console.warn(`[Multi-Brain] ${modelName} exhausted (${is429 ? '429' : '404'}). Shifting conscious layer to next model...`);
                 continue;
             }
             console.error("Gemini Error:", error);
             return "暗闇の中で声が消えました。";
         }
     }
-    return "すべての精神層が沈黙しました。休息が必要です。";
+    return "すべての精神層が沈黙しました。時間をおいてから再度お試しください。";
 };
 
 /**
@@ -187,14 +202,14 @@ ${currentContext}
 }
 </json_format>
 `;
-            const result = await model.generateContent(prompt);
+            const result = await executeWithRetry(() => model.generateContent(prompt));
             const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
             return JSON.parse(jsonStr);
         } catch (error) {
             const is429 = error.status === 429 || error.message?.includes('429');
             const is404 = error.status === 404 || error.message?.includes('404') || error.message?.includes('not found');
             if (is429 || is404) {
-                console.warn(`[Multi-Brain] ${modelName} (${is429 ? '429' : '404'}) → next layer`);
+                console.warn(`[Multi-Brain] Expansion failed on ${modelName} (${is429 ? '429' : '404'}) → switching to next model`);
                 continue;
             }
             console.error("Expansion Error:", error);
