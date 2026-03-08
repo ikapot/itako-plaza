@@ -7,6 +7,8 @@ import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
 import { searchNDLArchive } from './ndl';
 import Header from './components/Header';
 import LandingPage from './components/LandingPage';
+import WarholAvatar from './components/WarholAvatar';
+import SpiritCard from './components/SpiritCard';
 
 const INITIAL_CHARACTERS = [
   { id: 'soseki', name: '夏目漱石', flavor: '胃痛', color: 'bg-itako-clay', description: '日本の小説家、評論家。代表作『吾輩は猫である』。深く鋭い人間洞察を持つ。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg' },
@@ -25,58 +27,7 @@ const INITIAL_LOCATIONS = [
   { id: 'bridge', name: '橋', icon: <MapPin size={16} />, pos: 6 },
 ];
 
-// --- コンポーネント ---
-
-const WarholAvatar = ({ src, colorClass = "bg-itako-clay", size = "w-12 h-12", isSelected = false }) => (
-  <div className={`${size} rounded-full overflow-hidden relative flex-shrink-0 border border-white/5 bg-zinc-900 ${!isSelected && 'grayscale brightness-50'}`}>
-    {/* Screen Print Layer 1: Earth Background */}
-    <div className={`absolute inset-0 ${colorClass} opacity-80`} />
-
-    {/* Screen Print Layer 2: High Contrast Portrait */}
-    <img
-      src={src}
-      alt="portrait"
-      className={`absolute inset-0 w-full h-full object-cover grayscale contrast-[3] brightness-[1.2] mix-blend-multiply transition-all duration-500 ease-out ${isSelected ? 'scale-110' : 'scale-100'}`}
-    />
-
-    {/* Screen Print Layer 3: Texture Overlay */}
-    <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none" />
-
-    {/* Selection Border Glow */}
-    {isSelected && <div className="absolute inset-0 border-2 border-white/20 rounded-full animate-pulse" />}
-  </div>
-);
-
-const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, colorClass = "bg-white/5 border border-white/10" }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.98 }}
-    whileInView={{ opacity: 1, scale: 1 }}
-    viewport={{ once: true }}
-    className={`relative p-8 md:p-10 rounded-[40px] ${colorClass} mb-4 shadow-sm group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl`}
-  >
-    <div className="relative z-10 flex flex-col gap-6 text-inherit">
-      {author && (
-        <div className="flex items-center justify-between border-b border-white/5 pb-4">
-          <div className="flex items-center gap-3">
-            <WarholAvatar src={portraitUrl || 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg'} size="w-8 h-8" isSelected />
-            <span className="text-[10px] font-bold tracking-[0.2em] opacity-40 uppercase">{author}</span>
-            {flavor && <span className="text-[10px] font-bold bg-white/5 px-3 py-1 rounded-full opacity-30">{flavor}</span>}
-          </div>
-        </div>
-      )}
-      <div className="space-y-3 md:space-y-4">
-        <h3 className="text-2xl md:text-3xl font-bold tracking-tighter leading-tight pr-12 opacity-90">{title}</h3>
-        <p className="text-sm md:text-base leading-relaxed opacity-60 font-medium whitespace-pre-wrap">{content}</p>
-      </div>
-
-      <div className="flex justify-end mt-4">
-        <button className="bg-white/10 hover:bg-white/20 active:scale-95 text-inherit px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase flex items-center gap-2 transition-all shadow-lg border border-white/5 cursor-pointer disabled:opacity-50">
-          DISCOVER <span className="text-lg">→</span>
-        </button>
-      </div>
-    </div>
-  </motion.div>
-);
+// --- コンポーネント群は /components フォルダへ退避 (Clean Code) ---
 
 function App() {
   const [user, setUser] = useState(null);
