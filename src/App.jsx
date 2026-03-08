@@ -147,6 +147,11 @@ function App() {
     });
 
     const loadGlobalData = async () => {
+      if (!geminiKey) return; // キーがなければ何もしない
+      const loadingKey = `itako_loading_${geminiKey.slice(-6)}`;
+      if (sessionStorage.getItem(loadingKey)) return; // React Strict Mode の二重起動を防ぐ
+      sessionStorage.setItem(loadingKey, '1');
+
       const initialNews = await fetchFictionalizedNews(geminiKey);
       setNews(initialNews);
       if (initialNews.length > 0) {
