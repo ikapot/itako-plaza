@@ -1,16 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = "AIzaSyCX6vE8yK-S89L0M";
-const genAI = new GoogleGenerativeAI(apiKey);
-
-/**
- * リアルタイムニュースを取得し、柴田元幸トーンのフィクションに変換
- * (CORS回避のため、ここではGeminiに最新の概念を問うか、モックデータを使用)
- */
-export const fetchFictionalizedNews = async () => {
+export const fetchFictionalizedNews = async (apiKey) => {
     if (!apiKey) return [];
 
     try {
+        const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         // システムプロンプトで柴田元幸的な乾いたトーンを指定
@@ -42,10 +36,11 @@ export const fetchFictionalizedNews = async () => {
 /**
  * 市川房枝による政治ニュースへの叱咤コメントを生成
  */
-export const generateIchikawaScolding = async (newsItem) => {
+export const generateIchikawaScolding = async (newsItem, apiKey) => {
     if (!apiKey) return "";
 
     try {
+        const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
             model: "gemini-2.0-flash",
             generationConfig: { temperature: 0.3 } // 厳格な論理

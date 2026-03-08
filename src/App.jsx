@@ -24,41 +24,31 @@ const INITIAL_LOCATIONS = [
   { id: 'passage', name: '地下通路', icon: <MapPin size={16} /> },
 ];
 
-const INITIAL_TRENDS = [
-  { id: 1, title: '雨が降る、それだけで十分だ', content: '柴田元幸的な乾いたトーン。誰かが傘を忘れた。誰も取りに来ない。' },
-  { id: 2, title: '昨日の事件：静かなる消失', content: '公園の時計が2分遅れていた。管理人は何も言わない。' },
-];
-
-const INITIAL_CLASSICS = [
-  { id: 1, author: 'Soseki', quote: '「月が綺麗ですね」と言ったのは、私だっただろうか。', ref: '三四郎より' },
-  { id: 2, author: 'Dostoevsky', quote: '地獄とは何か？それは、もはや愛することができないという苦しみだ。', ref: 'カラマーゾフの兄弟より' },
-];
-
 // --- コンポーネント ---
 
-const SpiritCard = ({ title, content, author, flavor, timestamp, colorClass = "bg-itako-sand" }) => (
+const SpiritCard = ({ title, content, author, flavor, timestamp, colorClass = "bg-white" }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.98 }}
     whileInView={{ opacity: 1, scale: 1 }}
     viewport={{ once: true }}
-    className={`relative p-10 rounded-[40px] ${colorClass} mb-4 shadow-sm group transition-all duration-700`}
+    className={`relative p-10 rounded-[40px] ${colorClass} mb-4 shadow-sm group transition-all duration-700 border border-black/5`}
   >
     <div className="relative z-10 flex flex-col gap-6">
       {author && (
         <div className="flex items-center justify-between border-b border-black/5 pb-4">
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-bold tracking-[0.2em] text-black/60 uppercase">{author}</span>
-            {flavor && <span className="text-[10px] font-bold bg-white/40 px-3 py-1 rounded-full text-black/40">{flavor}</span>}
+            {flavor && <span className="text-[10px] font-bold bg-black/5 px-3 py-1 rounded-full text-black/40">{flavor}</span>}
           </div>
         </div>
       )}
       <div className="space-y-4">
-        <h3 className="text-3xl font-bold tracking-tighter text-itako-deep/90 leading-tight pr-12">{title}</h3>
-        <p className="text-base leading-relaxed text-itako-deep/70 font-medium whitespace-pre-wrap">{content}</p>
+        <h3 className="text-3xl font-bold tracking-tighter text-black/80 leading-tight pr-12">{title}</h3>
+        <p className="text-base leading-relaxed text-black/60 font-medium whitespace-pre-wrap">{content}</p>
       </div>
 
       <div className="flex justify-end mt-4">
-        <button className="bg-itako-deep text-white/90 px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase flex items-center gap-2 hover:bg-black transition-colors shadow-lg">
+        <button className="bg-black text-white/90 px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase flex items-center gap-2 hover:bg-zinc-800 transition-colors shadow-lg">
           DISCOVER <span className="text-lg">→</span>
         </button>
       </div>
@@ -126,11 +116,10 @@ function App() {
     });
 
     const loadGlobalData = async () => {
-      // ニュース取得などは認証前でも裏で進めておく
-      const initialNews = await fetchFictionalizedNews();
+      const initialNews = await fetchFictionalizedNews(geminiKey);
       setNews(initialNews);
       if (initialNews.length > 0) {
-        const scold = await generateIchikawaScolding(initialNews[0]);
+        const scold = await generateIchikawaScolding(initialNews[0], geminiKey);
         setIchikawaScolds({ [initialNews[0].id]: scold });
       }
     };
@@ -611,15 +600,15 @@ function App() {
       </main>
 
       {/* Footer Navigation (Indicator) */}
-      <footer className="h-14 border-t border-orange-100 bg-white/50 backdrop-blur-md flex items-center justify-center gap-8 px-6">
-        <div className={`p-2 transition-colors ${activeSlot === 0 ? 'text-itako-orange' : 'text-itako-grey/30'}`}>
-          <TrendingUp size={24} cursor="pointer" onClick={() => scrollRef.current?.scrollTo({ left: 0, behavior: 'smooth' })} />
+      <footer className="h-14 border-t border-white/5 bg-black/40 backdrop-blur-md flex items-center justify-center gap-8 px-6">
+        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 0 ? 'text-white scale-110' : 'text-white/20 hover:text-white/40'}`} onClick={() => scrollRef.current?.scrollTo({ left: 0, behavior: 'smooth' })}>
+          <TrendingUp size={20} />
         </div>
-        <div className={`p-2 transition-colors ${activeSlot === 1 ? 'text-itako-orange' : 'text-itako-grey/30'}`}>
-          <MessageSquare size={24} cursor="pointer" onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth, behavior: 'smooth' })} />
+        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 1 ? 'text-white scale-110' : 'text-white/20 hover:text-white/40'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth, behavior: 'smooth' })}>
+          <MessageSquare size={20} />
         </div>
-        <div className={`p-2 transition-colors ${activeSlot === 2 ? 'text-itako-orange' : 'text-itako-grey/30'}`}>
-          <BookOpen size={24} cursor="pointer" onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth * 2, behavior: 'smooth' })} />
+        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 2 ? 'text-white scale-110' : 'text-white/20 hover:text-white/40'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth * 2, behavior: 'smooth' })}>
+          <BookOpen size={20} />
         </div>
       </footer>
     </div>

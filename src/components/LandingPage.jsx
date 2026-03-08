@@ -74,12 +74,12 @@ export default function LandingPage({ onLoginComplete }) {
 
                                     <button
                                         onClick={() => setStep('auth')}
-                                        className="w-full border border-zinc-700 text-itako-orange py-3 px-6 rounded-full font-bold hover:bg-zinc-900 transition-all text-sm"
+                                        className="w-full border border-zinc-700 text-zinc-300 py-3 px-6 rounded-full font-bold hover:bg-zinc-900 transition-all text-sm"
                                     >
                                         アカウントを作成
                                     </button>
                                 </div>
-                                <p className="text-[10px] text-zinc-500 leading-relaxed">
+                                <p className="text-[10px] text-zinc-600 leading-relaxed">
                                     ログインすることで、利用規約およびプライバシーポリシーに同意したものとみなされます。ここは生者と死者が交差する場所です。
                                 </p>
                             </motion.div>
@@ -92,11 +92,11 @@ export default function LandingPage({ onLoginComplete }) {
                                 animate={{ opacity: 1, x: 0 }}
                                 className="space-y-8"
                             >
-                                <h2 className="text-3xl font-bold tracking-tighter text-itako-orange">
+                                <h2 className="text-3xl font-bold tracking-tighter text-white/90">
                                     口寄せの準備。
                                 </h2>
                                 <div className="space-y-4">
-                                    <p className="text-sm text-itako-grey/60">
+                                    <p className="text-sm text-zinc-500">
                                         対話を開始するには、あなたの Gemini API Key が必要です。
                                     </p>
                                     <div className="space-y-2">
@@ -105,12 +105,12 @@ export default function LandingPage({ onLoginComplete }) {
                                             placeholder="Gemini API Key..."
                                             value={tempKey}
                                             onChange={(e) => setTempKey(e.target.value)}
-                                            className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-itako-orange text-sm mb-4"
+                                            className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 text-sm mb-4"
                                         />
                                         <button
                                             onClick={handleApiConnect}
                                             disabled={!tempKey || isConnecting}
-                                            className="w-full bg-itako-orange text-white py-4 rounded-full font-bold hover:bg-orange-600 transition-all disabled:opacity-50"
+                                            className="w-full bg-zinc-200 text-black py-4 rounded-full font-bold hover:bg-white transition-all disabled:opacity-50"
                                         >
                                             {isConnecting ? '接続中...' : 'イタコプラザへ入る'}
                                         </button>

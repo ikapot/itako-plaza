@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, User, Settings } from 'lucide-react';
+import { BookOpen, User, Settings, CheckCircle2 } from 'lucide-react';
 import Logo from './Logo';
 
 export default function Header({
@@ -18,47 +18,51 @@ export default function Header({
         if (tempKey) setIsConnected(true);
         else setIsConnected(false);
     };
+
     return (
-        <header className="h-16 flex items-center justify-between px-6 border-b border-orange-100 bg-white/50 backdrop-blur-md z-10 shrink-0">
-            <div className="flex items-center gap-6">
+        <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-black/40 backdrop-blur-3xl z-10 shrink-0">
+            <div className="flex items-center gap-8">
                 <Logo />
-                <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 bg-white/80 border border-orange-200 p-1 rounded-md shadow-sm">
-                        <input
-                            type="password"
-                            placeholder="Gemini API Key..."
-                            value={tempKey}
-                            onChange={(e) => {
-                                setTempKey(e.target.value);
-                                setIsConnected(false);
-                            }}
-                            className="px-2 py-0.5 text-xs bg-transparent focus:outline-none w-40 text-itako-grey/80"
-                        />
-                        <button
-                            onClick={handleConnect}
-                            className={`px-3 py-1 text-[10px] font-bold rounded transition-colors ${isConnected
-                                ? 'bg-green-500/20 text-green-500 border border-green-500/30'
-                                : 'bg-itako-orange text-white hover:bg-orange-600'
-                                }`}
-                        >
-                            {isConnected ? '連携済み ✓' : '連携する'}
-                        </button>
-                    </div>
+                <div className="flex items-center gap-4 bg-white/5 border border-white/10 p-1.5 rounded-full pl-6 shadow-sm group">
+                    <input
+                        type="password"
+                        placeholder="Gemini API Key..."
+                        value={tempKey}
+                        onChange={(e) => {
+                            setTempKey(e.target.value);
+                            setIsConnected(false);
+                        }}
+                        className="px-2 py-0.5 text-[10px] font-medium bg-transparent focus:outline-none w-44 text-white/40 placeholder:text-white/10"
+                    />
+                    <button
+                        onClick={handleConnect}
+                        className={`px-6 py-1.5 text-[10px] font-bold rounded-full transition-all flex items-center gap-2 ${isConnected
+                            ? 'bg-transparent text-white/20'
+                            : 'bg-zinc-200 text-black hover:bg-white'
+                            }`}
+                    >
+                        {isConnected ? (
+                            <>
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                <span className="tracking-widest">CONNECTED</span>
+                            </>
+                        ) : 'CONNECT'}
+                    </button>
                 </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
                 <button
                     onClick={() => setShowContextUI(!showContextUI)}
-                    className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold transition-all ${showContextUI ? 'bg-itako-orange text-white' : 'bg-white border border-orange-100 text-itako-orange hover:bg-orange-50'}`}
+                    className={`flex items-center gap-2 px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all border ${showContextUI ? 'bg-zinc-200 text-black border-zinc-200 shadow-xl' : 'bg-transparent border-white/10 text-white/30 hover:border-white/20'}`}
                 >
-                    <BookOpen size={12} />
-                    NotebookLM Context
+                    <BookOpen size={14} />
+                    Context
                 </button>
-                <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-orange-50">
-                    <User size={16} className="text-orange-300" />
-                    <span className="text-sm font-medium">{userName}</span>
+                <div className="flex items-center gap-3 px-5 py-2 bg-white/5 rounded-full border border-white/10">
+                    <User size={14} className="text-white/40" />
+                    <span className="text-[11px] font-bold tracking-tight text-white/80">{userName}</span>
                 </div>
-                <Settings size={20} className="text-itako-grey/50 cursor-pointer hover:rotate-45 transition-transform" />
+                <Settings size={18} className="text-white/20 cursor-pointer hover:rotate-90 transition-transform duration-700 hover:text-white" />
             </div>
         </header>
     );
