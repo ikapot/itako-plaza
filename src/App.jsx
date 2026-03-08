@@ -26,12 +26,22 @@ const INITIAL_LOCATIONS = [
 // --- コンポーネント ---
 
 const WarholAvatar = ({ src, colorClass = "bg-itako-clay", size = "w-12 h-12", isSelected = false }) => (
-  <div className={`${size} rounded-full overflow-hidden ${colorClass} relative flex-shrink-0 border border-white/10 ${!isSelected && 'grayscale opacity-50'}`}>
+  <div className={`${size} rounded-full overflow-hidden relative flex-shrink-0 border border-white/5 bg-zinc-900 ${!isSelected && 'grayscale brightness-50'}`}>
+    {/* Screen Print Layer 1: Earth Background */}
+    <div className={`absolute inset-0 ${colorClass} opacity-80`} />
+
+    {/* Screen Print Layer 2: High Contrast Portrait */}
     <img
       src={src}
       alt="portrait"
-      className={`w-full h-full object-cover contrast-[2.5] brightness-[1.1] mix-blend-multiply opacity-90 transition-all duration-700 ${isSelected ? 'scale-110' : 'scale-100'}`}
+      className={`absolute inset-0 w-full h-full object-cover grayscale contrast-[3] brightness-[1.2] mix-blend-multiply transition-all duration-1000 ${isSelected ? 'scale-110' : 'scale-100'}`}
     />
+
+    {/* Screen Print Layer 3: Texture Overlay */}
+    <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none" />
+
+    {/* Selection Border Glow */}
+    {isSelected && <div className="absolute inset-0 border-2 border-white/20 rounded-full animate-pulse" />}
   </div>
 );
 
@@ -154,31 +164,54 @@ function App() {
 
   const handleOpenAccumulations = () => {
     const htmlContent = `
+      <!DOCTYPE html>
       <html>
         <head>
-          <title>ITAKO PLAZA - Accumulated Knowledge</title>
+          <title>Abyss Records - Itako Plaza</title>
+          <meta charset="UTF-8">
+          <script src="https://cdn.tailwindcss.com"></script>
           <style>
-            body { background: #1a1a1a; color: #f4f4f2; font-family: sans-serif; padding: 60px; line-height: 1.8; }
-            .container { max-width: 800px; margin: 0 auto; }
-            .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 40px; border-radius: 40px; margin-bottom: 30px; transition: transform 0.3s; }
-            .card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.05); }
-            h1 { font-size: 60px; font-weight: 900; letter-spacing: -3px; margin-bottom: 60px; opacity: 0.9; }
-            .content { white-space: pre-wrap; opacity: 0.7; font-size: 18px; }
-            .date { font-size: 10px; opacity: 0.3; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px; font-weight: bold; }
-            .header-info { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 40px; opacity: 0.3; font-size: 12px; letter-spacing: 2px; }
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Outfit:wght@300;600&display=swap');
+            body { 
+              background: #0a0a0a; 
+              color: rgba(255,255,255,0.8); 
+              font-family: 'Outfit', sans-serif;
+            }
+            .serif { font-family: 'Noto Serif JP', serif; }
+            .grain {
+              position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+              background: url('https://grainy-gradients.vercel.app/noise.svg');
+              opacity: 0.03; pointer-events: none; z-index: 50;
+            }
+            .earth-clay { color: #bd8a78; }
+            .earth-sage { color: #899d90; }
+            .earth-sand { color: #c8b39c; }
           </style>
         </head>
-        <body>
-          <div class="container">
-            <div class="header-info">ITAKO PLAZA / INTELLECTUAL ARCHIVE</div>
-            <h1>Accumulated Knowledge</h1>
-            ${notebookAccumulations.map(a => `
-              <div class="card">
-                <div class="date">${a.timestamp?.toDate().toLocaleString() || 'Ancient Fragment'}</div>
-                <div class="content">${a.content}</div>
-              </div>
-            `).join('')}
-            ${notebookAccumulations.length === 0 ? '<p style="opacity: 0.3">No fragments found in the abyss.</p>' : ''}
+        <body class="p-8 md:p-24 min-h-screen">
+          <div class="grain"></div>
+          <div class="max-w-4xl mx-auto">
+            <header class="mb-32 border-b border-white/5 pb-16">
+              <h1 class="text-8xl font-black tracking-tighter text-white mb-6">INSIGHTS</h1>
+              <p class="text-xl earth-clay font-bold tracking-[0.4em] uppercase">Deep Accumulations of Abyss</p>
+            </header>
+
+            <div class="grid gap-24">
+              ${notebookAccumulations.map(acc => `
+                <article class="group">
+                  <div class="flex items-center gap-6 mb-8 text-[10px] font-bold tracking-[0.3em] text-white/20 uppercase">
+                    <span class="bg-white/5 px-4 py-1 rounded-full text-white/40">${acc.timestamp?.toDate().toLocaleDateString() || 'Ancient Fragment'}</span>
+                    <span class="earth-sage">Deciphered</span>
+                  </div>
+                  <div class="relative pl-12 border-l border-white/10">
+                    <div class="absolute -left-[1px] top-0 w-[2px] h-12 bg-gradient-to-b from-[#bd8a78] to-transparent"></div>
+                    <p class="text-2xl leading-relaxed text-white/90 serif whitespace-pre-wrap">${acc.content}</p>
+                  </div>
+                </article>
+              `).join('')}
+            </div>
+
+            ${notebookAccumulations.length === 0 ? '<p class="text-white/20 italic tracking-widest text-center py-32">The abyss is silent...</p>' : ''}
           </div>
         </body>
       </html>
