@@ -321,7 +321,7 @@ function App() {
 
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col bg-[#050505] text-itako-grey font-sans">
+    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#050505] text-itako-grey font-sans">
 
       {/* Header (Clean Architecture: Components / UI) */}
       <Header
@@ -362,7 +362,7 @@ function App() {
       >
         {/* Slot 1: News (Fictionalized Reality) */}
         <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
-          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-32">
+          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-48 md:pb-32">
             <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
               <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none">News</h2>
               <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-wider uppercase tracking-[0.3em]">The Fictionalized Reality</p>
@@ -406,7 +406,7 @@ function App() {
 
         {/* Slot 2: Main Dialog */}
         <section className={`timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-[#1a1a1a]`}>
-          <div className="max-w-2xl mx-auto h-full flex flex-col pb-32">
+          <div className="max-w-2xl mx-auto h-full flex flex-col pb-48 md:pb-32">
             <header className="flex flex-col gap-2 mb-10 md:mb-12 px-2 md:px-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white/90 leading-none">Dialog</h2>
@@ -554,7 +554,7 @@ function App() {
 
         {/* Slot 3: Abyss / Future Records */}
         <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#1a1a1a]">
-          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-32">
+          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-48 md:pb-32">
             <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
               <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white/90 leading-none">Abyss</h2>
               <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em]">The Eternal Records</p>
@@ -710,11 +710,11 @@ function App() {
         </section>
 
         {/* Slot 4: NotebookLM Gateway */}
-        <section className="timeline-slot p-12 overflow-y-auto bg-[#0a0a0a]">
-          <div className="max-w-2xl mx-auto py-12">
-            <header className="flex flex-col gap-2 mb-24 px-4">
-              <h2 className="text-7xl font-black tracking-tighter text-white leading-none">Knowledge</h2>
-              <p className="text-lg font-bold text-[#bd8a78] pl-1 tracking-wider uppercase tracking-[0.3em]">Bridge to NotebookLM</p>
+        <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
+          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-48 md:pb-32">
+            <header className="flex flex-col gap-2 mb-12 md:mb-24 px-2 md:px-4">
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none">Knowledge</h2>
+              <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-wider uppercase tracking-[0.3em]">Bridge to NotebookLM</p>
             </header>
 
             <motion.div
