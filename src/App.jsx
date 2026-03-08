@@ -409,11 +409,11 @@ function App() {
         </section>
 
         {/* Slot 3: Abyss / Future Records */}
-        <section className="timeline-slot p-12 overflow-y-auto bg-itako-stone">
+        <section className="timeline-slot p-12 overflow-y-auto bg-[#1a1a1a]">
           <div className="max-w-2xl mx-auto py-12">
             <header className="flex flex-col gap-2 mb-12 px-4">
-              <h2 className="text-7xl font-bold tracking-tighter text-itako-deep leading-none">Abyss</h2>
-              <p className="text-lg font-bold text-itako-deep/40 pl-1 tracking-wider uppercase tracking-[0.3em]">The Eternal Records</p>
+              <h2 className="text-7xl font-bold tracking-tighter text-white/90 leading-none">Abyss</h2>
+              <p className="text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em]">The Eternal Records</p>
             </header>
 
             {loading ? (
@@ -422,45 +422,79 @@ function App() {
               </div>
             ) : (
               <div className="space-y-16">
-                {/* Future Self's Critique - Earthy Aesthetic */}
+                {/* NotebookLM Integration Bridge */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="relative p-12 rounded-[50px] bg-gradient-to-br from-white/10 to-transparent border border-white/20 shadow-2xl overflow-hidden group mb-8"
+                >
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+                          <span className="text-[#1a1a1a] font-black text-[10px]">LM</span>
+                        </div>
+                        <span className="text-[12px] font-bold tracking-[0.4em] text-white/50 uppercase">NotebookLM / Bridge</span>
+                      </div>
+                      <h3 className="text-3xl font-bold text-white tracking-tighter leading-tight">Channeling sources to NotebookLM</h3>
+                      <p className="text-sm text-white/40 max-w-lg leading-relaxed font-medium">
+                        Plazaで紡がれた対話の断片やアーカイブを、構造化された「知識源（Sources）」としてNotebookLMへ転送します。あなたの思考を深めるための、外部脳への架け橋です。
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const content = archives.map(a => `${a.title}\n${a.quote}`).join('\n\n');
+                        navigator.clipboard.writeText(content);
+                        alert('Archives copied for NotebookLM');
+                        window.open('https://notebooklm.google.com/', '_blank');
+                      }}
+                      className="whitespace-nowrap px-10 py-4 bg-white text-[#1a1a1a] rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:scale-105 transition-all"
+                    >
+                      Export to Source
+                    </button>
+                  </div>
+                  <div className="absolute -bottom-8 -right-8 opacity-5 pointer-events-none transform rotate-12">
+                    <BookOpen size={240} />
+                  </div>
+                </motion.div>
+                {/* Future Self's Critique - Neutral Glass Aesthetic */}
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="relative p-12 rounded-[50px] bg-white border border-black/5 shadow-2xl group overflow-hidden"
+                  className="relative p-12 rounded-[50px] bg-white/5 border border-white/10 shadow-2xl group overflow-hidden backdrop-blur-md"
                 >
-                  <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none text-itako-clay">
+                  <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none text-white">
                     <Quote size={120} />
                   </div>
                   <div className="flex items-center gap-4 mb-8">
-                    <span className="text-[12px] font-bold tracking-[0.4em] text-itako-clay uppercase border-l-2 border-itako-clay pl-4">The Verdict from 2036</span>
+                    <span className="text-[12px] font-bold tracking-[0.4em] text-white/40 uppercase border-l-2 border-white/20 pl-4">The Verdict from 2036</span>
                   </div>
-                  <p className="text-xl md:text-2xl leading-[1.6] text-itako-deep/80 font-serif italic tracking-tight">
+                  <p className="text-xl md:text-2xl leading-[1.6] text-white/80 font-serif italic tracking-tight">
                     {futureSelfCritique || "まだ、未来の自分に届く言葉が保存されていないようです。"}
                   </p>
 
                   <div className="mt-12 flex justify-end">
-                    <button className="bg-itako-clay text-white px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-lg">
+                    <button className="bg-white text-[#1a1a1a] px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-lg hover:bg-white/90 transition-colors">
                       Preserve Memory
                     </button>
                   </div>
                 </motion.div>
 
-                {/* Abyssal Records as Grid Cards */}
+                {/* Abyssal Records as Neutral Grid Cards */}
                 <div className="space-y-8">
-                  <h3 className="text-sm font-bold text-itako-deep/30 uppercase tracking-[0.6em] px-4">Spirit Fragments</h3>
+                  <h3 className="text-sm font-bold text-white/20 uppercase tracking-[0.6em] px-4">Spirit Fragments</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {archives.map((c, idx) => {
-                      const colors = ['bg-itako-sage/80', 'bg-itako-sand/80', 'bg-itako-clay/80'];
                       return (
                         <motion.div
                           initial={{ opacity: 0 }}
                           whileInView={{ opacity: 1 }}
                           key={c.id}
-                          className={`p-10 ${colors[idx % colors.length]} rounded-[40px] shadow-sm flex flex-col gap-4 group cursor-pointer`}
+                          className={`p-10 bg-white/5 border border-white/10 rounded-[40px] shadow-sm flex flex-col gap-4 group cursor-pointer hover:bg-white/10 transition-all duration-500`}
                         >
-                          <div className="text-[10px] font-bold text-black/30 uppercase tracking-widest">{c.author || 'Archive'}</div>
-                          <div className="text-xl font-bold text-black/80 leading-tight">{c.title}</div>
-                          <div className="text-sm leading-relaxed text-black/50 italic font-serif">" {c.quote} "</div>
+                          <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{c.author || 'Archive'}</div>
+                          <div className="text-xl font-bold text-white/80 leading-tight">{c.title}</div>
+                          <div className="text-sm leading-relaxed text-white/40 italic font-serif">" {c.quote} "</div>
                         </motion.div>
                       );
                     })}
@@ -469,15 +503,15 @@ function App() {
 
                 {/* Past Traces (Bookmarks) */}
                 <div className="space-y-8">
-                  <h3 className="text-sm font-bold text-itako-deep/30 uppercase tracking-[0.6em] px-4">Tied Spirits</h3>
+                  <h3 className="text-sm font-bold text-white/20 uppercase tracking-[0.6em] px-4">Tied Spirits</h3>
                   <div className="space-y-4">
                     {bookmarks.map(b => (
-                      <div key={b.id} className="p-12 rounded-[50px] bg-white border border-black/5 shadow-xl transition-transform hover:scale-[1.01]">
+                      <div key={b.id} className="p-12 rounded-[50px] bg-white text-[#1a1a1a] shadow-xl transition-transform hover:scale-[1.01]">
                         <div className="flex justify-between items-center mb-6">
-                          <span className="text-xs font-bold tracking-widest uppercase text-itako-clay">{b.charId}</span>
+                          <span className="text-xs font-bold tracking-widest uppercase opacity-40">{b.charId}</span>
                         </div>
-                        <div className="mb-6 text-xl text-itako-deep/90 font-medium leading-relaxed">" {b.userMsg} "</div>
-                        <div className="pl-8 border-l border-itako-clay/20 italic text-base text-itako-deep/40 font-serif">" {b.aiMsg} "</div>
+                        <div className="mb-6 text-xl font-medium leading-relaxed italic">" {b.userMsg} "</div>
+                        <div className="pl-8 border-l border-black/10 italic text-base opacity-60 font-serif">" {b.aiMsg} "</div>
                       </div>
                     ))}
                   </div>
