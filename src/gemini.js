@@ -1,5 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+const FALLBACK_MODELS = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b"
+];
+
 const CHARACTER_CONFIGS = {
     soseki: {
         systemPrompt: "あなたは夏目漱石です。史実：神経衰弱、重度の胃病。トーン：短く、皮肉。身体性：胃の痛みが声に滲み出ます。",
@@ -38,16 +44,17 @@ const CHARACTER_CONFIGS = {
 export const evaluateFutureSelf = async (bookmarks, userApiKey) => {
     if (!userApiKey || bookmarks.length === 0) return "まだ、未来へ届く言葉が足りないようです。";
 
-    try {
-        const genAI = new GoogleGenerativeAI(userApiKey);
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
-            generationConfig: CHARACTER_CONFIGS.future_self.generationConfig
-        });
+    for (const modelName of FALLBACK_MODELS) {
+        try {
+            const genAI = new GoogleGenerativeAI(userApiKey);
+            const model = genAI.getGenerativeModel({
+                model: modelName,
+                generationConfig: CHARACTER_CONFIGS.future_self.generationConfig
+            });
 
-        const bookmarkText = bookmarks.map(b => `[${b.charId}との対話] 私: "${b.userMsg}" -> 相手: "${b.aiMsg}"`).join('\n');
+            const bookmarkText = bookmarks.map(b => `[${b.charId}との対話] 私: "${b.userMsg}" -> 相手: "${b.aiMsg}"`).join('\n');
 
-        const prompt = `
+            const prompt = `
 <role>
 ${CHARACTER_CONFIGS.future_self.systemPrompt}
 </role>
@@ -65,12 +72,18 @@ ${bookmarkText}
 </rules>
 `;
 
-        const result = await model.generateContent(prompt);
-        return result.response.text();
-    } catch (error) {
-        console.error("Future Self Eval Error:", error);
-        return "未来の自分との通信が、ノイズに消えてしまいました。";
+            const result = await model.generateContent(prompt);
+            return result.response.text();
+        } catch (error) {
+            if (error.status === 429 || error.message?.includes('429')) {
+                console.warn(`[Multi-Brain] ${modelName} reached limit. Switching to next layer...`);
+                continue;
+            }
+            console.error("Future Self Eval Error:", error);
+            return "未来の自分との通信が、ノイズに消えてしまいました。";
+        }
     }
+    return "すべての意識層が極限に達しました。しばらく沈黙が必要です。";
 };
 
 /**
@@ -83,17 +96,18 @@ ${bookmarkText}
 export const generateCharacterResponse = async (char, userMessage, isUnderground = false, externalContext = "", userApiKey = "") => {
     if (!userApiKey) return "【左上の入力欄からGemini APIキーを設定してください】";
 
-    try {
-        const genAI = new GoogleGenerativeAI(userApiKey);
-        const config = CHARACTER_CONFIGS[char.id] || { generationConfig: { temperature: 0.7 } };
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
-            generationConfig: config.generationConfig
-        });
+    for (const modelName of FALLBACK_MODELS) {
+        try {
+            const genAI = new GoogleGenerativeAI(userApiKey);
+            const config = CHARACTER_CONFIGS[char.id] || { generationConfig: { temperature: 0.7 } };
+            const model = genAI.getGenerativeModel({
+                model: modelName,
+                generationConfig: config.generationConfig
+            });
 
-        const statusText = char.status ? Object.entries(char.status).map(([k, v]) => `${k}: ${v}`).join('、') : "";
+            const statusText = char.status ? Object.entries(char.status).map(([k, v]) => `${k}: ${v}`).join('、') : "";
 
-        const prompt = `
+            const prompt = `
 <role>
 ${config.systemPrompt || char.systemPrompt}
 </role>
@@ -116,12 +130,18 @@ ${config.systemPrompt || char.systemPrompt}
 ${userMessage}
 </user_message>
 `;
-        const result = await model.generateContent(prompt);
-        return result.response.text();
-    } catch (error) {
-        console.error("Gemini Error:", error);
-        return "暗闇の中で声が消えました。";
+            const result = await model.generateContent(prompt);
+            return result.response.text();
+        } catch (error) {
+            if (error.status === 429 || error.message?.includes('429')) {
+                console.warn(`[Multi-Brain] ${modelName} reached limit. Switching brain layer...`);
+                continue;
+            }
+            console.error("Gemini Error:", error);
+            return "暗闇の中で声が消えました。";
+        }
     }
+    return "すべての精神層が沈黙しました。休息が必要です。";
 };
 
 /**
@@ -130,10 +150,11 @@ ${userMessage}
 export const evaluateExpansion = async (currentContext, userApiKey) => {
     if (!userApiKey) return null;
 
-    try {
-        const genAI = new GoogleGenerativeAI(userApiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const prompt = `
+    for (const modelName of FALLBACK_MODELS) {
+        try {
+            const genAI = new GoogleGenerativeAI(userApiKey);
+            const model = genAI.getGenerativeModel({ model: modelName });
+            const prompt = `
 <task>
 以下の対話文脈から、この「イタコプラザ」に新たに招かれるべき「死者（文豪・芸術家・歴史的偉人）」または「作中の登場人物」、あるいは「新たな場所」を一つ提案してください。
 </task>
@@ -158,11 +179,16 @@ ${currentContext}
 }
 </json_format>
 `;
-        const result = await model.generateContent(prompt);
-        const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
-        return JSON.parse(jsonStr);
-    } catch (error) {
-        console.error("Expansion Error:", error);
-        return null;
+            const result = await model.generateContent(prompt);
+            const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
+            return JSON.parse(jsonStr);
+        } catch (error) {
+            if (error.status === 429 || error.message?.includes('429')) {
+                continue;
+            }
+            console.error("Expansion Error:", error);
+            return null;
+        }
     }
+    return null;
 };

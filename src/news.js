@@ -1,9 +1,15 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+const FALLBACK_MODELS = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b"
+];
+
 export const fetchFictionalizedNews = async (apiKey) => {
     if (!apiKey) return [];
 
-    // Cache logic: Check localStorage first
+    // Cache logic
     const CACHE_KEY = 'itako_news_cache';
     const CACHE_TIME_KEY = 'itako_news_cache_time';
     const cachedData = localStorage.getItem(CACHE_KEY);
@@ -11,72 +17,66 @@ export const fetchFictionalizedNews = async (apiKey) => {
     const now = Date.now();
 
     if (cachedData && cachedTime && (now - parseInt(cachedTime)) < 3600000) {
-        console.log("[NewsService] Using cached news data");
         return JSON.parse(cachedData);
     }
 
-    try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    for (const modelName of FALLBACK_MODELS) {
+        try {
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: modelName });
 
-        // システムプロンプトで柴田元幸的な乾いたトーンを指定
-        const prompt = `
-      現在起こっている世界的なニュース（政治、事件、社会現象）を3つ挙げ、
-      それを柴田元幸が翻訳した現代アメリカ文学のような「乾いた、微かに不穏で、象徴的なフィクション」に書き換えてください。
-      
-      例: 
-      - トランプ → 「英雄を演じることに飽き足らない、金色の髪をした古い王」
-      - 経済危機 → 「街中の銀行の扉が、音もなく一枚ずつ凍りついていく現象」
-      
-      出力は以下のJSON形式のみで行ってください:
-      [
-        { "id": 1, "title": "フィクション化されたタイトル", "content": "本文（100文字程度）", "original": "元のニュースの短い要約" }
-      ]
-    `;
+            const prompt = `
+          現在起こっている世界的なニュース（政治、事件、社会現象）を3つ挙げ、
+          それを柴田元幸が翻訳した現代アメリカ文学のような「乾いた、微かに不穏で、象徴的なフィクション」に書き換えてください。
+          
+          出力は以下のJSON形式のみで行ってください:
+          [
+            { "id": 1, "title": "フィクション化されたタイトル", "content": "本文（100文字程度）", "original": "元のニュースの短い要約" }
+          ]
+        `;
 
-        const result = await model.generateContent(prompt);
-        const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
-        const newsData = JSON.parse(jsonStr);
+            const result = await model.generateContent(prompt);
+            const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
+            const newsData = JSON.parse(jsonStr);
 
-        // Save to cache
-        localStorage.setItem(CACHE_KEY, JSON.stringify(newsData));
-        localStorage.setItem(CACHE_TIME_KEY, now.toString());
+            localStorage.setItem(CACHE_KEY, JSON.stringify(newsData));
+            localStorage.setItem(CACHE_TIME_KEY, now.toString());
 
-        return newsData;
-    } catch (error) {
-        console.error("News Fetch Error:", error);
-        return [
-            { id: 1, title: "静かなる断絶", content: "誰もが言葉を失ったわけではない。ただ、話すべき相手がどこにも見当たらないのだ。", original: "通信障害のメタファー" }
-        ];
+            return newsData;
+        } catch (error) {
+            if (error.status === 429 || error.message?.includes('429')) {
+                console.warn(`[Multi-Brain] News fetch shifted to ${modelName}`);
+                continue;
+            }
+            console.error("News Fetch Error:", error);
+        }
     }
+    return [{ id: 1, title: "静かなる断絶", content: "通信の深淵から。沈黙だけが、今の我々に残された唯一の共通言語だ。", original: "Network Timeout" }];
 };
 
-/**
- * 市川房枝による政治ニュースへの叱咤コメントを生成
- */
 export const generateIchikawaScolding = async (newsItem, apiKey) => {
     if (!apiKey) return "";
 
-    try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
-            generationConfig: { temperature: 0.3 } // 厳格な論理
-        });
+    for (const modelName of FALLBACK_MODELS) {
+        try {
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({
+                model: modelName,
+                generationConfig: { temperature: 0.3 }
+            });
 
-        const prompt = `
-      あなたは市川房枝です。以下のニュース（再構成されたもの）を読み、
-      日本の主権者、あるいは政治の腐敗に対し、毅然とした態度で「叱り」のコメントを述べてください。
-      言葉遣いは丁寧ですが、内容は一切の妥協を許さない厳格なものです。
-      
-      ニュース: "${newsItem.original} (${newsItem.title})"
-      
-      「一度きり」の厳しい言葉を返してください。
-    `;
+            const prompt = `
+          あなたは市川房枝です。以下のニュースを読み、
+          毅然とした態度で「叱り」のコメントを述べてください。
+          ニュース: "${newsItem.original}"
+        `;
 
-        const result = await model.generateContent(prompt);
-        return result.response.text();
-    } catch (error) {
-        return "政治が腐敗するのは、私たちが無関心だからです。目を離してはなりません。";
+            const result = await model.generateContent(prompt);
+            return result.response.text();
+        } catch (error) {
+            if (error.status === 429 || error.message?.includes('429')) continue;
+            return "政治が腐敗するのは、私たちの無関心ゆえです。";
+        }
     }
+    return "沈黙こそが最大の罪です。";
 };
