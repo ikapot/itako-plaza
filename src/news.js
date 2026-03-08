@@ -2,8 +2,9 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const FALLBACK_MODELS = [
     "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-flash-8b"
+    "gemini-2.0-flash-lite",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-flash-8b-latest"
 ];
 
 export const fetchFictionalizedNews = async (apiKey) => {
@@ -22,7 +23,8 @@ export const fetchFictionalizedNews = async (apiKey) => {
 
     for (const modelName of FALLBACK_MODELS) {
         try {
-            const genAI = new GoogleGenerativeAI(apiKey);
+            const sanitizedKey = apiKey.trim();
+            const genAI = new GoogleGenerativeAI(sanitizedKey);
             const model = genAI.getGenerativeModel({ model: modelName });
 
             const prompt = `
@@ -61,7 +63,8 @@ export const generateIchikawaScolding = async (newsItem, apiKey) => {
 
     for (const modelName of FALLBACK_MODELS) {
         try {
-            const genAI = new GoogleGenerativeAI(apiKey);
+            const sanitizedKey = apiKey.trim();
+            const genAI = new GoogleGenerativeAI(sanitizedKey);
             const model = genAI.getGenerativeModel({
                 model: modelName,
                 generationConfig: { temperature: 0.3 }

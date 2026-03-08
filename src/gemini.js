@@ -2,8 +2,9 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const FALLBACK_MODELS = [
     "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-flash-8b"
+    "gemini-2.0-flash-lite",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-flash-8b-latest"
 ];
 
 const CHARACTER_CONFIGS = {
@@ -46,7 +47,8 @@ export const evaluateFutureSelf = async (bookmarks, userApiKey) => {
 
     for (const modelName of FALLBACK_MODELS) {
         try {
-            const genAI = new GoogleGenerativeAI(userApiKey);
+            const sanitizedKey = userApiKey.trim();
+            const genAI = new GoogleGenerativeAI(sanitizedKey);
             const model = genAI.getGenerativeModel({
                 model: modelName,
                 generationConfig: CHARACTER_CONFIGS.future_self.generationConfig
@@ -76,9 +78,10 @@ ${bookmarkText}
             console.log(`[Multi-Brain] FutureSelf using: ${modelName}`);
             return result.response.text();
         } catch (error) {
-            const isQuotaExceeded = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
-            if (isQuotaExceeded) {
-                console.warn(`[Multi-Brain] ${modelName} reached limit. Switching to next layer...`);
+            const is429 = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
+            const is404 = error.status === 404 || error.message?.includes('404') || error.message?.includes('not found');
+            if (is429 || is404) {
+                console.warn(`[Multi-Brain] ${modelName} unavailable (${is429 ? '429' : '404'}). Switching layer...`);
                 continue;
             }
             console.error("Future Self Eval Error:", error);
@@ -100,7 +103,8 @@ export const generateCharacterResponse = async (char, userMessage, isUnderground
 
     for (const modelName of FALLBACK_MODELS) {
         try {
-            const genAI = new GoogleGenerativeAI(userApiKey);
+            const sanitizedKey = userApiKey.trim();
+            const genAI = new GoogleGenerativeAI(sanitizedKey);
             const config = CHARACTER_CONFIGS[char.id] || { generationConfig: { temperature: 0.7 } };
             const model = genAI.getGenerativeModel({
                 model: modelName,
@@ -136,9 +140,10 @@ ${userMessage}
             console.log(`[Multi-Brain] ${char.id} responding via: ${modelName}`);
             return result.response.text();
         } catch (error) {
-            const isQuotaExceeded = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
-            if (isQuotaExceeded) {
-                console.warn(`[Multi-Brain] ${modelName} overloaded. Shifting conscious layer...`);
+            const is429 = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
+            const is404 = error.status === 404 || error.message?.includes('404') || error.message?.includes('not found');
+            if (is429 || is404) {
+                console.warn(`[Multi-Brain] ${modelName} unavailable (${is429 ? '429' : '404'}). Shifting conscious layer...`);
                 continue;
             }
             console.error("Gemini Error:", error);
@@ -156,7 +161,8 @@ export const evaluateExpansion = async (currentContext, userApiKey) => {
 
     for (const modelName of FALLBACK_MODELS) {
         try {
-            const genAI = new GoogleGenerativeAI(userApiKey);
+            const sanitizedKey = userApiKey.trim();
+            const genAI = new GoogleGenerativeAI(sanitizedKey);
             const model = genAI.getGenerativeModel({ model: modelName });
             const prompt = `
 <task>
@@ -187,7 +193,10 @@ ${currentContext}
             const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
             return JSON.parse(jsonStr);
         } catch (error) {
-            if (error.status === 429 || error.message?.includes('429')) {
+            const is429 = error.status === 429 || error.message?.includes('429');
+            const is404 = error.status === 404 || error.message?.includes('404') || error.message?.includes('not found');
+            if (is429 || is404) {
+                console.warn(`[Multi-Brain] ${modelName} (${is429 ? '429' : '404'}) → next layer`);
                 continue;
             }
             console.error("Expansion Error:", error);
