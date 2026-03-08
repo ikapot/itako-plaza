@@ -36,7 +36,7 @@ const WarholAvatar = ({ src, colorClass = "bg-itako-clay", size = "w-12 h-12", i
     <img
       src={src}
       alt="portrait"
-      className={`absolute inset-0 w-full h-full object-cover grayscale contrast-[3] brightness-[1.2] mix-blend-multiply transition-all duration-1000 ${isSelected ? 'scale-110' : 'scale-100'}`}
+      className={`absolute inset-0 w-full h-full object-cover grayscale contrast-[3] brightness-[1.2] mix-blend-multiply transition-all duration-500 ease-out ${isSelected ? 'scale-110' : 'scale-100'}`}
     />
 
     {/* Screen Print Layer 3: Texture Overlay */}
@@ -52,7 +52,7 @@ const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, co
     initial={{ opacity: 0, scale: 0.98 }}
     whileInView={{ opacity: 1, scale: 1 }}
     viewport={{ once: true }}
-    className={`relative p-8 md:p-10 rounded-[40px] ${colorClass} mb-4 shadow-sm group transition-all duration-700`}
+    className={`relative p-8 md:p-10 rounded-[40px] ${colorClass} mb-4 shadow-sm group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl`}
   >
     <div className="relative z-10 flex flex-col gap-6 text-inherit">
       {author && (
@@ -70,7 +70,7 @@ const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, co
       </div>
 
       <div className="flex justify-end mt-4">
-        <button className="bg-white/10 hover:bg-white/20 text-inherit px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase flex items-center gap-2 transition-all shadow-lg border border-white/5">
+        <button className="bg-white/10 hover:bg-white/20 active:scale-95 text-inherit px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase flex items-center gap-2 transition-all shadow-lg border border-white/5 cursor-pointer disabled:opacity-50">
           DISCOVER <span className="text-lg">→</span>
         </button>
       </div>
@@ -342,7 +342,7 @@ function App() {
               backgroundColor: activeManagerTab === tab.id ? tab.color : 'transparent',
               color: activeManagerTab === tab.id ? '#000' : 'rgba(255,255,255,0.3)'
             }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all font-oswald shadow-inner`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 active:scale-95 cursor-pointer font-oswald shadow-inner`}
           >
             {tab.icon}
             <span className="hidden md:inline">{tab.label}</span>
@@ -398,7 +398,7 @@ function App() {
                 <button
                   key={c.id}
                   onClick={() => setSelectedCharId(c.id)}
-                  className={`w-full group text-left flex items-start gap-4 md:gap-6 p-4 md:p-6 rounded-[35px] transition-all duration-700 border ${isSelected ? 'bg-white/5 border-white/20 shadow-2xl translate-x-2' : 'bg-transparent border-transparent opacity-40 hover:opacity-100'}`}
+                  className={`w-full group text-left flex items-start gap-4 md:gap-6 p-4 md:p-6 rounded-[35px] transition-all duration-300 border active:scale-[0.98] ${isSelected ? 'bg-white/5 border-white/20 shadow-xl translate-x-2 cursor-default' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
                 >
                   <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" />
                   <div className="flex-1 space-y-1 md:space-y-2 py-0.5 md:py-1">
@@ -694,7 +694,7 @@ function App() {
                         <button
                           key={i}
                           onClick={() => loc && setSelectedLocationId(loc.id)}
-                          className={`aspect-square flex items-center justify-center transition-all ${isSelected ? 'bg-zinc-200' : 'bg-black/40 hover:bg-white/5'}`}
+                          className={`aspect-square flex items-center justify-center transition-all duration-300 active:scale-95 ${isSelected ? 'bg-zinc-200 cursor-default shadow-sm' : 'bg-black/40 hover:bg-white/10 cursor-pointer'}`}
                         >
                           {loc && <MapPin size={10} className={isSelected ? 'text-black' : 'text-white/20'} />}
                         </button>
