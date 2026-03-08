@@ -311,37 +311,36 @@ function App() {
         </section>
 
         {/* Slot 2: Main Dialog */}
-        <section className={`timeline-slot p-12 overflow-y-auto transition-all duration-1000 bg-itako-stone`}>
+        <section className={`timeline-slot p-12 overflow-y-auto transition-all duration-1000 bg-[#1a1a1a]`}>
           <div className="max-w-2xl mx-auto h-full flex flex-col">
             <header className="flex flex-col gap-2 mb-12 px-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-7xl font-bold tracking-tighter text-itako-deep leading-none">Dialog</h2>
+                <h2 className="text-7xl font-bold tracking-tighter text-white/90 leading-none">Dialog</h2>
                 <button
                   onClick={() => setIsUnderground(!isUnderground)}
-                  className={`px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all border ${isUnderground ? 'bg-itako-deep text-white border-itako-deep' : 'bg-transparent text-itako-deep/40 border-black/10 hover:border-black/20'}`}
+                  className={`px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all border ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
                 >
                   {isUnderground ? 'Surface' : 'Deep Trace'}
                 </button>
               </div>
-              <p className="text-lg font-bold text-itako-deep/40 pl-1 tracking-wider uppercase tracking-[0.3em]">{userName} / Now Speaking</p>
+              <p className="text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em]">{userName} / Now Speaking</p>
             </header>
 
             <div className="flex-1 flex flex-col gap-12 mb-24">
-              {/* Character Selection as Earthy Gallery */}
+              {/* Character Selection as Neutral Gallery */}
               <div className="scrollbar-hide overflow-x-auto flex gap-6 pb-4 px-2">
                 {characters.map(c => {
-                  const charColors = ['bg-itako-sage/20', 'bg-itako-clay/20', 'bg-itako-sand/30'];
                   const isSelected = selectedCharId === c.id;
                   return (
                     <button
                       key={c.id}
                       onClick={() => setSelectedCharId(c.id)}
-                      className={`flex-shrink-0 flex items-center gap-4 p-4 pr-8 rounded-[30px] transition-all duration-500 border ${isSelected ? 'bg-white border-black/5 shadow-xl scale-105' : 'bg-white/30 border-transparent opacity-60'}`}
+                      className={`flex-shrink-0 flex items-center gap-4 p-4 pr-8 rounded-[30px] transition-all duration-500 border ${isSelected ? 'bg-white/10 border-white/20 shadow-xl scale-105' : 'bg-white/5 border-transparent opacity-40'}`}
                     >
                       <img src={c.avatar} alt={c.name} className={`w-12 h-12 rounded-full shadow-md ${isSelected ? '' : 'grayscale'}`} />
                       <div className="flex flex-col items-start">
-                        <span className="text-xs font-bold tracking-widest uppercase text-itako-deep">{c.name}</span>
-                        <span className="text-[9px] text-itako-deep/40 font-bold uppercase tracking-wider">{c.flavor}</span>
+                        <span className="text-xs font-bold tracking-widest uppercase text-white/90">{c.name}</span>
+                        <span className="text-[9px] text-white/30 font-bold uppercase tracking-wider">{c.flavor}</span>
                       </div>
                     </button>
                   );
@@ -360,11 +359,11 @@ function App() {
                         animate={{ opacity: 1, y: 0 }}
                         className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                       >
-                        <div className={`p-8 rounded-[35px] shadow-sm max-w-[90%] ${isUser ? 'bg-itako-deep text-white/90 rounded-tr-none' : 'bg-itako-sand text-itako-deep/80 rounded-tl-none'}`}>
+                        <div className={`p-8 rounded-[35px] shadow-sm max-w-[90%] ${isUser ? 'bg-white text-[#1a1a1a] rounded-tr-none' : 'bg-white/5 text-white/80 border border-white/10 rounded-tl-none'}`}>
                           {!isUser && (
-                            <div className="flex items-center gap-4 mb-3 border-b border-black/5 pb-2">
-                              <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-black/40">{m.charId}</span>
-                              <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-itako-clay hover:text-black transition-colors">
+                            <div className="flex items-center gap-4 mb-3 border-b border-white/5 pb-2">
+                              <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/20">{m.charId}</span>
+                              <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/40 hover:text-white transition-colors">
                                 Bookmark
                               </button>
                             </div>
@@ -375,7 +374,7 @@ function App() {
                     );
                   })}
                   {loading && (
-                    <div className="flex items-center gap-4 text-itako-clay text-[10px] font-bold tracking-[0.4em] uppercase px-4 animate-pulse">
+                    <div className="flex items-center gap-4 text-white/20 text-[10px] font-bold tracking-[0.4em] uppercase px-4 animate-pulse">
                       Channeling spirit...
                     </div>
                   )}
@@ -383,9 +382,9 @@ function App() {
               </div>
             </div>
 
-            {/* Earthy Pill Input Bar (Inspired by the navigation in the image) */}
+            {/* Neutral Pill Input Bar */}
             <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-40">
-              <div className="bg-itako-deep rounded-[40px] p-2 flex items-center shadow-2xl border border-white/5">
+              <div className="bg-white/10 backdrop-blur-xl rounded-[40px] p-2 flex items-center shadow-2xl border border-white/10">
                 <div className="flex-1 px-6">
                   <textarea
                     value={input}
@@ -399,12 +398,9 @@ function App() {
                   <button
                     onClick={handleSendMessage}
                     disabled={loading || !input.trim()}
-                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-itako-deep font-bold transition-transform active:scale-95 disabled:opacity-20 shadow-lg"
+                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#1a1a1a] font-bold transition-transform active:scale-95 disabled:opacity-20 shadow-lg"
                   >
                     <span className="text-xl">+</span>
-                  </button>
-                  <button className="px-6 py-2 text-[10px] font-bold tracking-widest text-white/40 uppercase hover:text-white transition-colors">
-                    SENT
                   </button>
                 </div>
               </div>
