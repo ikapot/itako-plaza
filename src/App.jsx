@@ -421,24 +421,16 @@ function App() {
             exit={{ opacity: 0, y: -10 }}
             className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-6"
           >
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Gemini API Key</label>
-              <input
-                type="password"
-                placeholder="Enter API Key..."
-                value={geminiKey}
-                onChange={(e) => {
-                  setGeminiKey(e.target.value);
-                  localStorage.setItem('itako_gemini_key', e.target.value);
-                }}
-                className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white text-xs focus:ring-1 ring-white/20 outline-none"
-              />
-            </div>
-            <div className="flex items-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
-              <div className={`w-2 h-2 rounded-full ${geminiKey ? 'bg-emerald-500 animate-pulse' : 'bg-white/10'}`} />
-              <span className="text-[10px] font-bold text-emerald-500/80 tracking-widest uppercase">
-                {geminiKey ? 'Verified Connection' : 'Awaiting Connection'}
-              </span>
+            <div className="flex items-center gap-4 p-8 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl">
+              <div className={`w-3 h-3 rounded-full ${geminiKey ? 'bg-emerald-500 animate-pulse' : 'bg-white/10'}`} />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-emerald-500/80 tracking-widest uppercase mb-1">
+                  {geminiKey ? 'Verified Connection' : 'Awaiting Connection'}
+                </span>
+                <p className="text-[9px] text-white/20 leading-relaxed font-serif">
+                  {geminiKey ? '精神の回路は正常に接続されています。' : '設定（歯車）メニューからAPIキーを入力してください。'}
+                </p>
+              </div>
             </div>
           </motion.div>
         )}
@@ -578,6 +570,29 @@ function App() {
                     }}
                     className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-[#fdb913]"
                   />
+                </div>
+
+                {/* Gemini API Key - Now integrated into main settings for visibility */}
+                <div className="pt-6 border-t border-white/5 space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Gemini Engine Key</label>
+                    <div className={`w-1.5 h-1.5 rounded-full ${geminiKey ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-white/10'}`} />
+                  </div>
+                  <input
+                    type="password"
+                    placeholder="Enter API Key..."
+                    value={geminiKey}
+                    onChange={(e) => {
+                      setGeminiKey(e.target.value);
+                      localStorage.setItem('itako_gemini_key', e.target.value);
+                    }}
+                    className="w-full bg-black border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#fdb913]/30 outline-none transition-all placeholder:text-white/5"
+                  />
+                  {!geminiKey && (
+                    <p className="text-[8px] font-bold text-[#fdb913]/50 uppercase tracking-widest text-center animate-pulse">
+                      Waiting for spiritual key...
+                    </p>
+                  )}
                 </div>
 
                 <div className="pt-6 border-t border-white/5">

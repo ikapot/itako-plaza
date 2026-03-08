@@ -96,7 +96,7 @@ ${bookmarkText}
  * @param {string} externalContext NotebookLM等からの外部コンテキスト
  */
 export const generateCharacterResponse = async (char, userMessage, isUnderground = false, externalContext = "", userApiKey = "") => {
-    if (!userApiKey) return "【左上の入力欄からGemini APIキーを設定してください】";
+    if (!userApiKey) return "【設定の「歯車」アイコンから、Gemini APIキーを入力してください】";
 
     for (const modelName of FALLBACK_MODELS) {
         try {
