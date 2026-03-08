@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, TrendingUp, BookOpen, User, MapPin, Ghost, Settings, Loader2, Quote } from 'lucide-react';
-import { auth, fetchBookmarks, saveBookmark } from './firebase';
+import { auth, fetchBookmarks, saveBookmark, saveNotebookAccumulation, fetchNotebookAccumulations } from './firebase';
 import { generateCharacterResponse, evaluateFutureSelf } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
 import { searchNDLArchive } from './ndl';
@@ -88,6 +88,8 @@ function App() {
   ]);
   const [bookmarks, setBookmarks] = useState([]);
   const [futureSelfCritique, setFutureSelfCritique] = useState('');
+  const [notebookInput, setNotebookInput] = useState('');
+  const [notebookAccumulations, setNotebookAccumulations] = useState([]);
 
   // キャラクターと場所の拡張可能なリスト
   const [characters, setCharacters] = useState(INITIAL_CHARACTERS.map(c => ({
@@ -112,6 +114,8 @@ function App() {
         // ログイン後のデータ取得
         const savedBookMarks = await fetchBookmarks();
         setBookmarks(savedBookMarks);
+        const data = await fetchNotebookAccumulations();
+        setNotebookAccumulations(data);
       } else {
         // フォールバック: 匿名ログイン
         import('./firebase').then(async ({ loginAnonymously }) => {
@@ -134,6 +138,57 @@ function App() {
     loadGlobalData();
     return () => unsubscribe();
   }, [geminiKey]);
+
+  const loadAccumulations = async () => {
+    const data = await fetchNotebookAccumulations();
+    setNotebookAccumulations(data);
+  };
+
+  const handlePushNotebook = async () => {
+    if (!notebookInput.trim()) return;
+    setLoading(true);
+    await saveNotebookAccumulation(notebookInput);
+    setNotebookInput('');
+    await loadAccumulations();
+    setLoading(false);
+    alert('Knowledge pushed to the Abyss.');
+  };
+
+  const handleOpenAccumulations = () => {
+    const htmlContent = `
+      <html>
+        <head>
+          <title>ITAKO PLAZA - Accumulated Knowledge</title>
+          <style>
+            body { background: #1a1a1a; color: #f4f4f2; font-family: sans-serif; padding: 60px; line-height: 1.8; }
+            .container { max-width: 800px; margin: 0 auto; }
+            .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 40px; border-radius: 40px; margin-bottom: 30px; transition: transform 0.3s; }
+            .card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.05); }
+            h1 { font-size: 60px; font-weight: 900; letter-spacing: -3px; margin-bottom: 60px; opacity: 0.9; }
+            .content { white-space: pre-wrap; opacity: 0.7; font-size: 18px; }
+            .date { font-size: 10px; opacity: 0.3; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px; font-weight: bold; }
+            .header-info { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 40px; opacity: 0.3; font-size: 12px; letter-spacing: 2px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header-info">ITAKO PLAZA / INTELLECTUAL ARCHIVE</div>
+            <h1>Accumulated Knowledge</h1>
+            ${notebookAccumulations.map(a => `
+              <div class="card">
+                <div class="date">${a.timestamp?.toDate().toLocaleString() || 'Ancient Fragment'}</div>
+                <div class="content">${a.content}</div>
+              </div>
+            `).join('')}
+            ${notebookAccumulations.length === 0 ? '<p style="opacity: 0.3">No fragments found in the abyss.</p>' : ''}
+          </div>
+        </body>
+      </html>
+    `;
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  };
 
 
 
@@ -382,23 +437,23 @@ function App() {
               </div>
             </div>
 
-            {/* Neutral Pill Input Bar */}
+            {/* Unified Black Pill Input Bar */}
             <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-40">
-              <div className="bg-white/10 backdrop-blur-xl rounded-[40px] p-2 flex items-center shadow-2xl border border-white/10">
+              <div className="bg-black rounded-[40px] p-2 flex items-center shadow-2xl border border-white/10">
                 <div className="flex-1 px-6">
                   <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
                     placeholder="Message..."
-                    className="w-full bg-transparent border-none focus:ring-0 text-white/90 placeholder:text-white/20 resize-none h-10 py-2 leading-relaxed text-sm"
+                    className="w-full bg-transparent border-none focus:ring-0 text-white placeholder:text-white/20 resize-none h-10 py-2 leading-relaxed text-sm"
                   />
                 </div>
                 <div className="flex items-center gap-1 pr-2">
                   <button
                     onClick={handleSendMessage}
                     disabled={loading || !input.trim()}
-                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-[#1a1a1a] font-bold transition-transform active:scale-95 disabled:opacity-20 shadow-lg"
+                    className="w-12 h-12 bg-zinc-200 rounded-full flex items-center justify-center text-black font-bold transition-transform active:scale-95 disabled:opacity-20 shadow-lg"
                   >
                     <span className="text-xl">+</span>
                   </button>
@@ -428,33 +483,66 @@ function App() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="relative p-12 rounded-[50px] bg-gradient-to-br from-white/10 to-transparent border border-white/20 shadow-2xl overflow-hidden group mb-8"
                 >
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-                          <span className="text-[#1a1a1a] font-black text-[10px]">LM</span>
+                  <div className="flex flex-col gap-8 relative z-10">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-zinc-200 flex items-center justify-center">
+                            <span className="text-black font-black text-[10px]">LM</span>
+                          </div>
+                          <span className="text-[12px] font-bold tracking-[0.4em] text-zinc-400 uppercase">NotebookLM / Bridge</span>
                         </div>
-                        <span className="text-[12px] font-bold tracking-[0.4em] text-white/50 uppercase">NotebookLM / Bridge</span>
+                        <h3 className="text-3xl font-bold text-white tracking-tighter leading-tight">Channeling sources to NotebookLM</h3>
+                        <p className="text-sm text-zinc-500 max-w-lg leading-relaxed font-medium">
+                          Plazaの対話をNotebookLMへ。そしてNotebookLMの知見を、再びこの深淵へと「プッシュ（Push）」します。
+                        </p>
                       </div>
-                      <h3 className="text-3xl font-bold text-white tracking-tighter leading-tight">Channeling sources to NotebookLM</h3>
-                      <p className="text-sm text-white/40 max-w-lg leading-relaxed font-medium">
-                        Plazaで紡がれた対話の断片やアーカイブを、構造化された「知識源（Sources）」としてNotebookLMへ転送します。あなたの思考を深めるための、外部脳への架け橋です。
-                      </p>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={() => {
+                              const content = archives.map(a => `${a.title}\n${a.quote}`).join('\n\n');
+                              navigator.clipboard.writeText(content);
+                              alert('Archives copied for NotebookLM');
+                              window.open('https://notebooklm.google.com/', '_blank');
+                            }}
+                            className="whitespace-nowrap px-8 py-3 bg-zinc-800 border border-white/10 text-zinc-300 text-[9px] font-bold tracking-[0.2em] uppercase rounded-full hover:bg-zinc-700 transition-all"
+                          >
+                            Export to Source
+                          </button>
+                          <button
+                            onClick={handleOpenAccumulations}
+                            className="whitespace-nowrap px-8 py-3 bg-zinc-200 text-black text-[9px] font-bold tracking-[0.2em] uppercase rounded-full shadow-lg hover:scale-105 transition-all"
+                          >
+                            View History
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        const content = archives.map(a => `${a.title}\n${a.quote}`).join('\n\n');
-                        navigator.clipboard.writeText(content);
-                        alert('Archives copied for NotebookLM');
-                        window.open('https://notebooklm.google.com/', '_blank');
-                      }}
-                      className="whitespace-nowrap px-10 py-4 bg-white text-[#1a1a1a] rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:scale-105 transition-all"
-                    >
-                      Export to Source
-                    </button>
+
+                    <div className="space-y-4 mt-8 pt-8 border-t border-white/5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase">Gather Insights (Paste from NotebookLM)</span>
+                      </div>
+                      <div className="relative">
+                        <textarea
+                          value={notebookInput}
+                          onChange={(e) => setNotebookInput(e.target.value)}
+                          placeholder="Paste insights from NotebookLM here..."
+                          className="w-full bg-black border border-white/10 rounded-[40px] p-8 text-white placeholder:text-white/10 focus:ring-1 focus:ring-white/20 text-sm h-32 resize-none transition-all"
+                        />
+                        <button
+                          onClick={handlePushNotebook}
+                          disabled={!notebookInput.trim() || loading}
+                          className="absolute bottom-6 right-6 bg-zinc-200 text-black px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-2xl active:scale-95 disabled:opacity-20 transition-all"
+                        >
+                          PUSH TO ABYSS
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="absolute -bottom-8 -right-8 opacity-5 pointer-events-none transform rotate-12">
-                    <BookOpen size={240} />
+                  <div className="absolute -bottom-16 -right-16 opacity-5 pointer-events-none transform rotate-12">
+                    <BookOpen size={280} />
                   </div>
                 </motion.div>
                 {/* Future Self's Critique - Neutral Glass Aesthetic */}
