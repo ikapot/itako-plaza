@@ -64,9 +64,9 @@ const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, co
           </div>
         </div>
       )}
-      <div className="space-y-4">
-        <h3 className="text-3xl font-bold tracking-tighter text-black/80 leading-tight pr-12">{title}</h3>
-        <p className="text-base leading-relaxed text-black/60 font-medium whitespace-pre-wrap">{content}</p>
+      <div className="space-y-3 md:space-y-4">
+        <h3 className="text-2xl md:text-3xl font-bold tracking-tighter text-black/80 leading-tight pr-12">{title}</h3>
+        <p className="text-sm md:text-base leading-relaxed text-black/60 font-medium whitespace-pre-wrap">{content}</p>
       </div>
 
       <div className="flex justify-end mt-4">
@@ -361,14 +361,14 @@ function App() {
         className="timeline-container flex-1 itako-scrollbar"
       >
         {/* Slot 1: News (Fictionalized Reality) */}
-        <section className="timeline-slot p-12 overflow-y-auto bg-[#0a0a0a]">
-          <div className="max-w-2xl mx-auto py-12">
-            <header className="flex flex-col gap-2 mb-16 px-4">
-              <h2 className="text-7xl font-black tracking-tighter text-white leading-none">News</h2>
-              <p className="text-lg font-bold text-[#bd8a78] pl-1 tracking-wider uppercase tracking-[0.3em]">The Fictionalized Reality</p>
+        <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
+          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-32">
+            <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none">News</h2>
+              <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-wider uppercase tracking-[0.3em]">The Fictionalized Reality</p>
             </header>
 
-            <div className="flex items-center justify-between mb-12 px-2 border-b border-white/5 pb-4">
+            <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
               <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Current Echoes ({news.length})</span>
               <span className="text-[10px] font-bold text-white/40 hover:text-white cursor-pointer transition-all tracking-widest uppercase">Live Pulse</span>
             </div>
@@ -405,26 +405,26 @@ function App() {
         </section>
 
         {/* Slot 2: Main Dialog */}
-        <section className={`timeline-slot p-12 overflow-y-auto transition-all duration-1000 bg-[#1a1a1a]`}>
-          <div className="max-w-2xl mx-auto h-full flex flex-col">
-            <header className="flex flex-col gap-2 mb-12 px-4">
+        <section className={`timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-[#1a1a1a]`}>
+          <div className="max-w-2xl mx-auto h-full flex flex-col pb-32">
+            <header className="flex flex-col gap-2 mb-10 md:mb-12 px-2 md:px-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-7xl font-bold tracking-tighter text-white/90 leading-none">Dialog</h2>
+                <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white/90 leading-none">Dialog</h2>
                 <button
                   onClick={() => setIsUnderground(!isUnderground)}
-                  className={`px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all border ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
+                  className={`px-5 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all border ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
                 >
                   {isUnderground ? 'Surface' : 'Deep Trace'}
                 </button>
               </div>
-              <p className="text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em]">{userName} / Now Speaking</p>
+              <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em] truncate">{userName} / Speaking</p>
             </header>
 
             <div className="flex-1 flex flex-col gap-16 mb-24">
               {/* Grid Map (碁盤の目) */}
               <div className="px-4 space-y-6">
                 <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Map / Location Grid</span>
-                <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-sm border border-white/5 aspect-square max-w-[240px]">
+                <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-sm border border-white/5 aspect-square max-w-[180px] md:max-w-[240px]">
                   {Array.from({ length: 9 }).map((_, i) => {
                     const loc = locations.find(l => l.pos === i);
                     const isSelected = selectedLocationId === loc?.id;
@@ -527,22 +527,22 @@ function App() {
             </div>
 
             {/* Unified Black Pill Input Bar */}
-            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-40">
-              <div className="bg-black rounded-[40px] p-2 flex items-center shadow-2xl border border-white/10">
-                <div className="flex-1 px-6">
+            <div className="fixed bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 md:px-6 z-40">
+              <div className="bg-black/90 backdrop-blur-xl rounded-[40px] p-1.5 md:p-2 flex items-center shadow-2xl border border-white/10">
+                <div className="flex-1 px-4 md:px-6">
                   <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
                     placeholder="Message..."
-                    className="w-full bg-transparent border-none focus:ring-0 text-white placeholder:text-white/20 resize-none h-10 py-2 leading-relaxed text-sm"
+                    className="w-full bg-transparent border-none focus:ring-0 text-white placeholder:text-white/20 resize-none h-10 py-2.5 leading-relaxed text-sm"
                   />
                 </div>
-                <div className="flex items-center gap-1 pr-2">
+                <div className="flex items-center gap-1 pr-1.5 md:pr-2">
                   <button
                     onClick={handleSendMessage}
                     disabled={loading || !input.trim()}
-                    className="w-12 h-12 bg-zinc-200 rounded-full flex items-center justify-center text-black font-bold transition-transform active:scale-95 disabled:opacity-20 shadow-lg"
+                    className="w-10 h-10 md:w-12 md:h-12 bg-zinc-200 rounded-full flex items-center justify-center text-black font-bold transition-transform active:scale-90 disabled:opacity-20 shadow-lg"
                   >
                     <span className="text-xl">+</span>
                   </button>
@@ -553,11 +553,11 @@ function App() {
         </section>
 
         {/* Slot 3: Abyss / Future Records */}
-        <section className="timeline-slot p-12 overflow-y-auto bg-[#1a1a1a]">
-          <div className="max-w-2xl mx-auto py-12">
-            <header className="flex flex-col gap-2 mb-12 px-4">
-              <h2 className="text-7xl font-bold tracking-tighter text-white/90 leading-none">Abyss</h2>
-              <p className="text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em]">The Eternal Records</p>
+        <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#1a1a1a]">
+          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-32">
+            <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white/90 leading-none">Abyss</h2>
+              <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em]">The Eternal Records</p>
             </header>
 
             {loading ? (
@@ -638,15 +638,15 @@ function App() {
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="relative p-12 rounded-[50px] bg-white/5 border border-white/10 shadow-2xl group overflow-hidden backdrop-blur-md"
+                  className="relative p-8 md:p-12 rounded-[40px] md:rounded-[50px] bg-white/5 border border-white/10 shadow-2xl group overflow-hidden backdrop-blur-md"
                 >
-                  <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none text-white">
-                    <Quote size={120} />
+                  <div className="absolute top-0 right-0 p-4 md:p-8 opacity-5 pointer-events-none text-white">
+                    <Quote size={80} md:size={120} />
                   </div>
-                  <div className="flex items-center gap-4 mb-8">
-                    <span className="text-[12px] font-bold tracking-[0.4em] text-white/40 uppercase border-l-2 border-white/20 pl-4">The Verdict from 2036</span>
+                  <div className="flex items-center gap-4 mb-6 md:mb-8">
+                    <span className="text-[10px] md:text-[12px] font-bold tracking-[0.4em] text-white/40 uppercase border-l-2 border-white/20 pl-4">The Verdict from 2036</span>
                   </div>
-                  <p className="text-xl md:text-2xl leading-[1.6] text-white/80 font-serif italic tracking-tight">
+                  <p className="text-lg md:text-2xl leading-[1.6] text-white/80 font-serif italic tracking-tight">
                     {futureSelfCritique || "まだ、未来の自分に届く言葉が保存されていないようです。"}
                   </p>
 
@@ -668,14 +668,14 @@ function App() {
                           initial={{ opacity: 0 }}
                           whileInView={{ opacity: 1 }}
                           key={`${c.id}-${idx}`}
-                          className={`p-10 bg-white/5 border border-white/10 rounded-[40px] shadow-sm flex flex-col gap-4 group cursor-pointer hover:bg-white/10 transition-all duration-500`}
+                          className={`p-8 md:p-10 bg-white/5 border border-white/10 rounded-[35px] md:rounded-[40px] shadow-sm flex flex-col gap-4 group cursor-pointer hover:bg-white/10 transition-all duration-500`}
                         >
                           <div className="flex items-center gap-3 justify-between">
-                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{c.author || 'Archive'}</div>
-                            {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected />}
+                            <div className="text-[9px] md:text-[10px] font-bold text-white/20 uppercase tracking-widest">{c.author || 'Archive'}</div>
+                            {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-5 h-5 md:w-6 h-6" isSelected />}
                           </div>
-                          <div className="text-xl font-bold text-white/80 leading-tight">{c.title}</div>
-                          <div className="text-sm leading-relaxed text-white/40 italic font-serif">" {c.quote} "</div>
+                          <div className="text-lg md:text-xl font-bold text-white/80 leading-tight">{c.title}</div>
+                          <div className="text-xs md:text-sm leading-relaxed text-white/40 italic font-serif">" {c.quote} "</div>
                         </motion.div>
                       );
                     })}
@@ -689,16 +689,16 @@ function App() {
                     {bookmarks.map(b => {
                       const charObj = characters.find(c => c.id === b.charId);
                       return (
-                        <div key={b.id} className="p-12 rounded-[50px] bg-white text-[#1a1a1a] shadow-xl transition-transform hover:scale-[1.01]">
+                        <div key={b.id} className="p-8 md:p-12 rounded-[40px] md:rounded-[50px] bg-white text-[#1a1a1a] shadow-xl transition-transform hover:scale-[1.01]">
                           <div className="flex justify-between items-center mb-6">
                             <div className="flex items-center gap-3">
-                              {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected />}
-                              <span className="text-xs font-bold tracking-widest uppercase opacity-40">{b.charId}</span>
+                              {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-5 h-5 md:w-6 h-6" isSelected />}
+                              <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase opacity-40">{b.charId}</span>
                             </div>
-                            <span className="text-[10px] opacity-20 font-bold">{b.timestamp?.toDate().toLocaleDateString()}</span>
+                            <span className="text-[9px] opacity-20 font-bold">{b.timestamp?.toDate().toLocaleDateString()}</span>
                           </div>
-                          <div className="mb-6 text-xl font-medium leading-relaxed italic">" {b.userMsg} "</div>
-                          <div className="pl-8 border-l border-black/10 italic text-base opacity-60 font-serif">" {b.aiMsg} "</div>
+                          <div className="mb-4 md:mb-6 text-lg md:text-xl font-medium leading-relaxed italic">" {b.userMsg} "</div>
+                          <div className="pl-6 md:pl-8 border-l border-black/10 italic text-sm md:text-base opacity-60 font-serif">" {b.aiMsg} "</div>
                         </div>
                       );
                     })}
