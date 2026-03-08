@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, TrendingUp, BookOpen, User, MapPin, Ghost, Settings, Loader2, Quote } from 'lucide-react';
+import { MessageSquare, TrendingUp, BookOpen, User, MapPin, Ghost, Settings, Loader2, Quote, Menu, X, Cpu, Globe } from 'lucide-react';
 import { auth, fetchBookmarks, saveBookmark, saveNotebookAccumulation, fetchNotebookAccumulations } from './firebase';
 import { generateCharacterResponse, evaluateFutureSelf } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
@@ -89,6 +89,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [selectedCharId, setSelectedCharId] = useState('soseki');
   const [selectedLocationId, setSelectedLocationId] = useState('cafe');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeManagerTab, setActiveManagerTab] = useState('directory'); // 'map', 'directory', 'connect'
   const [isUnderground, setIsUnderground] = useState(false);
   const [externalContext, setExternalContext] = useState('');
   const [showContextUI, setShowContextUI] = useState(false);
@@ -310,6 +312,127 @@ function App() {
     }
   };
 
+  const ManagerContent = () => (
+    <div className="space-y-12">
+      {/* Tabs for Manager */}
+      <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 mb-8">
+        {[
+          { id: 'directory', icon: <User size={14} />, label: 'Registry' },
+          { id: 'map', icon: <Globe size={14} />, label: 'Map' },
+          { id: 'connect', icon: <Cpu size={14} />, label: 'Connect' },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveManagerTab(tab.id)}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all ${activeManagerTab === tab.id ? 'bg-zinc-200 text-black shadow-lg' : 'text-white/30 hover:text-white/60'}`}
+          >
+            {tab.icon}
+            <span className="hidden md:inline">{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence mode="wait">
+        {activeManagerTab === 'map' && (
+          <motion.div
+            key="map"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-6"
+          >
+            <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-sm border border-white/5 aspect-square max-w-[240px] mx-auto">
+              {Array.from({ length: 9 }).map((_, i) => {
+                const loc = locations.find(l => l.pos === i);
+                const isSelected = selectedLocationId === loc?.id;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => loc && setSelectedLocationId(loc.id)}
+                    className={`aspect-square flex items-center justify-center relative transition-all duration-500 overflow-hidden ${isSelected ? 'bg-zinc-200' : 'bg-black hover:bg-white/5'}`}
+                  >
+                    {loc ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <MapPin size={12} className={isSelected ? 'text-black' : 'text-white/20'} />
+                        <span className={`text-[8px] font-bold tracking-tighter ${isSelected ? 'text-black' : 'text-white/40'}`}>{loc.name}</span>
+                      </div>
+                    ) : (
+                      <div className="w-1 h-1 rounded-full bg-white/5" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {activeManagerTab === 'directory' && (
+          <motion.div
+            key="directory"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-4"
+          >
+            {characters.map(c => {
+              const isSelected = selectedCharId === c.id;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedCharId(c.id)}
+                  className={`w-full group text-left flex items-start gap-4 md:gap-6 p-4 md:p-6 rounded-[35px] transition-all duration-700 border ${isSelected ? 'bg-white/5 border-white/20 shadow-2xl translate-x-2' : 'bg-transparent border-transparent opacity-40 hover:opacity-100'}`}
+                >
+                  <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" />
+                  <div className="flex-1 space-y-1 md:space-y-2 py-0.5 md:py-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <span className={`text-sm md:text-base font-bold tracking-tight transition-colors ${isSelected ? 'text-white' : 'text-white/30'}`}>{c.name}</span>
+                        <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-[#bd8a78]/20 text-[#bd8a78]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
+                      </div>
+                    </div>
+                    <p className={`text-[10px] md:text-xs leading-relaxed transition-opacity line-clamp-2 ${isSelected ? 'text-white/60' : 'text-white/20'}`}>
+                      {c.description}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+
+        {activeManagerTab === 'connect' && (
+          <motion.div
+            key="connect"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-6"
+          >
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Gemini API Key</label>
+              <input
+                type="password"
+                placeholder="Enter API Key..."
+                value={geminiKey}
+                onChange={(e) => {
+                  setGeminiKey(e.target.value);
+                  localStorage.setItem('itako_gemini_key', e.target.value);
+                }}
+                className="w-full bg-black border border-white/10 rounded-2xl p-4 text-white text-xs focus:ring-1 ring-white/20 outline-none"
+              />
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+              <div className={`w-2 h-2 rounded-full ${geminiKey ? 'bg-emerald-500 animate-pulse' : 'bg-white/10'}`} />
+              <span className="text-[10px] font-bold text-emerald-500/80 tracking-widest uppercase">
+                {geminiKey ? 'Verified Connection' : 'Awaiting Connection'}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
   const handleScroll = (e) => {
     const scrollLeft = e.target.scrollLeft;
     const width = e.target.offsetWidth;
@@ -323,14 +446,49 @@ function App() {
   return (
     <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#050505] text-itako-grey font-sans">
 
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsDrawerOpen(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] md:hidden"
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 left-0 w-[85%] bg-black border-r border-white/10 z-[70] p-8 overflow-y-auto md:hidden"
+            >
+              <div className="flex items-center justify-between mb-12">
+                <span className="text-xl font-black tracking-tighter text-white">MANAGER</span>
+                <button onClick={() => setIsDrawerOpen(false)} className="text-white/40 hover:text-white">
+                  <X size={20} />
+                </button>
+              </div>
+              <ManagerContent />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Header (Clean Architecture: Components / UI) */}
       <Header
         userName={userName}
-        geminiKey={geminiKey}
-        setGeminiKey={setGeminiKey}
-        showContextUI={showContextUI}
-        setShowContextUI={setShowContextUI}
+        isPC={true} // For determining mobile/PC behavior if needed
+        openDrawer={() => setIsDrawerOpen(true)}
       />
+
+      {/* PC Top Manager (Collapsible) */}
+      <div className="hidden md:block bg-black/20 border-b border-white/5 backdrop-blur-xl overflow-hidden">
+        <div className="max-w-4xl mx-auto py-6 px-12">
+          <ManagerContent />
+        </div>
+      </div>
 
       {/* NotebookLM Context Injection UI */}
       <AnimatePresence>
@@ -420,67 +578,9 @@ function App() {
               <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em] truncate">{userName} / Speaking</p>
             </header>
 
-            <div className="flex-1 flex flex-col gap-16 mb-24">
-              {/* Grid Map (碁盤の目) */}
-              <div className="px-4 space-y-6">
-                <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Map / Location Grid</span>
-                <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-sm border border-white/5 aspect-square max-w-[180px] md:max-w-[240px]">
-                  {Array.from({ length: 9 }).map((_, i) => {
-                    const loc = locations.find(l => l.pos === i);
-                    const isSelected = selectedLocationId === loc?.id;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => loc && setSelectedLocationId(loc.id)}
-                        className={`aspect-square flex items-center justify-center relative transition-all duration-500 overflow-hidden ${isSelected ? 'bg-zinc-200' : 'bg-black hover:bg-white/5'}`}
-                      >
-                        {loc ? (
-                          <div className="flex flex-col items-center gap-1">
-                            <MapPin size={12} className={isSelected ? 'text-black' : 'text-white/20'} />
-                            <span className={`text-[8px] font-bold tracking-tighter ${isSelected ? 'text-black' : 'text-white/40'}`}>{loc.name}</span>
-                          </div>
-                        ) : (
-                          <div className="w-1 h-1 rounded-full bg-white/5" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Character Directory (Vertical List with Profile) */}
-              <div className="px-4 space-y-8">
-                <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Persons / Directory</span>
-                <div className="space-y-4">
-                  {characters.map(c => {
-                    const isSelected = selectedCharId === c.id;
-                    return (
-                      <button
-                        key={c.id}
-                        onClick={() => setSelectedCharId(c.id)}
-                        className={`w-full group text-left flex items-start gap-6 p-6 rounded-[35px] transition-all duration-700 border ${isSelected ? 'bg-white/5 border-white/20 shadow-2xl translate-x-4' : 'bg-transparent border-transparent'}`}
-                      >
-                        <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-16 h-16" />
-                        <div className="flex-1 space-y-2 py-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <span className={`text-base font-bold tracking-tight transition-colors ${isSelected ? 'text-white' : 'text-white/30'}`}>{c.name}</span>
-                              <span className={`text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-[#bd8a78]/20 text-[#bd8a78]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
-                            </div>
-                            {isSelected && <span className="text-[10px] text-[#bd8a78] font-bold animate-pulse">ACTIVE</span>}
-                          </div>
-                          <p className={`text-xs leading-relaxed transition-opacity ${isSelected ? 'text-white/60' : 'text-white/10 opacity-40'}`}>
-                            {c.description}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
+            <div className="flex-1 flex flex-col gap-12 mt-8">
               {/* Chat Thread as Stacked Cards */}
-              <div className="space-y-8 px-2 pb-32">
+              <div className="space-y-8 px-2 pb-48">
                 <AnimatePresence>
                   {messages.map((m, i) => {
                     const isUser = m.role === 'user';
