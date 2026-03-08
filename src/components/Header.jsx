@@ -20,13 +20,7 @@ export default function Header({
             </div>
 
             <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3 px-5 py-2 bg-white/5 rounded-full border border-white/10">
-                    <User size={14} className="text-white/40" />
-                    <span className="text-[11px] font-bold tracking-tight text-white/80">{userName}</span>
-                </div>
-                <button onClick={openSettings} className="p-2 -mr-2 text-white/20 hover:text-white transition-all transform hover:rotate-90">
-                    <Settings size={18} />
-                </button>
+                {/* Profile/Settings moved to Sidebar */}
             </div>
         </header>
     );
