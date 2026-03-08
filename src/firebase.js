@@ -4,12 +4,12 @@ import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestam
 
 // TODO: 環境変数（.envファイル）からFirebase設定を読み込む
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCX6vE8yK-S89L0M",
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "itako-plaza.firebaseapp.com",
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "itako-plaza",
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "itako-plaza.appspot.com",
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-    appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);
