@@ -591,16 +591,20 @@ function App() {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* PC Expanding Side Dashboard (Super Engineer Edition) */}
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* PC Expanding Side Dashboard (Overlay Mode - 1B) */}
+        {/* 1. Spacer to keep main content correctly positioned */}
+        <div className="hidden md:block w-20 shrink-0" />
+
+        {/* 2. The Floating Dashboard */}
         <motion.div
           initial={{ width: 80 }}
           whileHover={{ width: 420 }}
           transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-          className="hidden md:flex flex-col border-r border-white/5 bg-[#050505]/40 backdrop-blur-3xl overflow-hidden group/sidebar z-[110]"
+          className="hidden md:flex flex-col border-r border-white/5 bg-[#050505]/60 backdrop-blur-3xl overflow-hidden group/sidebar z-[110] absolute inset-y-0 left-0 shadow-[20px_0_50px_rgba(0,0,0,0.5)]"
         >
           <div className="flex-1 flex flex-col h-full">
-            {/* 1. Account & Gear (The Control Header) */}
+            {/* 1. Account & Gear */}
             <div className="p-4 border-b border-white/5 flex flex-col overflow-hidden">
               <div className="flex items-center gap-4 h-12">
                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shrink-0 group-hover/sidebar:bg-white/10 transition-colors">
@@ -627,7 +631,7 @@ function App() {
               </div>
             </div>
 
-            {/* 2. Registry & Map (The Core Context) */}
+            {/* 2. Registry & Map */}
             <div className="flex-1 overflow-y-auto itako-scrollbar p-4 space-y-12">
               {/* Characters Section */}
               <div className="space-y-6">
