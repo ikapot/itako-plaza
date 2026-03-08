@@ -8,14 +8,13 @@ import { searchNDLArchive } from './ndl';
 import Header from './components/Header';
 import LandingPage from './components/LandingPage';
 
-// --- 初期データ ---
 const INITIAL_CHARACTERS = [
-  { id: 'soseki', name: '夏目漱石', flavor: '胃痛', description: '「私は胃が痛いのだ。」', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=NS' },
-  { id: 'dosto', name: 'ドストエフスキー', flavor: '借金', description: '「ルーレットさえあれば…」', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=FD' },
-  { id: 'ichikawa', name: '市川房枝', flavor: '厳格', description: '「権利は、自ら勝ち取るものです。」', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=IF' },
-  { id: 'atsuko', name: 'Atsuko', flavor: '見守り', description: '「ずっと、見ていますよ。」', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=AT' },
-  { id: 'k_kokoro', name: 'K (こころ)', flavor: '絶望', description: '「精進の道は、厳しいものです。」', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=KK' },
-  { id: 'alyosha', name: 'アリョーシャ', flavor: '信仰', description: '「愛は、すべてを救うと信じています。」', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=AK' },
+  { id: 'soseki', name: '夏目漱石', flavor: '胃痛', color: 'bg-itako-clay', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg' },
+  { id: 'dosto', name: 'ドストエフスキー', flavor: '借金', color: 'bg-itako-sand', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Dostoevsky_1872.jpg/330px-Dostoevsky_1872.jpg' },
+  { id: 'ichikawa', name: '市川房枝', flavor: '厳格', color: 'bg-itako-sage', avatar: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg' },
+  { id: 'atsuko', name: 'Atsuko', flavor: '見守り', color: 'bg-itako-sand', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/O_Tsuta-san_c1900.jpg/330px-O_Tsuta-san_c1900.jpg' },
+  { id: 'k_kokoro', name: 'K', flavor: '絶望', color: 'bg-zinc-800', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Japanese_student_c1900.jpg/330px-Japanese_student_c1900.jpg' },
+  { id: 'alyosha', name: 'アリョーシャ', flavor: '信仰', color: 'bg-itako-sage', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alyosha_Vanya.jpg/330px-Alyosha_Vanya.jpg' },
 ];
 
 const INITIAL_LOCATIONS = [
@@ -25,6 +24,16 @@ const INITIAL_LOCATIONS = [
 ];
 
 // --- コンポーネント ---
+
+const WarholAvatar = ({ src, colorClass = "bg-itako-clay", size = "w-12 h-12", isSelected = false }) => (
+  <div className={`${size} rounded-full overflow-hidden ${colorClass} relative flex-shrink-0 border border-white/10 ${!isSelected && 'grayscale opacity-50'}`}>
+    <img
+      src={src}
+      alt="portrait"
+      className={`w-full h-full object-cover contrast-[2.5] brightness-[1.1] mix-blend-multiply opacity-90 transition-all duration-700 ${isSelected ? 'scale-110' : 'scale-100'}`}
+    />
+  </div>
+);
 
 const SpiritCard = ({ title, content, author, flavor, timestamp, colorClass = "bg-white" }) => (
   <motion.div
@@ -379,12 +388,12 @@ function App() {
                     <button
                       key={c.id}
                       onClick={() => setSelectedCharId(c.id)}
-                      className={`flex-shrink-0 flex items-center gap-4 p-4 pr-8 rounded-[30px] transition-all duration-500 border ${isSelected ? 'bg-white/10 border-white/20 shadow-xl scale-105' : 'bg-white/5 border-transparent opacity-40'}`}
+                      className={`flex-shrink-0 flex items-center gap-4 p-4 pr-10 rounded-[40px] transition-all duration-700 border ${isSelected ? 'bg-white/5 border-white/20 shadow-2xl scale-105' : 'bg-transparent border-transparent'}`}
                     >
-                      <img src={c.avatar} alt={c.name} className={`w-12 h-12 rounded-full shadow-md ${isSelected ? '' : 'grayscale'}`} />
+                      <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} />
                       <div className="flex flex-col items-start">
-                        <span className="text-xs font-bold tracking-widest uppercase text-white/90">{c.name}</span>
-                        <span className="text-[9px] text-white/30 font-bold uppercase tracking-wider">{c.flavor}</span>
+                        <span className={`text-xs font-bold tracking-[0.2em] uppercase transition-colors ${isSelected ? 'text-white' : 'text-white/20'}`}>{c.name}</span>
+                        <span className={`text-[9px] font-bold uppercase tracking-[0.3em] transition-colors ${isSelected ? 'text-white/40' : 'text-white/10'}`}>{c.flavor}</span>
                       </div>
                     </button>
                   );
