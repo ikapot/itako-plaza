@@ -7,10 +7,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        'itako-beige': '#1c1c1c',     /* Dark panel background */
-        'itako-orange': '#FF8C00',    /* Keep orange */
-        'itako-grey': '#eeeeee',      /* Light text */
-        'itako-warm-beige': '#0b0b0b',/* Darkest background */
+        'itako-clay': '#bd8a78',     /* Terracotta/Clay */
+        'itako-sage': '#899d90',     /* Sage Green */
+        'itako-sand': '#c8b39c',     /* Warm Beige/Sand */
+        'itako-stone': '#f4f4f2',    /* Light Background */
+        'itako-deep': '#242424',     /* Charcoal Text/Elements */
+        'itako-orange': '#bd8a78',   /* Override old orange with clay */
       },
       fontFamily: {
         sans: ['"BIZ UDGothic"', 'sans-serif'],

@@ -36,29 +36,32 @@ const INITIAL_CLASSICS = [
 
 // --- コンポーネント ---
 
-const SpiritCard = ({ title, content, author, flavor, timestamp }) => (
+const SpiritCard = ({ title, content, author, flavor, timestamp, colorClass = "bg-itako-sand" }) => (
   <motion.div
-    initial={{ opacity: 0, y: 15 }}
-    whileInView={{ opacity: 1, y: 0 }}
+    initial={{ opacity: 0, scale: 0.98 }}
+    whileInView={{ opacity: 1, scale: 1 }}
     viewport={{ once: true }}
-    whileHover={{ y: -4, borderColor: "rgba(255, 140, 0, 0.4)" }}
-    className="relative p-8 rounded-sm bg-[#0a0a0a]/40 backdrop-blur-md border border-white/5 mb-6 transition-all duration-500 overflow-hidden group"
+    className={`relative p-10 rounded-[40px] ${colorClass} mb-4 shadow-sm group transition-all duration-700`}
   >
-    {/* Spiritual Gradient Flare */}
-    <div className="absolute -top-24 -right-24 w-48 h-48 bg-itako-orange/5 blur-3xl rounded-full group-hover:bg-itako-orange/10 transition-colors" />
-
-    <div className="relative z-10">
+    <div className="relative z-10 flex flex-col gap-6">
       {author && (
-        <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+        <div className="flex items-center justify-between border-b border-black/5 pb-4">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-itako-orange">{author}</span>
-            {flavor && <span className="text-[8px] text-white/30 border border-white/10 px-2 py-0.5 rounded-full uppercase">{flavor}</span>}
+            <span className="text-[10px] font-bold tracking-[0.2em] text-black/60 uppercase">{author}</span>
+            {flavor && <span className="text-[10px] font-bold bg-white/40 px-3 py-1 rounded-full text-black/40">{flavor}</span>}
           </div>
-          {timestamp && <span className="text-[8px] text-white/20 font-mono italic">{timestamp}</span>}
         </div>
       )}
-      <h3 className="text-xl font-bold mb-4 text-white/90 leading-tight tracking-tight">{title}</h3>
-      <p className="text-sm leading-relaxed text-white/60 font-medium whitespace-pre-wrap">{content}</p>
+      <div className="space-y-4">
+        <h3 className="text-3xl font-bold tracking-tighter text-itako-deep/90 leading-tight pr-12">{title}</h3>
+        <p className="text-base leading-relaxed text-itako-deep/70 font-medium whitespace-pre-wrap">{content}</p>
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <button className="bg-itako-deep text-white/90 px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase flex items-center gap-2 hover:bg-black transition-colors shadow-lg">
+          DISCOVER <span className="text-lg">→</span>
+        </button>
+      </div>
     </div>
   </motion.div>
 );
@@ -270,129 +273,138 @@ function App() {
         {/* Slot 1: Trends (News & Scolding) */}
         <section className="timeline-slot p-12 overflow-y-auto">
           <div className="max-w-2xl mx-auto py-12">
-            <div className="flex flex-col gap-2 mb-16 px-4">
-              <span className="text-[10px] font-bold tracking-[0.5em] text-itako-orange uppercase opacity-60">Archive Index / 001</span>
-              <h2 className="text-4xl font-bold tracking-tighter text-white">残響する世界。</h2>
+            <div className="flex flex-col gap-2 mb-12">
+              <h2 className="text-7xl font-bold tracking-tighter text-itako-deep leading-none">Hello</h2>
+              <p className="text-lg font-bold text-itako-deep/40 pl-1 tracking-wider uppercase tracking-[0.3em]">Archives & News</p>
             </div>
-            {news.map(n => (
-              <div key={n.id} className="mb-12">
-                <SpiritCard title={n.title} content={n.content} />
-                {ichikawaScolds[n.id] && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    className="ml-auto w-[80%] mt-[-2rem] bg-zinc-900/80 backdrop-blur-xl p-8 rounded-sm border border-itako-orange/20 shadow-2xl relative z-20"
-                  >
-                    <div className="absolute top-0 left-0 w-1 h-full bg-itako-orange" />
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-[9px] font-bold tracking-[0.4em] text-itako-orange uppercase">Ichikawa's Echo / 叱咤</span>
-                    </div>
-                    <p className="text-sm leading-relaxed italic text-zinc-300 font-serif">「{ichikawaScolds[n.id]}」</p>
-                  </motion.div>
-                )}
-              </div>
-            ))}
+
+            <div className="flex items-center justify-between mb-8 px-2">
+              <span className="text-sm font-bold text-itako-deep/30 uppercase tracking-widest">Recents ({news.length})</span>
+              <span className="text-xs font-bold text-itako-deep/50 hover:underline cursor-pointer transition-all">See all</span>
+            </div>
+
+            {news.map((n, idx) => {
+              const cardColors = ['bg-itako-sand', 'bg-itako-sage', 'bg-itako-clay'];
+              return (
+                <div key={n.id} className="mb-12">
+                  <SpiritCard
+                    title={n.title}
+                    content={n.content}
+                    colorClass={cardColors[idx % cardColors.length]}
+                  />
+                  {ichikawaScolds[n.id] && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      className="ml-auto w-[85%] mt-[-4rem] bg-white p-10 rounded-[40px] border border-black/5 shadow-2xl relative z-20"
+                    >
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-[10px] font-bold tracking-[0.4em] text-itako-clay uppercase">Ichikawa's Echo / 叱咤</span>
+                      </div>
+                      <p className="text-base leading-relaxed italic text-itako-deep/70 font-serif">「{ichikawaScolds[n.id]}」</p>
+                    </motion.div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
 
         {/* Slot 2: Main Dialog */}
-        <section className={`timeline-slot p-12 overflow-y-auto transition-all duration-1000 ${isUnderground ? 'bg-zinc-950 text-zinc-400' : 'bg-transparent'}`}>
+        <section className={`timeline-slot p-12 overflow-y-auto transition-all duration-1000 bg-itako-stone`}>
           <div className="max-w-2xl mx-auto h-full flex flex-col">
-            <header className="flex items-center justify-between mb-16 px-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-[9px] font-bold tracking-[0.4em] text-itako-orange uppercase opacity-60">Communication / 002</span>
-                <h2 className="text-3xl font-bold tracking-tighter text-white">魂の対話。</h2>
+            <header className="flex flex-col gap-2 mb-12 px-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-7xl font-bold tracking-tighter text-itako-deep leading-none">Dialog</h2>
+                <button
+                  onClick={() => setIsUnderground(!isUnderground)}
+                  className={`px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all border ${isUnderground ? 'bg-itako-deep text-white border-itako-deep' : 'bg-transparent text-itako-deep/40 border-black/10 hover:border-black/20'}`}
+                >
+                  {isUnderground ? 'Surface' : 'Deep Trace'}
+                </button>
               </div>
-              <button
-                onClick={() => setIsUnderground(!isUnderground)}
-                className={`flex items-center gap-2 px-6 py-2 rounded-sm text-[9px] font-bold tracking-widest transition-all uppercase border ${isUnderground ? 'bg-itako-orange text-white border-itako-orange' : 'bg-transparent text-itako-orange border-itako-orange/30 hover:bg-itako-orange/10'}`}
-              >
-                <Ghost size={12} />
-                {isUnderground ? 'Surface' : 'Deep Trace'}
-              </button>
+              <p className="text-lg font-bold text-itako-deep/40 pl-1 tracking-wider uppercase tracking-[0.3em]">{userName} / Now Speaking</p>
             </header>
 
-            <div className="flex-1 flex flex-col gap-12 mb-8">
-              {/* Character Gallery Selection */}
-              <div className="scrollbar-hide overflow-x-auto flex gap-4 pb-4 px-2">
-                {characters.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedCharId(c.id)}
-                    className={`flex-shrink-0 flex flex-col items-center gap-3 p-4 rounded-sm transition-all duration-500 border ${selectedCharId === c.id ? 'bg-zinc-900 border-itako-orange/40 shadow-[0_0_30px_rgba(255,140,0,0.1)]' : 'bg-transparent border-transparent hover:border-white/5 opacity-40 hover:opacity-100'}`}
-                  >
-                    <div className="relative">
-                      <img src={c.avatar} alt={c.name} className={`w-12 h-12 rounded-full transition-all duration-700 ${selectedCharId === c.id ? 'scale-110 shadow-lg' : 'grayscale'}`} />
-                      {selectedCharId === c.id && (
-                        <motion.div layoutId="activeChar" className="absolute -inset-2 border border-itako-orange/30 rounded-full animate-pulse" />
-                      )}
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <span className="text-[10px] font-bold tracking-widest uppercase text-white">{c.name}</span>
-                      {c.status && (
-                        <div className="text-[7px] text-itako-orange font-bold mt-1 opacity-60">
-                          {Object.entries(c.status).map(([k, v]) => `${v}`).join('·')}
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
+            <div className="flex-1 flex flex-col gap-12 mb-24">
+              {/* Character Selection as Earthy Gallery */}
+              <div className="scrollbar-hide overflow-x-auto flex gap-6 pb-4 px-2">
+                {characters.map(c => {
+                  const charColors = ['bg-itako-sage/20', 'bg-itako-clay/20', 'bg-itako-sand/30'];
+                  const isSelected = selectedCharId === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedCharId(c.id)}
+                      className={`flex-shrink-0 flex items-center gap-4 p-4 pr-8 rounded-[30px] transition-all duration-500 border ${isSelected ? 'bg-white border-black/5 shadow-xl scale-105' : 'bg-white/30 border-transparent opacity-60'}`}
+                    >
+                      <img src={c.avatar} alt={c.name} className={`w-12 h-12 rounded-full shadow-md ${isSelected ? '' : 'grayscale'}`} />
+                      <div className="flex flex-col items-start">
+                        <span className="text-xs font-bold tracking-widest uppercase text-itako-deep">{c.name}</span>
+                        <span className="text-[9px] text-itako-deep/40 font-bold uppercase tracking-wider">{c.flavor}</span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Chat Thread */}
-              <div className="space-y-12 px-2 pb-24">
+              {/* Chat Thread as Stacked Cards */}
+              <div className="space-y-8 px-2 pb-32">
                 <AnimatePresence>
-                  {messages.map((m, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}
-                    >
-                      <div className={`max-w-[85%] text-lg leading-relaxed ${m.role === 'user' ? 'text-right text-white font-medium' : 'text-left text-white/70'}`}>
-                        {m.role === 'ai' && (
-                          <div className="flex items-center gap-4 mb-3 opacity-30 group">
-                            <span className="text-[8px] font-bold tracking-[0.4em] uppercase">{m.charId}</span>
-                            <button onClick={() => handleBookmark(i)} className="text-[8px] flex items-center gap-1 hover:text-itako-orange transition-colors uppercase tracking-widest font-bold">
-                              Bookmark
-                            </button>
-                          </div>
-                        )}
-                        <p className={`${m.role === 'ai' ? 'font-serif' : 'font-sans'}`}>{m.content}</p>
-                      </div>
-                    </motion.div>
-                  ))}
+                  {messages.map((m, i) => {
+                    const isUser = m.role === 'user';
+                    return (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+                      >
+                        <div className={`p-8 rounded-[35px] shadow-sm max-w-[90%] ${isUser ? 'bg-itako-deep text-white/90 rounded-tr-none' : 'bg-itako-sand text-itako-deep/80 rounded-tl-none'}`}>
+                          {!isUser && (
+                            <div className="flex items-center gap-4 mb-3 border-b border-black/5 pb-2">
+                              <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-black/40">{m.charId}</span>
+                              <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-itako-clay hover:text-black transition-colors">
+                                Bookmark
+                              </button>
+                            </div>
+                          )}
+                          <p className={`text-lg leading-relaxed ${!isUser ? 'font-serif' : 'font-sans'}`}>{m.content}</p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                   {loading && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-                      <div className="flex items-center gap-4 text-itako-orange/40 text-[9px] font-bold tracking-widest uppercase animate-pulse">
-                        <div className="w-1 h-1 bg-itako-orange rounded-full" />
-                        Transcribing Spirit Echo...
-                      </div>
-                    </motion.div>
+                    <div className="flex items-center gap-4 text-itako-clay text-[10px] font-bold tracking-[0.4em] uppercase px-4 animate-pulse">
+                      Channeling spirit...
+                    </div>
                   )}
                 </AnimatePresence>
               </div>
             </div>
 
-            {/* Premium Input Portal */}
-            <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-40 transition-all duration-500`}>
-              <div className="relative bg-[#0a0a0a]/80 backdrop-blur-2xl border border-white/5 rounded-sm p-4 shadow-2xl overflow-hidden group">
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-itako-orange/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity" />
-                <textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
-                  placeholder="言葉を、深淵へ沈める。"
-                  className="w-full bg-transparent border-none focus:ring-0 text-sm md:text-base text-white placeholder:text-white/10 resize-none h-12 leading-relaxed"
-                />
-                <div className="flex justify-between items-center mt-2 border-t border-white/5 pt-2">
-                  <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.3em]">Channeling Mode: {isUnderground ? 'Deep' : 'Surface'}</span>
+            {/* Earthy Pill Input Bar (Inspired by the navigation in the image) */}
+            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-40">
+              <div className="bg-itako-deep rounded-[40px] p-2 flex items-center shadow-2xl border border-white/5">
+                <div className="flex-1 px-6">
+                  <textarea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+                    placeholder="Message..."
+                    className="w-full bg-transparent border-none focus:ring-0 text-white/90 placeholder:text-white/20 resize-none h-10 py-2 leading-relaxed text-sm"
+                  />
+                </div>
+                <div className="flex items-center gap-1 pr-2">
                   <button
                     onClick={handleSendMessage}
                     disabled={loading || !input.trim()}
-                    className="text-[9px] font-bold tracking-[0.4em] text-itako-orange uppercase hover:text-white transition-colors disabled:opacity-20"
+                    className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-itako-deep font-bold transition-transform active:scale-95 disabled:opacity-20 shadow-lg"
                   >
-                    Send
+                    <span className="text-xl">+</span>
+                  </button>
+                  <button className="px-6 py-2 text-[10px] font-bold tracking-widest text-white/40 uppercase hover:text-white transition-colors">
+                    SENT
                   </button>
                 </div>
               </div>
@@ -401,68 +413,75 @@ function App() {
         </section>
 
         {/* Slot 3: Abyss / Future Records */}
-        <section className="timeline-slot p-12 overflow-y-auto">
+        <section className="timeline-slot p-12 overflow-y-auto bg-itako-stone">
           <div className="max-w-2xl mx-auto py-12">
-            <header className="flex flex-col gap-2 mb-16 px-4">
-              <span className="text-[9px] font-bold tracking-[0.5em] text-itako-orange uppercase opacity-60">Deep Records / 003</span>
-              <h2 className="text-4xl font-bold tracking-tighter text-white">消えない、記憶。</h2>
+            <header className="flex flex-col gap-2 mb-12 px-4">
+              <h2 className="text-7xl font-bold tracking-tighter text-itako-deep leading-none">Abyss</h2>
+              <p className="text-lg font-bold text-itako-deep/40 pl-1 tracking-wider uppercase tracking-[0.3em]">The Eternal Records</p>
             </header>
 
             {loading ? (
-              <div className="py-32 flex flex-col items-center gap-6 text-itako-orange/20 italic text-xs tracking-widest uppercase font-bold animate-pulse">
-                <Ghost size={40} />
-                Rewinding the Abyssal Clock...
+              <div className="py-32 flex flex-col items-center gap-6 text-itako-clay/40 italic text-xs tracking-widest uppercase font-bold animate-pulse">
+                Exploring the deep...
               </div>
             ) : (
               <div className="space-y-16">
-                {/* Future Self's Critique - Higher Aesthetic */}
+                {/* Future Self's Critique - Earthy Aesthetic */}
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="relative p-12 rounded-sm bg-zinc-950 border border-white/5 shadow-2xl group"
+                  className="relative p-12 rounded-[50px] bg-white border border-black/5 shadow-2xl group overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
-                    <Quote size={80} />
+                  <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none text-itako-clay">
+                    <Quote size={120} />
                   </div>
                   <div className="flex items-center gap-4 mb-8">
-                    <span className="text-[10px] font-bold tracking-[0.4em] text-itako-orange uppercase border-l border-itako-orange pl-4">The Verdict from 2036</span>
+                    <span className="text-[12px] font-bold tracking-[0.4em] text-itako-clay uppercase border-l-2 border-itako-clay pl-4">The Verdict from 2036</span>
                   </div>
-                  <p className="text-base md:text-lg leading-[1.8] text-white/80 font-serif italic">
+                  <p className="text-xl md:text-2xl leading-[1.6] text-itako-deep/80 font-serif italic tracking-tight">
                     {futureSelfCritique || "まだ、未来の自分に届く言葉が保存されていないようです。"}
                   </p>
+
+                  <div className="mt-12 flex justify-end">
+                    <button className="bg-itako-clay text-white px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-lg">
+                      Preserve Memory
+                    </button>
+                  </div>
                 </motion.div>
 
-                {/* Abyssal Records (NDL) as Fragments */}
+                {/* Abyssal Records as Grid Cards */}
                 <div className="space-y-8">
-                  <h3 className="text-[10px] font-bold text-white/30 uppercase tracking-[0.6em] mb-12 text-center">Spirit Fragments / 断片</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {archives.map(c => (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        key={c.id}
-                        className="p-6 bg-white/[0.02] border border-white/5 hover:border-itako-orange/30 transition-all rounded-sm"
-                      >
-                        <div className="text-[8px] font-bold text-itako-orange/40 mb-2 uppercase tracking-widest">{c.author || 'Archive'}</div>
-                        <div className="text-xs font-bold mb-3 text-white/80 leading-relaxed">{c.title}</div>
-                        <div className="text-[10px] leading-relaxed text-white/40 italic">" {c.quote} "</div>
-                      </motion.div>
-                    ))}
+                  <h3 className="text-sm font-bold text-itako-deep/30 uppercase tracking-[0.6em] px-4">Spirit Fragments</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {archives.map((c, idx) => {
+                      const colors = ['bg-itako-sage/80', 'bg-itako-sand/80', 'bg-itako-clay/80'];
+                      return (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          whileInView={{ opacity: 1 }}
+                          key={c.id}
+                          className={`p-10 ${colors[idx % colors.length]} rounded-[40px] shadow-sm flex flex-col gap-4 group cursor-pointer`}
+                        >
+                          <div className="text-[10px] font-bold text-black/30 uppercase tracking-widest">{c.author || 'Archive'}</div>
+                          <div className="text-xl font-bold text-black/80 leading-tight">{c.title}</div>
+                          <div className="text-sm leading-relaxed text-black/50 italic font-serif">" {c.quote} "</div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* Past Traces (Bookmarks) */}
                 <div className="space-y-8">
-                  <h3 className="text-[10px] font-bold text-white/30 uppercase tracking-[0.6em] mb-12 text-center">Tied Spirits / 結ばれた魂</h3>
+                  <h3 className="text-sm font-bold text-itako-deep/30 uppercase tracking-[0.6em] px-4">Tied Spirits</h3>
                   <div className="space-y-4">
                     {bookmarks.map(b => (
-                      <div key={b.id} className="p-8 border border-white/5 text-[11px] text-white/60 bg-white/[0.01]">
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-[9px] font-bold tracking-widest uppercase text-itako-orange/60">{b.charId}</span>
-                          <span className="text-[8px] opacity-20 italic">Preserved fragment</span>
+                      <div key={b.id} className="p-12 rounded-[50px] bg-white border border-black/5 shadow-xl transition-transform hover:scale-[1.01]">
+                        <div className="flex justify-between items-center mb-6">
+                          <span className="text-xs font-bold tracking-widest uppercase text-itako-clay">{b.charId}</span>
                         </div>
-                        <div className="mb-4 text-white/80 font-medium">" {b.userMsg} "</div>
-                        <div className="pl-6 border-l border-white/5 italic text-white/40">" {b.aiMsg} "</div>
+                        <div className="mb-6 text-xl text-itako-deep/90 font-medium leading-relaxed">" {b.userMsg} "</div>
+                        <div className="pl-8 border-l border-itako-clay/20 italic text-base text-itako-deep/40 font-serif">" {b.aiMsg} "</div>
                       </div>
                     ))}
                   </div>
