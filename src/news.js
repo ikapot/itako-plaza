@@ -39,13 +39,15 @@ export const fetchFictionalizedNews = async (apiKey) => {
             const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
             const newsData = JSON.parse(jsonStr);
 
+            console.log(`[Multi-Brain] News decrypted via: ${modelName}`);
             localStorage.setItem(CACHE_KEY, JSON.stringify(newsData));
             localStorage.setItem(CACHE_TIME_KEY, now.toString());
 
             return newsData;
         } catch (error) {
-            if (error.status === 429 || error.message?.includes('429')) {
-                console.warn(`[Multi-Brain] News fetch shifted to ${modelName}`);
+            const isQuotaExceeded = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
+            if (isQuotaExceeded) {
+                console.warn(`[Multi-Brain] ${modelName} reached limit. Shifting frequency...`);
                 continue;
             }
             console.error("News Fetch Error:", error);

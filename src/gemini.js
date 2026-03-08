@@ -73,9 +73,11 @@ ${bookmarkText}
 `;
 
             const result = await model.generateContent(prompt);
+            console.log(`[Multi-Brain] FutureSelf using: ${modelName}`);
             return result.response.text();
         } catch (error) {
-            if (error.status === 429 || error.message?.includes('429')) {
+            const isQuotaExceeded = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
+            if (isQuotaExceeded) {
                 console.warn(`[Multi-Brain] ${modelName} reached limit. Switching to next layer...`);
                 continue;
             }
@@ -131,10 +133,12 @@ ${userMessage}
 </user_message>
 `;
             const result = await model.generateContent(prompt);
+            console.log(`[Multi-Brain] ${char.id} responding via: ${modelName}`);
             return result.response.text();
         } catch (error) {
-            if (error.status === 429 || error.message?.includes('429')) {
-                console.warn(`[Multi-Brain] ${modelName} reached limit. Switching brain layer...`);
+            const isQuotaExceeded = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
+            if (isQuotaExceeded) {
+                console.warn(`[Multi-Brain] ${modelName} overloaded. Shifting conscious layer...`);
                 continue;
             }
             console.error("Gemini Error:", error);
