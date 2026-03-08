@@ -357,17 +357,17 @@ function App() {
         onScroll={handleScroll}
         className="timeline-container flex-1 itako-scrollbar"
       >
-        {/* Slot 1: Trends (News & Scolding) */}
-        <section className="timeline-slot p-12 overflow-y-auto">
+        {/* Slot 1: News (Fictionalized Reality) */}
+        <section className="timeline-slot p-12 overflow-y-auto bg-[#0a0a0a]">
           <div className="max-w-2xl mx-auto py-12">
-            <div className="flex flex-col gap-2 mb-12">
-              <h2 className="text-7xl font-bold tracking-tighter text-itako-deep leading-none">Hello</h2>
-              <p className="text-lg font-bold text-itako-deep/40 pl-1 tracking-wider uppercase tracking-[0.3em]">Archives & News</p>
-            </div>
+            <header className="flex flex-col gap-2 mb-16 px-4">
+              <h2 className="text-7xl font-black tracking-tighter text-white leading-none">News</h2>
+              <p className="text-lg font-bold text-[#bd8a78] pl-1 tracking-wider uppercase tracking-[0.3em]">The Fictionalized Reality</p>
+            </header>
 
-            <div className="flex items-center justify-between mb-8 px-2">
-              <span className="text-sm font-bold text-itako-deep/30 uppercase tracking-widest">Recents ({news.length})</span>
-              <span className="text-xs font-bold text-itako-deep/50 hover:underline cursor-pointer transition-all">See all</span>
+            <div className="flex items-center justify-between mb-12 px-2 border-b border-white/5 pb-4">
+              <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Current Echoes ({news.length})</span>
+              <span className="text-[10px] font-bold text-white/40 hover:text-white cursor-pointer transition-all tracking-widest uppercase">Live Pulse</span>
             </div>
 
             {news.map((n, idx) => {
@@ -377,7 +377,10 @@ function App() {
                   <SpiritCard
                     title={n.title}
                     content={n.content}
-                    colorClass={cardColors[idx % cardColors.length]}
+                    author="Soseki Natsume"
+                    portraitUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg"
+                    flavor="Narrator"
+                    colorClass="bg-white/5 text-white/80 border-white/10"
                   />
                   {ichikawaScolds[n.id] && (
                     <motion.div
@@ -386,9 +389,10 @@ function App() {
                       className="ml-auto w-[85%] mt-[-4rem] bg-white p-10 rounded-[40px] border border-black/5 shadow-2xl relative z-20"
                     >
                       <div className="flex items-center gap-3 mb-4">
-                        <span className="text-[10px] font-bold tracking-[0.4em] text-itako-clay uppercase">Ichikawa's Echo / 叱咤</span>
+                        <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg" colorClass="bg-itako-sage" size="w-8 h-8" isSelected />
+                        <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-400 uppercase">Ichikawa's Verdict / 叱咤</span>
                       </div>
-                      <p className="text-base leading-relaxed italic text-itako-deep/70 font-serif">「{ichikawaScolds[n.id]}」</p>
+                      <p className="text-base leading-relaxed italic text-black/80 font-serif">「{ichikawaScolds[n.id]}」</p>
                     </motion.div>
                   )}
                 </div>
