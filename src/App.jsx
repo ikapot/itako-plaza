@@ -105,6 +105,7 @@ function App() {
   const [futureSelfCritique, setFutureSelfCritique] = useState('');
   const [notebookInput, setNotebookInput] = useState('');
   const [notebookAccumulations, setNotebookAccumulations] = useState([]);
+  const [spiritSharedKnowledge, setSpiritSharedKnowledge] = useState('');
 
   // キャラクターと場所の拡張可能なリスト
   const [characters, setCharacters] = useState(INITIAL_CHARACTERS.map(c => ({
@@ -131,6 +132,8 @@ function App() {
         setBookmarks(savedBookMarks);
         const data = await fetchNotebookAccumulations();
         setNotebookAccumulations(data);
+        const shared = data.map(acc => acc.content).join('\n---\n');
+        setSpiritSharedKnowledge(shared);
       } else {
         // フォールバック: 匿名ログイン
         import('./firebase').then(async ({ loginAnonymously }) => {
@@ -163,9 +166,12 @@ function App() {
     setLoading(true);
     await saveNotebookAccumulation(notebookInput);
     setNotebookInput('');
-    await loadAccumulations();
+    const data = await fetchNotebookAccumulations();
+    setNotebookAccumulations(data);
+    const shared = data.map(acc => acc.content).join('\n---\n');
+    setSpiritSharedKnowledge(shared);
     setLoading(false);
-    alert('Knowledge pushed to the Abyss.');
+    alert('知見が広場の精神たちに自動注入されました。');
   };
 
   const handleOpenAccumulations = () => {
@@ -260,8 +266,8 @@ function App() {
       });
     }
 
-    // Generate AI response with physical status, underground info, and external context
-    const aiResp = await generateCharacterResponse(currentChar, userMsg, isUnderground, externalContext, geminiKey);
+    // Generate AI response with physical status, underground info, and spirit-shared knowledge
+    const aiResp = await generateCharacterResponse(currentChar, userMsg, isUnderground, spiritSharedKnowledge, geminiKey);
     setMessages(prev => [...prev, { role: 'ai', content: aiResp, charId: selectedCharId }]);
 
     // 自律増殖の評価
@@ -324,7 +330,7 @@ function App() {
           <button
             key={tab.id}
             onClick={() => setActiveManagerTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all ${activeManagerTab === tab.id ? 'bg-zinc-200 text-black shadow-lg' : 'text-white/30 hover:text-white/60'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all font-oswald ${activeManagerTab === tab.id ? 'bg-zinc-200 text-black shadow-lg' : 'text-white/30 hover:text-white/60'}`}
           >
             {tab.icon}
             <span className="hidden md:inline">{tab.label}</span>
@@ -444,7 +450,7 @@ function App() {
 
 
   return (
-    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#050505] text-itako-grey font-sans">
+    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#050505] text-itako-grey font-sans selection:bg-[#bd8a78]/30">
 
       {/* Mobile Drawer */}
       <AnimatePresence>
@@ -465,7 +471,7 @@ function App() {
               className="fixed inset-y-0 left-0 w-[85%] bg-black border-r border-white/10 z-[70] p-8 overflow-y-auto md:hidden"
             >
               <div className="flex items-center justify-between mb-12">
-                <span className="text-xl font-black tracking-tighter text-white">MANAGER</span>
+                <span className="text-2xl font-black tracking-tighter text-white font-oswald uppercase">Manager</span>
                 <button onClick={() => setIsDrawerOpen(false)} className="text-white/40 hover:text-white">
                   <X size={20} />
                 </button>
@@ -518,17 +524,16 @@ function App() {
         onScroll={handleScroll}
         className="timeline-container flex-1 itako-scrollbar"
       >
-        {/* Slot 1: News (Fictionalized Reality) */}
         <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
           <div className="max-w-2xl mx-auto py-8 md:py-12 pb-48 md:pb-32">
             <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
-              <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none">News</h2>
-              <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-wider uppercase tracking-[0.3em]">The Fictionalized Reality</p>
+              <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
+              <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">The Fictionalized Reality</p>
             </header>
 
             <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
-              <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em]">Current Echoes ({news.length})</span>
-              <span className="text-[10px] font-bold text-white/40 hover:text-white cursor-pointer transition-all tracking-widest uppercase">Live Pulse</span>
+              <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] font-oswald">Current Echoes ({news.length})</span>
+              <span className="text-[10px] font-bold text-white/40 hover:text-white cursor-pointer transition-all tracking-widest uppercase font-oswald">Live Pulse</span>
             </div>
 
             {news.map((n, idx) => {
@@ -567,15 +572,15 @@ function App() {
           <div className="max-w-2xl mx-auto h-full flex flex-col pb-48 md:pb-32">
             <header className="flex flex-col gap-2 mb-10 md:mb-12 px-2 md:px-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white/90 leading-none">Dialog</h2>
+                <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
                 <button
                   onClick={() => setIsUnderground(!isUnderground)}
-                  className={`px-5 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all border ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
+                  className={`px-5 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
                 >
                   {isUnderground ? 'Surface' : 'Deep Trace'}
                 </button>
               </div>
-              <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em] truncate">{userName} / Speaking</p>
+              <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald truncate">{userName} / Speaking</p>
             </header>
 
             <div className="flex-1 flex flex-col gap-12 mt-8">
@@ -656,8 +661,8 @@ function App() {
         <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#1a1a1a]">
           <div className="max-w-2xl mx-auto py-8 md:py-12 pb-48 md:pb-32">
             <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white/90 leading-none">Abyss</h2>
-              <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-wider uppercase tracking-[0.3em]">The Eternal Records</p>
+              <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Abyss</h2>
+              <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald">The Eternal Records</p>
             </header>
 
             {loading ? (
@@ -813,8 +818,8 @@ function App() {
         <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
           <div className="max-w-2xl mx-auto py-8 md:py-12 pb-48 md:pb-32">
             <header className="flex flex-col gap-2 mb-12 md:mb-24 px-2 md:px-4">
-              <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none">Knowledge</h2>
-              <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-wider uppercase tracking-[0.3em]">Bridge to NotebookLM</p>
+              <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Knowledge</h2>
+              <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">Bridge to NotebookLM</p>
             </header>
 
             <motion.div
@@ -840,9 +845,15 @@ function App() {
                 </div>
 
                 <div className="space-y-6">
-                  <h3 className="text-2xl font-bold text-white tracking-tight">Channeling sources to NotebookLM</h3>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-2xl font-bold text-white tracking-tight">Spirit Broadcasting</h3>
+                    <div className="flex gap-1">
+                      <div className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" />
+                      <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                    </div>
+                  </div>
                   <p className="text-sm text-white/40 leading-relaxed max-w-lg">
-                    対話を結晶化し、NotebookLMへ。生成された知見を「深淵」へと書き戻すための、知識の変換所です。
+                    NotebookLMでの解析結果をここに同期させます。一度「PUSH」された知見は、あなたのアカウントを通じて全てのキャラクターの思考に**自動注入**され、対話の質を根本から変容させます。
                   </p>
                 </div>
 
