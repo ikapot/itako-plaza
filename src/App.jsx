@@ -525,7 +525,7 @@ function App() {
         className="timeline-container flex-1 itako-scrollbar"
       >
         <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
-          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-48 md:pb-32">
+          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
             <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
               <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
               <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">The Fictionalized Reality</p>
@@ -569,7 +569,7 @@ function App() {
 
         {/* Slot 2: Main Dialog */}
         <section className={`timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-[#1a1a1a]`}>
-          <div className="max-w-2xl mx-auto h-full flex flex-col pb-48 md:pb-32">
+          <div className="max-w-2xl mx-auto h-full flex flex-col pb-64 md:pb-48">
             <header className="flex flex-col gap-2 mb-10 md:mb-12 px-2 md:px-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
@@ -585,7 +585,7 @@ function App() {
 
             <div className="flex-1 flex flex-col gap-12 mt-8">
               {/* Chat Thread as Stacked Cards */}
-              <div className="space-y-8 px-2 pb-48">
+              <div className="space-y-8 px-2 pb-24">
                 <AnimatePresence>
                   {messages.map((m, i) => {
                     const isUser = m.role === 'user';
@@ -659,7 +659,7 @@ function App() {
 
         {/* Slot 3: Abyss / Future Records */}
         <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#1a1a1a]">
-          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-48 md:pb-32">
+          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
             <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
               <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Abyss</h2>
               <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald">The Eternal Records</p>
@@ -816,7 +816,7 @@ function App() {
 
         {/* Slot 4: NotebookLM Gateway */}
         <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
-          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-48 md:pb-32">
+          <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
             <header className="flex flex-col gap-2 mb-12 md:mb-24 px-2 md:px-4">
               <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Knowledge</h2>
               <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">Bridge to NotebookLM</p>
@@ -893,8 +893,28 @@ function App() {
         </section>
       </main>
 
+      {/* Floating Input Bar (Fixed at bottom) */}
+      <div className="fixed bottom-14 left-0 right-0 p-4 md:p-6 z-[100] pointer-events-none">
+        <div className="max-w-3xl mx-auto flex items-center gap-3 bg-black/80 backdrop-blur-3xl border border-white/10 p-2 md:p-3 rounded-full shadow-2xl pointer-events-auto">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Message..."
+            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+            className="flex-1 bg-transparent border-none focus:outline-none text-white text-sm px-4 md:px-6 py-2 md:py-3 resize-none max-h-32 min-h-[44px] md:min-h-[56px] leading-relaxed placeholder:text-white/20"
+          />
+          <button
+            onClick={handleSendMessage}
+            disabled={!input.trim() || loading}
+            className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-white text-black flex items-center justify-center shrink-0 hover:scale-105 active:scale-95 transition-all disabled:opacity-20"
+          >
+            {loading ? <Loader2 className="animate-spin" size={20} /> : <div className="text-xl md:text-2xl font-black font-oswald">+</div>}
+          </button>
+        </div>
+      </div>
+
       {/* Footer Navigation (Indicator) */}
-      <footer className="h-14 border-t border-white/5 bg-black/40 backdrop-blur-md flex items-center justify-center gap-10 px-6">
+      <footer className="h-14 border-t border-white/5 bg-black/90 backdrop-blur-md flex items-center justify-center gap-10 px-6 z-[100] shrink-0">
         <div className={`p-2 transition-all cursor-pointer ${activeSlot === 0 ? 'text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/10 hover:text-white/30'}`} onClick={() => scrollRef.current?.scrollTo({ left: 0, behavior: 'smooth' })}>
           <TrendingUp size={18} />
         </div>
