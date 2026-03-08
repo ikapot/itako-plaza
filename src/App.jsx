@@ -45,7 +45,7 @@ const WarholAvatar = ({ src, colorClass = "bg-itako-clay", size = "w-12 h-12", i
   </div>
 );
 
-const SpiritCard = ({ title, content, author, flavor, timestamp, colorClass = "bg-white" }) => (
+const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, colorClass = "bg-white" }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.98 }}
     whileInView={{ opacity: 1, scale: 1 }}
@@ -56,6 +56,7 @@ const SpiritCard = ({ title, content, author, flavor, timestamp, colorClass = "b
       {author && (
         <div className="flex items-center justify-between border-b border-black/5 pb-4">
           <div className="flex items-center gap-3">
+            <WarholAvatar src={portraitUrl || 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg'} size="w-8 h-8" isSelected />
             <span className="text-[10px] font-bold tracking-[0.2em] text-black/60 uppercase">{author}</span>
             {flavor && <span className="text-[10px] font-bold bg-black/5 px-3 py-1 rounded-full text-black/40">{flavor}</span>}
           </div>
@@ -438,6 +439,7 @@ function App() {
                 <AnimatePresence>
                   {messages.map((m, i) => {
                     const isUser = m.role === 'user';
+                    const charObj = characters.find(c => c.id === m.charId);
                     return (
                       <motion.div
                         key={i}
@@ -447,11 +449,22 @@ function App() {
                       >
                         <div className={`p-8 rounded-[35px] shadow-sm max-w-[90%] ${isUser ? 'bg-white text-[#1a1a1a] rounded-tr-none' : 'bg-white/5 text-white/80 border border-white/10 rounded-tl-none'}`}>
                           {!isUser && (
-                            <div className="flex items-center gap-4 mb-3 border-b border-white/5 pb-2">
-                              <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/20">{m.charId}</span>
-                              <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/40 hover:text-white transition-colors">
-                                Bookmark
-                              </button>
+                            <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                              <div className="flex items-center gap-3">
+                                {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected />}
+                                <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/20">{m.charId}</span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => setNotebookInput(prev => prev + (prev ? '\n\n' : '') + `${m.charId}: ${m.content}`)}
+                                  className="text-[9px] font-bold tracking-widest text-[#bd8a78] hover:scale-110 transition-transform flex items-center gap-1"
+                                >
+                                  PUSH
+                                </button>
+                                <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/40 hover:text-white transition-colors">
+                                  Bookmark
+                                </button>
+                              </div>
                             </div>
                           )}
                           <p className={`text-lg leading-relaxed ${!isUser ? 'font-serif' : 'font-sans'}`}>{m.content}</p>
@@ -604,14 +617,18 @@ function App() {
                   <h3 className="text-sm font-bold text-white/20 uppercase tracking-[0.6em] px-4">Spirit Fragments</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {archives.map((c, idx) => {
+                      const charObj = characters.find(ch => ch.author === c.author || ch.id.toLowerCase() === (c.author || '').toLowerCase());
                       return (
                         <motion.div
                           initial={{ opacity: 0 }}
                           whileInView={{ opacity: 1 }}
-                          key={c.id}
+                          key={`${c.id}-${idx}`}
                           className={`p-10 bg-white/5 border border-white/10 rounded-[40px] shadow-sm flex flex-col gap-4 group cursor-pointer hover:bg-white/10 transition-all duration-500`}
                         >
-                          <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{c.author || 'Archive'}</div>
+                          <div className="flex items-center gap-3 justify-between">
+                            <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{c.author || 'Archive'}</div>
+                            {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected />}
+                          </div>
                           <div className="text-xl font-bold text-white/80 leading-tight">{c.title}</div>
                           <div className="text-sm leading-relaxed text-white/40 italic font-serif">" {c.quote} "</div>
                         </motion.div>
@@ -624,33 +641,115 @@ function App() {
                 <div className="space-y-8">
                   <h3 className="text-sm font-bold text-white/20 uppercase tracking-[0.6em] px-4">Tied Spirits</h3>
                   <div className="space-y-4">
-                    {bookmarks.map(b => (
-                      <div key={b.id} className="p-12 rounded-[50px] bg-white text-[#1a1a1a] shadow-xl transition-transform hover:scale-[1.01]">
-                        <div className="flex justify-between items-center mb-6">
-                          <span className="text-xs font-bold tracking-widest uppercase opacity-40">{b.charId}</span>
+                    {bookmarks.map(b => {
+                      const charObj = characters.find(c => c.id === b.charId);
+                      return (
+                        <div key={b.id} className="p-12 rounded-[50px] bg-white text-[#1a1a1a] shadow-xl transition-transform hover:scale-[1.01]">
+                          <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-3">
+                              {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected />}
+                              <span className="text-xs font-bold tracking-widest uppercase opacity-40">{b.charId}</span>
+                            </div>
+                            <span className="text-[10px] opacity-20 font-bold">{b.timestamp?.toDate().toLocaleDateString()}</span>
+                          </div>
+                          <div className="mb-6 text-xl font-medium leading-relaxed italic">" {b.userMsg} "</div>
+                          <div className="pl-8 border-l border-black/10 italic text-base opacity-60 font-serif">" {b.aiMsg} "</div>
                         </div>
-                        <div className="mb-6 text-xl font-medium leading-relaxed italic">" {b.userMsg} "</div>
-                        <div className="pl-8 border-l border-black/10 italic text-base opacity-60 font-serif">" {b.aiMsg} "</div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
             )}
           </div>
         </section>
+
+        {/* Slot 4: NotebookLM Gateway */}
+        <section className="timeline-slot p-12 overflow-y-auto bg-[#0a0a0a]">
+          <div className="max-w-2xl mx-auto py-12">
+            <header className="flex flex-col gap-2 mb-24 px-4">
+              <h2 className="text-7xl font-black tracking-tighter text-white leading-none">Knowledge</h2>
+              <p className="text-lg font-bold text-[#bd8a78] pl-1 tracking-wider uppercase tracking-[0.3em]">Bridge to NotebookLM</p>
+            </header>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative p-12 rounded-[50px] bg-white/5 border border-white/10 shadow-3xl overflow-hidden"
+            >
+              <div className="flex flex-col gap-12 relative z-10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg" colorClass="bg-zinc-800" size="w-16 h-16" isSelected />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold tracking-widest text-[#bd8a78] uppercase">The Scribe</span>
+                      <span className="text-[10px] text-white/30 uppercase tracking-[0.4em]">Knowledge Spirit</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleOpenAccumulations}
+                    className="px-8 py-3 bg-zinc-200 text-black text-[10px] font-bold tracking-widest uppercase rounded-full shadow-2xl hover:bg-white transition-all scale-110"
+                  >
+                    View Insights
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-white tracking-tight">Channeling sources to NotebookLM</h3>
+                  <p className="text-sm text-white/40 leading-relaxed max-w-lg">
+                    対話を結晶化し、NotebookLMへ。生成された知見を「深淵」へと書き戻すための、知識の変換所です。
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="relative">
+                    <textarea
+                      value={notebookInput}
+                      onChange={(e) => setNotebookInput(e.target.value)}
+                      placeholder="Paste insights from NotebookLM here..."
+                      className="w-full bg-black border border-white/10 rounded-[40px] p-8 text-white placeholder:text-white/5 focus:ring-1 focus:ring-[#bd8a78]/40 text-sm h-64 resize-none transition-all"
+                    />
+                    <div className="absolute bottom-6 right-6 flex items-center gap-4">
+                      <button
+                        onClick={() => {
+                          const content = archives.map(a => `${a.title}\n${a.quote}`).join('\n\n');
+                          navigator.clipboard.writeText(content);
+                          alert('Source copied for NotebookLM');
+                          window.open('https://notebooklm.google.com/', '_blank');
+                        }}
+                        className="px-6 py-2 border border-white/5 bg-zinc-900 text-white/40 text-[9px] font-bold tracking-widest uppercase rounded-full hover:bg-zinc-800 transition-all"
+                      >
+                        Export Source
+                      </button>
+                      <button
+                        onClick={handlePushNotebook}
+                        disabled={!notebookInput.trim() || loading}
+                        className="bg-[#bd8a78] text-black px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-2xl active:scale-95 disabled:opacity-20 transition-all font-black"
+                      >
+                        PUSH TO ABYSS
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
       </main>
 
       {/* Footer Navigation (Indicator) */}
-      <footer className="h-14 border-t border-white/5 bg-black/40 backdrop-blur-md flex items-center justify-center gap-8 px-6">
-        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 0 ? 'text-white scale-110' : 'text-white/20 hover:text-white/40'}`} onClick={() => scrollRef.current?.scrollTo({ left: 0, behavior: 'smooth' })}>
-          <TrendingUp size={20} />
+      <footer className="h-14 border-t border-white/5 bg-black/40 backdrop-blur-md flex items-center justify-center gap-10 px-6">
+        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 0 ? 'text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/10 hover:text-white/30'}`} onClick={() => scrollRef.current?.scrollTo({ left: 0, behavior: 'smooth' })}>
+          <TrendingUp size={18} />
         </div>
-        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 1 ? 'text-white scale-110' : 'text-white/20 hover:text-white/40'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth, behavior: 'smooth' })}>
-          <MessageSquare size={20} />
+        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 1 ? 'text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/10 hover:text-white/30'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth, behavior: 'smooth' })}>
+          <MessageSquare size={18} />
         </div>
-        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 2 ? 'text-white scale-110' : 'text-white/20 hover:text-white/40'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth * 2, behavior: 'smooth' })}>
-          <BookOpen size={20} />
+        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 2 ? 'text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/10 hover:text-white/30'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth * 2, behavior: 'smooth' })}>
+          <Ghost size={18} />
+        </div>
+        <div className={`p-2 transition-all cursor-pointer ${activeSlot === 3 ? 'text-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/10 hover:text-white/30'}`} onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth * 3, behavior: 'smooth' })}>
+          <BookOpen size={18} />
         </div>
       </footer>
     </div>
