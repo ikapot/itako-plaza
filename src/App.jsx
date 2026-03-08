@@ -612,108 +612,128 @@ function App() {
       </AnimatePresence>
 
       <div className="flex-1 flex overflow-hidden relative">
-        {/* PC Expanding Side Dashboard (Overlay Mode - 1B) */}
-        {/* 1. Spacer to keep main content correctly positioned */}
-        <div className="hidden md:block w-20 shrink-0" />
+        {/* PC Expandable Floating Bubbles */}
+        <div className="hidden md:block w-24 shrink-0 relative z-10" />
 
-        {/* 2. The Floating Dashboard */}
-        <motion.div
-          initial={{ width: 80 }}
-          whileHover={{ width: 420 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-          className="hidden md:flex flex-col border-r border-white/5 bg-[#050505]/60 backdrop-blur-3xl overflow-hidden group/sidebar z-[110] absolute inset-y-0 left-0 shadow-[20px_0_50px_rgba(0,0,0,0.5)]"
-        >
-          <div className="flex-1 flex flex-col h-full">
-            {/* 1. Account & Gear */}
-            <div className="p-4 border-b border-white/5 flex flex-col overflow-hidden">
-              <div className="flex items-center gap-4 h-12">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shrink-0 group-hover/sidebar:bg-white/10 transition-colors">
-                  <User size={18} className="text-white/40 group-hover/sidebar:text-white" />
+        {/* 2. Individual Floating Dashboard Sections */}
+        <div className="hidden md:flex flex-col gap-4 z-[110] absolute top-1/2 -translate-y-1/2 left-0 pl-6 pointer-events-none items-start">
+
+          {/* 1. Account & Gear */}
+          <motion.div
+            initial={{ width: 64, height: 64 }}
+            whileHover={{ width: 360 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="pointer-events-auto flex flex-col bg-[#050505]/80 backdrop-blur-3xl border border-white/10 rounded-[32px] overflow-hidden group/item shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+          >
+            <div className="flex items-center gap-4 p-2 w-[340px] h-[64px] box-border">
+              <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shrink-0 group-hover/item:bg-white/10 transition-colors">
+                <User size={18} className="text-white/40 group-hover/item:text-white" />
+              </div>
+              <div className="flex-1 flex items-center justify-between opacity-0 group-hover/item:opacity-100 transition-all duration-300 pr-4">
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="bg-transparent border-none text-sm font-bold tracking-tight text-white focus:ring-0 p-0 w-32"
+                    placeholder="Account Name..."
+                  />
+                  <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em] font-oswald">Participant ID</span>
                 </div>
-                <div className="flex-1 flex items-center justify-between opacity-0 group-hover/sidebar:opacity-100 transition-all duration-500 delay-100 whitespace-nowrap">
-                  <div className="flex flex-col">
-                    <input
-                      type="text"
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      className="bg-transparent border-none text-sm font-bold tracking-tight text-white focus:ring-0 p-0 w-44"
-                      placeholder="Account Name..."
-                    />
-                    <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em] font-oswald">Participant ID</span>
-                  </div>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="p-3 text-white/20 hover:text-white transform hover:rotate-90 transition-all duration-500 cursor-pointer"
+                >
+                  <Settings size={20} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* 2. Registry (Characters) */}
+          <motion.div
+            initial={{ width: 64, height: 64 }}
+            whileHover={{ width: 360, height: 'auto' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="pointer-events-auto flex flex-col bg-[#050505]/80 backdrop-blur-3xl border border-white/10 rounded-[32px] overflow-hidden group/item shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+          >
+            <div className="w-[360px]">
+              <div className="flex items-center gap-4 p-2 h-[64px] box-border">
+                <div className="w-12 h-12 rounded-full bg-transparent flex items-center justify-center shrink-0">
+                  <Ghost size={20} className="text-white/20 group-hover/item:text-[#98a436] transition-colors" />
+                </div>
+                <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-white/60 opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap">Registry (Participants)</h3>
+              </div>
+
+              <div className="opacity-0 group-hover/item:opacity-100 transition-all duration-300 px-4 pb-4 space-y-2 h-0 group-hover/item:h-auto overflow-hidden">
+                {characters.map(c => (
                   <button
-                    onClick={() => setShowSettings(true)}
-                    className="p-3 text-white/20 hover:text-white transform hover:rotate-90 transition-all duration-700"
+                    key={c.id}
+                    onClick={() => setSelectedCharId(c.id)}
+                    className={`w-[320px] flex items-center gap-4 p-2 rounded-2xl border transition-all duration-300 active:scale-95 ${selectedCharId === c.id ? 'bg-white/5 border-white/20 shadow-lg cursor-default' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
                   >
-                    <Settings size={20} />
+                    <WarholAvatar src={c.avatar} size="w-8 h-8 md:w-10 h-10" isSelected={selectedCharId === c.id} colorClass={c.color} />
+                    <span className="text-xs font-bold tracking-wide text-white/80 whitespace-nowrap">{c.name}</span>
                   </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* 3. Grid Map */}
+          <motion.div
+            initial={{ width: 64, height: 64 }}
+            whileHover={{ width: 320, height: 'auto' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="pointer-events-auto flex flex-col bg-[#050505]/80 backdrop-blur-3xl border border-white/10 rounded-[32px] overflow-hidden group/item shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+          >
+            <div className="w-[320px]">
+              <div className="flex items-center gap-4 p-2 h-[64px] box-border">
+                <div className="w-12 h-12 rounded-full bg-transparent flex items-center justify-center shrink-0">
+                  <Globe size={20} className="text-white/20 group-hover/item:text-[#fdb913] transition-colors" />
+                </div>
+                <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-white/60 opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap">Grid Map</h3>
+              </div>
+
+              <div className="opacity-0 group-hover/item:opacity-100 transition-all duration-300 px-6 pb-6 h-0 group-hover/item:h-auto overflow-hidden w-[320px]">
+                <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-xl border border-white/5 aspect-square max-w-[200px] ml-4">
+                  {Array.from({ length: 9 }).map((_, i) => {
+                    const loc = locations.find(l => l.pos === i);
+                    const isSelected = selectedLocationId === loc?.id;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => loc && setSelectedLocationId(loc.id)}
+                        className={`aspect-square flex items-center justify-center rounded transition-all duration-300 active:scale-95 ${isSelected ? 'bg-zinc-200 cursor-default shadow-sm' : 'bg-black/40 hover:bg-white/10 cursor-pointer'}`}
+                      >
+                        {loc && <MapPin size={12} className={isSelected ? 'text-black' : 'text-white/20'} />}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
+          </motion.div>
 
-            {/* 2. Registry & Map */}
-            <div className="flex-1 overflow-y-auto itako-scrollbar p-4 space-y-12">
-              {/* Characters Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-6 h-10 overflow-hidden">
-                  <div className="w-12 h-12 flex items-center justify-center shrink-0">
-                    <Ghost size={20} className="text-white/20 group-hover/sidebar:text-[#98a436] transition-colors" />
-                  </div>
-                  <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-white/40 opacity-0 group-hover/sidebar:opacity-100 transition-opacity">Registry</h3>
-                </div>
-
-                <div className="opacity-0 group-hover/sidebar:opacity-100 transition-all duration-700 delay-200 pl-10 pr-4 space-y-3">
-                  {characters.map(c => (
-                    <button
-                      key={c.id}
-                      onClick={() => setSelectedCharId(c.id)}
-                      className={`w-full flex items-center gap-4 p-3 rounded-2xl border transition-all ${selectedCharId === c.id ? 'bg-white/5 border-white/20 shadow-lg' : 'bg-transparent border-transparent opacity-20 hover:opacity-100'}`}
-                    >
-                      <WarholAvatar src={c.avatar} size="w-8 h-8" isSelected={selectedCharId === c.id} colorClass={c.color} />
-                      <span className="text-[11px] font-bold tracking-wide text-white/80">{c.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Map Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-6 h-10 overflow-hidden">
-                  <div className="w-12 h-12 flex items-center justify-center shrink-0">
-                    <Globe size={20} className="text-white/20 group-hover/sidebar:text-[#fdb913] transition-colors" />
-                  </div>
-                  <h3 className="text-[10px] font-bold tracking-[0.4em] uppercase text-white/40 opacity-0 group-hover/sidebar:opacity-100 transition-opacity">Grid Map</h3>
-                </div>
-
-                <div className="opacity-0 group-hover/sidebar:opacity-100 transition-all duration-700 delay-300 pl-12 pr-6">
-                  <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-lg border border-white/5 aspect-square max-w-[180px]">
-                    {Array.from({ length: 9 }).map((_, i) => {
-                      const loc = locations.find(l => l.pos === i);
-                      const isSelected = selectedLocationId === loc?.id;
-                      return (
-                        <button
-                          key={i}
-                          onClick={() => loc && setSelectedLocationId(loc.id)}
-                          className={`aspect-square flex items-center justify-center transition-all duration-300 active:scale-95 ${isSelected ? 'bg-zinc-200 cursor-default shadow-sm' : 'bg-black/40 hover:bg-white/10 cursor-pointer'}`}
-                        >
-                          {loc && <MapPin size={10} className={isSelected ? 'text-black' : 'text-white/20'} />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Connection Status Foot */}
-            <div className="p-6 opacity-0 group-hover/sidebar:opacity-100 transition-opacity">
-              <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+          {/* 4. Connection Status */}
+          <motion.div
+            initial={{ width: 64, height: 64 }}
+            whileHover={{ width: 280 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="pointer-events-auto flex flex-col bg-[#050505]/80 backdrop-blur-3xl border border-white/10 rounded-[32px] overflow-hidden group/item shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+          >
+            <div className="w-[280px] flex items-center gap-4 p-2 h-[64px] box-border">
+              <div className="w-12 h-12 rounded-full bg-transparent flex flex-col items-center justify-center shrink-0 group-hover/item:bg-white/5 transition-colors">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-white/20 tracking-widest uppercase">System Online</span>
+              </div>
+              <div className="flex flex-col opacity-0 group-hover/item:opacity-100 transition-all duration-300">
+                <span className="text-[10px] font-bold text-white/80 tracking-widest uppercase mb-1 whitespace-nowrap">System Online</span>
+                <span className="text-[8px] text-white/40 tracking-[0.2em] uppercase font-oswald whitespace-nowrap">Secure Connection</span>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+
+        </div>
 
         {/* NotebookLM Context Injection UI */}
         <AnimatePresence>
