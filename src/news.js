@@ -3,6 +3,18 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export const fetchFictionalizedNews = async (apiKey) => {
     if (!apiKey) return [];
 
+    // Cache logic: Check localStorage first
+    const CACHE_KEY = 'itako_news_cache';
+    const CACHE_TIME_KEY = 'itako_news_cache_time';
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+    const now = Date.now();
+
+    if (cachedData && cachedTime && (now - parseInt(cachedTime)) < 3600000) {
+        console.log("[NewsService] Using cached news data");
+        return JSON.parse(cachedData);
+    }
+
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -24,7 +36,13 @@ export const fetchFictionalizedNews = async (apiKey) => {
 
         const result = await model.generateContent(prompt);
         const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
-        return JSON.parse(jsonStr);
+        const newsData = JSON.parse(jsonStr);
+
+        // Save to cache
+        localStorage.setItem(CACHE_KEY, JSON.stringify(newsData));
+        localStorage.setItem(CACHE_TIME_KEY, now.toString());
+
+        return newsData;
     } catch (error) {
         console.error("News Fetch Error:", error);
         return [
