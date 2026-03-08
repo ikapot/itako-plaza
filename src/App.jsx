@@ -47,30 +47,30 @@ const WarholAvatar = ({ src, colorClass = "bg-itako-clay", size = "w-12 h-12", i
   </div>
 );
 
-const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, colorClass = "bg-white" }) => (
+const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, colorClass = "bg-white/5 border border-white/10" }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.98 }}
     whileInView={{ opacity: 1, scale: 1 }}
     viewport={{ once: true }}
-    className={`relative p-10 rounded-[40px] ${colorClass} mb-4 shadow-sm group transition-all duration-700 border border-black/5`}
+    className={`relative p-8 md:p-10 rounded-[40px] ${colorClass} mb-4 shadow-sm group transition-all duration-700`}
   >
-    <div className="relative z-10 flex flex-col gap-6">
+    <div className="relative z-10 flex flex-col gap-6 text-inherit">
       {author && (
-        <div className="flex items-center justify-between border-b border-black/5 pb-4">
+        <div className="flex items-center justify-between border-b border-white/5 pb-4">
           <div className="flex items-center gap-3">
             <WarholAvatar src={portraitUrl || 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg'} size="w-8 h-8" isSelected />
-            <span className="text-[10px] font-bold tracking-[0.2em] text-black/60 uppercase">{author}</span>
-            {flavor && <span className="text-[10px] font-bold bg-black/5 px-3 py-1 rounded-full text-black/40">{flavor}</span>}
+            <span className="text-[10px] font-bold tracking-[0.2em] opacity-40 uppercase">{author}</span>
+            {flavor && <span className="text-[10px] font-bold bg-white/5 px-3 py-1 rounded-full opacity-30">{flavor}</span>}
           </div>
         </div>
       )}
       <div className="space-y-3 md:space-y-4">
-        <h3 className="text-2xl md:text-3xl font-bold tracking-tighter text-black/80 leading-tight pr-12">{title}</h3>
-        <p className="text-sm md:text-base leading-relaxed text-black/60 font-medium whitespace-pre-wrap">{content}</p>
+        <h3 className="text-2xl md:text-3xl font-bold tracking-tighter leading-tight pr-12 opacity-90">{title}</h3>
+        <p className="text-sm md:text-base leading-relaxed opacity-60 font-medium whitespace-pre-wrap">{content}</p>
       </div>
 
       <div className="flex justify-end mt-4">
-        <button className="bg-black text-white/90 px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase flex items-center gap-2 hover:bg-zinc-800 transition-colors shadow-lg">
+        <button className="bg-white/10 hover:bg-white/20 text-inherit px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase flex items-center gap-2 transition-all shadow-lg border border-white/5">
           DISCOVER <span className="text-lg">→</span>
         </button>
       </div>
@@ -101,7 +101,8 @@ function App() {
   const [archives, setArchives] = useState([
     { id: 1, author: 'Soseki', quote: '「月が綺麗ですね」と言ったのは、私だっただろうか。', ref: '三四郎より' },
   ]);
-  const [brightness, setBrightness] = useState(parseFloat(localStorage.getItem('itako_brightness')) || 1.0);
+  const [bgLight, setBgLight] = useState(parseFloat(localStorage.getItem('itako_bg_light')) || 5);
+  const [textLight, setTextLight] = useState(parseFloat(localStorage.getItem('itako_text_light')) || 90);
   const [showSettings, setShowSettings] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
   const [futureSelfCritique, setFutureSelfCritique] = useState('');
@@ -457,8 +458,12 @@ function App() {
 
   return (
     <div
-      className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-[#050505] text-itako-grey font-sans selection:bg-[#fdb913]/30"
-      style={{ '--itako-brightness': brightness }}
+      className="h-[100dvh] w-screen overflow-hidden flex flex-col font-sans selection:bg-[#fdb913]/30"
+      style={{
+        backgroundColor: `hsl(0, 0%, ${bgLight}%)`,
+        color: `hsla(0, 0%, ${textLight}%, 1)`,
+        '--itako-text-opacity': textLight / 100
+      }}
     >
 
       {/* Mobile Drawer */}
@@ -477,15 +482,27 @@ function App() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-[85%] bg-black border-r border-white/10 z-[70] p-8 overflow-y-auto md:hidden"
+              className="fixed inset-y-0 left-0 w-[85%] bg-zinc-950 border-r border-white/5 z-[70] p-8 overflow-y-auto md:hidden shadow-3xl"
             >
-              <div className="flex items-center justify-between mb-12">
-                <span className="text-2xl font-black tracking-tighter text-white font-oswald uppercase">Manager</span>
-                <button onClick={() => setIsDrawerOpen(false)} className="text-white/40 hover:text-white">
-                  <X size={20} />
+              <div className="flex items-center justify-between mb-12 border-b border-white/5 pb-8">
+                <div className="flex flex-col">
+                  <span className="text-2xl font-black tracking-tighter text-white font-oswald uppercase">Manager</span>
+                  <span className="text-[8px] font-bold tracking-[0.4em] text-white/20 uppercase">Control Center</span>
+                </div>
+                <button onClick={() => setIsDrawerOpen(false)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40">
+                  <X size={18} />
                 </button>
               </div>
-              <ManagerContent />
+              <div className="pb-24">
+                <ManagerContent />
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-zinc-950 to-transparent">
+                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-3xl border border-white/5">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase">Mobile Link Stable</span>
+                </div>
+              </div>
             </motion.div>
           </>
         )}
@@ -516,31 +533,57 @@ function App() {
               className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 bg-zinc-900 border border-white/10 p-8 rounded-[40px] z-[120] shadow-3xl"
             >
               <div className="flex items-center justify-between mb-10">
-                <span className="text-xl font-bold font-oswald tracking-widest text-white uppercase">Settings</span>
+                <span className="text-xl font-bold font-oswald tracking-widest text-white uppercase">Atmosphere</span>
                 <button onClick={() => setShowSettings(false)} className="text-white/20 hover:text-white"><X size={20} /></button>
               </div>
-              <div className="space-y-8">
+
+              <div className="space-y-10">
+                {/* Background Lightness */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-end">
-                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald">Luminance / 輝度</label>
-                    <span className="text-[10px] font-bold text-[#fdb913] font-oswald">{Math.round(brightness * 100)}%</span>
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Background / 深淵</label>
+                    <span className="text-[10px] font-bold text-white/60 font-oswald">{Math.round(bgLight)}%</span>
                   </div>
                   <input
                     type="range"
-                    min="0.4"
-                    max="1.0"
-                    step="0.05"
-                    value={brightness}
+                    min="0"
+                    max="20"
+                    step="1"
+                    value={bgLight}
                     onChange={(e) => {
                       const val = parseFloat(e.target.value);
-                      setBrightness(val);
-                      localStorage.setItem('itako_brightness', val);
+                      setBgLight(val);
+                      localStorage.setItem('itako_bg_light', val);
                     }}
                     className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-[#fdb913]"
                   />
                 </div>
-                <div className="pt-4 border-t border-white/5">
-                  <p className="text-[9px] leading-relaxed text-white/20 font-serif italic text-center">背景の静寂はそのままに、言葉の光を調整します。</p>
+
+                {/* Text Brightness */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Luminance / 霊性</label>
+                    <span className="text-[10px] font-bold text-[#fdb913] font-oswald">{Math.round(textLight)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="40"
+                    max="100"
+                    step="1"
+                    value={textLight}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setTextLight(val);
+                      localStorage.setItem('itako_text_light', val);
+                    }}
+                    className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-[#fdb913]"
+                  />
+                </div>
+
+                <div className="pt-6 border-t border-white/5">
+                  <p className="text-[9px] leading-relaxed text-white/20 font-serif italic text-center">
+                    静かな深淵の奥底で、言葉の灯火をあなただけの明るさに。
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -675,9 +718,8 @@ function App() {
           ref={scrollRef}
           onScroll={handleScroll}
           className="timeline-container flex-1 itako-scrollbar"
-          style={{ opacity: 'var(--itako-brightness)', filter: `contrast(${0.8 + (1 - brightness) * 0.4})` }}
         >
-          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
+          <section className="timeline-slot p-6 md:p-12 overflow-y-auto" style={{ backgroundColor: 'transparent' }}>
             <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
               <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
                 <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
@@ -690,7 +732,6 @@ function App() {
               </div>
 
               {news.map((n, idx) => {
-                const cardColors = ['bg-itako-sand', 'bg-itako-sage', 'bg-itako-clay'];
                 return (
                   <div key={n.id} className="mb-12">
                     <SpiritCard
@@ -699,19 +740,19 @@ function App() {
                       author="Soseki Natsume"
                       portraitUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg"
                       flavor="Narrator"
-                      colorClass="bg-white/5 text-white/80 border-white/10"
+                      colorClass="bg-white/5 text-inherit border-white/10"
                     />
                     {ichikawaScolds[n.id] && (
                       <motion.div
                         initial={{ opacity: 0, y: 15 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        className="ml-auto w-[85%] mt-[-4rem] bg-white p-10 rounded-[40px] border border-black/5 shadow-2xl relative z-20"
+                        className="ml-auto w-[90%] md:w-[85%] mt-[-4rem] bg-zinc-100 p-8 md:p-10 rounded-[35px] md:rounded-[40px] border border-black/5 shadow-2xl relative z-20"
                       >
                         <div className="flex items-center gap-3 mb-4">
-                          <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg" colorClass="bg-itako-sage" size="w-8 h-8" isSelected />
-                          <span className="text-[10px] font-bold tracking-[0.4em] text-zinc-400 uppercase">Ichikawa's Verdict / 叱咤</span>
+                          <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg" colorClass="bg-itako-sage" size="w-7 h-7" isSelected />
+                          <span className="text-[9px] font-bold tracking-[0.4em] text-zinc-900/30 uppercase">Ichikawa's Verdict / 叱咤</span>
                         </div>
-                        <p className="text-base leading-relaxed italic text-black/80 font-serif">「{ichikawaScolds[n.id]}」</p>
+                        <p className="text-base leading-relaxed italic text-black font-serif">「{ichikawaScolds[n.id]}」</p>
                       </motion.div>
                     )}
                   </div>
