@@ -12,9 +12,24 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const isConfigValid = firebaseConfig.apiKey && firebaseConfig.authDomain;
+
+let app;
+let auth;
+let db;
+
+if (isConfigValid) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+} else {
+    console.warn("Firebase config is missing. Authentication will not work.");
+    // Dummy objects to prevent early crashes
+    auth = { onAuthStateChanged: (cb) => { cb(null); return () => { }; }, currentUser: null };
+    db = {};
+}
+
+export { auth, db };
 
 const googleProvider = new GoogleAuthProvider();
 

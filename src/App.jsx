@@ -33,7 +33,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState('無名の参列者');
   const [geminiKey, setGeminiKey] = useState(localStorage.getItem('itako_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || '');
-  const [isAppReady, setIsAppReady] = useState(true);
+  const [isAppReady, setIsAppReady] = useState(false);
   const [activeSlot, setActiveSlot] = useState(0);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
@@ -409,6 +409,20 @@ function App() {
     }
   };
 
+
+  if (!isAppReady || !user) {
+    return (
+      <LandingPage
+        onLoginComplete={(key) => {
+          if (key) {
+            setGeminiKey(key);
+            localStorage.setItem('itako_gemini_key', key);
+          }
+          setIsAppReady(true);
+        }}
+      />
+    );
+  }
 
   return (
     <div
