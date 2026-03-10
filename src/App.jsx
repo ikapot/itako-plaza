@@ -403,6 +403,8 @@ function App() {
                     setIsAppReady(true);
                     // Force refresh news if needed
                     fetchFictionalizedNews(geminiKey).then(setNews);
+                    // Auto close drawer if open
+                    setIsDrawerOpen(false);
                   }
                 }}
                 className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${geminiKey
@@ -566,6 +568,8 @@ function App() {
                     onClick={() => {
                       if (geminiKey) {
                         setIsAppReady(true);
+                        // Auto close settings overlay
+                        setTimeout(() => setShowSettings(false), 300);
                       }
                     }}
                     className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${geminiKey
