@@ -170,9 +170,43 @@ export const validateGeminiApiKey = async (rawKey) => {
     const firstKey = rawKey.split(',')[0].trim();
     try {
         const genAI = new GoogleGenerativeAI(firstKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: "ok" }] }], generationConfig: { maxOutputTokens: 1 } });
-        return !!result.response.text();
+        // 接続確認のため、複数のモデルを試行
+        const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash"];
+
+        for (const modelName of modelsToTry) {
+            try {
+                const model = genAI.getGenerativeModel({ model: modelName });
+                // 最小限のリクエストで生存確認
+                const result = await model.generateContent({
+                    contents: [{ role: "user", parts: [{ text: "ok" }] }],
+                    generationConfig: { maxOutputTokens: 1 }
+                });
+                if (result.response) return true;
+            } catch (e) {
+                const errorText = e.message || "";
+                const status = e.status;
+
+                // 429 (Rate Limit) や Quota エラーが出るということは、キー自体は認証を通っている（有効）
+                if (status === 429 || errorText.includes('429') || errorText.includes('Quota') || errorText.includes('RESOURCE_EXHAUSTED')) {
+                    console.warn(`[API Validation] Key is valid but rate limited: ${modelName}`);
+                    return true;
+                }
+
+                // 404 (Not Found) の場合はモデル名が正しくないだけの可能性があるので次を試す
+                if (status === 404 || errorText.includes('404')) {
+                    console.warn(`[API Validation] Model ${modelName} not found, trying next...`);
+                    continue;
+                }
+
+                // 401 (Unauthorized) や 403 (Forbidden) は無効なキー
+                if (status === 401 || status === 403 || errorText.includes('401') || errorText.includes('403') || errorText.includes('invalid')) {
+                    return false;
+                }
+
+                // その他のエラーも一旦次を試すか、ループ終了後に false を返す
+            }
+        }
+        return false;
     } catch (e) {
         console.error("API Key Validation Error Details:", e);
         return false;
