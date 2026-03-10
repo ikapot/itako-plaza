@@ -372,18 +372,46 @@ function App() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-6"
+            className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-8"
           >
             <div className="flex items-center gap-4 p-8 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl">
-              <div className={`w-3 h-3 rounded-full ${geminiKey ? 'bg-emerald-500 animate-pulse' : 'bg-white/10'}`} />
+              <div className={`w-3 h-3 rounded-full ${geminiKey ? 'bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.8)]' : 'bg-white/10'}`} />
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-emerald-500/80 tracking-widest uppercase mb-1">
+                <span className="text-[10px] font-bold text-emerald-500/80 tracking-widest uppercase mb-1 font-oswald">
                   {geminiKey ? 'Verified Connection' : 'Awaiting Connection'}
                 </span>
                 <p className="text-[9px] text-white/20 leading-relaxed font-serif">
-                  {geminiKey ? '精神の回路は正常に接続されています。' : '設定（歯車）メニューからAPIキーを入力してください。'}
+                  {geminiKey ? '精神の回路は正常に接続されています。' : '対話を開始するにはAPIキーが必要です。'}
                 </p>
               </div>
+            </div>
+
+            <div className="space-y-4">
+              <input
+                type="password"
+                placeholder="Enter Gemini API Key..."
+                value={geminiKey}
+                onChange={(e) => {
+                  setGeminiKey(e.target.value);
+                  localStorage.setItem('itako_gemini_key', e.target.value);
+                }}
+                className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-emerald-500/30 outline-none transition-all placeholder:text-white/5 font-mono"
+              />
+              <button
+                onClick={() => {
+                  if (geminiKey) {
+                    setIsAppReady(true);
+                    // Force refresh news if needed
+                    fetchFictionalizedNews(geminiKey).then(setNews);
+                  }
+                }}
+                className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${geminiKey
+                  ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.7)]'
+                  : 'bg-white/5 text-white/20'
+                  }`}
+              >
+                接続する (Connect)
+              </button>
             </div>
           </motion.div>
         )}
@@ -532,8 +560,21 @@ function App() {
                       setGeminiKey(e.target.value);
                       localStorage.setItem('itako_gemini_key', e.target.value);
                     }}
-                    className="w-full bg-black border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#fdb913]/30 outline-none transition-all placeholder:text-white/5"
+                    className="w-full bg-black border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-emerald-500/30 outline-none transition-all placeholder:text-white/5 font-mono"
                   />
+                  <button
+                    onClick={() => {
+                      if (geminiKey) {
+                        setIsAppReady(true);
+                      }
+                    }}
+                    className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${geminiKey
+                      ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.7)]'
+                      : 'bg-white/5 text-white/20'
+                      }`}
+                  >
+                    接続する (Connect)
+                  </button>
                   {!geminiKey && (
                     <p className="text-[8px] font-bold text-[#fdb913]/50 uppercase tracking-widest text-center animate-pulse">
                       Waiting for spiritual key...
