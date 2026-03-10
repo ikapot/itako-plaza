@@ -14,9 +14,13 @@ export const searchNDLArchive = async (keyword) => {
         // プロキシ経由でアクセス、タイムアウト付き
         const response = await fetch(baseUrl + query, { signal: controller.signal });
         clearTimeout(timeoutId);
-
         if (!response.ok) {
             throw new Error(`NDL Access Failed: [${response.status}] ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Received non-JSON response from NDL API (possibly Vite dev server fallback)");
         }
 
         const data = await response.json();

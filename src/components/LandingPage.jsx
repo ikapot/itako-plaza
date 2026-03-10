@@ -12,7 +12,18 @@ export default function LandingPage({ onLoginComplete }) {
     const handleGoogleLogin = async () => {
         const user = await loginWithGoogle();
         if (user) {
-            setStep('api');
+            // .env にキーがある場合は自動接続、なければ入力画面へ
+            const envKey = import.meta.env.VITE_GEMINI_API_KEY;
+            if (envKey) {
+                setIsConnecting(true);
+                setTimeout(() => {
+                    localStorage.setItem('itako_gemini_key', envKey);
+                    onLoginComplete(envKey);
+                    setIsConnecting(false);
+                }, 800);
+            } else {
+                setStep('api');
+            }
         }
     };
 

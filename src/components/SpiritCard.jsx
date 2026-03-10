@@ -7,11 +7,11 @@ const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, co
         initial={{ opacity: 0, scale: 0.98 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
-        className={`relative p-8 md:p-10 rounded-[40px] ${colorClass} mb-4 shadow-sm group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl`}
+        className={`relative p-6 md:p-8 rounded-[32px] ${colorClass} mb-4 shadow-sm group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl`}
     >
         <div className="relative z-10 flex flex-col gap-6 text-inherit">
             {author && (
-                <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <div className="flex items-center justify-between border-b border-white/5 pb-3">
                     <div className="flex items-center gap-3">
                         <WarholAvatar src={portraitUrl || 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg'} size="w-8 h-8" isSelected />
                         <span className="text-[10px] font-bold tracking-[0.2em] opacity-40 uppercase">{author}</span>

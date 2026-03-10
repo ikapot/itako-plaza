@@ -32,9 +32,9 @@ const INITIAL_LOCATIONS = [
 function App() {
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState('無名の参列者');
-  const [geminiKey, setGeminiKey] = useState(localStorage.getItem('itako_gemini_key') || '');
+  const [geminiKey, setGeminiKey] = useState(localStorage.getItem('itako_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || '');
   const [isAppReady, setIsAppReady] = useState(true);
-  const [activeSlot, setActiveSlot] = useState(1);
+  const [activeSlot, setActiveSlot] = useState(0);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -99,6 +99,12 @@ function App() {
 
     const loadGlobalData = async () => {
       if (!geminiKey) return; // キーがなければ何もしない
+
+      // ユーザーがログイン済みかつキーがあるなら、LandingPageをスキップ
+      if (auth.currentUser && geminiKey) {
+        setIsAppReady(true);
+      }
+
       const loadingKey = `itako_loading_${geminiKey.slice(-6)}`;
       if (sessionStorage.getItem(loadingKey)) return; // React Strict Mode の二重起動を防ぐ
       sessionStorage.setItem(loadingKey, '1');
@@ -406,11 +412,11 @@ function App() {
 
   return (
     <div
-      className="h-[100dvh] w-screen overflow-hidden flex flex-col font-sans selection:bg-[#fdb913]/30"
+      className="h-[100dvh] w-screen overflow-hidden flex flex-col font-sans selection:bg-white/30"
       style={{
-        backgroundColor: `hsl(0, 0%, ${bgLight}%)`,
-        color: `hsla(0, 0%, ${textLight}%, 1)`,
-        '--itako-text-opacity': textLight / 100
+        backgroundColor: '#000000',
+        color: '#ffffff',
+        '--itako-text-opacity': 1
       }}
     >
 
@@ -492,46 +498,14 @@ function App() {
               </div>
 
               <div className="space-y-10">
-                {/* Background Lightness */}
+                {/* Visual Settings Enforced to the Abyss */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-end">
-                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Background / 深淵</label>
-                    <span className="text-[10px] font-bold text-white/60 font-oswald">{Math.round(bgLight)}%</span>
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Abyssal Theme</label>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="20"
-                    step="1"
-                    value={bgLight}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      setBgLight(val);
-                      localStorage.setItem('itako_bg_light', val);
-                    }}
-                    className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-[#fdb913]"
-                  />
-                </div>
-
-                {/* Text Brightness */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-end">
-                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Luminance / 霊性</label>
-                    <span className="text-[10px] font-bold text-[#fdb913] font-oswald">{Math.round(textLight)}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="40"
-                    max="100"
-                    step="1"
-                    value={textLight}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value);
-                      setTextLight(val);
-                      localStorage.setItem('itako_text_light', val);
-                    }}
-                    className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-[#fdb913]"
-                  />
+                  <p className="text-[10px] text-white/60 font-serif leading-relaxed">
+                    空間は常に深い闇と純白の言葉で覆われています。
+                  </p>
                 </div>
 
                 {/* Gemini API Key - Now integrated into main settings for visibility */}
@@ -720,11 +694,11 @@ function App() {
           onScroll={handleScroll}
           className="timeline-container flex-1 itako-scrollbar"
         >
-          <section className="timeline-slot p-6 md:p-12 overflow-y-auto" style={{ backgroundColor: 'transparent' }}>
-            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
-              <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
-                <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
-                <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">The Fictionalized Reality</p>
+          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
+            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
+              <header className="flex flex-col gap-2 mb-8 md:mb-10 px-2 md:px-4">
+                <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
+                <p className="text-sm md:text-base font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">The Fictionalized Reality</p>
               </header>
 
               <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
@@ -763,24 +737,24 @@ function App() {
           </section>
 
           {/* Slot 2: Main Dialog */}
-          <section className={`timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-[#1a1a1a]`}>
-            <div className="max-w-2xl mx-auto h-full flex flex-col pb-64 md:pb-48">
-              <header className="flex flex-col gap-2 mb-10 md:mb-12 px-2 md:px-4">
+          <section className={`timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-black`}>
+            <div className="max-w-2xl mx-auto min-h-full flex flex-col">
+              <header className="flex flex-col gap-2 mb-6 md:mb-8 px-2 md:px-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
+                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
                   <button
                     onClick={() => setIsUnderground(!isUnderground)}
-                    className={`px-5 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
+                    className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
                   >
                     {isUnderground ? 'Surface' : 'Deep Trace'}
                   </button>
                 </div>
-                <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald truncate">{userName} / Speaking</p>
+                <p className="text-sm md:text-base font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald truncate">{userName} / Speaking</p>
               </header>
 
-              <div className="flex-1 flex flex-col gap-12 mt-8">
+              <div className="flex-1 flex flex-col gap-8 mt-4">
                 {/* Chat Thread */}
-                <div className="space-y-8 px-2 pb-24">
+                <div className="space-y-8 px-2 pb-80 md:pb-96">
                   <AnimatePresence>
                     {messages.map((m, i) => {
                       const isUser = m.role === 'user';
@@ -792,7 +766,7 @@ function App() {
                           animate={{ opacity: 1, y: 0 }}
                           className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                         >
-                          <div className={`p-8 rounded-[35px] shadow-sm max-w-[90%] ${isUser ? 'bg-white text-[#1a1a1a] rounded-tr-none' : 'bg-white/5 text-white/80 border border-white/10 rounded-tl-none'}`}>
+                          <div className={`p-6 md:p-7 rounded-[30px] shadow-sm max-w-[95%] md:max-w-[90%] ${isUser ? 'bg-black text-white border border-white/20 rounded-tr-none' : 'bg-black text-white border border-white/10 rounded-tl-none'}`}>
                             {!isUser && (
                               <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
                                 <div className="flex items-center gap-3">
@@ -823,17 +797,19 @@ function App() {
                       </div>
                     )}
                   </AnimatePresence>
+                  {/* Spacer to prevent overlap with floating bar */}
+                  <div className="h-64 md:h-80 shrink-0" />
                 </div>
               </div>
             </div>
           </section>
 
           {/* Slot 3: Abyss / Future Records */}
-          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#1a1a1a]">
-            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
-              <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
-                <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Abyss</h2>
-                <p className="text-base md:text-lg font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald">The Eternal Records</p>
+          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
+            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
+              <header className="flex flex-col gap-2 mb-8 px-2 md:px-4">
+                <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Abyss</h2>
+                <p className="text-sm md:text-base font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald">The Eternal Records</p>
               </header>
 
               {loading ? (
@@ -943,8 +919,8 @@ function App() {
           </section>
 
           {/* Slot 4: NotebookLM Gateway */}
-          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-[#0a0a0a]">
-            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-64 md:pb-48">
+          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
+            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
               <header className="flex flex-col gap-2 mb-12 md:mb-24 px-2 md:px-4">
                 <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Knowledge</h2>
                 <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">Bridge to NotebookLM</p>
@@ -973,7 +949,7 @@ function App() {
                     />
                     <button
                       onClick={handlePushNotebook}
-                      className="w-full bg-[#bd8a78] text-black py-4 rounded-full font-bold uppercase tracking-widest"
+                      className="w-full bg-[#bd8a78] text-black py-4 rounded-full font-bold uppercase tracking-widest hover:bg-[#bd8a78]/80 transition-colors"
                     >
                       PUSH TO ABYSS
                     </button>
@@ -985,19 +961,19 @@ function App() {
         </main>
 
         {/* Floating Input Bar */}
-        <div className="fixed bottom-16 md:bottom-20 left-0 right-0 p-4 md:p-6 z-[100] pointer-events-none pb-safe">
-          <div className="max-w-3xl mx-auto flex items-center gap-3 bg-[#050505]/85 backdrop-blur-3xl border border-white/10 p-2 pl-3 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.8)] pointer-events-auto transition-all duration-300 focus-within:border-white/20 focus-within:bg-[#050505]/95">
+        <div className="fixed bottom-16 md:bottom-20 left-0 right-0 p-4 z-[100] pointer-events-none pb-safe">
+          <div className="max-w-xl mx-auto flex items-center gap-3 bg-[#0a0a0a]/95 border border-white/20 p-1.5 pl-5 rounded-full shadow-[0_40px_80px_rgba(0,0,0,0.9)] pointer-events-auto transition-all duration-500 focus-within:border-white/40 focus-within:scale-[1.02]">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="あなたの言葉を、深淵へ..."
+              placeholder="深淵へ言葉を記す..."
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
-              className="flex-1 bg-transparent border-none focus:outline-none text-white text-sm md:text-base px-5 py-3.5 resize-none h-14 leading-relaxed placeholder:text-white/20 font-sans"
+              className="flex-1 bg-transparent border-none focus:outline-none text-white text-sm md:text-base py-3.5 resize-none h-14 leading-relaxed placeholder:text-white/10 font-sans"
             />
             <button
               onClick={handleSendMessage}
               disabled={loading || !input.trim()}
-              className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center font-black text-2xl font-oswald shadow-xl transition-all duration-300 active:scale-90 disabled:opacity-30 disabled:active:scale-100 hover:bg-zinc-200"
+              className="w-11 h-11 rounded-full bg-white text-black flex items-center justify-center font-black text-lg font-oswald shadow-xl transition-all duration-300 active:scale-90 disabled:opacity-10 hover:bg-zinc-200"
             >
               +
             </button>
