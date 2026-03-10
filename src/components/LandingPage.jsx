@@ -135,9 +135,25 @@ export default function LandingPage({ onLoginComplete, user }) {
                                         <button
                                             onClick={handleApiConnect}
                                             disabled={!tempKey || isConnecting}
-                                            className="w-full bg-zinc-200 text-black py-4 rounded-full font-bold hover:bg-white transition-all disabled:opacity-50"
+                                            className={`w-full py-4 rounded-full font-bold transition-all duration-500 disabled:opacity-50 ${tempKey
+                                                ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)]'
+                                                : 'bg-zinc-200 text-black'
+                                                }`}
                                         >
-                                            {isConnecting ? '接続中...' : 'イタコプラザへ入る'}
+                                            <div className="flex items-center justify-center gap-2">
+                                                {isConnecting ? (
+                                                    <>
+                                                        <motion.div
+                                                            animate={{ scale: [1, 1.2, 1] }}
+                                                            transition={{ repeat: Infinity, duration: 1 }}
+                                                            className="w-2 h-2 rounded-full bg-white"
+                                                        />
+                                                        <span>接続中...</span>
+                                                    </>
+                                                ) : (
+                                                    <span>接続する (Connect)</span>
+                                                )}
+                                            </div>
                                         </button>
                                     </div>
                                 </div>
