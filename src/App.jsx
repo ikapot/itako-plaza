@@ -31,9 +31,14 @@ const INITIAL_LOCATIONS = [
 // --- コンポーネント群は /components フォルダへ退避 (Clean Code) ---
 
 function App() {
+  const cleanKey = (key) => {
+    if (typeof key !== 'string') return key;
+    return key.includes('=') ? key.split('=')[1].trim() : key.trim();
+  };
+
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState('無名の参列者');
-  const [geminiKey, setGeminiKey] = useState(localStorage.getItem('itako_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || '');
+  const [geminiKey, setGeminiKey] = useState(cleanKey(localStorage.getItem('itako_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || ''));
   const [isAppReady, setIsAppReady] = useState(false);
   const [activeSlot, setActiveSlot] = useState(0);
   const [input, setInput] = useState('');

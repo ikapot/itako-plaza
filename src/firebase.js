@@ -3,13 +3,18 @@ import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOu
 import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy } from "firebase/firestore";
 
 // TODO: 環境変数（.envファイル）からFirebase設定を読み込む
+const cleanKey = (key) => {
+    if (typeof key !== 'string') return key;
+    return key.includes('=') ? key.split('=')[1].trim() : key.trim();
+};
+
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID
+    apiKey: cleanKey(import.meta.env.VITE_FIREBASE_API_KEY),
+    authDomain: cleanKey(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN),
+    projectId: cleanKey(import.meta.env.VITE_FIREBASE_PROJECT_ID),
+    storageBucket: cleanKey(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET),
+    messagingSenderId: cleanKey(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID),
+    appId: cleanKey(import.meta.env.VITE_FIREBASE_APP_ID)
 };
 
 const isConfigValid = firebaseConfig.apiKey && firebaseConfig.authDomain;
