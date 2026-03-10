@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, TrendingUp, User, MapPin, Ghost, Settings, Loader2, Quote, Menu, X, Cpu, Globe } from 'lucide-react';
 import { auth, fetchBookmarks, saveBookmark, fetchNotebookAccumulations } from './firebase';
-import { generateCharacterResponse, evaluateFutureSelf } from './gemini';
+import { generateCharacterResponseStream, evaluateFutureSelf } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
 import { searchNDLArchive } from './ndl';
 import Header from './components/Header';
@@ -195,49 +195,70 @@ function App() {
     const currentChar = characters.find(c => c.id === selectedCharId);
 
     // NDL検索（話題に関連するアーカイブの提示）
-    if (messages.length % 2 === 0) {
-      searchNDLArchive(userMsg).then(results => {
+    searchNDLArchive(userMsg).then(results => {
+      if (results && results.length > 0) {
         setArchives(prev => [...results, ...prev].slice(0, 5));
-      });
-    }
-
-    // Generate AI response with physical status, underground info, and spirit-shared knowledge
-    const aiResp = await generateCharacterResponse(currentChar, userMsg, isUnderground, spiritSharedKnowledge, geminiKey);
-    setMessages(prev => [...prev, { role: 'ai', content: aiResp, charId: selectedCharId }]);
-
-    // 自律増殖の評価
-    if (messages.length % 3 === 0) {
-      import('./gemini').then(async ({ evaluateExpansion }) => {
-        const expansion = await evaluateExpansion(userMsg + " " + aiResp, geminiKey);
-        if (expansion) {
-          if (expansion.type === 'character' && !characters.find(c => c.id === expansion.id)) {
-            setCharacters(prev => [...prev, {
-              ...expansion,
-              avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${expansion.id}`,
-              status: { [expansion.flavor]: '初期値' }
-            }]);
-          } else if (expansion.type === 'location' && !locations.find(l => l.id === expansion.id)) {
-            setLocations(prev => [...prev, { id: expansion.id, name: expansion.name, icon: <MapPin size={16} /> }]);
-          }
-        }
-      });
-    }
-
-    // Trends評価 (旧2036年評価)
-    if (activeSlot === 2) {
-      const critique = await evaluateFutureSelf(bookmarks, geminiKey);
-      setFutureSelfCritique(critique);
-    }
-
-    // ステータスの動的変化
-    setCharacters(prev => prev.map(c => {
-      if (c.id === selectedCharId) {
-        if (c.id === 'soseki') return { ...c, status: { '胃痛レベル': (c.status['胃痛レベル'] || 0) + 1 } };
-        if (c.id === 'dosto') return { ...c, status: { '借金額': (parseInt(c.status['借金額']) + 1000) || 50000 + 'ルーブル' } };
-        if (c.id === 'k_kokoro') return { ...c, status: { '絶望度': 'より深く' } };
       }
-      return c;
-    }));
+    });
+
+    // Create a placeholder for the AI message to be updated via stream
+    setMessages(prev => [...prev, { role: 'ai', content: '', charId: selectedCharId }]);
+
+    let finalAiResp = "";
+    try {
+      await generateCharacterResponseStream(
+        currentChar,
+        userMsg,
+        isUnderground,
+        spiritSharedKnowledge,
+        geminiKey,
+        (chunk) => {
+          finalAiResp = chunk;
+          setMessages(prev => {
+            const next = [...prev];
+            next[next.length - 1] = { ...next[next.length - 1], content: chunk };
+            return next;
+          });
+        }
+      );
+
+      // 自律増殖の評価（ストリーム完了後）
+      if (messages.length % 3 === 0) {
+        import('./gemini').then(async ({ evaluateExpansion }) => {
+          const expansion = await evaluateExpansion(userMsg + " " + finalAiResp, geminiKey);
+          if (expansion) {
+            if (expansion.type === 'character' && !characters.find(c => c.id === expansion.id)) {
+              setCharacters(prev => [...prev, {
+                ...expansion,
+                avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${expansion.id}`,
+                status: { [expansion.flavor]: '初期値' }
+              }]);
+            } else if (expansion.type === 'location' && !locations.find(l => l.id === expansion.id)) {
+              setLocations(prev => [...prev, { id: expansion.id, name: expansion.name, icon: <MapPin size={16} /> }]);
+            }
+          }
+        });
+      }
+
+      // Trends評価
+      if (activeSlot === 2) {
+        const critique = await evaluateFutureSelf(bookmarks, geminiKey);
+        setFutureSelfCritique(critique);
+      }
+
+      // ステータスの動的変化
+      setCharacters(prev => prev.map(c => {
+        if (c.id === selectedCharId) {
+          if (c.id === 'soseki') return { ...c, status: { '胃痛レベル': (c.status['胃痛レベル'] || 0) + 1 } };
+          if (c.id === 'dosto') return { ...c, status: { '借金額': (parseInt(c.status['借金額']) + 1000) || 50000 + 'ルーブル' } };
+          if (c.id === 'k_kokoro') return { ...c, status: { '絶望度': 'より深く' } };
+        }
+        return c;
+      }));
+
+    } catch (e) {
+      console.error("Chat Interaction Error:", e);
+    }
 
     setLoading(false);
   };

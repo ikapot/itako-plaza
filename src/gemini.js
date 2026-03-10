@@ -81,7 +81,11 @@ export const evaluateFutureSelf = async (bookmarks, userApiKey) => {
             const model = genAI.getGenerativeModel({
                 model: modelName,
                 generationConfig: CHARACTER_CONFIGS.future_self.generationConfig,
-                systemInstruction: CHARACTER_CONFIGS.future_self.systemPrompt
+                systemInstruction: CHARACTER_CONFIGS.future_self.systemPrompt,
+                safetySettings: [
+                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                ]
             });
 
             const bookmarkText = bookmarks.map(b => `[${b.charId}との対話] 私: "${b.userMsg}" -> 相手: "${b.aiMsg}"`).join('\n');
@@ -118,12 +122,64 @@ ${bookmarkText}
 };
 
 /**
- * キャラクターの応答を生成
- * @param {Object} char キャラクター情報
- * @param {string} userMessage メッセージ
- * @param {boolean} isUnderground 地下通路フラグ
- * @param {string} externalContext NotebookLM等からの外部コンテキスト
+ * キャラクターの応答を生成（ストリーミング対応）
  */
+export const generateCharacterResponseStream = async (char, userMessage, isUnderground = false, externalContext = "", userApiKey = "", onChunk) => {
+    if (!userApiKey) {
+        onChunk("【設定の「歯車」アイコンから、Gemini APIキーを入力してください】");
+        return;
+    }
+
+    for (const modelName of FALLBACK_MODELS) {
+        try {
+            const sanitizedKey = userApiKey.trim();
+            const genAI = new GoogleGenerativeAI(sanitizedKey);
+            const config = CHARACTER_CONFIGS[char.id] || { generationConfig: { temperature: 0.7 } };
+            const model = genAI.getGenerativeModel({
+                model: modelName,
+                generationConfig: config.generationConfig,
+                systemInstruction: config.systemPrompt || char.systemPrompt,
+                safetySettings: [
+                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+                ]
+            });
+
+            const statusText = char.status ? Object.entries(char.status).map(([k, v]) => `${k}: ${v}`).join('、') : "";
+            const prompt = `
+<context>
+追加コンテキスト: ${externalContext || 'なし'}
+史実エピソード: ${char.history || '特記事項なし'}
+現在の身体状態: ${statusText}
+特殊環境: ${isUnderground ? '地下通路（本音・共謀モード）' : '地表（通常の対話）'}
+</context>
+<user_message>${userMessage}</user_message>`;
+
+            const result = await model.generateContentStream(prompt);
+            let fullText = "";
+            for await (const chunk of result.stream) {
+                const chunkText = chunk.text();
+                fullText += chunkText;
+                onChunk(fullText);
+            }
+            console.log(`[Stream] ${char.id} responding via: ${modelName}`);
+            return;
+        } catch (error) {
+            const isRetryable = error.status === 429 || error.status === 404 || error.message?.includes('429');
+            if (isRetryable) {
+                console.warn(`[Stream] ${modelName} failed, retrying fallback...`);
+                continue;
+            }
+            console.error("Stream Error:", error);
+            onChunk("暗闇の中で声が消えました。");
+            return;
+        }
+    }
+    onChunk("すべての精神層が沈黙しました。時間をおいてから再度お試しください。");
+};
+
 export const generateCharacterResponse = async (char, userMessage, isUnderground = false, externalContext = "", userApiKey = "") => {
     if (!userApiKey) return "【設定の「歯車」アイコンから、Gemini APIキーを入力してください】";
 
