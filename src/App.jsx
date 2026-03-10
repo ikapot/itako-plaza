@@ -88,6 +88,9 @@ function App() {
         setNotebookAccumulations(data);
         const shared = data.map(acc => acc.content).join('\n---\n');
         setSpiritSharedKnowledge(shared);
+        if (geminiKey) {
+          setIsAppReady(true);
+        }
       } else {
         // フォールバック: 匿名ログイン
         import('./firebase').then(async ({ loginAnonymously }) => {
