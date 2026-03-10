@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, TrendingUp, User, MapPin, Ghost, Settings, Loader2, Quote, Menu, X, Cpu, Globe } from 'lucide-react';
-import { auth, fetchBookmarks, saveBookmark } from './firebase';
+import { auth, fetchBookmarks, saveBookmark, fetchNotebookAccumulations } from './firebase';
 import { generateCharacterResponse, evaluateFutureSelf } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
 import { searchNDLArchive } from './ndl';
@@ -59,6 +59,8 @@ function App() {
   const [bookmarks, setBookmarks] = useState([]);
   const [futureSelfCritique, setFutureSelfCritique] = useState('');
   const [spiritSharedKnowledge, setSpiritSharedKnowledge] = useState('');
+  const [notebookInput, setNotebookInput] = useState('');
+  const [notebookAccumulations, setNotebookAccumulations] = useState([]);
 
   // キャラクターと場所の拡張可能なリスト
   const [characters, setCharacters] = useState(INITIAL_CHARACTERS.map(c => ({
@@ -83,7 +85,11 @@ function App() {
         // ログイン後のデータ取得
         const savedBookMarks = await fetchBookmarks();
         setBookmarks(savedBookMarks);
-        setSpiritSharedKnowledge('');
+
+        // NotebookLMからの蓄積知見を読み込み
+        const data = await fetchNotebookAccumulations();
+        const shared = data.map(acc => acc.content).join('\n---\n');
+        setSpiritSharedKnowledge(shared);
         if (geminiKey) {
           setIsAppReady(true);
         }
@@ -116,9 +122,18 @@ function App() {
     return () => unsubscribe();
   }, [geminiKey]);
 
-
-
-
+  const handlePushNotebook = async (content) => {
+    const textToPush = content || notebookInput;
+    if (!textToPush.trim()) return;
+    setLoading(true);
+    await saveNotebookAccumulation(textToPush);
+    setNotebookInput('');
+    const data = await fetchNotebookAccumulations();
+    setNotebookAccumulations(data);
+    const shared = data.map(acc => acc.content).join('\n---\n');
+    setSpiritSharedKnowledge(shared);
+    setLoading(false);
+  };
   const handleBookmark = async (msgIndex) => {
     const userMsg = messages[msgIndex - 1]?.content;
     const aiMsg = messages[msgIndex]?.content;
@@ -715,11 +730,30 @@ function App() {
           <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
             <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
               <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
-                <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">3. Trends</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">3. Trends</h2>
+                  <button
+                    onClick={() => alert('同期を開始するには Antigravity に NotebookLM の URL を伝えてください。')}
+                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase hover:bg-white/10 transition-all"
+                  >
+                    /sync-notebooklm
+                  </button>
+                </div>
                 <p className="text-sm md:text-base font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">イタコプラザでの流行</p>
               </header>
 
               <div className="space-y-12">
+                {/* Knowledge Sync Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-6 bg-white/5 border border-white/10 rounded-[30px] flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Knowledge Points</span>
+                    <span className="text-2xl font-black text-white font-oswald">{notebookAccumulations.length}</span>
+                  </div>
+                  <div className="p-6 bg-white/5 border border-white/10 rounded-[30px] flex flex-col gap-1">
+                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Spirit Sync</span>
+                    <span className="text-2xl font-black text-emerald-500 font-oswald">ACTIVE</span>
+                  </div>
+                </div>
                 {/* Visual Insight Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
