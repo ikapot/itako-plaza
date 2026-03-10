@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, TrendingUp, User, MapPin, Ghost, Settings, Loader2, Quote, Menu, X, Cpu, Globe } from 'lucide-react';
-import { auth, fetchBookmarks, saveBookmark, fetchNotebookAccumulations } from './firebase';
+import { auth, fetchBookmarks, saveBookmark, fetchNotebookAccumulations, updateLocationEnergy, fetchLocationEnergies } from './firebase';
 import { generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
 import { searchNDLArchive } from './ndl';
@@ -68,6 +68,7 @@ function App() {
   const [notebookAccumulations, setNotebookAccumulations] = useState([]);
   const [isValidatingApi, setIsValidatingApi] = useState(false);
   const [apiConnectionStatus, setApiConnectionStatus] = useState('idle'); // 'idle', 'success', 'error'
+  const [locationEnergies, setLocationEnergies] = useState({});
 
   // キャラクターと場所の拡張可能なリスト
   const [characters, setCharacters] = useState(INITIAL_CHARACTERS.map(c => ({
@@ -126,7 +127,17 @@ function App() {
     };
 
     loadGlobalData();
-    return () => unsubscribe();
+
+    // 霊的エネルギーの定期取得
+    const energyInterval = setInterval(async () => {
+      const energies = await fetchLocationEnergies();
+      setLocationEnergies(energies);
+    }, 10000);
+
+    return () => {
+      unsubscribe();
+      clearInterval(energyInterval);
+    };
   }, [geminiKey]);
 
   const lastLocationRef = useRef(null);
@@ -140,6 +151,10 @@ function App() {
 
       lastLocationRef.current = selectedLocationId;
       setLoading(true);
+
+      // エネルギーを上昇させる
+      updateLocationEnergy(selectedLocationId, 15);
+
       // Pick two random characters
       const shuffled = [...characters].sort(() => 0.5 - Math.random());
       const c1 = shuffled[0];
@@ -313,15 +328,32 @@ function App() {
               {Array.from({ length: 9 }).map((_, i) => {
                 const loc = locations.find(l => l.pos === i);
                 const isSelected = selectedLocationId === loc?.id;
+                const energy = loc ? (locationEnergies[loc.id] || 0) : 0;
+                const intensity = Math.min(energy / 100, 1);
+
                 return (
                   <button
                     key={i}
                     onClick={() => loc && setSelectedLocationId(loc.id)}
                     className={`aspect-square flex items-center justify-center relative transition-all duration-500 overflow-hidden ${isSelected ? 'bg-zinc-200' : 'bg-black hover:bg-white/5'}`}
                   >
+                    {/* Spiritual Glow Overlay */}
+                    {loc && energy > 0 && (
+                      <div
+                        className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
+                        style={{
+                          background: `radial-gradient(circle, rgba(241, 90, 36, ${intensity * 0.3}) 0%, transparent 70%)`,
+                          opacity: 0.5 + Math.sin(Date.now() / 1000) * 0.2
+                        }}
+                      />
+                    )}
                     {loc ? (
-                      <div className="flex flex-col items-center gap-1">
-                        <MapPin size={12} className={isSelected ? 'text-black' : 'text-white/20'} />
+                      <div className="flex flex-col items-center gap-1 z-10">
+                        <MapPin
+                          size={12}
+                          className={`${isSelected ? 'text-black' : 'text-white/20'}`}
+                          style={!isSelected && energy > 0 ? { filter: `drop-shadow(0 0 ${intensity * 10}px #f15a24)` } : {}}
+                        />
                         <span className={`text-[8px] font-bold tracking-tighter ${isSelected ? 'text-black' : 'text-white/40'}`}>{loc.name}</span>
                       </div>
                     ) : (
@@ -715,13 +747,30 @@ function App() {
                   {Array.from({ length: 9 }).map((_, i) => {
                     const loc = locations.find(l => l.pos === i);
                     const isSelected = selectedLocationId === loc?.id;
+                    const energy = loc ? (locationEnergies[loc.id] || 0) : 0;
+                    const intensity = Math.min(energy / 100, 1);
+
                     return (
                       <button
                         key={i}
                         onClick={() => loc && setSelectedLocationId(loc.id)}
-                        className={`aspect-square flex items-center justify-center rounded transition-all duration-300 active:scale-95 ${isSelected ? 'bg-zinc-200 cursor-default shadow-sm' : 'bg-black/40 hover:bg-white/10 cursor-pointer'}`}
+                        className={`aspect-square flex items-center justify-center relative rounded transition-all duration-300 active:scale-95 overflow-hidden ${isSelected ? 'bg-zinc-200 cursor-default shadow-sm' : 'bg-black/40 hover:bg-white/10 cursor-pointer'}`}
                       >
-                        {loc && <MapPin size={12} className={isSelected ? 'text-black' : 'text-white/20'} />}
+                        {loc && energy > 0 && (
+                          <div
+                            className="absolute inset-0 pointer-events-none"
+                            style={{
+                              background: `radial-gradient(circle, rgba(241, 90, 36, ${intensity * 0.4}) 0%, transparent 70%)`,
+                            }}
+                          />
+                        )}
+                        {loc && (
+                          <MapPin
+                            size={12}
+                            className={`z-10 ${isSelected ? 'text-black' : 'text-white/20'}`}
+                            style={!isSelected && energy > 0 ? { filter: `drop-shadow(0 0 ${intensity * 8}px #f15a24)` } : {}}
+                          />
+                        )}
                       </button>
                     );
                   })}

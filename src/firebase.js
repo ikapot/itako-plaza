@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 
 // TODO: 環境変数（.envファイル）からFirebase設定を読み込む
 const cleanKey = (key) => {
@@ -165,5 +165,48 @@ export const fetchNotebookAccumulations = async (limitCount = 10) => {
     } catch (e) {
         console.error("Fetch Accumulation Error:", e);
         return [];
+    }
+};
+
+/**
+ * 特定の場所の霊的エネルギーを更新
+ */
+export const updateLocationEnergy = async (locationId, amount = 10) => {
+    if (!isConfigValid || !db) return;
+    try {
+        const locRef = doc(db, "location_energy", locationId);
+        const snap = await getDoc(locRef);
+
+        if (snap.exists()) {
+            await updateDoc(locRef, {
+                energy: increment(amount),
+                lastInteraction: serverTimestamp()
+            });
+        } else {
+            await setDoc(locRef, {
+                energy: amount,
+                lastInteraction: serverTimestamp()
+            });
+        }
+    } catch (e) {
+        console.error("Update Energy Error:", e);
+    }
+};
+
+/**
+ * 全場所の霊的エネルギーを取得
+ */
+export const fetchLocationEnergies = async () => {
+    if (!isConfigValid || !db) return {};
+    try {
+        const snapshot = await getDocs(collection(db, "location_energy"));
+        const energies = {};
+        snapshot.forEach(doc => {
+            energies[doc.id] = doc.data().energy || 0;
+        });
+        return energies;
+    } catch (e) {
+        console.error("Fetch Energies Error:", e);
+        return {};
     }
 };
