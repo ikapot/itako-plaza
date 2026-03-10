@@ -5,10 +5,10 @@
 @tailwind utilities;
 
 :root {
-  --itako-bg: #f4f4f2;
-  --itako-panel: #ffffff;
+  --itako-bg: #000000;
+  --itako-panel: #0a0a0a;
   --itako-accent: #bd8a78;
-  --itako-text: #2c2c2c;
+  --itako-text: #ffffff;
   --itako-muted: #888888;
   background-color: var(--itako-bg);
   color: var(--itako-text);
