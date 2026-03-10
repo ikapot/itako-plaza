@@ -427,6 +427,8 @@ function App() {
         userName={userName}
         openDrawer={() => setIsDrawerOpen(true)}
         openSettings={() => setShowSettings(true)}
+        activeSlot={activeSlot}
+        onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })}
       />
 
       {/* Settings Overlay */}
@@ -802,7 +804,7 @@ function App() {
         </main>
 
         {/* Floating Input Bar */}
-        <div className="fixed bottom-16 md:bottom-20 left-0 right-0 p-4 z-[100] pointer-events-none pb-safe">
+        <div className="fixed bottom-10 left-0 right-0 p-4 z-[100] pointer-events-none pb-safe">
           <div className="max-w-xl mx-auto flex items-center gap-3 bg-[#0a0a0a]/95 border border-white/20 p-1.5 pl-5 rounded-full shadow-[0_40px_80px_rgba(0,0,0,0.9)] pointer-events-auto transition-all duration-500 focus-within:border-white/40 focus-within:scale-[1.02]">
             <textarea
               value={input}
@@ -820,28 +822,6 @@ function App() {
             </button>
           </div>
         </div>
-
-        {/* Footer Navigation */}
-        <footer className="h-16 md:h-14 pb-2 md:pb-0 border-t border-white/10 bg-[#020202]/95 backdrop-blur-3xl flex items-center justify-center gap-16 sm:gap-24 px-6 z-[100] shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-          {[
-            { id: 0, icon: <TrendingUp size={22} />, color: '#98a436', label: 'News' },
-            { id: 1, icon: <MessageSquare size={22} />, color: '#fdb913', label: 'Dialog' },
-            { id: 2, icon: <Ghost size={22} />, color: '#f15a24', label: 'Trends' },
-          ].map(item => (
-            <div
-              key={item.id}
-              onClick={() => scrollRef.current?.scrollTo({ left: window.innerWidth * item.id, behavior: 'smooth' })}
-              style={{ color: activeSlot === item.id ? item.color : 'rgba(255,255,255,0.15)' }}
-              className={`p-3 relative flex items-center justify-center transition-all duration-300 cursor-pointer transform active:scale-90 ${activeSlot === item.id ? 'scale-110 drop-shadow-md' : 'hover:scale-105 hover:text-white/40'}`}
-              aria-label={item.label}
-            >
-              {item.icon}
-              {activeSlot === item.id && (
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current shadow-[0_0_10px_current]" />
-              )}
-            </div>
-          ))}
-        </footer>
       </div>
     </div>
   );
