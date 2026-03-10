@@ -7,7 +7,7 @@ export default function Logo() {
             {/* Ultra-minimalist Image Icon */}
             <div className="w-8 h-8 flex items-center justify-center overflow-hidden rounded-full bg-zinc-950 border border-white/5 group-hover:border-itako-orange/40 transition-all duration-700 shadow-2xl space-x-2">
                 <motion.img
-                    src="/assets/logo.png"
+                    src="assets/logo.png"
                     alt="ITAKO"
                     className="w-full h-full object-cover opacity-60 group-hover:opacity-100 scale-125 transition-all duration-1000"
                 />

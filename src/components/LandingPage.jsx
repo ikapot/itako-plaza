@@ -84,7 +84,7 @@ export default function LandingPage({ onLoginComplete }) {
                                     </div>
 
                                     <button
-                                        onClick={() => setStep('auth')}
+                                        onClick={() => setStep('api')}
                                         className="w-full border border-zinc-700 text-zinc-300 py-3 px-6 rounded-full font-bold hover:bg-zinc-900 transition-all text-sm"
                                     >
                                         アカウントを作成

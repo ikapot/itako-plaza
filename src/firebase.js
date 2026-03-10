@@ -18,22 +18,42 @@ let app;
 let auth;
 let db;
 
+const dummyAuthCallbacks = new Set();
+let dummyCurrentUser = null;
+
 if (isConfigValid) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
 } else {
     console.warn("Firebase config is missing. Authentication will not work.");
-    // Dummy objects to prevent early crashes
-    auth = { onAuthStateChanged: (cb) => { cb(null); return () => { }; }, currentUser: null };
+    auth = {
+        onAuthStateChanged: (cb) => {
+            dummyAuthCallbacks.add(cb);
+            cb(dummyCurrentUser);
+            return () => { dummyAuthCallbacks.delete(cb); };
+        },
+        get currentUser() { return dummyCurrentUser; }
+    };
     db = {};
 }
 
-export { auth, db };
+const triggerAuthChange = (user) => {
+    dummyCurrentUser = user;
+    dummyAuthCallbacks.forEach(cb => cb(user));
+};
 
-const googleProvider = new GoogleAuthProvider();
+export { auth, db, triggerAuthChange };
+
+const googleProvider = isConfigValid ? new GoogleAuthProvider() : null;
 
 export const loginWithGoogle = async () => {
+    if (!isConfigValid) {
+        console.warn("Using dummy Google login");
+        const user = { uid: 'dummy-google-user', displayName: 'GUEST (No Firebase)' };
+        triggerAuthChange(user);
+        return user;
+    }
     try {
         const result = await signInWithPopup(auth, googleProvider);
         return result.user;
@@ -43,9 +63,21 @@ export const loginWithGoogle = async () => {
     }
 };
 
-export const logout = () => signOut(auth);
+export const logout = () => {
+    if (isConfigValid) {
+        signOut(auth);
+    } else {
+        triggerAuthChange(null);
+    }
+};
 
 export const loginAnonymously = async () => {
+    if (!isConfigValid) {
+        console.warn("Using dummy anonymous login");
+        const user = { uid: 'dummy-anon-user', displayName: 'GUEST' };
+        triggerAuthChange(user);
+        return user;
+    }
     try {
         const result = await signInAnonymously(auth);
         return result.user;
