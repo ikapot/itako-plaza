@@ -127,24 +127,25 @@ function App() {
     return () => unsubscribe();
   }, [geminiKey]);
 
+  const lastLocationRef = useRef(null);
   useEffect(() => {
     const triggerLocationConversation = async () => {
       if (!geminiKey || !isAppReady) return;
+      if (lastLocationRef.current === selectedLocationId) return; // Prevent double trigger or mount trigger
       const currentLocation = locations.find(l => l.id === selectedLocationId);
       if (!currentLocation) return;
+      if (!lastLocationRef.current) { lastLocationRef.current = selectedLocationId; return; } // Skip first mount
 
+      lastLocationRef.current = selectedLocationId;
       setLoading(true);
       // Pick two random characters
       const shuffled = [...characters].sort(() => 0.5 - Math.random());
       const c1 = shuffled[0];
       const c2 = shuffled[1];
 
-      const prompt = `${currentLocation.name}にて、${c1.name}と${c2.name}が短い対話（2往復程度）を交わしている様子を描写してください。 ${currentLocation.name}の雰囲気を反映させ、魂がそこに「居る」感覚を重視してください。`;
-
       try {
         const { generateLocationDialogue } = await import('./gemini');
         const dialogue = await generateLocationDialogue(c1, c2, currentLocation, geminiKey);
-        // Add to messages as a group
         if (Array.isArray(dialogue)) {
           setMessages(prev => [...prev, ...dialogue.map(d => ({ role: 'ai', content: d.content, charId: d.charId }))]);
         }
