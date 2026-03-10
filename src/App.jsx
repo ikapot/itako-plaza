@@ -760,7 +760,7 @@ function App() {
           <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
             <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
               <header className="flex flex-col gap-2 mb-8 md:mb-10 px-2 md:px-4">
-                <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">1. News</h2>
+                <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
                 <p className="text-sm md:text-base font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">ニュース</p>
               </header>
 
@@ -804,7 +804,7 @@ function App() {
             <div className="max-w-2xl mx-auto min-h-full flex flex-col">
               <header className="flex flex-col gap-2 mb-6 md:mb-8 px-2 md:px-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">2. Dialog</h2>
+                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
                   <button
                     onClick={() => setIsUnderground(!isUnderground)}
                     className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
@@ -866,7 +866,7 @@ function App() {
             <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
               <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">3. Trends</h2>
+                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Trends</h2>
                   <button
                     onClick={() => alert('同期を開始するには Antigravity に NotebookLM の URL を伝えてください。')}
                     className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase hover:bg-white/10 transition-all"
