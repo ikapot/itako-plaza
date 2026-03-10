@@ -125,39 +125,3 @@ export const fetchBookmarks = async () => {
         return [];
     }
 };
-/**
- * NotebookLMの蓄積データを保存
- */
-export const saveNotebookAccumulation = async (content) => {
-    const user = auth.currentUser;
-    if (!user || !content.trim()) return;
-    try {
-        await addDoc(collection(db, "notebook_accumulations"), {
-            uid: user.uid,
-            content,
-            timestamp: serverTimestamp()
-        });
-    } catch (e) {
-        console.error("Save Accumulation Error:", e);
-    }
-};
-
-/**
- * NotebookLMの蓄積データを全取得
- */
-export const fetchNotebookAccumulations = async () => {
-    const user = auth.currentUser;
-    if (!user) return [];
-    try {
-        const q = query(
-            collection(db, "notebook_accumulations"),
-            where("uid", "==", user.uid),
-            orderBy("timestamp", "desc")
-        );
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (e) {
-        console.error("Fetch Accumulation Error:", e);
-        return [];
-    }
-};

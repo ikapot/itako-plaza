@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, TrendingUp, BookOpen, User, MapPin, Ghost, Settings, Loader2, Quote, Menu, X, Cpu, Globe } from 'lucide-react';
-import { auth, fetchBookmarks, saveBookmark, saveNotebookAccumulation, fetchNotebookAccumulations } from './firebase';
+import { MessageSquare, TrendingUp, User, MapPin, Ghost, Settings, Loader2, Quote, Menu, X, Cpu, Globe } from 'lucide-react';
+import { auth, fetchBookmarks, saveBookmark } from './firebase';
 import { generateCharacterResponse, evaluateFutureSelf } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
 import { searchNDLArchive } from './ndl';
@@ -57,8 +57,6 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
   const [futureSelfCritique, setFutureSelfCritique] = useState('');
-  const [notebookInput, setNotebookInput] = useState('');
-  const [notebookAccumulations, setNotebookAccumulations] = useState([]);
   const [spiritSharedKnowledge, setSpiritSharedKnowledge] = useState('');
 
   // キャラクターと場所の拡張可能なリスト
@@ -84,10 +82,7 @@ function App() {
         // ログイン後のデータ取得
         const savedBookMarks = await fetchBookmarks();
         setBookmarks(savedBookMarks);
-        const data = await fetchNotebookAccumulations();
-        setNotebookAccumulations(data);
-        const shared = data.map(acc => acc.content).join('\n---\n');
-        setSpiritSharedKnowledge(shared);
+        setSpiritSharedKnowledge('');
         if (geminiKey) {
           setIsAppReady(true);
         }
@@ -124,82 +119,6 @@ function App() {
     return () => unsubscribe();
   }, [geminiKey]);
 
-  const loadAccumulations = async () => {
-    const data = await fetchNotebookAccumulations();
-    setNotebookAccumulations(data);
-  };
-
-  const handlePushNotebook = async () => {
-    if (!notebookInput.trim()) return;
-    setLoading(true);
-    await saveNotebookAccumulation(notebookInput);
-    setNotebookInput('');
-    const data = await fetchNotebookAccumulations();
-    setNotebookAccumulations(data);
-    const shared = data.map(acc => acc.content).join('\n---\n');
-    setSpiritSharedKnowledge(shared);
-    setLoading(false);
-    alert('知見が広場の精神たちに自動注入されました。');
-  };
-
-  const handleOpenAccumulations = () => {
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Abyss Records - Itako Plaza</title>
-          <meta charset="UTF-8">
-          <script src="https://cdn.tailwindcss.com"></script>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Outfit:wght@300;600&display=swap');
-            body { 
-              background: #0a0a0a; 
-              color: rgba(255,255,255,0.8); 
-              font-family: 'Outfit', sans-serif;
-            }
-            .serif { font-family: 'Noto Serif JP', serif; }
-            .grain {
-              position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-              background: url('https://grainy-gradients.vercel.app/noise.svg');
-              opacity: 0.03; pointer-events: none; z-index: 50;
-            }
-            .earth-clay { color: #bd8a78; }
-            .earth-sage { color: #899d90; }
-            .earth-sand { color: #c8b39c; }
-          </style>
-        </head>
-        <body class="p-8 md:p-24 min-h-screen">
-          <div class="grain"></div>
-          <div class="max-w-4xl mx-auto">
-            <header class="mb-32 border-b border-white/5 pb-16">
-              <h1 class="text-8xl font-black tracking-tighter text-white mb-6">INSIGHTS</h1>
-              <p class="text-xl earth-clay font-bold tracking-[0.4em] uppercase">Deep Accumulations of Abyss</p>
-            </header>
-
-            <div class="grid gap-24">
-              ${notebookAccumulations.map(acc => `
-                <article class="group">
-                  <div class="flex items-center gap-6 mb-8 text-[10px] font-bold tracking-[0.3em] text-white/20 uppercase">
-                    <span class="bg-white/5 px-4 py-1 rounded-full text-white/40">${acc.timestamp?.toDate().toLocaleDateString() || 'Ancient Fragment'}</span>
-                    <span class="earth-sage">Deciphered</span>
-                  </div>
-                  <div class="relative pl-12 border-l border-white/10">
-                    <div class="absolute -left-[1px] top-0 w-[2px] h-12 bg-gradient-to-b from-[#bd8a78] to-transparent"></div>
-                    <p class="text-2xl leading-relaxed text-white/90 serif whitespace-pre-wrap">${acc.content}</p>
-                  </div>
-                </article>
-              `).join('')}
-            </div>
-
-            ${notebookAccumulations.length === 0 ? '<p class="text-white/20 italic tracking-widest text-center py-32">The abyss is silent...</p>' : ''}
-          </div>
-        </body>
-      </html>
-    `;
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-  };
 
 
 
@@ -256,7 +175,7 @@ function App() {
       });
     }
 
-    // 2036年スロットの更新
+    // Trends評価 (旧2036年評価)
     if (activeSlot === 2) {
       const critique = await evaluateFutureSelf(bookmarks, geminiKey);
       setFutureSelfCritique(critique);
@@ -683,27 +602,6 @@ function App() {
 
         </div>
 
-        {/* NotebookLM Context Injection UI */}
-        <AnimatePresence>
-          {showContextUI && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="bg-white border-b border-orange-100 overflow-hidden"
-            >
-              <div className="p-4 max-w-xl mx-auto">
-                <label className="text-[10px] font-bold text-itako-orange mb-2 block uppercase tracking-wider">NotebookLM Analysis / 作家特有の論理・語彙</label>
-                <textarea
-                  value={externalContext}
-                  onChange={(e) => setExternalContext(e.target.value)}
-                  placeholder="ここにNotebookLMで解析した作家の癖や思想をペーストしてください。AIの応答に反映されます。"
-                  className="w-full h-24 p-3 bg-itako-warm-beige/30 border border-orange-50 rounded-xl text-xs focus:ring-1 ring-itako-orange/30 outline-none resize-none"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Main Timeline Scrollable Area */}
         <main
@@ -714,8 +612,8 @@ function App() {
           <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
             <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
               <header className="flex flex-col gap-2 mb-8 md:mb-10 px-2 md:px-4">
-                <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
-                <p className="text-sm md:text-base font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">The Fictionalized Reality</p>
+                <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">1. News</h2>
+                <p className="text-sm md:text-base font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">ニュース</p>
               </header>
 
               <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
@@ -754,11 +652,11 @@ function App() {
           </section>
 
           {/* Slot 2: Main Dialog */}
-          <section className={`timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-black`}>
+          <section className="timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-black">
             <div className="max-w-2xl mx-auto min-h-full flex flex-col">
               <header className="flex flex-col gap-2 mb-6 md:mb-8 px-2 md:px-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
+                  <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">2. Dialog</h2>
                   <button
                     onClick={() => setIsUnderground(!isUnderground)}
                     className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
@@ -791,12 +689,6 @@ function App() {
                                   <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/20">{m.charId}</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <button
-                                    onClick={() => setNotebookInput(prev => prev + (prev ? '\n\n' : '') + `${m.charId}: ${m.content}`)}
-                                    className="text-[9px] font-bold tracking-widest text-[#bd8a78] hover:scale-110 transition-transform flex items-center gap-1"
-                                  >
-                                    PUSH
-                                  </button>
                                   <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/40 hover:text-white transition-colors">
                                     Bookmark
                                   </button>
@@ -821,158 +713,53 @@ function App() {
             </div>
           </section>
 
-          {/* Slot 3: Abyss / Future Records */}
+          {/* Slot 3: Trends / イタコプラザでの流行 */}
           <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
             <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
-              <header className="flex flex-col gap-2 mb-8 px-2 md:px-4">
-                <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Abyss</h2>
-                <p className="text-sm md:text-base font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald">The Eternal Records</p>
+              <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
+                <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">3. Trends</h2>
+                <p className="text-sm md:text-base font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">イタコプラザでの流行</p>
               </header>
 
-              {loading ? (
-                <div className="py-32 flex flex-col items-center gap-6 text-itako-clay/40 italic text-xs tracking-widest uppercase font-bold animate-pulse">
-                  Exploring the deep...
-                </div>
-              ) : (
-                <div className="space-y-16">
-                  {/* NotebookLM Integration Bridge */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="relative p-12 rounded-[50px] bg-gradient-to-br from-white/10 to-transparent border border-white/20 shadow-2xl overflow-hidden group mb-8"
-                  >
-                    <div className="flex flex-col gap-8 relative z-10">
-                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-zinc-200 flex items-center justify-center">
-                              <span className="text-black font-black text-[10px]">LM</span>
-                            </div>
-                            <span className="text-[12px] font-bold tracking-[0.4em] text-zinc-400 uppercase">NotebookLM / Bridge</span>
-                          </div>
-                          <h3 className="text-3xl font-bold text-white tracking-tighter leading-tight">Channeling sources to NotebookLM</h3>
-                          <p className="text-sm text-zinc-500 max-w-lg leading-relaxed font-medium">
-                            Plazaの対話をNotebookLMへ。そしてNotebookLMの知見を、再びこの深淵へと「プッシュ（Push）」します。
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-4">
-                            <button
-                              onClick={() => {
-                                const content = archives.map(a => `${a.title}\n${a.quote}`).join('\n\n');
-                                navigator.clipboard.writeText(content);
-                                alert('Archives copied for NotebookLM');
-                                window.open('https://notebooklm.google.com/', '_blank');
-                              }}
-                              className="whitespace-nowrap px-8 py-3 bg-zinc-800 border border-white/10 text-zinc-300 text-[9px] font-bold tracking-[0.2em] uppercase rounded-full hover:bg-zinc-700 transition-all"
-                            >
-                              Export to Source
-                            </button>
-                            <button
-                              onClick={handleOpenAccumulations}
-                              className="whitespace-nowrap px-8 py-3 bg-zinc-200 text-black text-[9px] font-bold tracking-[0.2em] uppercase rounded-full shadow-lg hover:scale-105 transition-all"
-                            >
-                              View History
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+              <div className="space-y-12">
+                {/* Visual Insight Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-10 rounded-[50px] bg-gradient-to-br from-[#bd8a78]/20 to-transparent border border-[#bd8a78]/30 shadow-2xl"
+                >
+                  <div className="flex flex-col gap-6">
+                    <span className="text-[10px] font-bold tracking-[0.5em] text-[#bd8a78] uppercase">Now Trending</span>
+                    <h3 className="text-3xl font-bold text-white tracking-tighter leading-tight">
+                      {futureSelfCritique || "深淵から湧き上がる新たな潮流..."}
+                    </h3>
+                    <p className="text-sm text-white/40 leading-relaxed">
+                      広場で交わされる魂の対話から、今もっとも熱を帯びている言葉を抽出しました。
+                    </p>
+                  </div>
+                </motion.div>
 
-                      <div className="space-y-4 mt-8 pt-8 border-t border-white/5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase">Gather Insights (Paste from NotebookLM)</span>
-                        </div>
-                        <div className="relative">
-                          <textarea
-                            value={notebookInput}
-                            onChange={(e) => setNotebookInput(e.target.value)}
-                            placeholder="Paste insights from NotebookLM here..."
-                            className="w-full bg-black border border-white/10 rounded-[40px] p-8 text-white placeholder:text-white/10 focus:ring-1 focus:ring-white/20 text-sm h-32 resize-none transition-all"
-                          />
-                          <button
-                            onClick={handlePushNotebook}
-                            disabled={!notebookInput.trim() || loading}
-                            className="absolute bottom-6 right-6 bg-zinc-200 text-black px-8 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase shadow-2xl active:scale-95 disabled:opacity-20 transition-all"
-                          >
-                            PUSH TO ABYSS
-                          </button>
-                        </div>
+                {/* Abyssal Records (as Fragments of Trends) */}
+                <div className="space-y-8">
+                  <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.6em] px-4">Fragments of Spirit</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {archives.length > 0 ? archives.map((c, idx) => (
+                      <motion.div
+                        key={`${c.id}-${idx}`}
+                        className="p-8 bg-white/5 border border-white/10 rounded-[40px] flex flex-col gap-4 group hover:bg-white/10 transition-all"
+                      >
+                        <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{c.author || 'Trend'}</div>
+                        <div className="text-lg font-bold text-white/80 leading-tight">{c.title}</div>
+                        <div className="text-xs leading-relaxed text-white/40 italic font-serif">" {c.quote} "</div>
+                      </motion.div>
+                    )) : (
+                      <div className="col-span-2 py-20 text-center text-white/10 text-xs font-bold tracking-widest uppercase italic">
+                        No trends recorded yet.
                       </div>
-                    </div>
-                  </motion.div>
-                  {/* Future Self's Critique */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="relative p-8 md:p-12 rounded-[40px] md:rounded-[50px] bg-white/5 border border-white/10 shadow-2xl overflow-hidden backdrop-blur-md"
-                  >
-                    <div className="flex flex-col gap-6">
-                      <span className="text-[10px] md:text-[12px] font-bold tracking-[0.4em] text-white/40 uppercase border-l-2 border-white/20 pl-4">The Verdict from 2036</span>
-                      <p className="text-lg md:text-2xl leading-[1.6] text-white/80 font-serif italic tracking-tight">
-                        {futureSelfCritique || "まだ、未来の自分に届く言葉が保存されていないようです。"}
-                      </p>
-                    </div>
-                  </motion.div>
-
-                  {/* Abyssal Records */}
-                  <div className="space-y-8">
-                    <h3 className="text-sm font-bold text-white/20 uppercase tracking-[0.6em] px-4">Spirit Fragments</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {archives.map((c, idx) => (
-                        <motion.div
-                          key={`${c.id}-${idx}`}
-                          className="p-8 md:p-10 bg-white/5 border border-white/10 rounded-[40px] flex flex-col gap-4 group hover:bg-white/10 transition-all"
-                        >
-                          <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{c.author || 'Archive'}</div>
-                          <div className="text-lg font-bold text-white/80 leading-tight">{c.title}</div>
-                          <div className="text-xs leading-relaxed text-white/40 italic font-serif">" {c.quote} "</div>
-                        </motion.div>
-                      ))}
-                    </div>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
-          </section>
-
-          {/* Slot 4: NotebookLM Gateway */}
-          <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
-            <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
-              <header className="flex flex-col gap-2 mb-12 md:mb-24 px-2 md:px-4">
-                <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Knowledge</h2>
-                <p className="text-base md:text-lg font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">Bridge to NotebookLM</p>
-              </header>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="relative p-12 rounded-[50px] bg-white/5 border border-white/10 shadow-3xl overflow-hidden"
-              >
-                <div className="flex flex-col gap-12">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg" colorClass="bg-zinc-800" size="w-16 h-16" isSelected />
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold tracking-widest text-[#bd8a78] uppercase">The Scribe</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <textarea
-                      value={notebookInput}
-                      onChange={(e) => setNotebookInput(e.target.value)}
-                      placeholder="Paste insights from NotebookLM here..."
-                      className="w-full bg-black border border-white/10 rounded-[40px] p-8 text-white text-sm h-64 resize-none"
-                    />
-                    <button
-                      onClick={handlePushNotebook}
-                      className="w-full bg-[#bd8a78] text-black py-4 rounded-full font-bold uppercase tracking-widest hover:bg-[#bd8a78]/80 transition-colors"
-                    >
-                      PUSH TO ABYSS
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
+              </div>
             </div>
           </section>
         </main>
@@ -998,12 +785,11 @@ function App() {
         </div>
 
         {/* Footer Navigation */}
-        <footer className="h-16 md:h-14 pb-2 md:pb-0 border-t border-white/10 bg-[#020202]/95 backdrop-blur-3xl flex items-center justify-center gap-10 sm:gap-16 px-6 z-[100] shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+        <footer className="h-16 md:h-14 pb-2 md:pb-0 border-t border-white/10 bg-[#020202]/95 backdrop-blur-3xl flex items-center justify-center gap-16 sm:gap-24 px-6 z-[100] shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
           {[
             { id: 0, icon: <TrendingUp size={22} />, color: '#98a436', label: 'News' },
             { id: 1, icon: <MessageSquare size={22} />, color: '#fdb913', label: 'Dialog' },
-            { id: 2, icon: <Ghost size={22} />, color: '#f15a24', label: 'Abyss' },
-            { id: 3, icon: <BookOpen size={22} />, color: '#8e63aa', label: 'Knowledge' },
+            { id: 2, icon: <Ghost size={22} />, color: '#f15a24', label: 'Trends' },
           ].map(item => (
             <div
               key={item.id}
