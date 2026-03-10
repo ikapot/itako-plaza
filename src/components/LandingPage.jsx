@@ -136,7 +136,7 @@ export default function LandingPage({ onLoginComplete, user }) {
                                             onClick={handleApiConnect}
                                             disabled={!tempKey || isConnecting}
                                             className={`w-full py-4 rounded-full font-bold transition-all duration-500 disabled:opacity-50 ${tempKey
-                                                ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)]'
+                                                ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.4)] hover:shadow-[0_0_30px_rgba(241,90,36,0.6)]'
                                                 : 'bg-zinc-200 text-black'
                                                 }`}
                                         >

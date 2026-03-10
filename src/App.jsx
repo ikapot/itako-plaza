@@ -374,10 +374,10 @@ function App() {
             exit={{ opacity: 0, y: -10 }}
             className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-8"
           >
-            <div className="flex items-center gap-4 p-8 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl">
-              <div className={`w-3 h-3 rounded-full ${geminiKey ? 'bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.8)]' : 'bg-white/10'}`} />
+            <div className="flex items-center gap-4 p-8 bg-[#f15a24]/5 border border-[#f15a24]/10 rounded-3xl">
+              <div className={`w-3 h-3 rounded-full ${geminiKey ? 'bg-[#f15a24] animate-pulse shadow-[0_0_15px_rgba(241,90,36,0.8)]' : 'bg-white/10'}`} />
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-emerald-500/80 tracking-widest uppercase mb-1 font-oswald">
+                <span className="text-[10px] font-bold text-[#f15a24]/80 tracking-widest uppercase mb-1 font-oswald">
                   {geminiKey ? 'Verified Connection' : 'Awaiting Connection'}
                 </span>
                 <p className="text-[9px] text-white/20 leading-relaxed font-serif">
@@ -395,7 +395,7 @@ function App() {
                   setGeminiKey(e.target.value);
                   localStorage.setItem('itako_gemini_key', e.target.value);
                 }}
-                className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-emerald-500/30 outline-none transition-all placeholder:text-white/5 font-mono"
+                className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/30 outline-none transition-all placeholder:text-white/5 font-mono"
               />
               <button
                 onClick={() => {
@@ -406,7 +406,7 @@ function App() {
                   }
                 }}
                 className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${geminiKey
-                  ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.7)]'
+                  ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.4)] hover:shadow-[0_0_30px_rgba(241,90,36,0.7)]'
                   : 'bg-white/5 text-white/20'
                   }`}
               >
@@ -550,7 +550,7 @@ function App() {
                 <div className="pt-6 border-t border-white/5 space-y-4">
                   <div className="flex justify-between items-end">
                     <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Gemini Engine Key</label>
-                    <div className={`w-1.5 h-1.5 rounded-full ${geminiKey ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-white/10'}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${geminiKey ? 'bg-[#f15a24] shadow-[0_0_10px_rgba(241,90,36,0.5)]' : 'bg-white/10'}`} />
                   </div>
                   <input
                     type="password"
@@ -560,7 +560,7 @@ function App() {
                       setGeminiKey(e.target.value);
                       localStorage.setItem('itako_gemini_key', e.target.value);
                     }}
-                    className="w-full bg-black border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-emerald-500/30 outline-none transition-all placeholder:text-white/5 font-mono"
+                    className="w-full bg-black border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/30 outline-none transition-all placeholder:text-white/5 font-mono"
                   />
                   <button
                     onClick={() => {
@@ -569,7 +569,7 @@ function App() {
                       }
                     }}
                     className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${geminiKey
-                      ? 'bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.7)]'
+                      ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.4)] hover:shadow-[0_0_30px_rgba(241,90,36,0.7)]'
                       : 'bg-white/5 text-white/20'
                       }`}
                   >
