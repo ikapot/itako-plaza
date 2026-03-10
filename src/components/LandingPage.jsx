@@ -1,26 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ghost, LogIn } from 'lucide-react';
 import Logo from './Logo';
 import { loginWithGoogle } from '../firebase';
 
-export default function LandingPage({ onLoginComplete }) {
+export default function LandingPage({ onLoginComplete, user }) {
     const [step, setStep] = useState('landing'); // 'landing', 'auth', 'api'
     const [tempKey, setTempKey] = useState(localStorage.getItem('itako_gemini_key') || '');
     const [isConnecting, setIsConnecting] = useState(false);
 
-    const handleGoogleLogin = async () => {
-        const user = await loginWithGoogle();
-        if (user) {
-            // .env にキーがある場合は自動接続、なければ入力画面へ
+    // 既にGoogleログイン済みの場合は自動で次のステップへ
+    useEffect(() => {
+        if (user && step === 'landing') {
             const envKey = import.meta.env.VITE_GEMINI_API_KEY;
-            if (envKey) {
-                setIsConnecting(true);
-                setTimeout(() => {
-                    localStorage.setItem('itako_gemini_key', envKey);
-                    onLoginComplete(envKey);
-                    setIsConnecting(false);
-                }, 800);
+            const localKey = localStorage.getItem('itako_gemini_key');
+            const keyToUse = envKey || localKey;
+
+            if (keyToUse) {
+                onLoginComplete(keyToUse);
+            } else {
+                setStep('api'); // キーがない場合のみ入力画面へ
+            }
+        }
+    }, [user, step, onLoginComplete]);
+
+    const handleGoogleLogin = async () => {
+        const u = await loginWithGoogle();
+        if (u) {
+            // useEffect が prop の user 変更を検知して自動で進むが、
+            // 即時反映のためにここでもロジックを追加（任意）
+            const envKey = import.meta.env.VITE_GEMINI_API_KEY;
+            const localKey = localStorage.getItem('itako_gemini_key');
+            const keyToUse = envKey || localKey;
+
+            if (keyToUse) {
+                onLoginComplete(keyToUse);
             } else {
                 setStep('api');
             }

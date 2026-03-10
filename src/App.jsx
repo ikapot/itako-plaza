@@ -87,11 +87,7 @@ function App() {
           setIsAppReady(true);
         }
       } else {
-        // フォールバック: 匿名ログイン
-        import('./firebase').then(async ({ loginAnonymously }) => {
-          const anonUser = await loginAnonymously();
-          if (anonUser) setUser(anonUser);
-        });
+        setUser(null);
       }
     });
 
@@ -335,6 +331,7 @@ function App() {
   if (!isAppReady || !user) {
     return (
       <LandingPage
+        user={user}
         onLoginComplete={(key) => {
           if (key) {
             setGeminiKey(key);
