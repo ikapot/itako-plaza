@@ -656,13 +656,13 @@ function App() {
                       <motion.div
                         initial={{ opacity: 0, y: 15 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        className="ml-auto w-[90%] md:w-[85%] mt-[-4rem] bg-zinc-100 p-8 md:p-10 rounded-[35px] md:rounded-[40px] border border-black/5 shadow-2xl relative z-20"
+                        className="ml-auto w-[90%] md:w-[85%] mt-[-4rem] bg-zinc-900 p-8 md:p-10 rounded-[35px] md:rounded-[40px] border border-white/10 shadow-2xl relative z-20"
                       >
                         <div className="flex items-center gap-3 mb-4">
                           <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg" colorClass="bg-itako-sage" size="w-7 h-7" isSelected />
-                          <span className="text-[9px] font-bold tracking-[0.4em] text-zinc-900/30 uppercase">Ichikawa's Verdict / 叱咤</span>
+                          <span className="text-[9px] font-bold tracking-[0.4em] text-white/30 uppercase">Ichikawa's Verdict / 叱咤</span>
                         </div>
-                        <p className="text-base leading-relaxed italic text-black font-serif">「{ichikawaScolds[n.id]}」</p>
+                        <p className="text-base leading-relaxed italic text-white font-serif">「{ichikawaScolds[n.id]}」</p>
                       </motion.div>
                     )}
                   </div>
