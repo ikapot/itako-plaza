@@ -228,3 +228,60 @@ ${currentContext}
     }
     return null;
 };
+
+/**
+ * 場所変更時にキャラクター同士の対話を生成
+ */
+export const generateLocationDialogue = async (c1, c2, location, userApiKey) => {
+    if (!userApiKey) return [];
+
+    for (const modelName of FALLBACK_MODELS) {
+        try {
+            const sanitizedKey = userApiKey.trim();
+            const genAI = new GoogleGenerativeAI(sanitizedKey);
+            const model = genAI.getGenerativeModel({ model: modelName });
+
+            const prompt = `
+<task>
+「${location.name}」という場所で、${c1.name}と${c2.name}が交わしている短い会話（2〜3往復）を生成してください。
+</task>
+
+<context>
+場所: ${location.name}
+人物1: ${c1.name} (${c1.description})
+人物2: ${c2.name} (${c2.description})
+</context>
+
+<rules>
+- キャラクターの口調、性格、哲学を厳格に守ってください。
+- 背景描写などは含めず、純粋な対話（セリフ）のみを抽出してください。
+- 以下のJSON形式の配列のみを出力してください。
+</rules>
+
+[
+  { "charId": "${c1.id}", "content": "セリフ内容" },
+  { "charId": "${c2.id}", "content": "セリフ内容" }
+]
+`;
+            const result = await executeWithRetry(() => model.generateContent(prompt));
+            const jsonText = result.response.text().replace(/```json|```/g, "").trim();
+            try {
+                return JSON.parse(jsonText);
+            } catch (e) {
+                // Fallback attempt to extract array from sloppy output
+                const match = jsonText.match(/\[[\s\S]*\]/);
+                if (match) return JSON.parse(match[0]);
+                throw e;
+            }
+        } catch (error) {
+            const isRetryable = error.status === 429 || error.status === 404 || error.message?.includes('429');
+            if (isRetryable) {
+                console.warn(`[Dialogue] ${modelName} failed, switching...`);
+                continue;
+            }
+            console.error("Location Dialogue AI Error:", error);
+            break;
+        }
+    }
+    return [];
+};

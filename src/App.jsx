@@ -21,11 +21,11 @@ const INITIAL_CHARACTERS = [
 ];
 
 const INITIAL_LOCATIONS = [
-  { id: 'cafe', name: 'カフェ', icon: <MapPin size={16} />, pos: 0 },
-  { id: 'library', name: '図書館', icon: <MapPin size={16} />, pos: 4 },
-  { id: 'passage', name: '地下通路', icon: <MapPin size={16} />, pos: 8 },
-  { id: 'shrine', name: '神社', icon: <MapPin size={16} />, pos: 2 },
-  { id: 'bridge', name: '橋', icon: <MapPin size={16} />, pos: 6 },
+  { id: 'cafe', name: 'カフェ', icon: <MapPin size={16} />, pos: 0, color: '#1a1a1a', pattern: 'radial-gradient(circle, #222 1px, transparent 1px)' },
+  { id: 'library', name: '図書館', icon: <MapPin size={16} />, pos: 4, color: '#0f141a', pattern: 'linear-gradient(45deg, #ffffff03 25%, transparent 25%, transparent 50%, #ffffff03 50%, #ffffff03 75%, transparent 75%, transparent)' },
+  { id: 'passage', name: '地下通路', icon: <MapPin size={16} />, pos: 8, color: '#050505', pattern: 'repeating-linear-gradient(0deg, #111 0, #111 1px, transparent 0, transparent 20px)' },
+  { id: 'shrine', name: '神社', icon: <MapPin size={16} />, pos: 2, color: '#1a0f0f', pattern: 'radial-gradient(circle, #300 2px, transparent 2px)' },
+  { id: 'bridge', name: '橋', icon: <MapPin size={16} />, pos: 6, color: '#0f1a1a', pattern: 'linear-gradient(to right, #ffffff05 1px, transparent 1px), linear-gradient(to bottom, #ffffff05 1px, transparent 1px)' },
 ];
 
 // --- コンポーネント群は /components フォルダへ退避 (Clean Code) ---
@@ -126,6 +126,36 @@ function App() {
     loadGlobalData();
     return () => unsubscribe();
   }, [geminiKey]);
+
+  useEffect(() => {
+    const triggerLocationConversation = async () => {
+      if (!geminiKey || !isAppReady) return;
+      const currentLocation = locations.find(l => l.id === selectedLocationId);
+      if (!currentLocation) return;
+
+      setLoading(true);
+      // Pick two random characters
+      const shuffled = [...characters].sort(() => 0.5 - Math.random());
+      const c1 = shuffled[0];
+      const c2 = shuffled[1];
+
+      const prompt = `${currentLocation.name}にて、${c1.name}と${c2.name}が短い対話（2往復程度）を交わしている様子を描写してください。 ${currentLocation.name}の雰囲気を反映させ、魂がそこに「居る」感覚を重視してください。`;
+
+      try {
+        const { generateLocationDialogue } = await import('./gemini');
+        const dialogue = await generateLocationDialogue(c1, c2, currentLocation, geminiKey);
+        // Add to messages as a group
+        if (Array.isArray(dialogue)) {
+          setMessages(prev => [...prev, ...dialogue.map(d => ({ role: 'ai', content: d.content, charId: d.charId }))]);
+        }
+      } catch (e) {
+        console.error("Location Dialogue Error:", e);
+      }
+      setLoading(false);
+    };
+
+    triggerLocationConversation();
+  }, [selectedLocationId]);
 
   const handlePushNotebook = async (content) => {
     const textToPush = content || notebookInput;
@@ -366,9 +396,11 @@ function App() {
 
   return (
     <div
-      className="h-[100dvh] w-screen overflow-hidden flex flex-col font-sans selection:bg-white/30"
+      className="h-[100dvh] w-screen overflow-hidden flex flex-col font-sans selection:bg-white/30 transition-all duration-1000"
       style={{
-        backgroundColor: '#000000',
+        backgroundColor: locations.find(l => l.id === selectedLocationId)?.color || '#000000',
+        backgroundImage: locations.find(l => l.id === selectedLocationId)?.pattern || 'none',
+        backgroundSize: '40px 40px',
         color: '#ffffff',
         '--itako-text-opacity': 1
       }}
