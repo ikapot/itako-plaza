@@ -174,7 +174,10 @@ export const validateGeminiApiKey = async (rawKey) => {
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: "ok" }] }], generationConfig: { maxOutputTokens: 1 } });
         return !!result.response.text();
-    } catch (e) { return false; }
+    } catch (e) {
+        console.error("API Key Validation Error Details:", e);
+        return false;
+    }
 };
 
 /**
