@@ -5,7 +5,9 @@ import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestam
 // TODO: 環境変数（.envファイル）からFirebase設定を読み込む
 const cleanKey = (key) => {
     if (typeof key !== 'string') return key;
-    return key.includes('=') ? key.split('=')[1].trim() : key.trim();
+    const trimmed = key.trim();
+    const match = trimmed.match(/^[A-Z0-9_]+=(.*)$/);
+    return match ? match[1].trim() : trimmed;
 };
 
 const firebaseConfig = {

@@ -33,7 +33,9 @@ const INITIAL_LOCATIONS = [
 function App() {
   const cleanKey = (key) => {
     if (typeof key !== 'string') return key;
-    return key.includes('=') ? key.split('=')[1].trim() : key.trim();
+    const trimmed = key.trim();
+    const match = trimmed.match(/^[A-Z0-9_]+=(.*)$/);
+    return match ? match[1].trim() : trimmed;
   };
 
   const [user, setUser] = useState(null);

@@ -2,9 +2,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const FALLBACK_MODELS = [
     "gemini-2.0-flash",
-    "gemini-1.5-pro",
     "gemini-1.5-flash",
-    "gemini-1.5-flash-8b"
+    "gemini-1.5-pro"
 ];
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -214,7 +213,7 @@ export const generateLocationDialogue = async (c1, c2, loc, userApiKey) => {
             const result = await model.generateContent(prompt);
             const text = result.response.text().replace(/```json|```/g, "");
             return JSON.parse(text);
-        } catch (e) { continue; }
+        } catch (error) { continue; }
     }
     return [];
 };
