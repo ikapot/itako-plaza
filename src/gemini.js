@@ -341,3 +341,24 @@ export const generateLocationDialogue = async (c1, c2, location, userApiKey) => 
     }
     return [];
 };
+
+/**
+ * APIキーの有効性を検証する
+ */
+export const validateGeminiApiKey = async (userApiKey) => {
+    if (!userApiKey) return false;
+    try {
+        const sanitizedKey = userApiKey.trim();
+        const genAI = new GoogleGenerativeAI(sanitizedKey);
+        // 最も軽量なモデルで最小限の出力を試みる
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: "ok" }] }],
+            generationConfig: { maxOutputTokens: 1 }
+        });
+        return !!result.response.text();
+    } catch (error) {
+        console.error("API Key Validation Error:", error);
+        return false;
+    }
+};

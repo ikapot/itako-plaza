@@ -3,11 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Ghost, LogIn } from 'lucide-react';
 import Logo from './Logo';
 import { loginWithGoogle } from '../firebase';
+import { validateGeminiApiKey } from '../gemini';
 
 export default function LandingPage({ onLoginComplete, user }) {
     const [step, setStep] = useState('landing'); // 'landing', 'auth', 'api'
     const [tempKey, setTempKey] = useState(localStorage.getItem('itako_gemini_key') || '');
     const [isConnecting, setIsConnecting] = useState(false);
+    const [isValidated, setIsValidated] = useState(false);
+    const [error, setError] = useState('');
 
     // 既にGoogleログイン済みの場合は自動で次のステップへ
     useEffect(() => {
@@ -41,13 +44,22 @@ export default function LandingPage({ onLoginComplete, user }) {
         }
     };
 
-    const handleApiConnect = () => {
+    const handleApiConnect = async () => {
         setIsConnecting(true);
-        setTimeout(() => {
-            localStorage.setItem('itako_gemini_key', tempKey);
-            onLoginComplete(tempKey);
+        setError('');
+        const isValid = await validateGeminiApiKey(tempKey);
+
+        if (isValid) {
+            setIsValidated(true);
+            setTimeout(() => {
+                localStorage.setItem('itako_gemini_key', tempKey);
+                onLoginComplete(tempKey);
+                setIsConnecting(false);
+            }, 800);
+        } else {
             setIsConnecting(false);
-        }, 800);
+            setError('無効なAPIキーです。精神の接続に失敗しました。');
+        }
     };
 
     return (
@@ -135,9 +147,9 @@ export default function LandingPage({ onLoginComplete, user }) {
                                         <button
                                             onClick={handleApiConnect}
                                             disabled={!tempKey || isConnecting}
-                                            className={`w-full py-4 rounded-full font-bold transition-all duration-500 disabled:opacity-50 ${tempKey
-                                                ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.4)] hover:shadow-[0_0_30px_rgba(241,90,36,0.6)]'
-                                                : 'bg-zinc-200 text-black'
+                                            className={`w-full py-4 rounded-full font-bold transition-all duration-500 disabled:opacity-50 ${isValidated
+                                                ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.6)]'
+                                                : tempKey && !isConnecting ? 'bg-zinc-100 text-black' : 'bg-zinc-200 text-black'
                                                 }`}
                                         >
                                             <div className="flex items-center justify-center gap-2">
@@ -155,6 +167,11 @@ export default function LandingPage({ onLoginComplete, user }) {
                                                 )}
                                             </div>
                                         </button>
+                                        {error && (
+                                            <p className="text-[10px] text-red-500 font-bold text-center animate-bounce">
+                                                {error}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </motion.div>

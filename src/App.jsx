@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, TrendingUp, User, MapPin, Ghost, Settings, Loader2, Quote, Menu, X, Cpu, Globe } from 'lucide-react';
 import { auth, fetchBookmarks, saveBookmark, fetchNotebookAccumulations } from './firebase';
-import { generateCharacterResponseStream, evaluateFutureSelf } from './gemini';
+import { generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
 import { searchNDLArchive } from './ndl';
 import Header from './components/Header';
@@ -66,6 +66,8 @@ function App() {
   const [spiritSharedKnowledge, setSpiritSharedKnowledge] = useState('');
   const [notebookInput, setNotebookInput] = useState('');
   const [notebookAccumulations, setNotebookAccumulations] = useState([]);
+  const [isValidatingApi, setIsValidatingApi] = useState(false);
+  const [apiConnectionStatus, setApiConnectionStatus] = useState('idle'); // 'idle', 'success', 'error'
 
   // キャラクターと場所の拡張可能なリスト
   const [characters, setCharacters] = useState(INITIAL_CHARACTERS.map(c => ({
@@ -398,22 +400,35 @@ function App() {
                 className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/30 outline-none transition-all placeholder:text-white/5 font-mono"
               />
               <button
-                onClick={() => {
-                  if (geminiKey) {
-                    setIsAppReady(true);
-                    // Force refresh news if needed
-                    fetchFictionalizedNews(geminiKey).then(setNews);
-                    // Auto close drawer if open
-                    setIsDrawerOpen(false);
+                onClick={async () => {
+                  if (geminiKey && !isValidatingApi) {
+                    setIsValidatingApi(true);
+                    setApiConnectionStatus('idle');
+                    const isValid = await validateGeminiApiKey(geminiKey);
+                    if (isValid) {
+                      setApiConnectionStatus('success');
+                      setIsAppReady(true);
+                      fetchFictionalizedNews(geminiKey).then(setNews);
+                      setTimeout(() => setIsDrawerOpen(false), 500);
+                    } else {
+                      setApiConnectionStatus('error');
+                    }
+                    setIsValidatingApi(false);
                   }
                 }}
-                className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${geminiKey
-                  ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.4)] hover:shadow-[0_0_30px_rgba(241,90,36,0.7)]'
-                  : 'bg-white/5 text-white/20'
+                disabled={isValidatingApi}
+                className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${apiConnectionStatus === 'success'
+                  ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.6)]'
+                  : geminiKey && !isValidatingApi ? 'bg-white/10 text-white' : 'bg-white/5 text-white/20'
                   }`}
               >
-                接続する (Connect)
+                {isValidatingApi ? 'Validating...' : apiConnectionStatus === 'error' ? 'Retry Connection' : '接続する (Connect)'}
               </button>
+              {apiConnectionStatus === 'error' && (
+                <p className="text-[8px] font-bold text-red-500 uppercase tracking-widest text-center animate-pulse">
+                  Invalid API Key or Limit Exceeded.
+                </p>
+              )}
             </div>
           </motion.div>
         )}
@@ -565,20 +580,34 @@ function App() {
                     className="w-full bg-black border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/30 outline-none transition-all placeholder:text-white/5 font-mono"
                   />
                   <button
-                    onClick={() => {
-                      if (geminiKey) {
-                        setIsAppReady(true);
-                        // Auto close settings overlay
-                        setTimeout(() => setShowSettings(false), 300);
+                    onClick={async () => {
+                      if (geminiKey && !isValidatingApi) {
+                        setIsValidatingApi(true);
+                        setApiConnectionStatus('idle');
+                        const isValid = await validateGeminiApiKey(geminiKey);
+                        if (isValid) {
+                          setApiConnectionStatus('success');
+                          setIsAppReady(true);
+                          setTimeout(() => setShowSettings(false), 500);
+                        } else {
+                          setApiConnectionStatus('error');
+                        }
+                        setIsValidatingApi(false);
                       }
                     }}
-                    className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${geminiKey
-                      ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.4)] hover:shadow-[0_0_30px_rgba(241,90,36,0.7)]'
-                      : 'bg-white/5 text-white/20'
+                    disabled={isValidatingApi}
+                    className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${apiConnectionStatus === 'success'
+                      ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.6)]'
+                      : geminiKey && !isValidatingApi ? 'bg-white/10 text-white' : 'bg-white/5 text-white/20'
                       }`}
                   >
-                    接続する (Connect)
+                    {isValidatingApi ? 'Validating...' : apiConnectionStatus === 'error' ? 'Retry Connection' : '接続する (Connect)'}
                   </button>
+                  {apiConnectionStatus === 'error' && (
+                    <p className="text-[8px] font-bold text-red-500 uppercase tracking-widest text-center animate-pulse">
+                      Connection Failed.
+                    </p>
+                  )}
                   {!geminiKey && (
                     <p className="text-[8px] font-bold text-[#fdb913]/50 uppercase tracking-widest text-center animate-pulse">
                       Waiting for spiritual key...
