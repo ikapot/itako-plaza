@@ -21,11 +21,11 @@ const INITIAL_CHARACTERS = [
 ];
 
 const INITIAL_LOCATIONS = [
-  { id: 'cafe', name: 'カフェ', icon: <MapPin size={16} />, pos: 0, color: '#1a1a1a', pattern: 'radial-gradient(circle, #222 1px, transparent 1px)' },
-  { id: 'library', name: '図書館', icon: <MapPin size={16} />, pos: 4, color: '#0f141a', pattern: 'linear-gradient(45deg, #ffffff03 25%, transparent 25%, transparent 50%, #ffffff03 50%, #ffffff03 75%, transparent 75%, transparent)' },
-  { id: 'passage', name: '地下通路', icon: <MapPin size={16} />, pos: 8, color: '#050505', pattern: 'repeating-linear-gradient(0deg, #111 0, #111 1px, transparent 0, transparent 20px)' },
-  { id: 'shrine', name: '神社', icon: <MapPin size={16} />, pos: 2, color: '#1a0f0f', pattern: 'radial-gradient(circle, #300 2px, transparent 2px)' },
-  { id: 'bridge', name: '橋', icon: <MapPin size={16} />, pos: 6, color: '#0f1a1a', pattern: 'linear-gradient(to right, #ffffff05 1px, transparent 1px), linear-gradient(to bottom, #ffffff05 1px, transparent 1px)' },
+  { id: 'cafe', name: 'カフェ', description: '壁には誰のものとも知れぬ肖像画が掛かり、微かなコーヒーの香りが生者の執着を思い出させる。', icon: <MapPin size={16} />, pos: 0, color: '#1a1a1a', pattern: 'radial-gradient(circle, #222 1px, transparent 1px)' },
+  { id: 'library', name: '図書館', description: '開かれることのない蔵書たちが、重力のような沈黙を強いている知識の墓場。', icon: <MapPin size={16} />, pos: 4, color: '#0f141a', pattern: 'linear-gradient(45deg, #ffffff03 25%, transparent 25%, transparent 50%, #ffffff03 50%, #ffffff03 75%, transparent 75%, transparent)' },
+  { id: 'passage', name: '地下通路', description: 'どこへも繋がっていないようでいて、すべての後悔へと通じている冷たいコンクリートの回廊。', icon: <MapPin size={16} />, pos: 8, color: '#050505', pattern: 'repeating-linear-gradient(0deg, #111 0, #111 1px, transparent 0, transparent 20px)' },
+  { id: 'shrine', name: '神社', description: '赤い鳥居が境界線。神は不在かもしれないが、形なき祈りだけが風に震えている。', icon: <MapPin size={16} />, pos: 2, color: '#1a0f0f', pattern: 'radial-gradient(circle, #300 2px, transparent 2px)' },
+  { id: 'bridge', name: '橋', description: '「こちら」と「あちら」を結ぶ細い道。下を流れる水は、過去の記憶をどこか遠くへ運んでいく。', icon: <MapPin size={16} />, pos: 6, color: '#0f1a1a', pattern: 'linear-gradient(to right, #ffffff05 1px, transparent 1px), linear-gradient(to bottom, #ffffff05 1px, transparent 1px)' },
 ];
 
 // --- コンポーネント群は /components フォルダへ退避 (Clean Code) ---
@@ -306,10 +306,11 @@ function App() {
             key={tab.id}
             onClick={() => setActiveManagerTab(tab.id)}
             style={{
-              backgroundColor: activeManagerTab === tab.id ? tab.color : 'transparent',
-              color: activeManagerTab === tab.id ? '#000' : 'rgba(255,255,255,0.3)'
+              backgroundColor: activeManagerTab === tab.id ? tab.color : 'rgba(255,255,255,0.03)',
+              color: activeManagerTab === tab.id ? '#000' : 'rgba(255,255,255,0.3)',
+              boxShadow: activeManagerTab === tab.id ? `0 4px 15px ${tab.color}44` : 'none'
             }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 active:scale-95 cursor-pointer font-oswald shadow-inner`}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 active:scale-95 cursor-pointer font-oswald border ${activeManagerTab === tab.id ? 'border-white/20' : 'border-transparent'}`}
           >
             {tab.icon}
             <span className="hidden md:inline">{tab.label}</span>
@@ -337,7 +338,7 @@ function App() {
                   <button
                     key={i}
                     onClick={() => loc && setSelectedLocationId(loc.id)}
-                    className={`aspect-square flex items-center justify-center relative transition-all duration-500 overflow-hidden ${isSelected ? 'bg-zinc-200' : 'bg-black hover:bg-white/5'}`}
+                    className={`aspect-square flex items-center justify-center relative transition-all duration-700 overflow-hidden rounded-lg group/loc ${isSelected ? 'bg-white shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'bg-black/40 border border-white/5 hover:bg-white/10'}`}
                   >
                     {/* Spiritual Glow Overlay */}
                     {loc && energy > 0 && (
@@ -480,17 +481,19 @@ function App() {
   };
 
 
+  const handleLoginComplete = React.useCallback((key) => {
+    if (key) {
+      setGeminiKey(key);
+      localStorage.setItem('itako_gemini_key', key);
+    }
+    setIsAppReady(true);
+  }, []);
+
   if (!isAppReady || !user) {
     return (
       <LandingPage
         user={user}
-        onLoginComplete={(key) => {
-          if (key) {
-            setGeminiKey(key);
-            localStorage.setItem('itako_gemini_key', key);
-          }
-          setIsAppReady(true);
-        }}
+        onLoginComplete={handleLoginComplete}
       />
     );
   }
@@ -524,7 +527,7 @@ function App() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 250 }}
-              className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-[#050505]/95 backdrop-blur-3xl border-r border-white/10 z-[70] p-6 sm:p-8 overflow-y-auto md:hidden shadow-[30px_0_60px_rgba(0,0,0,0.8)] itako-scrollbar"
+              className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-gradient-to-br from-[#121212] to-[#050505] backdrop-blur-3xl border-r border-white/10 z-[70] p-6 sm:p-8 overflow-y-auto md:hidden shadow-[40px_0_80px_rgba(0,0,0,0.9)] itako-scrollbar"
             >
               <div className="flex items-center justify-between mb-10 border-b border-white/5 pb-6">
                 <div className="flex flex-col">

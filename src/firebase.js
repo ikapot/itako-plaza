@@ -153,7 +153,7 @@ export const saveNotebookAccumulation = async (content) => {
 /**
  * NotebookLMの蓄積データを全取得
  */
-export const fetchNotebookAccumulations = async (limitCount = 10) => {
+export const fetchNotebookAccumulations = async () => {
     const user = auth.currentUser;
     if (!user) return [];
     try {
@@ -164,8 +164,7 @@ export const fetchNotebookAccumulations = async (limitCount = 10) => {
         );
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch (e) {
-        console.error("Fetch Accumulation Error:", e);
+    } catch {
         return [];
     }
 };

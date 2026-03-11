@@ -14,16 +14,16 @@ export default function LandingPage({ onLoginComplete, user }) {
 
     // 既にGoogleログイン済みの場合は自動で次のステップへ
     useEffect(() => {
-        if (user && step === 'landing') {
-            const envKey = import.meta.env.VITE_GEMINI_API_KEY;
-            const localKey = localStorage.getItem('itako_gemini_key');
-            const keyToUse = envKey || localKey;
+        if (!user || step !== 'landing') return;
 
-            if (keyToUse) {
-                onLoginComplete(keyToUse);
-            } else {
-                setStep('api'); // キーがない場合のみ入力画面へ
-            }
+        const envKey = import.meta.env.VITE_GEMINI_API_KEY;
+        const localKey = localStorage.getItem('itako_gemini_key');
+        const keyToUse = envKey || localKey;
+
+        if (keyToUse) {
+            onLoginComplete(keyToUse);
+        } else {
+            setStep('api');
         }
     }, [user, step, onLoginComplete]);
 

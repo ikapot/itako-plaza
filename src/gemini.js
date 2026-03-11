@@ -21,21 +21,6 @@ const storeEcho = (systemPrompt, userMsg, response) => {
     semanticCache.set(key, response);
 };
 
-async function executeWithRetry(operation, maxRetries = 2) {
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-            return await operation();
-        } catch (error) {
-            const is429 = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota') || error.message?.includes('exhausted');
-            if (is429) {
-                if (attempt === maxRetries - 1) throw error;
-                await sleep(Math.pow(2, attempt) * 1000);
-                continue;
-            }
-            throw error;
-        }
-    }
-}
 
 const CHARACTER_CONFIGS = {
     soseki: {
@@ -133,7 +118,13 @@ export const generateCharacterResponseStream = async (char, userMessage, isUnder
         }
         // 全キー全滅
         console.error("All keys exhausted:", lastError);
-        onChunk("魂が沈黙しました。複数のAPIキーをカンマ区切りで入力することで、上限を超えられるかもしれません。");
+        const isQuotaExhausted = lastError?.status === 429 || lastError?.message?.includes('429') || lastError?.message?.includes('Quota') || lastError?.message?.includes('exhausted');
+
+        if (isQuotaExhausted) {
+            onChunk("【霊的回路の制限】全ての鍵（APIキー）の交信回数が上限に達しました。しばらく待つか、設定から予備の鍵を追加してください。");
+        } else {
+            onChunk("魂が沈黙しました。深淵との接続が不安定なようです。APIキーが正しいか、ネットワーク設定を確認してください。");
+        }
     }
 };
 
@@ -153,7 +144,7 @@ export const evaluateFutureSelf = async (bookmarks, userApiKey) => {
                 const model = genAI.getGenerativeModel({ model: m, systemInstruction: CHARACTER_CONFIGS.future_self.systemPrompt });
                 const result = await model.generateContent(prompt);
                 return result.response.text();
-            } catch (e) {
+            } catch {
                 if (keys.indexOf(k) === keys.length - 1 && FALLBACK_MODELS.indexOf(m) === FALLBACK_MODELS.length - 1) break;
                 continue;
             }
@@ -227,7 +218,7 @@ export const evaluateExpansion = async (context, userApiKey) => {
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
             const result = await model.generateContent(prompt);
             return JSON.parse(result.response.text().replace(/```json|```/g, ""));
-        } catch (e) { continue; }
+        } catch { continue; }
     }
     return null;
 };
@@ -238,7 +229,24 @@ export const evaluateExpansion = async (context, userApiKey) => {
 export const generateLocationDialogue = async (c1, c2, loc, userApiKey) => {
     if (!userApiKey) return [];
     const keys = userApiKey.split(',').map(k => k.trim()).filter(k => k);
-    const prompt = `${loc.name}で${c1.name}と${c2.name}が交わす会話をJSON形式の配列 [{"charId":"...","content":"..."}] で生成せよ。`;
+
+    const config1 = CHARACTER_CONFIGS[c1.id] || { systemPrompt: "" };
+    const config2 = CHARACTER_CONFIGS[c2.id] || { systemPrompt: "" };
+
+    const prompt = `
+あなたは文学的で不穏な世界の「口寄せ」です。
+場所: "${loc.name}" (${loc.description || "静かなる非日常"})
+登場人物1: ${c1.name} (設定: ${config1.systemPrompt})
+登場人物2: ${c2.name} (設定: ${config2.systemPrompt})
+
+この場所でこれら二人が交わす短い会話（3-4往復程度）を生成してください。
+- 翻訳文学（ドストエフスキー、カフカ、あるいは日本の私小説）のように、抽象的で魂を削り合うようなトーンにしてください。
+- 二人のキャラクター性は守りつつ、場の雰囲気を会話に反映させてください。
+- 出力は必ず以下の形式のJSON配列のみを返してください：
+[
+  {"charId": "${c1.id}", "content": "..."},
+  {"charId": "${c2.id}", "content": "..."}
+]`;
 
     for (const k of keys) {
         try {
@@ -247,7 +255,7 @@ export const generateLocationDialogue = async (c1, c2, loc, userApiKey) => {
             const result = await model.generateContent(prompt);
             const text = result.response.text().replace(/```json|```/g, "");
             return JSON.parse(text);
-        } catch (error) { continue; }
+        } catch { continue; }
     }
     return [];
 };
