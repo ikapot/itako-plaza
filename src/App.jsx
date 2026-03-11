@@ -887,25 +887,36 @@ function App() {
                       return (
                         <motion.div
                           key={i}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
+                          initial={{ opacity: 0, y: 30, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ type: "spring", damping: 20, stiffness: 100 }}
                           className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                         >
-                          <div className={`p-6 md:p-7 rounded-[30px] shadow-sm max-w-[95%] md:max-w-[90%] ${isUser ? 'bg-black text-white border border-white/20 rounded-tr-none' : 'bg-black text-white border border-white/10 rounded-tl-none'}`}>
+                          <div className={`group relative p-6 md:p-8 rounded-[35px] transition-all duration-500 max-w-[95%] md:max-w-[85%] ${isUser
+                              ? 'bg-gradient-to-br from-zinc-900 to-black text-white border border-white/10 rounded-tr-none shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]'
+                              : 'bg-gradient-to-br from-black to-zinc-900/50 text-white border border-white/5 rounded-tl-none'
+                            }`}>
                             {!isUser && (
-                              <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                              <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
                                 <div className="flex items-center gap-3">
                                   {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected isPreStyled={charObj.isPreStyled} />}
-                                  <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/20">{m.charId}</span>
+                                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/30">{charObj?.name || m.charId}</span>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                  <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/40 hover:text-white transition-colors">
-                                    Bookmark
+                                <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                  <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/30 hover:text-[#bd8a78] transition-colors cursor-pointer">
+                                    Archive
                                   </button>
                                 </div>
                               </div>
                             )}
-                            <p className={`text-lg leading-relaxed ${!isUser ? 'font-serif' : 'font-sans'}`}>{m.content}</p>
+                            <p className={`text-base md:text-lg leading-relaxed text-white/70 group-hover:text-white/90 transition-colors duration-500 ${!isUser ? 'font-serif' : 'font-sans'}`}>
+                              {m.content}
+                            </p>
+
+                            {/* Subtle Ambient Glow */}
+                            {!isUser && isSelected && (
+                              <div className="absolute -inset-[1px] rounded-[35px] bg-gradient-to-br from-white/5 to-transparent -z-10 pointer-events-none" />
+                            )}
                           </div>
                         </motion.div>
                       );
@@ -993,24 +1004,30 @@ function App() {
           </section>
         </main>
 
-        {/* Floating Input Bar */}
+        {/* Floating Input Bar (UI/UX Pro Max) */}
         <div className="fixed bottom-10 left-0 right-0 p-4 z-[100] pointer-events-none pb-safe">
-          <div className="max-w-xl mx-auto flex items-center gap-3 bg-[#0a0a0a]/95 border border-white/20 p-1.5 pl-5 rounded-full shadow-[0_40px_80px_rgba(0,0,0,0.9)] pointer-events-auto transition-all duration-500 focus-within:border-white/40 focus-within:scale-[1.02]">
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="max-w-xl mx-auto flex items-center gap-4 bg-black/80 backdrop-blur-2xl border border-white/10 p-2 pl-6 rounded-full shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8)] pointer-events-auto transition-all duration-700 hover:border-white/20 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.9)] focus-within:border-[#bd8a78]/40 group"
+          >
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="深淵へ言葉を記す..."
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
-              className="flex-1 bg-transparent border-none focus:outline-none text-white text-sm md:text-base py-3.5 resize-none h-14 leading-relaxed placeholder:text-white/10 font-sans"
+              className="flex-1 bg-transparent border-none focus:outline-none text-white/80 text-sm md:text-base py-4 resize-none h-14 leading-relaxed placeholder:text-white/5 font-sans itako-scrollbar"
             />
             <button
               onClick={handleSendMessage}
               disabled={loading || !input.trim()}
-              className="w-11 h-11 rounded-full bg-white text-black flex items-center justify-center font-black text-lg font-oswald shadow-xl transition-all duration-300 active:scale-90 disabled:opacity-10 hover:bg-zinc-200"
+              className="w-12 h-12 rounded-full bg-white hover:bg-[#bd8a78] hover:text-white text-black flex items-center justify-center transition-all duration-500 active:scale-90 disabled:opacity-5 shadow-inner group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] overflow-hidden relative cursor-pointer"
             >
-              +
+              <div className="relative z-10 font-oswald font-black text-xl">+</div>
+              {/* Subtle button effect */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             </button>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
