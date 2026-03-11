@@ -3,17 +3,31 @@ import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOu
 import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 
 // TODO: 環境変数（.envファイル）からFirebase設定を読み込む
-const firebaseConfig = {
-    apiKey: (import.meta.env.VITE_FIREBASE_API_KEY || "").trim(),
-    authDomain: (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "").trim(),
-    projectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID || "").trim(),
-    storageBucket: (import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "").trim(),
-    messagingSenderId: (import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "").trim(),
-    appId: (import.meta.env.VITE_FIREBASE_APP_ID || "").trim()
+const getEnv = (key) => {
+    const val = import.meta.env[key];
+    if (!val) return "";
+    return val.trim().replace(/^['"]|['"]$/g, ""); // Remove quotes if any
 };
 
-console.log("Firebase Config Trace (Simplified):", { ...firebaseConfig, apiKey: "REDACTED" });
-const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.authDomain && !firebaseConfig.apiKey.includes('YOUR_'));
+const firebaseConfig = {
+    apiKey: getEnv('VITE_FIREBASE_API_KEY'),
+    authDomain: getEnv('VITE_FIREBASE_AUTH_DOMAIN'),
+    projectId: getEnv('VITE_FIREBASE_PROJECT_ID'),
+    storageBucket: getEnv('VITE_FIREBASE_STORAGE_BUCKET'),
+    messagingSenderId: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID'),
+    appId: getEnv('VITE_FIREBASE_APP_ID')
+};
+
+console.log("Firebase Env Check:", {
+    hasKey: !!firebaseConfig.apiKey,
+    keyPrefix: firebaseConfig.apiKey ? firebaseConfig.apiKey.slice(0, 7) : "none",
+    hasDomain: !!firebaseConfig.authDomain
+});
+
+const isConfigValid = !!(firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    !firebaseConfig.apiKey.includes('YOUR_') &&
+    firebaseConfig.apiKey.length > 10);
 console.log("Is Firebase Config Valid?", isConfigValid);
 
 let app;
