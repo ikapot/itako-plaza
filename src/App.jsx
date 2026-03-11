@@ -770,7 +770,7 @@ function App() {
                       <button
                         key={i}
                         onClick={() => loc && setSelectedLocationId(loc.id)}
-                        className={`aspect-square flex items-center justify-center relative rounded transition-all duration-300 active:scale-95 overflow-hidden ${isSelected ? 'bg-zinc-200 cursor-default shadow-sm' : 'bg-black/40 hover:bg-white/10 cursor-pointer'}`}
+                        className={`aspect-square flex flex-col items-center justify-center relative rounded transition-all duration-300 active:scale-95 overflow-hidden group/loc ${isSelected ? 'bg-zinc-200 cursor-default shadow-sm' : 'bg-black/40 hover:bg-white/10 cursor-pointer'}`}
                       >
                         {loc && energy > 0 && (
                           <div
@@ -781,11 +781,16 @@ function App() {
                           />
                         )}
                         {loc && (
-                          <MapPin
-                            size={12}
-                            className={`z-10 ${isSelected ? 'text-black' : 'text-white/20'}`}
-                            style={!isSelected && energy > 0 ? { filter: `drop-shadow(0 0 ${intensity * 8}px #f15a24)` } : {}}
-                          />
+                          <>
+                            <MapPin
+                              size={isSelected ? 14 : 12}
+                              className={`z-10 ${isSelected ? 'text-black' : 'text-white/20 group-hover/loc:text-white/60'}`}
+                              style={!isSelected && energy > 0 ? { filter: `drop-shadow(0 0 ${intensity * 8}px #f15a24)` } : {}}
+                            />
+                            <span className={`absolute bottom-0.5 text-[6px] font-bold tracking-tighter uppercase z-10 transition-opacity duration-300 ${isSelected ? 'text-black/60' : 'text-white/20 opacity-0 group-hover/loc:opacity-100'}`}>
+                              {loc.name}
+                            </span>
+                          </>
                         )}
                       </button>
                     );
