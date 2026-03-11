@@ -122,10 +122,6 @@ function App() {
 
       const initialNews = await fetchFictionalizedNews(geminiKey);
       setNews(initialNews);
-      if (initialNews.length > 0) {
-        const scold = await generateIchikawaScolding(initialNews[0], geminiKey);
-        setIchikawaScolds({ [initialNews[0].id]: scold });
-      }
     };
 
     loadGlobalData();
@@ -835,19 +831,30 @@ function App() {
                       flavor="Narrator"
                       colorClass="bg-white/5 text-inherit border-white/10"
                     />
-                    {ichikawaScolds[n.id] && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        className="ml-auto w-[90%] md:w-[85%] mt-[-4rem] bg-zinc-900 p-8 md:p-10 rounded-[35px] md:rounded-[40px] border border-white/10 shadow-2xl relative z-20"
-                      >
-                        <div className="flex items-center gap-3 mb-4">
-                          <WarholAvatar src="https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg" colorClass="bg-itako-sage" size="w-7 h-7" isSelected />
-                          <span className="text-[9px] font-bold tracking-[0.4em] text-white/30 uppercase">Ichikawa's Verdict / 叱咤</span>
-                        </div>
-                        <p className="text-base leading-relaxed italic text-white font-serif">「{ichikawaScolds[n.id]}」</p>
-                      </motion.div>
-                    )}
+                    {/* Discussion Thread for News */}
+                    <div className="space-y-[-2rem] mt-[-2rem] relative z-20">
+                      {n.discussion && n.discussion.map((d, dIdx) => {
+                        const char = characters.find(c => c.id === d.charId);
+                        return (
+                          <motion.div
+                            key={`${n.id}-${dIdx}`}
+                            initial={{ opacity: 0, x: dIdx % 2 === 0 ? 20 : -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: dIdx * 0.2 }}
+                            className={`flex ${dIdx % 2 === 0 ? 'justify-end' : 'justify-start'} w-full`}
+                          >
+                            <div className={`p-6 md:p-8 rounded-[35px] border shadow-2xl max-w-[85%] ${dIdx % 2 === 0 ? 'bg-zinc-900/90 border-white/10' : 'bg-black/80 border-white/5'}`}>
+                              <div className="flex items-center gap-3 mb-3">
+                                {char && <WarholAvatar src={char.avatar} size="w-6 h-6" isSelected isPreStyled={char.isPreStyled} colorClass={char.color} />}
+                                <span className="text-[9px] font-bold tracking-[0.3em] text-white/40 uppercase">{char?.name || d.charId}</span>
+                              </div>
+                              <p className="text-sm md:text-base leading-relaxed text-white/90 font-serif italic">「{d.comment}」</p>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
               })}

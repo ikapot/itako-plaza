@@ -3,23 +3,18 @@ import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOu
 import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 
 // TODO: 環境変数（.envファイル）からFirebase設定を読み込む
-const cleanKey = (key) => {
-    if (typeof key !== 'string') return key;
-    const trimmed = key.trim();
-    const match = trimmed.match(/^[A-Z0-9_]+=(.*)$/);
-    return match ? match[1].trim() : trimmed;
-};
-
 const firebaseConfig = {
-    apiKey: cleanKey(import.meta.env.VITE_FIREBASE_API_KEY),
-    authDomain: cleanKey(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN),
-    projectId: cleanKey(import.meta.env.VITE_FIREBASE_PROJECT_ID),
-    storageBucket: cleanKey(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET),
-    messagingSenderId: cleanKey(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID),
-    appId: cleanKey(import.meta.env.VITE_FIREBASE_APP_ID)
+    apiKey: (import.meta.env.VITE_FIREBASE_API_KEY || "").trim(),
+    authDomain: (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "").trim(),
+    projectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID || "").trim(),
+    storageBucket: (import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "").trim(),
+    messagingSenderId: (import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "").trim(),
+    appId: (import.meta.env.VITE_FIREBASE_APP_ID || "").trim()
 };
 
-const isConfigValid = firebaseConfig.apiKey && firebaseConfig.authDomain;
+console.log("Firebase Config Trace (Simplified):", { ...firebaseConfig, apiKey: "REDACTED" });
+const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.authDomain && !firebaseConfig.apiKey.includes('YOUR_'));
+console.log("Is Firebase Config Valid?", isConfigValid);
 
 let app;
 let auth;

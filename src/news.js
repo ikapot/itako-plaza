@@ -58,7 +58,17 @@ export const fetchFictionalizedNews = async (apiKey) => {
 
 <format>
 [
-  { "id": 1, "title": "フィクション化されたタイトル", "content": "本文（100文字程度）", "original": "元のニュースの短い要約" }
+  { 
+    "id": 1, 
+    "title": "フィクション化されたタイトル", 
+    "content": "本文（100文字程度）", 
+    "original": "元のニュースの短い要約",
+    "discussion": [
+      {"charId": "soseki", "comment": "漱石らしい皮肉なコメント"},
+      {"charId": "dosto", "comment": "ドストエフスキーらしい魂の叫び"},
+      {"charId": "ichikawa", "comment": "市川房枝らしい社会正義の叱咤"}
+    ]
+  }
 ]
 </format>
 `;
@@ -85,7 +95,7 @@ export const fetchFictionalizedNews = async (apiKey) => {
     return [{ id: 1, title: "静かなる断絶", content: "通信の深淵から。沈黙だけが、今の我々に残された唯一の共通言語だ。", original: "Network Timeout" }];
 };
 
-export const generateIchikawaScolding = async (newsItem, apiKey) => {
+export const generateCharacterNewsComment = async (newsItem, charId, apiKey) => {
     if (!apiKey) return "";
 
     for (const modelName of FALLBACK_MODELS) {
@@ -94,20 +104,21 @@ export const generateIchikawaScolding = async (newsItem, apiKey) => {
             const genAI = new GoogleGenerativeAI(sanitizedKey);
             const model = genAI.getGenerativeModel({
                 model: modelName,
-                generationConfig: { temperature: 0.3 },
-                systemInstruction: "あなたは市川房枝です。毅然とした態度で「叱り」のコメントを述べてください。"
+                generationConfig: { temperature: 0.7 }
             });
 
-            const prompt = `以下のニュースに対して、社会の在り方を問うコメントを述べてください。\nニュース: "${newsItem.original}"`;
+            const prompt = `あなたは「${charId}」の魂です。
+以下のニュース（現実の出来事を象徴的に表現したもの）に対して、あなたの思想に基づいた短い独白またはコメントを述べてください。
+ニュース: "${newsItem.title}"
+状況: "${newsItem.content}"`;
 
             const result = await executeWithRetry(() => model.generateContent(prompt));
             return result.response.text();
         } catch (error) {
             const isRateLimit = error.status === 429 || error.message?.includes('429');
-            const isNotFound = error.status === 404 || error.message?.includes('404');
-            if (isRateLimit || isNotFound) continue;
-            return "政治が腐敗するのは、私たちの無関心ゆえです。";
+            if (isRateLimit) continue;
+            return "...";
         }
     }
-    return "沈黙こそが最大の罪です。";
+    return "沈黙。";
 };
