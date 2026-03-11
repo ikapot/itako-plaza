@@ -87,46 +87,44 @@ function App() {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        setUserName(currentUser.displayName || '彷徨える魂');
-
-        // ログイン後のデータ取得
-        const savedBookMarks = await fetchBookmarks();
-        setBookmarks(savedBookMarks);
-
-        // NotebookLMからの蓄積知見を読み込み
-        const data = await fetchNotebookAccumulations();
-        const shared = data.map(acc => acc.content).join('\n---\n');
-        setSpiritSharedKnowledge(shared);
-        if (geminiKey) {
-          setIsAppReady(true);
-        }
-      } else {
+    function onAuthChange(currentUser) {
+      if (!currentUser) {
         setUser(null);
+        return;
       }
-    });
 
-    const loadGlobalData = async () => {
-      if (!geminiKey) return; // キーがなければ何もしない
+      setUser(currentUser);
+      setUserName(currentUser.displayName || '彷徨える魂');
 
-      // ユーザーがログイン済みかつキーがあるなら、LandingPageをスキップ
-      if (auth.currentUser && geminiKey) {
+      // ログイン後のデータ取得
+      Promise.all([fetchBookmarks(), fetchNotebookAccumulations()])
+        .then(([savedBookMarks, data]) => {
+          setBookmarks(savedBookMarks);
+          const shared = data.map(acc => acc.content).join('\n---\n');
+          setSpiritSharedKnowledge(shared);
+          if (geminiKey) setIsAppReady(true);
+        });
+    }
+
+    const unsubscribe = auth.onAuthStateChanged(onAuthChange);
+
+    async function loadGlobalData() {
+      if (!geminiKey) return;
+
+      if (auth.currentUser) {
         setIsAppReady(true);
       }
 
-      const loadingKey = `itako_loading_${geminiKey.slice(-6)}`;
-      if (sessionStorage.getItem(loadingKey)) return; // React Strict Mode の二重起動を防ぐ
-      sessionStorage.setItem(loadingKey, '1');
+      const syncKey = geminiKey.slice(-6);
+      if (sessionStorage.getItem(`itako_loading_${syncKey}`)) return;
+      sessionStorage.setItem(`itako_loading_${syncKey}`, '1');
 
       const initialNews = await fetchFictionalizedNews(geminiKey);
       setNews(initialNews);
-    };
+    }
 
     loadGlobalData();
 
-    // 霊的エネルギーの定期取得
     const energyInterval = setInterval(async () => {
       const energies = await fetchLocationEnergies();
       setLocationEnergies(energies);
@@ -263,12 +261,14 @@ function App() {
 
       // ステータスの動的変化
       setCharacters(prev => prev.map(c => {
-        if (c.id === selectedCharId) {
-          if (c.id === 'soseki') return { ...c, status: { '胃痛レベル': (c.status['胃痛レベル'] || 0) + 1 } };
-          if (c.id === 'dosto') return { ...c, status: { '借金額': (parseInt(c.status['借金額']) + 1000) || 50000 + 'ルーブル' } };
-          if (c.id === 'k_kokoro') return { ...c, status: { '絶望度': 'より深く' } };
-        }
-        return c;
+        if (c.id !== selectedCharId) return c;
+
+        const newStatus = { ...c.status };
+        if (c.id === 'soseki') newStatus['胃痛レベル'] = (newStatus['胃痛レベル'] || 0) + 1;
+        if (c.id === 'dosto') newStatus['借金額'] = (parseInt(newStatus['借金額']) + 1000) + 'ルーブル';
+        if (c.id === 'k_kokoro') newStatus['絶望度'] = 'より深く';
+
+        return { ...c, status: newStatus };
       }));
 
     } catch (e) {
@@ -289,7 +289,8 @@ function App() {
     }
   };
 
-  const ManagerContent = () => (
+  // Memoize ManagerContent to prevent unnecessary re-renders when parent state (like input or messages) changes
+  const MemoizedManagerContent = React.useMemo(() => (
     <div className="space-y-12">
       {/* Tabs for Manager */}
       <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 mb-8">
@@ -297,21 +298,29 @@ function App() {
           { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
           { id: 'map', icon: <Globe size={14} />, label: 'Map', color: '#fdb913' },
           { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveManagerTab(tab.id)}
-            style={{
-              backgroundColor: activeManagerTab === tab.id ? tab.color : 'rgba(255,255,255,0.03)',
-              color: activeManagerTab === tab.id ? '#000' : 'rgba(255,255,255,0.3)',
-              boxShadow: activeManagerTab === tab.id ? `0 4px 15px ${tab.color}44` : 'none'
-            }}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 active:scale-95 cursor-pointer font-oswald border ${activeManagerTab === tab.id ? 'border-white/20' : 'border-transparent'}`}
-          >
-            {tab.icon}
-            <span className="hidden md:inline">{tab.label}</span>
-          </button>
-        ))}
+        ].map(tab => {
+          const isActive = activeManagerTab === tab.id;
+          const bgColor = isActive ? tab.color : 'rgba(255,255,255,0.03)';
+          const textColor = isActive ? '#000' : 'rgba(255,255,255,0.3)';
+          const shadow = isActive ? `0 4px 15px ${tab.color}44` : 'none';
+          const border = isActive ? 'border-white/20' : 'border-transparent';
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveManagerTab(tab.id)}
+              style={{
+                backgroundColor: bgColor,
+                color: textColor,
+                boxShadow: shadow
+              }}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 active:scale-95 cursor-pointer font-oswald border ${border}`}
+            >
+              {tab.icon}
+              <span className="hidden md:inline">{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       <AnimatePresence mode="wait">
@@ -465,7 +474,7 @@ function App() {
         )}
       </AnimatePresence>
     </div>
-  );
+  ), [activeManagerTab, locations, selectedLocationId, locationEnergies, characters, selectedCharId, geminiKey, isValidatingApi, apiConnectionStatus]);
 
   const handleScroll = (e) => {
     const scrollLeft = e.target.scrollLeft;
@@ -539,7 +548,7 @@ function App() {
                 </button>
               </div>
               <div className="pb-32">
-                <ManagerContent />
+                {MemoizedManagerContent}
               </div>
 
               {/* Status footer with safe area padding */}
@@ -893,8 +902,8 @@ function App() {
                           className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                         >
                           <div className={`group relative p-6 md:p-8 rounded-[35px] transition-all duration-500 max-w-[95%] md:max-w-[85%] ${isUser
-                              ? 'bg-gradient-to-br from-zinc-900 to-black text-white border border-white/10 rounded-tr-none shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]'
-                              : 'bg-gradient-to-br from-black to-zinc-900/50 text-white border border-white/5 rounded-tl-none'
+                            ? 'bg-gradient-to-br from-zinc-900 to-black text-white border border-white/10 rounded-tr-none shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]'
+                            : 'bg-gradient-to-br from-black to-zinc-900/50 text-white border border-white/5 rounded-tl-none'
                             }`}>
                             {!isUser && (
                               <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">

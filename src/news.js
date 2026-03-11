@@ -1,9 +1,10 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 const FALLBACK_MODELS = [
+    "gemini-3-flash-preview",
+    "gemini-3-pro-preview",
     "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-pro"
+    "gemini-2.0-flash"
 ];
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -43,8 +44,7 @@ export const fetchFictionalizedNews = async (apiKey) => {
     for (const modelName of FALLBACK_MODELS) {
         try {
             const sanitizedKey = apiKey.trim();
-            const genAI = new GoogleGenerativeAI(sanitizedKey);
-            const model = genAI.getGenerativeModel({ model: modelName });
+            const ai = new GoogleGenAI({ apiKey: sanitizedKey });
 
             const prompt = `
 <task>
@@ -73,8 +73,11 @@ export const fetchFictionalizedNews = async (apiKey) => {
 </format>
 `;
 
-            const result = await executeWithRetry(() => model.generateContent(prompt));
-            const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
+            const result = await executeWithRetry(() => ai.models.generateContent({
+                model: modelName,
+                contents: prompt
+            }));
+            const jsonStr = result.text.replace(/```json|```/g, "").trim();
             const newsData = JSON.parse(jsonStr);
 
             console.log(`[Multi-Brain] News decrypted via: ${modelName}`);
@@ -101,19 +104,19 @@ export const generateCharacterNewsComment = async (newsItem, charId, apiKey) => 
     for (const modelName of FALLBACK_MODELS) {
         try {
             const sanitizedKey = apiKey.trim();
-            const genAI = new GoogleGenerativeAI(sanitizedKey);
-            const model = genAI.getGenerativeModel({
-                model: modelName,
-                generationConfig: { temperature: 0.7 }
-            });
+            const ai = new GoogleGenAI({ apiKey: sanitizedKey });
 
             const prompt = `あなたは「${charId}」の魂です。
 以下のニュース（現実の出来事を象徴的に表現したもの）に対して、あなたの思想に基づいた短い独白またはコメントを述べてください。
 ニュース: "${newsItem.title}"
 状況: "${newsItem.content}"`;
 
-            const result = await executeWithRetry(() => model.generateContent(prompt));
-            return result.response.text();
+            const result = await executeWithRetry(() => ai.models.generateContent({
+                model: modelName,
+                contents: prompt,
+                config: { temperature: 0.7 }
+            }));
+            return result.text;
         } catch (error) {
             const isRateLimit = error.status === 429 || error.message?.includes('429');
             if (isRateLimit) continue;

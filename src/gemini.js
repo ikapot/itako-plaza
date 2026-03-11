@@ -1,9 +1,10 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 const FALLBACK_MODELS = [
+    "gemini-3-flash-preview",
+    "gemini-3-pro-preview",
     "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-pro"
+    "gemini-2.0-flash"
 ];
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -83,19 +84,22 @@ export const generateCharacterResponseStream = async (char, userMessage, isUnder
 
     for (const currentKey of keys) {
         let lastError = null;
+        const ai = new GoogleGenAI({ apiKey: currentKey });
+
         for (const modelName of FALLBACK_MODELS) {
             try {
-                const genAI = new GoogleGenerativeAI(currentKey);
-                const model = genAI.getGenerativeModel({
+                const responseStream = await ai.models.generateContentStream({
                     model: modelName,
-                    generationConfig: config.generationConfig,
-                    systemInstruction: systemPrompt
+                    contents: userMessage,
+                    config: {
+                        ...config.generationConfig,
+                        systemInstruction: systemPrompt
+                    }
                 });
 
-                const result = await model.generateContentStream(userMessage);
                 let fullText = "";
-                for await (const chunk of result.stream) {
-                    const chunkText = chunk.text();
+                for await (const chunk of responseStream) {
+                    const chunkText = chunk.text;
                     fullText += chunkText;
                     onChunk(fullText);
                 }
@@ -103,7 +107,8 @@ export const generateCharacterResponseStream = async (char, userMessage, isUnder
                 return; // 成功
             } catch (error) {
                 lastError = error;
-                const is429 = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota') || error.message?.includes('exhausted');
+                const errorMsg = error.message || "";
+                const is429 = error.status === 429 || errorMsg.includes('429') || errorMsg.includes('Quota') || errorMsg.includes('exhausted');
                 if (is429) {
                     console.warn(`[Key Switch] Model ${modelName} exhausted on current key.`);
                     continue; // 次のモデルを試す
@@ -138,12 +143,15 @@ export const evaluateFutureSelf = async (bookmarks, userApiKey) => {
     const prompt = `2036年のあなたとして、2026年の自分へメッセージを送れ。対話記録:\n${bookmarkText}`;
 
     for (const k of keys) {
+        const ai = new GoogleGenAI({ apiKey: k });
         for (const m of FALLBACK_MODELS) {
             try {
-                const genAI = new GoogleGenerativeAI(k);
-                const model = genAI.getGenerativeModel({ model: m, systemInstruction: CHARACTER_CONFIGS.future_self.systemPrompt });
-                const result = await model.generateContent(prompt);
-                return result.response.text();
+                const result = await ai.models.generateContent({
+                    model: m,
+                    contents: prompt,
+                    config: { systemInstruction: CHARACTER_CONFIGS.future_self.systemPrompt }
+                });
+                return result.text;
             } catch {
                 if (keys.indexOf(k) === keys.length - 1 && FALLBACK_MODELS.indexOf(m) === FALLBACK_MODELS.length - 1) break;
                 continue;
@@ -160,19 +168,19 @@ export const validateGeminiApiKey = async (rawKey) => {
     if (!rawKey) return false;
     const firstKey = rawKey.split(',')[0].trim();
     try {
-        const genAI = new GoogleGenerativeAI(firstKey);
-        // 接続確認のため、複数のモデルを試行
-        const modelsToTry = ["gemini-2.0-flash", "gemini-2.5-flash"];
+        const ai = new GoogleGenAI({ apiKey: firstKey });
+        // 接続確認のため、最新モデルを優先的に試行
+        const modelsToTry = ["gemini-3-flash-preview", "gemini-2.5-flash"];
 
         for (const modelName of modelsToTry) {
             try {
-                const model = genAI.getGenerativeModel({ model: modelName });
                 // 最小限のリクエストで生存確認
-                const result = await model.generateContent({
-                    contents: [{ role: "user", parts: [{ text: "ok" }] }],
-                    generationConfig: { maxOutputTokens: 1 }
+                const result = await ai.models.generateContent({
+                    model: modelName,
+                    contents: "ok",
+                    config: { maxOutputTokens: 1 }
                 });
-                if (result.response) return true;
+                if (result.text) return true;
             } catch (e) {
                 const errorText = e.message || "";
                 const status = e.status;
@@ -214,10 +222,12 @@ export const evaluateExpansion = async (context, userApiKey) => {
 
     for (const k of keys) {
         try {
-            const genAI = new GoogleGenerativeAI(k);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-            const result = await model.generateContent(prompt);
-            return JSON.parse(result.response.text().replace(/```json|```/g, ""));
+            const ai = new GoogleGenAI({ apiKey: k });
+            const result = await ai.models.generateContent({
+                model: "gemini-3-flash-preview",
+                contents: prompt
+            });
+            return JSON.parse(result.text.replace(/```json|```/g, ""));
         } catch { continue; }
     }
     return null;
@@ -250,10 +260,12 @@ export const generateLocationDialogue = async (c1, c2, loc, userApiKey) => {
 
     for (const k of keys) {
         try {
-            const genAI = new GoogleGenerativeAI(k);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-            const result = await model.generateContent(prompt);
-            const text = result.response.text().replace(/```json|```/g, "");
+            const ai = new GoogleGenAI({ apiKey: k });
+            const result = await ai.models.generateContent({
+                model: "gemini-3-flash-preview",
+                contents: prompt
+            });
+            const text = result.text.replace(/```json|```/g, "");
             return JSON.parse(text);
         } catch { continue; }
     }
