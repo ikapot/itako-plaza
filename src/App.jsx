@@ -12,8 +12,8 @@ import WarholAvatar from './components/WarholAvatar';
 import SpiritCard from './components/SpiritCard';
 
 const INITIAL_CHARACTERS = [
-  { id: 'soseki', name: '夏目漱石', flavor: '胃痛', color: 'bg-itako-clay', description: '日本の小説家、評論家。代表作『吾輩は猫である』。深く鋭い人間洞察を持つ。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg' },
-  { id: 'dosto', name: 'ドストエフスキー', flavor: '借金', color: 'bg-itako-sand', description: 'ロシアの小説家。代表作『罪と罰』。魂の極限状態を描くリアリズムの巨匠。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Dostoevsky_1872.jpg/330px-Dostoevsky_1872.jpg' },
+  { id: 'soseki', name: '夏目漱石', flavor: '胃痛', color: 'bg-itako-clay', description: '日本の小説家、評論家。代表作『吾輩は猫である』。深く鋭い人間洞察を持つ。', avatar: 'assets/soseki_warhol.png', isPreStyled: true },
+  { id: 'dosto', name: 'ドストエフスキー', flavor: '借金', color: 'bg-itako-sand', description: 'ロシアの小説家。代表作『罪と罰』。魂の極限状態を描くリアリズムの巨匠。', avatar: 'assets/dosto_warhol.png', isPreStyled: true },
   { id: 'ichikawa', name: '市川房枝', flavor: '厳格', color: 'bg-itako-sage', description: '日本の婦人運動家。女性参政権運動を主導し、政治の浄化を訴え続けた。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg' },
   { id: 'atsuko', name: 'Atsuko', flavor: '見守り', color: 'bg-itako-sand', description: '広場の片隅で静かにすべてを記録し続ける、超越的な観察者の魂。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/O_Tsuta-san_c1900.jpg/330px-O_Tsuta-san_c1900.jpg' },
   { id: 'k_kokoro', name: 'K', flavor: '絶望', color: 'bg-zinc-800', description: '『こころ』の登場人物。宗教的理想と人間的感情の間で苦悩する孤高の青年。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Japanese_student_c1900.jpg/330px-Japanese_student_c1900.jpg' },
@@ -385,7 +385,7 @@ function App() {
                   onClick={() => setSelectedCharId(c.id)}
                   className={`w-full group text-left flex items-start gap-4 md:gap-6 p-4 md:p-6 rounded-[35px] transition-all duration-300 border active:scale-[0.98] ${isSelected ? 'bg-white/5 border-white/20 shadow-xl translate-x-2 cursor-default' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
                 >
-                  <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" />
+                  <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" isPreStyled={c.isPreStyled} />
                   <div className="flex-1 space-y-1 md:space-y-2 py-0.5 md:py-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 md:gap-3">
@@ -487,7 +487,7 @@ function App() {
       localStorage.setItem('itako_gemini_key', key);
     }
     setIsAppReady(true);
-  }, []);
+  }, [setGeminiKey, setIsAppReady]);
 
   if (!isAppReady || !user) {
     return (
@@ -724,7 +724,7 @@ function App() {
                     onClick={() => setSelectedCharId(c.id)}
                     className={`w-[320px] flex items-center gap-4 p-2 rounded-2xl border transition-all duration-300 active:scale-95 ${selectedCharId === c.id ? 'bg-white/5 border-white/20 shadow-lg cursor-default' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
                   >
-                    <WarholAvatar src={c.avatar} size="w-8 h-8 md:w-10 h-10" isSelected={selectedCharId === c.id} colorClass={c.color} />
+                    <WarholAvatar src={c.avatar} size="w-8 h-8 md:w-10 h-10" isSelected={selectedCharId === c.id} colorClass={c.color} isPreStyled={c.isPreStyled} />
                     <span className="text-xs font-bold tracking-wide text-white/80 whitespace-nowrap">{c.name}</span>
                   </button>
                 ))}
@@ -830,7 +830,8 @@ function App() {
                       title={n.title}
                       content={n.content}
                       author="Soseki Natsume"
-                      portraitUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg"
+                      portraitUrl="assets/soseki_warhol.png"
+                      isPreStyled={true}
                       flavor="Narrator"
                       colorClass="bg-white/5 text-inherit border-white/10"
                     />
@@ -887,7 +888,7 @@ function App() {
                             {!isUser && (
                               <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
                                 <div className="flex items-center gap-3">
-                                  {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected />}
+                                  {charObj && <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected isPreStyled={charObj.isPreStyled} />}
                                   <span className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/20">{m.charId}</span>
                                 </div>
                                 <div className="flex items-center gap-3">

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import WarholAvatar from './WarholAvatar';
 
-const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, colorClass = "bg-white/5 border border-white/10" }) => (
+const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, colorClass = "bg-white/5 border border-white/10", isPreStyled = false }) => (
     <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -13,7 +13,7 @@ const SpiritCard = ({ title, content, author, portraitUrl, flavor, timestamp, co
             {author && (
                 <div className="flex items-center justify-between border-b border-white/5 pb-3">
                     <div className="flex items-center gap-3">
-                        <WarholAvatar src={portraitUrl || 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Natsume_Souseki.jpg/330px-Natsume_Souseki.jpg'} size="w-8 h-8" isSelected />
+                        <WarholAvatar src={portraitUrl || 'assets/soseki_warhol.png'} size="w-8 h-8" isSelected isPreStyled={isPreStyled || !portraitUrl} />
                         <span className="text-[10px] font-bold tracking-[0.2em] opacity-40 uppercase">{author}</span>
                         {flavor && <span className="text-[10px] font-bold bg-white/5 px-3 py-1 rounded-full opacity-30">{flavor}</span>}
                     </div>
