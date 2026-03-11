@@ -929,8 +929,8 @@ function App() {
                             </p>
 
                             {/* Subtle Ambient Glow */}
-                            {!isUser && isSelected && (
-                              <div className="absolute -inset-[1px] rounded-[35px] bg-gradient-to-br from-white/5 to-transparent -z-10 pointer-events-none" />
+                            {!isUser && (
+                              <div className="absolute -inset-[1px] rounded-[35px] bg-gradient-to-br from-white/5 to-transparent -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                             )}
                           </div>
                         </motion.div>

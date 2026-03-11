@@ -3,31 +3,22 @@ import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOu
 import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 
 // TODO: 環境変数（.envファイル）からFirebase設定を読み込む
-const getEnv = (key) => {
-    const val = import.meta.env[key];
-    if (!val) return "";
-    return val.trim().replace(/^['"]|['"]$/g, ""); // Remove quotes if any
-};
-
+// Firebase Configuration - Hardcoded for build stability
 const firebaseConfig = {
-    apiKey: getEnv('VITE_FIREBASE_API_KEY'),
-    authDomain: getEnv('VITE_FIREBASE_AUTH_DOMAIN'),
-    projectId: getEnv('VITE_FIREBASE_PROJECT_ID'),
-    storageBucket: getEnv('VITE_FIREBASE_STORAGE_BUCKET'),
-    messagingSenderId: getEnv('VITE_FIREBASE_MESSAGING_SENDER_ID'),
-    appId: getEnv('VITE_FIREBASE_APP_ID')
+    apiKey: "AIzaSyDzWYTqLbGZA0lZ3YOVt6NWYacgVp67zpQ",
+    authDomain: "itako-plaza-kenji.firebaseapp.com",
+    projectId: "itako-plaza-kenji",
+    storageBucket: "itako-plaza-kenji.firebasestorage.app",
+    messagingSenderId: "588973200958",
+    appId: "1:588973200958:web:16d8ceab44a39098b7636f"
 };
 
-console.log("Firebase Env Check:", {
-    hasKey: !!firebaseConfig.apiKey,
-    keyPrefix: firebaseConfig.apiKey ? firebaseConfig.apiKey.slice(0, 7) : "none",
-    hasDomain: !!firebaseConfig.authDomain
+console.log("Firebase Status:", {
+    connected: !!firebaseConfig.apiKey,
+    domain: firebaseConfig.authDomain
 });
 
-const isConfigValid = !!(firebaseConfig.apiKey &&
-    firebaseConfig.authDomain &&
-    !firebaseConfig.apiKey.includes('YOUR_') &&
-    firebaseConfig.apiKey.length > 10);
+const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.authDomain);
 console.log("Is Firebase Config Valid?", isConfigValid);
 
 let app;
