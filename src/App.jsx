@@ -205,7 +205,14 @@ function App() {
     // Add user message locally
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
 
+    // Create a placeholder for the AI message
     const currentChar = characters.find(c => c.id === selectedCharId);
+    if (!currentChar) {
+      console.error("Character not found:", selectedCharId);
+      setMessages(prev => [...prev, { role: 'ai', content: '【霊障】対話相手が見つかりません。', charId: 'system' }]);
+      setLoading(false);
+      return;
+    }
 
     // NDL検索（話題に関連するアーカイブの提示）
     searchNDLArchive(userMsg).then(results => {
@@ -214,7 +221,6 @@ function App() {
       }
     });
 
-    // Create a placeholder for the AI message to be updated via stream
     setMessages(prev => [...prev, { role: 'ai', content: '', charId: selectedCharId }]);
 
     let finalAiResp = "";

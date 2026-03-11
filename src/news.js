@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const FALLBACK_MODELS = [
     "gemini-3-flash-preview",
@@ -44,7 +44,8 @@ export const fetchFictionalizedNews = async (apiKey) => {
     for (const modelName of FALLBACK_MODELS) {
         try {
             const sanitizedKey = apiKey.trim();
-            const ai = new GoogleGenAI({ apiKey: sanitizedKey });
+            const genAI = new GoogleGenerativeAI(sanitizedKey);
+            const model = genAI.getGenerativeModel({ model: modelName });
 
             const prompt = `
 <task>
@@ -73,11 +74,8 @@ export const fetchFictionalizedNews = async (apiKey) => {
 </format>
 `;
 
-            const result = await executeWithRetry(() => ai.models.generateContent({
-                model: modelName,
-                contents: prompt
-            }));
-            const jsonStr = result.text.replace(/```json|```/g, "").trim();
+            const result = await executeWithRetry(() => model.generateContent(prompt));
+            const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
             const newsData = JSON.parse(jsonStr);
 
             console.log(`[Multi-Brain] News decrypted via: ${modelName}`);
@@ -104,19 +102,19 @@ export const generateCharacterNewsComment = async (newsItem, charId, apiKey) => 
     for (const modelName of FALLBACK_MODELS) {
         try {
             const sanitizedKey = apiKey.trim();
-            const ai = new GoogleGenAI({ apiKey: sanitizedKey });
+            const genAI = new GoogleGenerativeAI(sanitizedKey);
+            const model = genAI.getGenerativeModel({
+                model: modelName,
+                generationConfig: { temperature: 0.7 }
+            });
 
             const prompt = `あなたは「${charId}」の魂です。
 以下のニュース（現実の出来事を象徴的に表現したもの）に対して、あなたの思想に基づいた短い独白またはコメントを述べてください。
 ニュース: "${newsItem.title}"
 状況: "${newsItem.content}"`;
 
-            const result = await executeWithRetry(() => ai.models.generateContent({
-                model: modelName,
-                contents: prompt,
-                config: { temperature: 0.7 }
-            }));
-            return result.text;
+            const result = await executeWithRetry(() => model.generateContent(prompt));
+            return result.response.text();
         } catch (error) {
             const isRateLimit = error.status === 429 || error.message?.includes('429');
             if (isRateLimit) continue;
