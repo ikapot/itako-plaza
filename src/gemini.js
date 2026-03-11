@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const FALLBACK_MODELS = [
+    "gemini-2.5-flash",
     "gemini-2.0-flash",
-    "gemini-1.5-flash",
     "gemini-1.5-pro"
 ];
 
@@ -162,7 +162,7 @@ export const validateGeminiApiKey = async (rawKey) => {
     try {
         const genAI = new GoogleGenerativeAI(firstKey);
         // 接続確認のため、複数のモデルを試行
-        const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash"];
+        const modelsToTry = ["gemini-2.0-flash", "gemini-2.5-flash"];
 
         for (const modelName of modelsToTry) {
             try {
@@ -215,7 +215,7 @@ export const evaluateExpansion = async (context, userApiKey) => {
     for (const k of keys) {
         try {
             const genAI = new GoogleGenerativeAI(k);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContent(prompt);
             return JSON.parse(result.response.text().replace(/```json|```/g, ""));
         } catch { continue; }
@@ -251,7 +251,7 @@ export const generateLocationDialogue = async (c1, c2, loc, userApiKey) => {
     for (const k of keys) {
         try {
             const genAI = new GoogleGenerativeAI(k);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContent(prompt);
             const text = result.response.text().replace(/```json|```/g, "");
             return JSON.parse(text);
