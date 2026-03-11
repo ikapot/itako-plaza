@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ghost, LogIn } from 'lucide-react';
 import Logo from './Logo';
-import { loginWithGoogle } from '../firebase';
+import { loginWithGoogle, loginAnonymously } from '../firebase';
 import { validateGeminiApiKey } from '../gemini';
 
 export default function LandingPage({ onLoginComplete, user }) {
@@ -28,19 +28,34 @@ export default function LandingPage({ onLoginComplete, user }) {
     }, [user, step, onLoginComplete]);
 
     const handleGoogleLogin = async () => {
+        setError('');
         const u = await loginWithGoogle();
         if (u) {
-            // useEffect が prop の user 変更を検知して自動で進むが、
-            // 即時反映のためにここでもロジックを追加（任意）
-            const envKey = import.meta.env.VITE_GEMINI_API_KEY;
-            const localKey = localStorage.getItem('itako_gemini_key');
-            const keyToUse = envKey || localKey;
+            proceedToNextStep();
+        } else {
+            setError('認証に失敗しました。ドメインが許可されていない可能性があります。');
+        }
+    };
 
-            if (keyToUse) {
-                onLoginComplete(keyToUse);
-            } else {
-                setStep('api');
-            }
+    const handleGuestLogin = async () => {
+        setError('');
+        const u = await loginAnonymously();
+        if (u) {
+            proceedToNextStep();
+        } else {
+            setError('ゲストログインに失敗しました。');
+        }
+    };
+
+    const proceedToNextStep = () => {
+        const envKey = import.meta.env.VITE_GEMINI_API_KEY;
+        const localKey = localStorage.getItem('itako_gemini_key');
+        const keyToUse = envKey || localKey;
+
+        if (keyToUse) {
+            onLoginComplete(keyToUse);
+        } else {
+            setStep('api');
         }
     };
 
@@ -103,6 +118,13 @@ export default function LandingPage({ onLoginComplete, user }) {
                                         Googleアカウントでログイン
                                     </button>
 
+                                    <button
+                                        onClick={handleGuestLogin}
+                                        className="w-full border border-zinc-700 text-zinc-300 py-3 px-6 rounded-full font-bold hover:bg-zinc-900 transition-all text-sm"
+                                    >
+                                        ゲストとして開始 (匿名ログイン)
+                                    </button>
+
                                     <div className="flex items-center gap-3 py-2">
                                         <div className="h-[1px] flex-1 bg-zinc-800"></div>
                                         <span className="text-xs text-zinc-500 font-bold">OR</span>
@@ -111,11 +133,19 @@ export default function LandingPage({ onLoginComplete, user }) {
 
                                     <button
                                         onClick={() => setStep('api')}
-                                        className="w-full border border-zinc-700 text-zinc-300 py-3 px-6 rounded-full font-bold hover:bg-zinc-900 transition-all text-sm"
+                                        className="w-full border border-zinc-700 text-zinc-500 py-2 px-6 rounded-full font-medium hover:bg-zinc-900 transition-all text-xs"
                                     >
-                                        アカウントを作成
+                                        API接続のみで開始
                                     </button>
                                 </div>
+                                {error && (
+                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                                        <p className="text-[11px] text-red-500 leading-relaxed font-bold">
+                                            {error}<br />
+                                            <span className="opacity-70 font-normal">Firebaseコンソールの [承認済みドメイン] に current domain を追加してください。</span>
+                                        </p>
+                                    </div>
+                                )}
                                 <p className="text-[10px] text-zinc-600 leading-relaxed">
                                     ログインすることで、利用規約およびプライバシーポリシーに同意したものとみなされます。ここは生者と死者が交差する場所です。
                                 </p>
