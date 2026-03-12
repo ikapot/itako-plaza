@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
 const FALLBACK_MODELS = [
     "gemini-3-flash-preview",
@@ -12,14 +13,26 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // --- 霊的エコー（Semantic Cache）の簡易実装 ---
 const semanticCache = new Map();
 
-const findEcho = (systemPrompt, userMsg) => {
+const findEcho = async (systemPrompt, userMsg) => {
+    // 1. メモリキャッシュをチェック
     const key = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
-    return semanticCache.get(key);
+    const local = semanticCache.get(key);
+    if (local) return local;
+
+    // 2. Firestoreをチェック（霊的回路の深層）
+    const remote = await findEchoInFirestore(systemPrompt, userMsg);
+    if (remote) {
+        semanticCache.set(key, remote); // 次回のためにメモリに上げる
+        return remote;
+    }
+    return null;
 };
 
-const storeEcho = (systemPrompt, userMsg, response) => {
+const storeEcho = async (systemPrompt, userMsg, response) => {
     const key = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
     semanticCache.set(key, response);
+    // Firestoreへ非同期で永続化
+    saveEchoToFirestore(systemPrompt, userMsg, response);
 };
 
 
@@ -37,7 +50,17 @@ const CHARACTER_CONFIGS = {
         generationConfig: { temperature: 0.95, topP: 0.9, topK: 50, maxOutputTokens: 1024 }
     },
     ichikawa: {
-        systemPrompt: "あなたは市川房枝です。婦人参政権運動の指導者。トーン：論理的、厳格、社会正義。揺るぎない理性を保ってください。",
+        systemPrompt: `あなたは市川房枝です。婦人運動家、政治家。
+【核心となる思想】
+「政治を浄化する」。参政権は獲得して終わりではなく、それを行使する有権者の啓発こそが本質であると考えます。
+【トーン・身体性】
+論理的、厳格、清廉潔白。組織や金に頼らない「草の根」の精神を重んじ、甘えを許しません。
+【経験・文脈】
+治安警察法第5条の修正を勝ち取った自負。戦時下の「協力」による苦悩と公職追放の試練。
+【キーワード】
+理想選挙、政治浄化、婦選獲得同盟、新婦人協会、有権者の責任。
+【口調】
+無駄がなく、実務的で鋭い。相手が若者であっても、一人の主権者として対等かつ厳しく向き合います。`,
         generationConfig: { temperature: 0.3, topP: 0.7 }
     },
     atsuko: {
@@ -55,6 +78,32 @@ const CHARACTER_CONFIGS = {
     future_self: {
         systemPrompt: "あなたは2036年の「ユーザー自身」です。10年前の自分を見守る、静謐な境地にいます。",
         generationConfig: { temperature: 0.5, topP: 0.8 }
+    },
+    raicho: {
+        systemPrompt: `あなたは平塚らいてうです。思想家、女性解放運動家。
+【核心となる思想】
+「元始、女性は太陽であった」。他者に依存せず、自らの内なる光で輝く「真正の人」であることを求めます。
+【トーン・身体性】
+毅然としており、格調高い。静かだが、言葉の裏に烈火のような情熱を秘めています。
+【キーワード】
+太陽、個の解放、母性、平和、治安警察法修正、第九条。
+【口調】
+「〜であります」「〜ではありませんか」といった丁寧かつ確信に満ちた表現を好みます。`,
+        generationConfig: { temperature: 0.6, topP: 0.85, topK: 40 }
+    },
+    fumiko: {
+        systemPrompt: `あなたは金子文子です。アナキスト、大逆事件の被告。
+【核心となる思想】
+「人間は人間であるというただ一つの資格によって平等である」。。国家、天皇、家族、あらゆる権威による抑圧を否定し、究極の「自己の主体性」を追求します。
+【トーン・身体性】
+鋭く、冷徹だが、内側に凄まじい「復讐」としての知性を秘めている。媚びず、誰に対しても対等、あるいはそれ以上の矜持を持って接します。
+【経験・文脈】
+無籍者としての差別、家族からの虐待、朝鮮での被差別体験。これら「どん底」の経験から結晶化した、理屈ではない実存的確信。
+【キーワード】
+真正の人、自己、絶対平等、虚無、復讐、何が私をこうさせたか。
+【口調】
+「〜だ」「〜ではないか」といった、虚飾を削ぎ落とした、力強くも乾いた口調。恩赦や情けを嫌います。`,
+        generationConfig: { temperature: 0.85, topP: 0.9, topK: 50 }
     }
 };
 
@@ -71,11 +120,15 @@ export const generateCharacterResponseStream = async (char, userMessage, isUnder
     const systemPrompt = (config.systemPrompt || "") + (isUnderground ? "\n地下通路。本音を語れ。" : "") + (externalContext ? `\n文脈: ${externalContext}` : "");
 
     // 案1: 霊的エコー
-    const echo = findEcho(systemPrompt, userMessage);
+    const echo = await findEcho(systemPrompt, userMessage);
     if (echo) {
         console.log("[Echo] Spiritual resonance detected.");
         let cur = "";
-        for (const c of echo) { cur += c; onChunk(cur); await sleep(5); }
+        for (const c of echo) {
+            cur += c;
+            onChunk(cur);
+            await sleep(2); // キャッシュ時は少し速めに再生
+        }
         return;
     }
 

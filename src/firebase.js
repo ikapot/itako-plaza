@@ -5,12 +5,12 @@ import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestam
 // TODO: 環境変数（.envファイル）からFirebase設定を読み込む
 // Firebase Configuration - Hardcoded for build stability
 const firebaseConfig = {
-    apiKey: "AIzaSyDzWYTqLbGZA0lZ3YOVt6NWYacgVp67zpQ",
-    authDomain: "itako-plaza-kenji.firebaseapp.com",
-    projectId: "itako-plaza-kenji",
-    storageBucket: "itako-plaza-kenji.firebasestorage.app",
-    messagingSenderId: "588973200958",
-    appId: "1:588973200958:web:16d8ceab44a39098b7636f"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 console.log("Firebase Status:", {
@@ -166,6 +166,45 @@ export const fetchNotebookAccumulations = async () => {
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch {
         return [];
+    }
+};
+
+/**
+ * 霊的エコー（セマンティックキャッシュ）を検索
+ */
+export const findEchoInFirestore = async (systemPrompt, userMsg) => {
+    if (!isConfigValid || !db) return null;
+    const cacheKey = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
+    try {
+        const q = query(
+            collection(db, "semantic_echoes"),
+            where("key", "==", cacheKey),
+            orderBy("timestamp", "desc")
+        );
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+            return snapshot.docs[0].data().response;
+        }
+    } catch (e) {
+        console.error("Find Echo Error:", e);
+    }
+    return null;
+};
+
+/**
+ * 霊적エコーを保存
+ */
+export const saveEchoToFirestore = async (systemPrompt, userMsg, response) => {
+    if (!isConfigValid || !db) return;
+    const cacheKey = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
+    try {
+        await addDoc(collection(db, "semantic_echoes"), {
+            key: cacheKey,
+            response,
+            timestamp: serverTimestamp()
+        });
+    } catch (e) {
+        console.error("Save Echo Error:", e);
     }
 };
 
