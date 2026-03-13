@@ -65,9 +65,10 @@ export const fetchFictionalizedNews = async (apiKey) => {
     "content": "本文（100文字程度）", 
     "original": "元のニュースの短い要約",
     "discussion": [
+      {"charId": "raicho", "comment": "平塚らいてうらしい「原始、太陽であった」女性の視点でのコメント"},
+      {"charId": "fumiko", "comment": "金子文子らしい徹底した自己と無政府主義的視点でのコメント"},
       {"charId": "soseki", "comment": "漱石らしい皮肉なコメント"},
-      {"charId": "dosto", "comment": "ドストエフスキーらしい魂の叫び"},
-      {"charId": "ichikawa", "comment": "市川房枝らしい社会正義の叱咤"}
+      {"charId": "dosto", "comment": "ドストエフスキーらしい魂の叫び"}
     ]
   }
 ]

@@ -277,6 +277,8 @@ function App() {
         if (c.id === 'soseki') newStatus['胃痛レベル'] = (newStatus['胃痛レベル'] || 0) + 1;
         if (c.id === 'dosto') newStatus['借金額'] = (parseInt(newStatus['借金額']) + 1000) + 'ルーブル';
         if (c.id === 'k_kokoro') newStatus['絶望度'] = 'より深く';
+        if (c.id === 'raicho') newStatus['内なる光'] = 'より眩く';
+        if (c.id === 'fumiko') newStatus['自己の強度'] = '鋼の如く';
 
         return { ...c, status: newStatus };
       }));
