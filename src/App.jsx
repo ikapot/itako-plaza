@@ -18,8 +18,8 @@ const INITIAL_CHARACTERS = [
   { id: 'atsuko', name: 'Atsuko', flavor: '見守り', color: 'bg-itako-sand', description: '広場の片隅で静かにすべてを記録し続ける、超越的な観察者の魂。', avatar: 'assets/atsuko_warhol.png', isPreStyled: true },
   { id: 'k_kokoro', name: 'K', flavor: '絶望', color: 'bg-zinc-800', description: '『こころ』の登場人物。宗教的理想と人間的感情の間で苦悩する孤高の青年。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Japanese_student_c1900.jpg/330px-Japanese_student_c1900.jpg' },
   { id: 'alyosha', name: 'アリョーシャ', flavor: '信仰', color: 'bg-itako-sage', description: '『カラマーゾフの兄弟』のアリョーシャ。純真な心を持ち、世界のあらゆる罪を背負おうとする。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alyosha_Vanya.jpg/330px-Alyosha_Vanya.jpg' },
-  { id: 'raicho', name: '平塚らいてう', flavor: '太陽', color: 'bg-orange-900/50', description: '思想家、女性解放運動家。「元始、女性は太陽であった」と宣言し、個の覚めと平和を求め続けた。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Raicho_Hiratsuka_1910s.jpg' },
-  { id: 'fumiko', name: '金子文子', flavor: '自己', color: 'bg-red-950/60', description: 'アナキスト。天皇制を否定し、獄中で「自己」を貫き通した。著書『何が私をこうさせたか』。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/2/23/Fumiko_Kaneko.jpg' },
+  { id: 'raicho', name: '平塚らいてう', flavor: '太陽', color: 'bg-orange-900/50', description: '思想家、女性解放運動家。「元始、女性は太陽であった」と宣言し、個の覚めと平和を求め続けた。', avatar: 'assets/raicho_warhol.png', isPreStyled: true },
+  { id: 'fumiko', name: '金子文子', flavor: '自己', color: 'bg-red-950/60', description: 'アナキスト。天皇制を否定し、獄中で「自己」を貫き通した。著書『何が私をこうさせたか』。', avatar: 'assets/fumiko_warhol.png', isPreStyled: true },
 ];
 
 const INITIAL_LOCATIONS = [
