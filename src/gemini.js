@@ -323,3 +323,40 @@ export const generateLocationDialogue = async (c1, c2, loc, userApiKey) => {
     }
     return [];
 };
+
+/**
+ * NotebookLMからのテキスト（ユーザーの思考）から、流行（Trends）の重力となるキーワードを抽出する
+ */
+export const extractTrendsFromNotebook = async (notebookText, userApiKey) => {
+    if (!userApiKey || !notebookText) return null;
+    const keys = userApiKey.split(',').map(k => k.trim()).filter(k => k);
+    const prompt = `
+以下のテキストは、ある人間の最近の思考、メモ、または学習内容です。
+これを読み解き、この人間が「現在何について深く考え、悩んでいるか・何に囚われているか」を象徴する、抽象的で文学的なキーワードを３つ抽出してください。
+
+<text>
+${notebookText.substring(0, 3000)}
+</text>
+
+出力は必ず以下のJSONフォーマットのみにしてください（マークダウンのバッククォート不要）。
+{
+  "summary": "この思考が向かっている方向性の短いポエムのような要約（50文字以内）",
+  "keywords": ["キーワード1", "キーワード2", "キーワード3"]
+}
+`;
+
+    for (const k of keys) {
+        for (const m of FALLBACK_MODELS) {
+            try {
+                const genAI = new GoogleGenerativeAI(k);
+                const model = genAI.getGenerativeModel({ model: m });
+                const result = await model.generateContent(prompt);
+                const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
+                return JSON.parse(jsonStr);
+            } catch (e) {
+                console.warn(`[Sync Notebook] Failed using key ${k} / model ${m}`, e);
+            }
+        }
+    }
+    return null;
+};
