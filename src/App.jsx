@@ -25,53 +25,71 @@ const INITIAL_CHARACTERS = [
 ];
 
 const INITIAL_LOCATIONS = [
-  // Face 1: 現世の残影 (Glimmer of Living)
-  { id: 'cafe', name: 'カフェ', face: 0, pos: 0, description: '微かなコーヒーの香りが生者の執着を思い出させる。', color: '#1a1a1a', pattern: 'radial-gradient(circle, #222 1px, transparent 1px)' },
-  { id: 'library', name: '図書館', face: 0, pos: 1, description: '開かれることのない蔵書たちが、重力のような沈黙を強いている。', color: '#0f141a', pattern: 'linear-gradient(45deg, #ffffff03 25%, transparent 25%)' },
-  { id: 'garden', name: '庭園', face: 0, pos: 2, description: '枯れない花々。時間はここでは結晶化している。', color: '#0f1a0f', pattern: 'radial-gradient(circle, #1a2a1a 1px, transparent 1px)' },
-  { id: 'market', name: '市場', face: 0, pos: 3, description: '物々交換される記憶。中身のない言葉が飛び交う。', color: '#1a150f', pattern: 'repeating-linear-gradient(45deg, #222, #222 2px, transparent 2px, transparent 10px)' },
-  { id: 'school', name: '校舎', face: 0, pos: 4, description: '永遠に終わらない放課後のチャイム。', color: '#151a20', pattern: 'linear-gradient(to bottom, #1a2a3a 1px, transparent 1px)' },
-  { id: 'theatre', name: '劇場', face: 0, pos: 5, description: '観客のいない舞台。拍手の残響だけが揺れている。', color: '#1a0505', pattern: 'radial-gradient(ellipse at center, #300 0%, transparent 70%)' },
+  // Face 1: 現世の残影 (Glimmer) - 9 locations
+  { id: 'cafe', name: 'カフェ', face: 0, pos: 0, tags: ['narrow'], description: '微かなコーヒーの香りが生者の執着を思い出させる。', color: '#1a1a1a', pattern: 'radial-gradient(circle, #222 1px, transparent 1px)' },
+  { id: 'library', name: '図書館', face: 0, pos: 1, tags: ['quiet'], description: '開かれることのない蔵書たちが、重力のような沈黙を強いている。', color: '#0f141a', pattern: 'linear-gradient(45deg, #ffffff03 25%, transparent 25%)' },
+  { id: 'garden', name: '庭園', face: 0, pos: 2, tags: ['wide', 'nature'], description: '枯れない花々。時間はここでは結晶化している。', color: '#0f1a0f', pattern: 'radial-gradient(circle, #1a2a1a 1px, transparent 1px)' },
+  { id: 'elevator', name: '昇降機', face: 0, pos: 3, tags: ['narrow'], description: '閉ざされた立方体。目的地のない沈黙。', color: '#111', pattern: 'linear-gradient(to bottom, #222 1px, transparent 1px)' },
+  { id: 'park', name: '広い公園', face: 0, pos: 4, tags: ['wide'], description: '空が剥き出しの場所。誰ともすれ違わない散歩道。', color: '#1a2a1a', pattern: 'radial-gradient(circle at 50% 50%, #2a3a2a 20%, transparent 80%)' },
+  { id: 'market', name: '市場', face: 0, pos: 5, tags: ['noisy'], description: '物々交換される記憶。中身のない言葉が飛び交う。', color: '#1a150f', pattern: 'repeating-linear-gradient(45deg, #222, #222 2px, transparent 2px, transparent 10px)' },
+  { id: 'school', name: '校舎', face: 0, pos: 6, tags: ['quiet'], description: '永遠に終わらない放課後のチャイム。', color: '#151a20', pattern: 'linear-gradient(to bottom, #1a2a3a 1px, transparent 1px)' },
+  { id: 'roof', name: '屋上', face: 0, pos: 7, tags: ['wide'], description: 'フェンスの向こう側は、何もない空。', color: '#0a1015', pattern: 'linear-gradient(to bottom, #1a2a3a, transparent)' },
+  { id: 'theatre', name: '劇場', face: 0, pos: 8, tags: ['wide'], description: '観客のいない舞台。拍手の残響だけが揺れている。', color: '#1a0505', pattern: 'radial-gradient(ellipse at center, #300 0%, transparent 70%)' },
 
-  // Face 2: 忘却の回廊 (Corridor of Oblivion)
-  { id: 'passage', name: '地下通路', face: 1, pos: 0, description: 'すべての後悔へと通じている冷たいコンクリートの回廊。', color: '#050505', pattern: 'repeating-linear-gradient(0deg, #111 0, #111 1px, transparent 0, transparent 20px)' },
-  { id: 'stair', name: '螺旋階段', face: 1, pos: 1, description: '上っても下っても、同じ階層に辿り着く。', color: '#0a0a0a', pattern: 'conic-gradient(from 0deg, #111, #000)' },
-  { id: 'mirror', name: '鏡の間', face: 1, pos: 2, description: '自分以外のすべてが映る鏡。', color: '#101015', pattern: 'linear-gradient(135deg, #222 25%, transparent 25%)' },
-  { id: 'waiting', name: '待合室', face: 1, pos: 3, description: 'いつまでも来ない列車を待つ影たち。', color: '#0f0f0f', pattern: 'radial-gradient(circle, #222 2px, transparent 2px)' },
-  { id: 'door', name: '開かずの扉', face: 1, pos: 4, description: '鍵のない境界線。向こう側の気配。', color: '#150505', pattern: 'linear-gradient(to right, #200, transparent)' },
-  { id: 'window', name: '額縁の窓', face: 1, pos: 5, description: '風景を切り取ったまま動かない。', color: '#050a15', pattern: 'linear-gradient(to bottom, #0a1a2a, transparent)' },
+  // Face 2: 忘却の回廊 (Oblivion) - 9 locations
+  { id: 'passage', name: '地下通路', face: 1, pos: 0, tags: ['narrow'], description: 'すべての後悔へと通じている冷たいコンクリートの回廊。', color: '#050505', pattern: 'repeating-linear-gradient(0deg, #111 0, #111 1px, transparent 0, transparent 20px)' },
+  { id: 'stair', name: '螺旋階段', face: 1, pos: 1, tags: ['narrow'], description: '上っても下っても、同じ階層に辿り着く。', color: '#0a0a0a', pattern: 'conic-gradient(from 0deg, #111, #000)' },
+  { id: 'mirror', name: '鏡の間', face: 1, pos: 2, tags: ['narrow'], description: '自分以外のすべてが映る鏡。', color: '#101015', pattern: 'linear-gradient(135deg, #222 25%, transparent 25%)' },
+  { id: 'waiting', name: '待合室', face: 1, pos: 3, tags: ['quiet'], description: 'いつまでも来ない列車を待つ影たち。', color: '#0f0f0f', pattern: 'radial-gradient(circle, #222 2px, transparent 2px)' },
+  { id: 'prison', name: '独房', face: 1, pos: 4, tags: ['narrow'], description: '自己との対面を強いる最小限の空間。', color: '#111', pattern: 'none' },
+  { id: 'window', name: '額縁の窓', face: 1, pos: 5, tags: ['quiet'], description: '風景を切り取ったまま動かない。', color: '#050a15', pattern: 'linear-gradient(to bottom, #0a1a2a, transparent)' },
+  { id: 'door', name: '開かずの扉', face: 1, pos: 6, tags: ['narrow'], description: '鍵のない境界線。向こう側の気配。', color: '#150505', pattern: 'linear-gradient(to right, #200, transparent)' },
+  { id: 'box', name: '暗室', face: 1, pos: 7, tags: ['narrow'], description: '意識だけが漂う暗闇。', color: '#000', pattern: 'none' },
+  { id: 'archive_room', name: '地下書庫', face: 1, pos: 8, tags: ['quiet'], description: '湿った紙の断片が、誰かの一生を黙殺している。', color: '#0a0505', pattern: 'repeating-linear-gradient(0deg, #211, #000 2px)' },
 
-  // Face 3: 静寂の聖域 (Sanctuary of Silence)
-  { id: 'shrine', name: '神社', face: 2, pos: 0, description: '形なき祈りだけが風に震えている。', color: '#1a0f0f', pattern: 'radial-gradient(circle, #300 2px, transparent 2px)' },
-  { id: 'altar', name: '祭壇', face: 2, pos: 1, description: '供えられたのは、名もなき者の悔恨。', color: '#150f15', pattern: 'radial-gradient(circle at 50% 50%, #202, transparent)' },
-  { id: 'temple', name: '寺院', face: 2, pos: 2, description: '鐘の音は空へは昇らず、地へと染み込む。', color: '#0f0f05', pattern: 'repeating-conic-gradient(#110 0deg 10deg, #000 10deg 20deg)' },
-  { id: 'graveyard', name: '墓地', face: 2, pos: 3, description: '名前が削れた石碑。死者さえ忘れた墓。', color: '#0a0f0a', pattern: 'radial-gradient(circle, #121 1px, transparent 1px)' },
-  { id: 'tower', name: '五重塔', face: 2, pos: 4, description: '天への梯子。途中で途切れている。', color: '#1a1005', pattern: 'linear-gradient(to top, #210, transparent)' },
-  { id: 'forest', name: '鎮守の森', face: 2, pos: 5, description: '木々の隙間に、誰かの瞳が光る。', color: '#051005', pattern: 'radial-gradient(circle, #020 3px, transparent 3px)' },
+  // Face 3: 静寂の聖域 (Sanctuary) - 9 locations
+  { id: 'shrine', name: '神社', face: 2, pos: 0, tags: ['quiet'], description: '形なき祈りだけが風に震えている。', color: '#1a0f0f', pattern: 'radial-gradient(circle, #300 2px, transparent 2px)' },
+  { id: 'altar', name: '祭壇', face: 2, pos: 1, tags: ['quiet'], description: '供えられたのは、名もなき者の悔恨。', color: '#150f15', pattern: 'radial-gradient(circle at 50% 50%, #202, transparent)' },
+  { id: 'temple', name: '寺院', face: 2, pos: 2, tags: ['wide'], description: '鐘の音は空へは昇らず、地へと染み込む。', color: '#0f0f05', pattern: 'repeating-conic-gradient(#110 0deg 10deg, #000 10deg 20deg)' },
+  { id: 'forest', name: '鎮守の森', face: 2, pos: 3, tags: ['nature', 'wide'], description: '木々の隙間に、誰かの瞳が光る。', color: '#051005', pattern: 'radial-gradient(circle, #020 3px, transparent 3px)' },
+  { id: 'lake', name: '静かな湖', face: 2, pos: 4, tags: ['wide', 'nature'], description: '波紋のない水面。深淵の入口。', color: '#0a1a1a', pattern: 'radial-gradient(ellipse at center, #0a2a2a 0%, #000 70%)' },
+  { id: 'mountain', name: '虚無山', face: 2, pos: 5, tags: ['wide', 'nature'], description: '道のない山。登るほどに自分を失う。', color: '#1a1005', pattern: 'linear-gradient(to top, #210, transparent)' },
+  { id: 'graveyard', name: '墓地', face: 2, pos: 6, tags: ['quiet'], description: '名前が削れた石碑。死者さえ忘れた墓。', color: '#0a0f0a', pattern: 'radial-gradient(circle, #121 1px, transparent 1px)' },
+  { id: 'tower', name: '五重塔', face: 2, pos: 7, tags: ['narrow'], description: '天への梯子。途中で途切れている。', color: '#1a1005', pattern: 'linear-gradient(to top, #210, transparent)' },
+  { id: 'cliff', name: '断崖', face: 2, pos: 8, tags: ['nature'], description: 'ここから先は、言葉のない領域。', color: '#0a0a0a', pattern: 'linear-gradient(to top, #111, transparent)' },
 
-  // Face 4: 混沌の吹き溜まり (Swirl of Chaos)
-  { id: 'backalley', name: '路地裏', face: 3, pos: 0, description: '捨てられた概念が腐敗している。', color: '#0a0a0a', pattern: 'radial-gradient(circle, #1a1a1a 1px, transparent 1px)' },
-  { id: 'neon', name: 'ネオン街', face: 3, pos: 1, description: '電圧の低い欲望。明滅する幽霊文字。', color: '#0a051a', pattern: 'linear-gradient(90deg, #102 1px, transparent 1px)' },
-  { id: 'junkyard', name: '廃材置場', face: 3, pos: 2, description: '意味を失った機械たちの、冷たい囁き。', color: '#1a1a1a', pattern: 'repeating-linear-gradient(45deg, #222, #000 5px)' },
-  { id: 'underpass', name: 'ガード下', face: 3, pos: 3, description: '絶え間ない振動。誰の足音でもない。', color: '#050505', pattern: 'linear-gradient(transparent 50%, #111 50%)' },
-  { id: 'rooftop', name: '屋上', face: 3, pos: 4, description: 'フェンスの向こう側は、何もない空。', color: '#0a1015', pattern: 'linear-gradient(to bottom, #1a2a3a, transparent)' },
-  { id: 'canal', name: '運河', face: 3, pos: 5, description: 'オイルの浮いた水面が、偽物の月を映す。', color: '#051010', pattern: 'radial-gradient(circle at 10% 10%, #122, transparent)' },
+  // Face 4: 混沌の吹き溜まり (Chaos) - 9 locations
+  { id: 'backalley', name: '路地裏', face: 3, pos: 0, tags: ['narrow'], description: '捨てられた概念が腐敗している。', color: '#0a0a0a', pattern: 'radial-gradient(circle, #1a1a1a 1px, transparent 1px)' },
+  { id: 'casino', name: '賽の河原賭博場', face: 3, pos: 1, tags: ['gambling', 'narrow'], description: '魂を賭けてサイコロを振る、終わりのない遊戯。', color: '#1a0505', pattern: 'radial-gradient(circle at center, #300 0%, #000 80%)' },
+  { id: 'neon', name: 'ネオン街', face: 3, pos: 2, tags: ['noisy'], description: '電圧の低い欲望。明滅する幽霊文字。', color: '#0a051a', pattern: 'linear-gradient(90deg, #102 1px, transparent 1px)' },
+  { id: 'junkyard', name: '廃材置場', face: 3, pos: 3, tags: ['wide'], description: '意味を失った機械たちの、冷たい囁き。', color: '#1a1a1a', pattern: 'repeating-linear-gradient(45deg, #222, #000 5px)' },
+  { id: 'underpass', name: 'ガード下', face: 3, pos: 4, tags: ['narrow'], description: '絶え間ない振動。誰の足音でもない。', color: '#050505', pattern: 'linear-gradient(transparent 50%, #111 50%)' },
+  { id: 'slum', name: '裏通りの吹き溜まり', face: 3, pos: 5, tags: ['narrow'], description: '希望が廃棄された場所。', color: '#1a0a05', pattern: 'none' },
+  { id: 'canal', name: '運河', face: 3, pos: 6, tags: ['wide'], description: 'オイルの浮いた水面が、偽物の月を映す。', color: '#051010', pattern: 'radial-gradient(circle at 10% 10%, #122, transparent)' },
+  { id: 'port', name: '亡霊の港', face: 3, pos: 7, tags: ['wide'], description: '出航しない船だけが繋がれている。', color: '#0a1015', pattern: 'none' },
+  { id: 'factory', name: '廃工場', face: 3, pos: 8, tags: ['wide'], description: 'リズムだけが生き続ける、主のいない生産ライン。', color: '#111', pattern: 'repeating-linear-gradient(90deg, #222 0, #222 2px, transparent 0, transparent 40px)' },
 
-  // Face 5: 残響の境界 (Boundary of Echoes)
-  { id: 'bridge', name: '橋', face: 4, pos: 0, description: '過去の記憶をどこか遠くへ運んでいく。', color: '#0f1a1a', pattern: 'linear-gradient(to right, #ffffff05 1px, transparent 1px)' },
-  { id: 'station', name: '無人駅', face: 4, pos: 1, description: '改札口を通る者は、もう誰もいない。', color: '#151515', pattern: 'repeating-linear-gradient(90deg, #222, #222 1px, transparent 1px, transparent 50px)' },
-  { id: 'pier', name: '桟橋', face: 4, pos: 2, description: '霧の向こうから、呼び声が聞こえる。', color: '#101520', pattern: 'radial-gradient(circle, #1a2030 1px, transparent 1px)' },
-  { id: 'lighthouse', name: '灯台', face: 4, pos: 3, description: '光は魂を導かず、ただ闇を薙ぎ払う。', color: '#1a1a05', pattern: 'conic-gradient(from 180deg at 50% 0%, #331, transparent)' },
-  { id: 'beach', name: '砂浜', face: 4, pos: 4, description: '打ち寄せられるのは、漂流した未練。', color: '#1a1a15', pattern: 'radial-gradient(ellipse, #222, transparent)' },
-  { id: 'island', name: '浮島', face: 4, pos: 5, description: '根を持たない地。浮遊する虚無。', color: '#101010', pattern: 'radial-gradient(circle, #222, transparent 50%)' },
+  // Face 5: 残響の境界 (Boundary) - 9 locations
+  { id: 'bridge', name: '橋', face: 4, pos: 0, tags: ['wide'], description: '過去の記憶をどこか遠くへ運んでいく。', color: '#0f1a1a', pattern: 'linear-gradient(to right, #ffffff05 1px, transparent 1px)' },
+  { id: 'station', name: '無人駅', face: 4, pos: 1, tags: ['wide'], description: '改札口を通る者は、もう誰もいない。', color: '#151515', pattern: 'repeating-linear-gradient(90deg, #222, #222 1px, transparent 1px, transparent 50px)' },
+  { id: 'pier', name: '桟橋', face: 4, pos: 2, tags: ['narrow'], description: '霧の向こうから、呼び聲が聞こえる。', color: '#101520', pattern: 'radial-gradient(circle, #1a2030 1px, transparent 1px)' },
+  { id: 'sea', name: '亡霊の海', face: 4, pos: 3, tags: ['wide', 'nature'], description: '岸のない海。記憶が塩分となって溶けている。', color: '#050a15', pattern: 'radial-gradient(ellipse at 50% 100%, #0a2a4a 0%, #000 80%)' },
+  { id: 'lighthouse', name: '灯台', face: 4, pos: 4, tags: ['narrow'], description: '光は魂を導かず、ただ闇を薙ぎ払う。', color: '#1a1a05', pattern: 'conic-gradient(from 180deg at 50% 0%, #331, transparent)' },
+  { id: 'beach', name: '砂浜', face: 4, pos: 5, tags: ['wide', 'nature'], description: '打ち寄せられるのは、漂流した未練。', color: '#1a1a15', pattern: 'radial-gradient(ellipse, #222, transparent)' },
+  { id: 'island', name: '浮島', face: 4, pos: 6, tags: ['nature'], description: '根を持たない地。浮遊する虚無。', color: '#101010', pattern: 'radial-gradient(circle, #222, transparent 50%)' },
+  { id: 'ship', name: '難破船', face: 4, pos: 7, tags: ['narrow'], description: '沈みきれないまま漂う後悔の船体。', color: '#0a0a0a', pattern: 'none' },
+  { id: 'bottom', name: '海底', face: 4, pos: 8, tags: ['wide', 'quiet'], description: 'すべての音が光と共に消え去る場所。', color: '#000510', pattern: 'none' },
 
-  // Face 6: 深淵の核 (Abyssal Heart)
-  { id: 'core', name: '核', face: 5, pos: 0, description: 'すべての魂が収束し、消失する点。', color: '#000000', pattern: 'radial-gradient(circle, #111 2px, transparent 2px)' },
-  { id: 'void', name: '虚無', face: 5, pos: 1, description: '色も音も、名前も。すべてが許されない場所。', color: '#000000', pattern: 'none' },
-  { id: 'monolith', name: '方尖柱', face: 5, pos: 2, description: '天を貫く垂直の意志。文字が刻まれている。', color: '#050505', pattern: 'linear-gradient(to right, #1a1a1a, transparent)' },
-  { id: 'archive', name: '書庫', face: 5, pos: 3, description: '宇宙の終わりの一秒前まで記された記録。', color: '#0a0505', pattern: 'repeating-linear-gradient(0deg, #211, #000 2px)' },
-  { id: 'oracle', name: '神託所', face: 5, pos: 4, description: '返ってくるのは自分の声だけ。', color: '#050a0a', pattern: 'radial-gradient(circle, #122 1px, transparent 1px)' },
-  { id: 'gate', name: '門', face: 5, pos: 5, description: '本当の出口か、あるいは永遠の入り口か。', color: '#000000', pattern: 'linear-gradient(45deg, #111 25%, transparent 25%)' },
+  // Face 6: 深淵の核 (Abyssal Heart) - 9 locations
+  { id: 'core', name: '核', face: 5, pos: 0, tags: ['narrow'], description: 'すべての魂が収束し、消失する点。', color: '#000000', pattern: 'radial-gradient(circle, #111 2px, transparent 2px)' },
+  { id: 'monolith', name: '方尖柱', face: 5, pos: 1, tags: ['narrow'], description: '天を貫く垂直の意志。文字が刻まれている。', color: '#050505', pattern: 'linear-gradient(to right, #1a1a1a, transparent)' },
+  { id: 'oracle', name: '神託所', face: 5, pos: 2, tags: ['quiet'], description: '返ってくるのは自分の声だけ。', color: '#050a0a', pattern: 'radial-gradient(circle, #122 1px, transparent 1px)' },
+  { id: 'void', name: '虚無', face: 5, pos: 3, tags: ['wide'], description: '色も音も、名前も。すべてが許されない場所。', color: '#000000', pattern: 'none' },
+  { id: 'archive', name: '終焉書庫', face: 5, pos: 4, tags: ['quiet'], description: '宇宙の終わりの一秒前まで記された記録。', color: '#0a0505', pattern: 'repeating-linear-gradient(0deg, #211, #000 2px)' },
+  { id: 'gate', name: '門', face: 5, pos: 5, tags: ['narrow'], description: '本当の出口か、あるいは永遠の入り口か。', color: '#000000', pattern: 'linear-gradient(45deg, #111 25%, transparent 25%)' },
+  { id: 'throne', name: '空の玉座', face: 5, pos: 6, tags: ['wide'], description: '支配なき支配者が坐る、絶対的な不在。', color: '#050505', pattern: 'none' },
+  { id: 'mirror_abyss', name: '深淵の鏡', face: 5, pos: 7, tags: ['narrow'], description: '覗き込む時、向こう側もあなたを見ている。', color: '#000', pattern: 'radial-gradient(circle at center, #111, transparent)' },
+  { id: 'end', name: '終焉', face: 5, pos: 8, tags: ['wide'], description: 'すべてが完了し、新たな静止が始まる。', color: '#111', pattern: 'none' },
 ];
 
 // --- コンポーネント群は /components フォルダへ退避 (Clean Code) ---
@@ -92,7 +110,16 @@ function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedCharId, setSelectedCharId] = useState('soseki');
+  const [selectedCharIds, setSelectedCharIds] = useState(['soseki']);
+  const handleToggleChar = (id) => {
+    setSelectedCharIds(prev => {
+      if (prev.includes(id)) {
+        if (prev.length === 1) return prev; // At least one must be selected
+        return prev.filter(cId => cId !== id);
+      }
+      return [...prev, id];
+    });
+  };
   const [selectedLocationId, setSelectedLocationId] = useState('cafe');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeManagerTab, setActiveManagerTab] = useState('directory'); // 'map', 'directory', 'connect'
@@ -123,6 +150,8 @@ function App() {
   const [globalTrends, setGlobalTrends] = useState(null);
   const [showNotebookModal, setShowNotebookModal] = useState(false);
   const [syncingNotebook, setSyncingNotebook] = useState(false);
+  const [currentWorldEvent, setCurrentWorldEvent] = useState(null);
+  const [isEventPulsing, setIsEventPulsing] = useState(false);
 
   // キャラクターと場所の拡張可能なリスト
   const [characters, setCharacters] = useState(INITIAL_CHARACTERS.map(c => ({
@@ -183,6 +212,18 @@ function App() {
 
     loadGlobalData();
 
+    // 世界事変の更新ループ (5分おき)
+    const updateEvent = async () => {
+      if (!geminiKey) return;
+      const { generateWorldEvent } = await import('./gemini');
+      const event = await generateWorldEvent(geminiKey, globalTrends);
+      setCurrentWorldEvent(event);
+      setIsEventPulsing(true);
+      setTimeout(() => setIsEventPulsing(false), 10000);
+    };
+    updateEvent();
+    const eventInterval = setInterval(updateEvent, 300000);
+
     const energyInterval = setInterval(async () => {
       const energies = await fetchLocationEnergies();
       setLocationEnergies(energies);
@@ -191,6 +232,7 @@ function App() {
     return () => {
       unsubscribe();
       clearInterval(energyInterval);
+      clearInterval(eventInterval);
     };
   }, [geminiKey]);
 
@@ -198,27 +240,31 @@ function App() {
   useEffect(() => {
     const triggerLocationConversation = async () => {
       if (!geminiKey || !isAppReady) return;
-      if (lastLocationRef.current === selectedLocationId) return; // Prevent double trigger or mount trigger
+      if (lastLocationRef.current === selectedLocationId) return;
       const currentLocation = locations.find(l => l.id === selectedLocationId);
       if (!currentLocation) return;
-      if (!lastLocationRef.current) { lastLocationRef.current = selectedLocationId; return; } // Skip first mount
+      if (!lastLocationRef.current) { lastLocationRef.current = selectedLocationId; return; }
 
       lastLocationRef.current = selectedLocationId;
       setLoading(true);
 
-      // エネルギーを上昇させる
       updateLocationEnergy(selectedLocationId, 15);
 
-      // Pick two random characters
-      const shuffled = [...characters].sort(() => 0.5 - Math.random());
-      const c1 = shuffled[0];
-      const c2 = shuffled[1];
-
+      // Multiple characters support
+      const selectedChars = characters.filter(c => selectedCharIds.includes(c.id));
+      
       try {
-        const { generateLocationDialogue } = await import('./gemini');
-        const dialogue = await generateLocationDialogue(c1, c2, currentLocation, geminiKey);
+        const { generateLocationDialogueWithEvent } = await import('./gemini');
+        const dialogue = await generateLocationDialogueWithEvent(
+          geminiKey, 
+          selectedChars, 
+          currentLocation, 
+          currentWorldEvent, 
+          spiritSharedKnowledge
+        );
+        
         if (Array.isArray(dialogue)) {
-          setMessages(prev => [...prev, ...dialogue.map(d => ({ role: 'ai', content: d.content, charId: d.charId }))]);
+          setMessages(prev => [...prev, ...dialogue.map(d => ({ role: 'ai', content: d.content, charIds: d.charIds || [d.charId] }))]);
         }
       } catch (e) {
         console.error("Location Dialogue Error:", e);
@@ -227,7 +273,7 @@ function App() {
     };
 
     triggerLocationConversation();
-  }, [selectedLocationId]);
+  }, [selectedLocationId, selectedCharIds, geminiKey, currentWorldEvent]);
 
   const handlePushNotebook = async (content) => {
     const textToPush = content || notebookInput;
@@ -392,7 +438,7 @@ function App() {
   };
   
   const handleTalkTo = (charId) => {
-    setSelectedCharId(charId);
+    handleToggleChar(charId); // Toggle selection
     handleSlotChange(1); // Dialog Slot
     setIsDrawerOpen(false);
     setEnlargedCharId(null);
@@ -462,12 +508,12 @@ function App() {
             className="space-y-4"
           >
             {characters.map(c => {
-              const isSelected = selectedCharId === c.id;
+              const isSelected = selectedCharIds.includes(c.id);
               return (
                 <button
                   key={c.id}
-                  onClick={() => setSelectedCharId(c.id)}
-                  className={`w-full group text-left flex items-start gap-4 md:gap-6 p-4 md:p-6 rounded-[35px] transition-all duration-300 border active:scale-[0.98] ${isSelected ? 'bg-white/5 border-white/20 shadow-xl translate-x-2 cursor-default' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
+                  onClick={() => handleToggleChar(c.id)}
+                  className={`w-full group text-left flex items-start gap-4 md:gap-6 p-4 md:p-6 rounded-[35px] transition-all duration-300 border active:scale-[0.98] ${isSelected ? 'bg-white/10 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.1)] translate-x-2' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
                 >
                   <div onClick={(e) => { e.stopPropagation(); setEnlargedCharId(c.id); }} className="cursor-zoom-in">
                     <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" isPreStyled={c.isPreStyled} />
@@ -476,16 +522,8 @@ function App() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 md:gap-3">
                         <span className={`text-sm md:text-base font-bold tracking-tight transition-colors ${isSelected ? 'text-white' : 'text-white/30'}`}>{c.name}</span>
-                        <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-[#bd8a78]/20 text-[#bd8a78]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
+                        <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-[#bd8a78]/40 text-white shadow-[0_0_10px_rgba(189,138,120,0.5)]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
                       </div>
-                      {isSelected && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleTalkTo(c.id); }}
-                          className="bg-white text-black px-3 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase hover:bg-itako-clay hover:text-white transition-all active:scale-90"
-                        >
-                          話しかける
-                        </button>
-                      )}
                     </div>
                     <p className={`text-[10px] md:text-xs leading-relaxed transition-opacity line-clamp-2 ${isSelected ? 'text-white/60' : 'text-white/20'}`}>
                       {c.description}
@@ -811,16 +849,19 @@ function App() {
               </div>
 
               <div className="opacity-0 group-hover/item:opacity-100 transition-all duration-300 px-4 pb-4 space-y-2 h-0 group-hover/item:h-auto overflow-hidden">
-                {characters.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedCharId(c.id)}
-                    className={`w-[320px] flex items-center gap-4 p-2 rounded-2xl border transition-all duration-300 active:scale-95 ${selectedCharId === c.id ? 'bg-white/5 border-white/20 shadow-lg cursor-default' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
-                  >
-                    <WarholAvatar src={c.avatar} size="w-8 h-8 md:w-10 h-10" isSelected={selectedCharId === c.id} colorClass={c.color} isPreStyled={c.isPreStyled} />
-                    <span className="text-xs font-bold tracking-wide text-white/80 whitespace-nowrap">{c.name}</span>
-                  </button>
-                ))}
+                {characters.map(c => {
+                  const isSelected = selectedCharIds.includes(c.id);
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => handleToggleChar(c.id)}
+                      className={`w-[320px] flex items-center gap-4 p-2 rounded-2xl border transition-all duration-300 active:scale-95 ${isSelected ? 'bg-white/10 border-white/40 shadow-lg translate-x-1' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
+                    >
+                      <WarholAvatar src={c.avatar} size="w-8 h-8 md:w-10 h-10" isSelected={isSelected} colorClass={c.color} isPreStyled={c.isPreStyled} />
+                      <span className={`text-xs font-bold tracking-wide whitespace-nowrap transition-colors ${isSelected ? 'text-white' : 'text-white/40'}`}>{c.name}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </motion.div>
@@ -974,6 +1015,32 @@ function App() {
           <section className="timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-black">
             <div className="max-w-2xl mx-auto min-h-full flex flex-col">
               <header className="flex flex-col gap-2 mb-6 md:mb-8 px-2 md:px-4">
+                {/* 世界事変の降り注ぐテキスト演出 */}
+                <AnimatePresence>
+                  {currentWorldEvent && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 1.1, y: -20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      className={`mb-6 p-4 rounded-xl backdrop-blur-xl border border-white/10 shadow-2xl flex items-center gap-3 transition-colors duration-1000 ${
+                        currentWorldEvent.type === 'war' ? 'bg-red-950/40 text-red-100' :
+                        currentWorldEvent.type === 'earthquake' ? 'bg-amber-950/40 text-amber-100' :
+                        'bg-white/5 text-white/50'
+                      }`}
+                    >
+                      <div className={`w-2 h-2 rounded-full animate-pulse flex-shrink-0 ${
+                         currentWorldEvent.type === 'war' ? 'bg-red-500' :
+                         currentWorldEvent.type === 'earthquake' ? 'bg-amber-500' :
+                         'bg-white/30'
+                      }`} />
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="text-[8px] font-black tracking-[0.2em] uppercase opacity-40 mb-1">Anomaly Log / 歴史の震動</span>
+                        <span className="text-xs md:text-sm font-medium tracking-wider">{currentWorldEvent.content}</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div className="flex items-center justify-between">
                   <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
                   <button

@@ -58,7 +58,7 @@ const CubeMap = ({ locations, selectedLocationId, onSelectLocation, locationEner
         {faces.map((face, fIdx) => (
           <div
             key={fIdx}
-            className="absolute inset-0 bg-black/40 border border-white/10 backdrop-blur-md backface-hidden grid grid-cols-2 grid-rows-3 gap-1 p-1"
+            className="absolute inset-0 bg-black/40 border border-white/10 backdrop-blur-md backface-hidden grid grid-cols-3 grid-rows-3 gap-1 p-1"
             style={{ transform: face.rotate }}
           >
             {locations.filter(l => l.face === face.faceIndex).map((loc, lIdx) => {
