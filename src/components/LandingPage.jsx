@@ -172,7 +172,7 @@ export default function LandingPage({ onLoginComplete, user }) {
                                             placeholder="Gemini API Key..."
                                             value={tempKey}
                                             onChange={(e) => setTempKey(e.target.value)}
-                                            className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 text-sm mb-4"
+                                            className="w-full bg-black border border-white/30 p-4 rounded-xl focus:outline-none focus:ring-1 focus:ring-white/40 text-white text-sm mb-4 shadow-inner"
                                         />
                                         <button
                                             onClick={handleApiConnect}

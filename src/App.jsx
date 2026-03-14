@@ -10,6 +10,7 @@ import Header from './components/Header';
 import LandingPage from './components/LandingPage';
 import WarholAvatar from './components/WarholAvatar';
 import SpiritCard from './components/SpiritCard';
+import CubeMap from './components/CubeMap';
 
 const INITIAL_CHARACTERS = [
   { id: 'soseki', name: '夏目漱石', flavor: '胃痛', color: 'bg-itako-clay', description: '日本の小説家、評論家。代表作『吾輩は猫である』。深く鋭い人間洞察を持つ。', avatar: 'assets/soseki_warhol.png', isPreStyled: true },
@@ -23,11 +24,53 @@ const INITIAL_CHARACTERS = [
 ];
 
 const INITIAL_LOCATIONS = [
-  { id: 'cafe', name: 'カフェ', description: '壁には誰のものとも知れぬ肖像画が掛かり、微かなコーヒーの香りが生者の執着を思い出させる。', icon: <MapPin size={16} />, pos: 0, color: '#1a1a1a', pattern: 'radial-gradient(circle, #222 1px, transparent 1px)' },
-  { id: 'library', name: '図書館', description: '開かれることのない蔵書たちが、重力のような沈黙を強いている知識の墓場。', icon: <MapPin size={16} />, pos: 4, color: '#0f141a', pattern: 'linear-gradient(45deg, #ffffff03 25%, transparent 25%, transparent 50%, #ffffff03 50%, #ffffff03 75%, transparent 75%, transparent)' },
-  { id: 'passage', name: '地下通路', description: 'どこへも繋がっていないようでいて、すべての後悔へと通じている冷たいコンクリートの回廊。', icon: <MapPin size={16} />, pos: 8, color: '#050505', pattern: 'repeating-linear-gradient(0deg, #111 0, #111 1px, transparent 0, transparent 20px)' },
-  { id: 'shrine', name: '神社', description: '赤い鳥居が境界線。神は不在かもしれないが、形なき祈りだけが風に震えている。', icon: <MapPin size={16} />, pos: 2, color: '#1a0f0f', pattern: 'radial-gradient(circle, #300 2px, transparent 2px)' },
-  { id: 'bridge', name: '橋', description: '「こちら」と「あちら」を結ぶ細い道。下を流れる水は、過去の記憶をどこか遠くへ運んでいく。', icon: <MapPin size={16} />, pos: 6, color: '#0f1a1a', pattern: 'linear-gradient(to right, #ffffff05 1px, transparent 1px), linear-gradient(to bottom, #ffffff05 1px, transparent 1px)' },
+  // Face 1: 現世の残影 (Glimmer of Living)
+  { id: 'cafe', name: 'カフェ', face: 0, pos: 0, description: '微かなコーヒーの香りが生者の執着を思い出させる。', color: '#1a1a1a', pattern: 'radial-gradient(circle, #222 1px, transparent 1px)' },
+  { id: 'library', name: '図書館', face: 0, pos: 1, description: '開かれることのない蔵書たちが、重力のような沈黙を強いている。', color: '#0f141a', pattern: 'linear-gradient(45deg, #ffffff03 25%, transparent 25%)' },
+  { id: 'garden', name: '庭園', face: 0, pos: 2, description: '枯れない花々。時間はここでは結晶化している。', color: '#0f1a0f', pattern: 'radial-gradient(circle, #1a2a1a 1px, transparent 1px)' },
+  { id: 'market', name: '市場', face: 0, pos: 3, description: '物々交換される記憶。中身のない言葉が飛び交う。', color: '#1a150f', pattern: 'repeating-linear-gradient(45deg, #222, #222 2px, transparent 2px, transparent 10px)' },
+  { id: 'school', name: '校舎', face: 0, pos: 4, description: '永遠に終わらない放課後のチャイム。', color: '#151a20', pattern: 'linear-gradient(to bottom, #1a2a3a 1px, transparent 1px)' },
+  { id: 'theatre', name: '劇場', face: 0, pos: 5, description: '観客のいない舞台。拍手の残響だけが揺れている。', color: '#1a0505', pattern: 'radial-gradient(ellipse at center, #300 0%, transparent 70%)' },
+
+  // Face 2: 忘却の回廊 (Corridor of Oblivion)
+  { id: 'passage', name: '地下通路', face: 1, pos: 0, description: 'すべての後悔へと通じている冷たいコンクリートの回廊。', color: '#050505', pattern: 'repeating-linear-gradient(0deg, #111 0, #111 1px, transparent 0, transparent 20px)' },
+  { id: 'stair', name: '螺旋階段', face: 1, pos: 1, description: '上っても下っても、同じ階層に辿り着く。', color: '#0a0a0a', pattern: 'conic-gradient(from 0deg, #111, #000)' },
+  { id: 'mirror', name: '鏡の間', face: 1, pos: 2, description: '自分以外のすべてが映る鏡。', color: '#101015', pattern: 'linear-gradient(135deg, #222 25%, transparent 25%)' },
+  { id: 'waiting', name: '待合室', face: 1, pos: 3, description: 'いつまでも来ない列車を待つ影たち。', color: '#0f0f0f', pattern: 'radial-gradient(circle, #222 2px, transparent 2px)' },
+  { id: 'door', name: '開かずの扉', face: 1, pos: 4, description: '鍵のない境界線。向こう側の気配。', color: '#150505', pattern: 'linear-gradient(to right, #200, transparent)' },
+  { id: 'window', name: '額縁の窓', face: 1, pos: 5, description: '風景を切り取ったまま動かない。', color: '#050a15', pattern: 'linear-gradient(to bottom, #0a1a2a, transparent)' },
+
+  // Face 3: 静寂の聖域 (Sanctuary of Silence)
+  { id: 'shrine', name: '神社', face: 2, pos: 0, description: '形なき祈りだけが風に震えている。', color: '#1a0f0f', pattern: 'radial-gradient(circle, #300 2px, transparent 2px)' },
+  { id: 'altar', name: '祭壇', face: 2, pos: 1, description: '供えられたのは、名もなき者の悔恨。', color: '#150f15', pattern: 'radial-gradient(circle at 50% 50%, #202, transparent)' },
+  { id: 'temple', name: '寺院', face: 2, pos: 2, description: '鐘の音は空へは昇らず、地へと染み込む。', color: '#0f0f05', pattern: 'repeating-conic-gradient(#110 0deg 10deg, #000 10deg 20deg)' },
+  { id: 'graveyard', name: '墓地', face: 2, pos: 3, description: '名前が削れた石碑。死者さえ忘れた墓。', color: '#0a0f0a', pattern: 'radial-gradient(circle, #121 1px, transparent 1px)' },
+  { id: 'tower', name: '五重塔', face: 2, pos: 4, description: '天への梯子。途中で途切れている。', color: '#1a1005', pattern: 'linear-gradient(to top, #210, transparent)' },
+  { id: 'forest', name: '鎮守の森', face: 2, pos: 5, description: '木々の隙間に、誰かの瞳が光る。', color: '#051005', pattern: 'radial-gradient(circle, #020 3px, transparent 3px)' },
+
+  // Face 4: 混沌の吹き溜まり (Swirl of Chaos)
+  { id: 'backalley', name: '路地裏', face: 3, pos: 0, description: '捨てられた概念が腐敗している。', color: '#0a0a0a', pattern: 'radial-gradient(circle, #1a1a1a 1px, transparent 1px)' },
+  { id: 'neon', name: 'ネオン街', face: 3, pos: 1, description: '電圧の低い欲望。明滅する幽霊文字。', color: '#0a051a', pattern: 'linear-gradient(90deg, #102 1px, transparent 1px)' },
+  { id: 'junkyard', name: '廃材置場', face: 3, pos: 2, description: '意味を失った機械たちの、冷たい囁き。', color: '#1a1a1a', pattern: 'repeating-linear-gradient(45deg, #222, #000 5px)' },
+  { id: 'underpass', name: 'ガード下', face: 3, pos: 3, description: '絶え間ない振動。誰の足音でもない。', color: '#050505', pattern: 'linear-gradient(transparent 50%, #111 50%)' },
+  { id: 'rooftop', name: '屋上', face: 3, pos: 4, description: 'フェンスの向こう側は、何もない空。', color: '#0a1015', pattern: 'linear-gradient(to bottom, #1a2a3a, transparent)' },
+  { id: 'canal', name: '運河', face: 3, pos: 5, description: 'オイルの浮いた水面が、偽物の月を映す。', color: '#051010', pattern: 'radial-gradient(circle at 10% 10%, #122, transparent)' },
+
+  // Face 5: 残響の境界 (Boundary of Echoes)
+  { id: 'bridge', name: '橋', face: 4, pos: 0, description: '過去の記憶をどこか遠くへ運んでいく。', color: '#0f1a1a', pattern: 'linear-gradient(to right, #ffffff05 1px, transparent 1px)' },
+  { id: 'station', name: '無人駅', face: 4, pos: 1, description: '改札口を通る者は、もう誰もいない。', color: '#151515', pattern: 'repeating-linear-gradient(90deg, #222, #222 1px, transparent 1px, transparent 50px)' },
+  { id: 'pier', name: '桟橋', face: 4, pos: 2, description: '霧の向こうから、呼び声が聞こえる。', color: '#101520', pattern: 'radial-gradient(circle, #1a2030 1px, transparent 1px)' },
+  { id: 'lighthouse', name: '灯台', face: 4, pos: 3, description: '光は魂を導かず、ただ闇を薙ぎ払う。', color: '#1a1a05', pattern: 'conic-gradient(from 180deg at 50% 0%, #331, transparent)' },
+  { id: 'beach', name: '砂浜', face: 4, pos: 4, description: '打ち寄せられるのは、漂流した未練。', color: '#1a1a15', pattern: 'radial-gradient(ellipse, #222, transparent)' },
+  { id: 'island', name: '浮島', face: 4, pos: 5, description: '根を持たない地。浮遊する虚無。', color: '#101010', pattern: 'radial-gradient(circle, #222, transparent 50%)' },
+
+  // Face 6: 深淵の核 (Abyssal Heart)
+  { id: 'core', name: '核', face: 5, pos: 0, description: 'すべての魂が収束し、消失する点。', color: '#000000', pattern: 'radial-gradient(circle, #111 2px, transparent 2px)' },
+  { id: 'void', name: '虚無', face: 5, pos: 1, description: '色も音も、名前も。すべてが許されない場所。', color: '#000000', pattern: 'none' },
+  { id: 'monolith', name: '方尖柱', face: 5, pos: 2, description: '天を貫く垂直の意志。文字が刻まれている。', color: '#050505', pattern: 'linear-gradient(to right, #1a1a1a, transparent)' },
+  { id: 'archive', name: '書庫', face: 5, pos: 3, description: '宇宙の終わりの一秒前まで記された記録。', color: '#0a0505', pattern: 'repeating-linear-gradient(0deg, #211, #000 2px)' },
+  { id: 'oracle', name: '神託所', face: 5, pos: 4, description: '返ってくるのは自分の声だけ。', color: '#050a0a', pattern: 'radial-gradient(circle, #122 1px, transparent 1px)' },
+  { id: 'gate', name: '門', face: 5, pos: 5, description: '本当の出口か、あるいは永遠の入り口か。', color: '#000000', pattern: 'linear-gradient(45deg, #111 25%, transparent 25%)' },
 ];
 
 // --- コンポーネント群は /components フォルダへ退避 (Clean Code) ---
@@ -75,6 +118,7 @@ function App() {
   const [locationEnergies, setLocationEnergies] = useState({});
 
   // Trends & NotebookLM State
+  const [enlargedCharId, setEnlargedCharId] = useState(null);
   const [globalTrends, setGlobalTrends] = useState(null);
   const [showNotebookModal, setShowNotebookModal] = useState(false);
   const [syncingNotebook, setSyncingNotebook] = useState(false);
@@ -344,6 +388,16 @@ function App() {
       setLoading(false);
     }
   };
+  
+  const handleTalkTo = (charId) => {
+    setSelectedCharId(charId);
+    handleSlotChange(1); // Dialog Slot
+    setIsDrawerOpen(false);
+    setEnlargedCharId(null);
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ left: window.innerWidth * 1, behavior: 'smooth' });
+    }, 100);
+  };
 
   // Memoize ManagerContent to prevent unnecessary re-renders when parent state (like input or messages) changes
   const MemoizedManagerContent = React.useMemo(() => (
@@ -388,45 +442,12 @@ function App() {
             exit={{ opacity: 0, y: -10 }}
             className="space-y-6"
           >
-            <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-sm border border-white/5 aspect-square max-w-[240px] mx-auto">
-              {Array.from({ length: 9 }).map((_, i) => {
-                const loc = locations.find(l => l.pos === i);
-                const isSelected = selectedLocationId === loc?.id;
-                const energy = loc ? (locationEnergies[loc.id] || 0) : 0;
-                const intensity = Math.min(energy / 100, 1);
-
-                return (
-                  <button
-                    key={i}
-                    onClick={() => loc && setSelectedLocationId(loc.id)}
-                    className={`aspect-square flex items-center justify-center relative transition-all duration-700 overflow-hidden rounded-lg group/loc ${isSelected ? 'bg-white shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'bg-black/40 border border-white/5 hover:bg-white/10'}`}
-                  >
-                    {/* Spiritual Glow Overlay */}
-                    {loc && energy > 0 && (
-                      <div
-                        className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
-                        style={{
-                          background: `radial-gradient(circle, rgba(241, 90, 36, ${intensity * 0.3}) 0%, transparent 70%)`,
-                          opacity: 0.5 + Math.sin(Date.now() / 1000) * 0.2
-                        }}
-                      />
-                    )}
-                    {loc ? (
-                      <div className="flex flex-col items-center gap-1 z-10">
-                        <MapPin
-                          size={12}
-                          className={`${isSelected ? 'text-black' : 'text-white/20'}`}
-                          style={!isSelected && energy > 0 ? { filter: `drop-shadow(0 0 ${intensity * 10}px #f15a24)` } : {}}
-                        />
-                        <span className={`text-[8px] font-bold tracking-tighter ${isSelected ? 'text-black' : 'text-white/40'}`}>{loc.name}</span>
-                      </div>
-                    ) : (
-                      <div className="w-1 h-1 rounded-full bg-white/5" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+            <CubeMap 
+              locations={locations} 
+              selectedLocationId={selectedLocationId} 
+              onSelectLocation={setSelectedLocationId} 
+              locationEnergies={locationEnergies}
+            />
           </motion.div>
         )}
 
@@ -446,13 +467,23 @@ function App() {
                   onClick={() => setSelectedCharId(c.id)}
                   className={`w-full group text-left flex items-start gap-4 md:gap-6 p-4 md:p-6 rounded-[35px] transition-all duration-300 border active:scale-[0.98] ${isSelected ? 'bg-white/5 border-white/20 shadow-xl translate-x-2 cursor-default' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
                 >
-                  <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" isPreStyled={c.isPreStyled} />
+                  <div onClick={(e) => { e.stopPropagation(); setEnlargedCharId(c.id); }} className="cursor-zoom-in">
+                    <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" isPreStyled={c.isPreStyled} />
+                  </div>
                   <div className="flex-1 space-y-1 md:space-y-2 py-0.5 md:py-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 md:gap-3">
                         <span className={`text-sm md:text-base font-bold tracking-tight transition-colors ${isSelected ? 'text-white' : 'text-white/30'}`}>{c.name}</span>
                         <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-[#bd8a78]/20 text-[#bd8a78]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
                       </div>
+                      {isSelected && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleTalkTo(c.id); }}
+                          className="bg-white text-black px-3 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase hover:bg-itako-clay hover:text-white transition-all active:scale-90"
+                        >
+                          話しかける
+                        </button>
+                      )}
                     </div>
                     <p className={`text-[10px] md:text-xs leading-relaxed transition-opacity line-clamp-2 ${isSelected ? 'text-white/60' : 'text-white/20'}`}>
                       {c.description}
@@ -492,7 +523,7 @@ function App() {
                   setGeminiKey(e.target.value);
                   localStorage.setItem('itako_gemini_key', e.target.value);
                 }}
-                className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/30 outline-none transition-all placeholder:text-white/5 font-mono resize-none min-h-[80px]"
+                className="w-full bg-black/60 border border-white/30 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/50 outline-none transition-all placeholder:text-white/10 font-mono resize-none min-h-[80px]"
               />
               <button
                 onClick={async () => {
@@ -560,7 +591,7 @@ function App() {
 
   return (
     <div
-      className="h-[100dvh] w-screen overflow-hidden flex flex-col font-sans selection:bg-white/30 transition-all duration-1000"
+      className="h-[100dvh] w-full overflow-hidden flex flex-col font-sans selection:bg-white/30 transition-all duration-1000"
       style={{
         backgroundColor: locations.find(l => l.id === selectedLocationId)?.color || '#000000',
         backgroundImage: locations.find(l => l.id === selectedLocationId)?.pattern || 'none',
@@ -1146,7 +1177,7 @@ function App() {
                   value={notebookInput}
                   onChange={(e) => setNotebookInput(e.target.value)}
                   placeholder="思考の断片を入力..."
-                  className="w-full h-40 bg-black/50 border border-white/10 rounded-2xl p-4 text-white/80 text-sm focus:outline-none focus:border-[#bd8a78]/50 transition-colors mb-6 resize-none itako-scrollbar"
+                  className="w-full h-40 bg-black border border-white/30 rounded-2xl p-4 text-white text-sm focus:outline-none focus:border-[#bd8a78] transition-colors mb-6 resize-none itako-scrollbar shadow-inner"
                 />
                 <div className="flex justify-end gap-4">
                   <button
@@ -1173,7 +1204,7 @@ function App() {
           <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="max-w-xl mx-auto flex items-center gap-4 bg-black/80 backdrop-blur-2xl border border-white/10 p-2 pl-6 rounded-full shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8)] pointer-events-auto transition-all duration-700 hover:border-white/20 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.9)] focus-within:border-[#bd8a78]/40 group"
+            className="max-w-xl mx-auto flex items-center gap-4 bg-black/90 backdrop-blur-3xl border border-white/30 p-2 pl-6 rounded-full shadow-[0_30px_60px_-12px_rgba(0,0,0,0.9)] pointer-events-auto transition-all duration-700 hover:border-white/50 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,1)] focus-within:border-[#bd8a78] group"
           >
             <textarea
               value={input}
@@ -1193,6 +1224,68 @@ function App() {
             </button>
           </motion.div>
         </div>
+        
+        {/* Character Enlargement Overlay */}
+        <AnimatePresence>
+          {enlargedCharId && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setEnlargedCharId(null)}
+                className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[300] cursor-zoom-out"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 40 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: 40 }}
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-lg z-[310] pointer-events-none"
+              >
+                {(() => {
+                  const c = characters.find(char => char.id === enlargedCharId);
+                  if (!c) return null;
+                  return (
+                    <div className="bg-zinc-900/50 border border-white/10 rounded-[50px] overflow-hidden shadow-3xl pointer-events-auto">
+                      <div className="aspect-square w-full relative">
+                        <motion.img 
+                          layoutId={`avatar-${c.id}`}
+                          src={c.avatar} 
+                          alt={c.name} 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+                        <button 
+                          onClick={() => setEnlargedCharId(null)}
+                          className="absolute top-8 right-8 w-12 h-12 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white/40 hover:text-white transition-all"
+                        >
+                          <X size={24} />
+                        </button>
+                      </div>
+                      <div className="p-10 space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <h2 className="text-4xl font-black text-white tracking-tighter uppercase font-oswald">{c.name}</h2>
+                            <span className="text-[10px] font-bold text-itako-clay tracking-[0.4em] uppercase">{c.flavor}</span>
+                          </div>
+                          <button
+                            onClick={() => handleTalkTo(c.id)}
+                            className="bg-white text-black px-8 py-4 rounded-full font-bold tracking-[0.2em] uppercase hover:bg-itako-clay hover:text-white transition-all active:scale-95 shadow-xl font-oswald text-sm"
+                          >
+                            話しかける
+                          </button>
+                        </div>
+                        <p className="text-base text-white/50 leading-relaxed font-serif italic">
+                          {c.description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
