@@ -229,17 +229,21 @@ function App() {
 
     let finalAiResp = "";
     try {
+      const { fetchAozoraContext } = await import('./aozora');
+      const aozoraContext = await fetchAozoraContext(currentChar.name);
+      const combinedContext = [spiritSharedKnowledge, aozoraContext].filter(Boolean).join('\n\n');
+
       await generateCharacterResponseStream(
         currentChar,
         userMsg,
         isUnderground,
-        spiritSharedKnowledge,
+        combinedContext,
         geminiKey,
-        (chunk) => {
+        (chunk, meta) => {
           finalAiResp = chunk;
           setMessages(prev => {
             const next = [...prev];
-            next[next.length - 1] = { ...next[next.length - 1], content: chunk };
+            next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
             return next;
           });
         }
@@ -432,24 +436,23 @@ function App() {
               <div className={`w-3 h-3 rounded-full ${geminiKey ? 'bg-[#f15a24] animate-pulse shadow-[0_0_15px_rgba(241,90,36,0.8)]' : 'bg-white/10'}`} />
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-[#f15a24]/80 tracking-widest uppercase mb-1 font-oswald">
-                  {geminiKey ? 'Verified Connection' : 'Awaiting Connection'}
+                  {geminiKey ? `Verified Connection (${geminiKey.split(',').filter(k=>k.trim()).length} Keys)` : 'Awaiting Connection'}
                 </span>
                 <p className="text-[9px] text-white/20 leading-relaxed font-serif">
-                  {geminiKey ? '精神の回路は正常に接続されています。' : '対話を開始するにはAPIキーが必要です。'}
+                  {geminiKey ? '精神の回路は正常に接続されています。複数の鍵による並行接続が有効です。' : '対話を開始するにはAPIキーが必要です。カンマ区切りで複数指定可能。'}
                 </p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <input
-                type="password"
-                placeholder="Enter Gemini API Key..."
+              <textarea
+                placeholder="Enter Gemini API Keys (comma separated)..."
                 value={geminiKey}
                 onChange={(e) => {
                   setGeminiKey(e.target.value);
                   localStorage.setItem('itako_gemini_key', e.target.value);
                 }}
-                className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/30 outline-none transition-all placeholder:text-white/5 font-mono"
+                className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/30 outline-none transition-all placeholder:text-white/5 font-mono resize-none min-h-[80px]"
               />
               <button
                 onClick={async () => {
@@ -535,7 +538,7 @@ function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4 }}
               onClick={() => setIsDrawerOpen(false)}
               className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden cursor-pointer"
             />
@@ -543,17 +546,17 @@ function App() {
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 250 }}
-              className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-gradient-to-br from-[#121212] to-[#050505] backdrop-blur-3xl border-r border-white/10 z-[70] p-6 sm:p-8 overflow-y-auto md:hidden shadow-[40px_0_80px_rgba(0,0,0,0.9)] itako-scrollbar"
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-black/40 backdrop-blur-3xl border-r border-white/10 z-[70] px-6 pt-safe pb-safe sm:px-8 overflow-y-auto md:hidden shadow-[40px_0_80px_rgba(0,0,0,0.9)] itako-scrollbar"
             >
-              <div className="flex items-center justify-between mb-10 border-b border-white/5 pb-6">
+              <div className="flex items-center justify-between mt-6 mb-10 border-b border-white/5 pb-6">
                 <div className="flex flex-col">
                   <span className="text-xl sm:text-2xl font-black tracking-tighter text-white font-oswald uppercase">Manager</span>
                   <span className="text-[7px] sm:text-[8px] font-bold tracking-[0.4em] text-white/30 uppercase mt-0.5">Control Center</span>
                 </div>
                 <button
                   onClick={() => setIsDrawerOpen(false)}
-                  className="w-12 h-12 -mr-2 rounded-full flex items-center justify-center text-white/40 hover:text-white transition-colors active:scale-90"
+                  className="w-12 h-12 -mr-2 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/5 transition-all active:scale-90 touch-manipulation"
                   aria-label="Close menu"
                 >
                   <X size={24} />
@@ -564,8 +567,8 @@ function App() {
               </div>
 
               {/* Status footer with safe area padding */}
-              <div className="fixed bottom-0 left-0 w-[85%] max-w-sm p-6 sm:p-8 bg-gradient-to-t from-[#050505] via-[#050505]/90 to-transparent pointer-events-none">
-                <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md p-4 rounded-3xl border border-white/10 shadow-lg pointer-events-auto">
+              <div className="fixed bottom-0 left-0 w-[85%] max-w-sm px-6 pb-safe pt-24 sm:px-8 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none flex flex-col justify-end">
+                <div className="flex items-center gap-4 bg-white/5 backdrop-blur-md p-4 rounded-3xl border border-white/10 shadow-lg pointer-events-auto mb-6">
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                   <span className="text-[9px] font-bold text-white/60 tracking-widest uppercase font-oswald">Mobile Link Stable</span>
                 </div>
@@ -857,6 +860,13 @@ function App() {
                       flavor="Narrator"
                       colorClass="bg-white/5 text-inherit border-white/10"
                     />
+                    {n.meta && (
+                      <div className="flex justify-end pr-4 -mt-2 mb-2 relative z-30">
+                        <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full" title="Generated by">
+                          {n.meta.model}
+                        </span>
+                      </div>
+                    )}
                     {/* Discussion Thread for News */}
                     <div className="space-y-[-2rem] mt-[-2rem] relative z-20">
                       {n.discussion && n.discussion.map((d, dIdx) => {
@@ -929,6 +939,11 @@ function App() {
                                   <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/30">{charObj?.name || m.charId}</span>
                                 </div>
                                 <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                  {m.meta && (
+                                    <span className="text-[8px] font-mono text-white/20 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-full" title="Active Core & Key">
+                                      {m.meta.model} {m.meta.keyIndex !== '-' && `[K${m.meta.keyIndex}]`}
+                                    </span>
+                                  )}
                                   <button onClick={() => handleBookmark(i)} className="text-[9px] font-bold tracking-[0.4em] uppercase text-white/30 hover:text-[#bd8a78] transition-colors cursor-pointer">
                                     Archive
                                   </button>

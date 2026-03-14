@@ -27,18 +27,18 @@ export default function Header({
             </div>
 
             {/* Timeline Buttons moved to Header */}
-            <div className="flex items-center gap-4 sm:gap-8 h-16">
+            <div className="flex items-center gap-1 sm:gap-4 h-16">
                 {navItems.map(item => (
                     <button
                         key={item.id}
                         onClick={() => onSlotClick(item.id)}
                         style={{ color: activeSlot === item.id ? item.color : 'rgba(255,255,255,0.2)' }}
-                        className={`p-2 relative flex items-center justify-center transition-all duration-300 hover:text-white/60 active:scale-90`}
+                        className={`w-12 h-12 relative flex items-center justify-center rounded-full transition-all duration-300 hover:text-white/60 hover:bg-white/5 active:scale-90 touch-manipulation`}
                         title={item.label}
                     >
                         {item.icon}
                         {activeSlot === item.id && (
-                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current shadow-[0_0_8px_current]" />
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current shadow-[0_0_8px_current]" />
                         )}
                     </button>
                 ))}

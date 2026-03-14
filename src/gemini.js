@@ -112,7 +112,7 @@ const CHARACTER_CONFIGS = {
  */
 export const generateCharacterResponseStream = async (char, userMessage, isUnderground = false, externalContext = "", userApiKey = "", onChunk) => {
     if (!userApiKey) {
-        onChunk("【設定からGemini APIキーを入力してください】");
+        onChunk("【設定からGemini APIキーを入力してください】", { model: 'system', keyIndex: '-' });
         return;
     }
 
@@ -126,7 +126,7 @@ export const generateCharacterResponseStream = async (char, userMessage, isUnder
         let cur = "";
         for (const c of echo) {
             cur += c;
-            onChunk(cur);
+            onChunk(cur, { model: 'echo-cache', keyIndex: '-' });
             await sleep(2); // キャッシュ時は少し速めに再生
         }
         return;
@@ -151,7 +151,7 @@ export const generateCharacterResponseStream = async (char, userMessage, isUnder
                 for await (const chunk of result.stream) {
                     const chunkText = chunk.text();
                     fullText += chunkText;
-                    onChunk(fullText);
+                    onChunk(fullText, { model: modelName, keyIndex: keys.indexOf(currentKey) + 1 });
                 }
                 storeEcho(systemPrompt, userMessage, fullText);
                 return; // 成功
@@ -175,9 +175,9 @@ export const generateCharacterResponseStream = async (char, userMessage, isUnder
         const isQuotaExhausted = lastError?.status === 429 || lastError?.message?.includes('429') || lastError?.message?.includes('Quota') || lastError?.message?.includes('exhausted');
 
         if (isQuotaExhausted) {
-            onChunk("【霊的回路の制限】全ての鍵（APIキー）の交信回数が上限に達しました。しばらく待つか、設定から予備の鍵を追加してください。");
+            onChunk("【霊的回路の制限】全ての鍵（APIキー）の交信回数が上限に達しました。しばらく待つか、設定から予備の鍵を追加してください。", { model: 'system', keyIndex: '-' });
         } else {
-            onChunk("魂が沈黙しました。深淵との接続が不安定なようです。APIキーが正しいか、ネットワーク設定を確認してください。");
+            onChunk("魂が沈黙しました。深淵との接続が不安定なようです。APIキーが正しいか、ネットワーク設定を確認してください。", { model: 'system', keyIndex: '-' });
         }
     }
 };

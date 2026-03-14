@@ -78,6 +78,7 @@ export const fetchFictionalizedNews = async (apiKey) => {
             const result = await executeWithRetry(() => model.generateContent(prompt));
             const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
             const newsData = JSON.parse(jsonStr);
+            newsData.forEach(n => n.meta = { model: modelName });
 
             console.log(`[Multi-Brain] News decrypted via: ${modelName}`);
             localStorage.setItem(CACHE_KEY, JSON.stringify(newsData));
