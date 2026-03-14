@@ -21,6 +21,7 @@ const INITIAL_CHARACTERS = [
   { id: 'alyosha', name: 'アリョーシャ', flavor: '信仰', color: 'bg-itako-sage', description: '『カラマーゾフの兄弟』のアリョーシャ。純真な心を持ち、世界のあらゆる罪を背負おうとする。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alyosha_Vanya.jpg/330px-Alyosha_Vanya.jpg' },
   { id: 'raicho', name: '平塚らいてう', flavor: '太陽', color: 'bg-orange-900/50', description: '思想家、女性解放運動家。「元始、女性は太陽であった」と宣言し、個の覚めと平和を求め続けた。', avatar: 'assets/raicho_warhol.png', isPreStyled: true },
   { id: 'fumiko', name: '金子文子', flavor: '自己', color: 'bg-red-950/60', description: 'アナキスト。天皇制を否定し、獄中で「自己」を貫き通した。著書『何が私をこうさせたか』。', avatar: 'assets/fumiko_warhol.png', isPreStyled: true },
+  { id: 'rand', name: 'アイン・ランド', flavor: '利己', color: 'bg-zinc-700', description: '客観主義の提唱者であり、『肩をすくめるアトラス』の著者。合理的な利己心こそが人間の最高の美徳であると断じ、集団主義や相互扶助を「魂の寄生」として激しく拒絶する。', avatar: 'assets/rand_placeholder.png', isPreStyled: false },
 ];
 
 const INITIAL_LOCATIONS = [
@@ -133,7 +134,8 @@ function App() {
             c.id === 'alyosha' ? { '信仰心': '不変' } :
               c.id === 'raicho' ? { '内なる光': '極大' } :
                 c.id === 'fumiko' ? { '魂の自律': '絶対' } :
-                  { '不気味さ': '80%' }
+                  c.id === 'rand' ? { '合理的利己心': '不滅' } :
+                    { '不気味さ': '80%' }
   })));
   const [locations, setLocations] = useState(INITIAL_LOCATIONS);
 
