@@ -229,6 +229,11 @@ function App() {
 
     let finalAiResp = "";
     try {
+      // Calculate 'depth' based on how many messages the current character has in the log
+      const characterMessageCount = messages.filter(m => m.charId === selectedCharId).length;
+      // 0: Introduction (Short), 1: Warming up (Medium), 2+: Deep monologue (Long)
+      const interactionDepth = Math.min(Math.floor(characterMessageCount / 2), 2);
+
       const { fetchAozoraContext } = await import('./aozora');
       const aozoraContext = await fetchAozoraContext(currentChar.name);
       const combinedContext = [spiritSharedKnowledge, aozoraContext].filter(Boolean).join('\n\n');
@@ -239,6 +244,7 @@ function App() {
         isUnderground,
         combinedContext,
         geminiKey,
+        interactionDepth, // Pass depth
         (chunk, meta) => {
           finalAiResp = chunk;
           setMessages(prev => {

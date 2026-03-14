@@ -110,14 +110,25 @@ const CHARACTER_CONFIGS = {
 /**
  * APIキーのスイッチングを伴うストリーム生成 (案3 + 案1)
  */
-export const generateCharacterResponseStream = async (char, userMessage, isUnderground = false, externalContext = "", userApiKey = "", onChunk) => {
+export const generateCharacterResponseStream = async (char, userMessage, isUnderground = false, externalContext = "", userApiKey = "", interactionDepth = 0, onChunk) => {
     if (!userApiKey) {
         onChunk("【設定からGemini APIキーを入力してください】", { model: 'system', keyIndex: '-' });
         return;
     }
 
     const config = CHARACTER_CONFIGS[char.id] || { systemPrompt: char.systemPrompt, generationConfig: { temperature: 0.7 } };
-    const systemPrompt = (config.systemPrompt || "") + (isUnderground ? "\n地下通路。本音を語れ。" : "") + (externalContext ? `\n文脈: ${externalContext}` : "");
+    
+    // 対話の深さに応じた動的な振る舞い指示
+    let depthInstruction = "";
+    if (interactionDepth === 0) {
+        depthInstruction = "\n【重要行動指示: 邂逅】これは会話の始まりです。極めて短く（1〜2文程度）、挨拶や当惑、冷たい反応など、初対面の距離感を感じさせる簡潔な返答のみを行ってください。自分からはまだ多くを語らないでください。";
+    } else if (interactionDepth === 1) {
+        depthInstruction = "\n【重要行動指示: 呼応】相手との対話が少し進みました。相手の言葉に反応し、自身の記憶や思想の断片を少しずつ語り始めてください。（3〜4文程度）";
+    } else {
+        depthInstruction = "\n【重要行動指示: 独白と憑依】相手との精神的な繋がりが深まりました。堰を切ったように、自身の深い思想、記憶の深淵、または与えられた文脈（著作の断片など）を絡めながら、長く、深く、文学的に語り尽くしてください。";
+    }
+
+    const systemPrompt = (config.systemPrompt || "") + depthInstruction + (isUnderground ? "\n地下通路。本音を語れ。" : "") + (externalContext ? `\n文脈: ${externalContext}` : "");
 
     // 案1: 霊的エコー
     const echo = await findEcho(systemPrompt, userMessage);
