@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, TrendingUp, User, MapPin, Ghost, Settings, Loader2, Quote, Menu, X, Cpu, Globe } from 'lucide-react';
-import { auth, fetchBookmarks, saveBookmark, fetchNotebookAccumulations, updateLocationEnergy, fetchLocationEnergies } from './firebase';
-import { generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey } from './gemini';
+import { auth, fetchBookmarks, saveBookmark, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies } from './firebase';
+import { generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook } from './gemini';
 import { fetchFictionalizedNews, generateIchikawaScolding } from './news';
 import { searchNDLArchive } from './ndl';
 import Header from './components/Header';
@@ -74,6 +74,11 @@ function App() {
   const [apiConnectionStatus, setApiConnectionStatus] = useState('idle'); // 'idle', 'success', 'error'
   const [locationEnergies, setLocationEnergies] = useState({});
 
+  // Trends & NotebookLM State
+  const [globalTrends, setGlobalTrends] = useState(null);
+  const [showNotebookModal, setShowNotebookModal] = useState(false);
+  const [syncingNotebook, setSyncingNotebook] = useState(false);
+
   // キャラクターと場所の拡張可能なリスト
   const [characters, setCharacters] = useState(INITIAL_CHARACTERS.map(c => ({
     ...c,
@@ -125,6 +130,9 @@ function App() {
 
       const initialNews = await fetchFictionalizedNews(geminiKey);
       setNews(initialNews);
+
+      const cachedTrends = localStorage.getItem('itako_global_trends');
+      if (cachedTrends) setGlobalTrends(JSON.parse(cachedTrends));
     }
 
     loadGlobalData();
@@ -199,6 +207,27 @@ function App() {
     }
   };
 
+  const handleSyncNotebook = async () => {
+    if (!notebookInput.trim() || !geminiKey) return;
+    setSyncingNotebook(true);
+    try {
+      const trends = await extractTrendsFromNotebook(notebookInput, geminiKey);
+      if (trends) {
+        setGlobalTrends(trends);
+        localStorage.setItem('itako_global_trends', JSON.stringify(trends));
+        setShowNotebookModal(false);
+        setNotebookInput('');
+      } else {
+        alert("思考の同期に失敗しました。");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("エラーが発生しました。");
+    } finally {
+      setSyncingNotebook(false);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!input.trim() || loading) return;
 
@@ -236,7 +265,12 @@ function App() {
 
       const { fetchAozoraContext } = await import('./aozora');
       const aozoraContext = await fetchAozoraContext(currentChar.name);
-      const combinedContext = [spiritSharedKnowledge, aozoraContext].filter(Boolean).join('\n\n');
+      
+      let contextPieces = [spiritSharedKnowledge, aozoraContext];
+      if (globalTrends && globalTrends.summary) {
+        contextPieces.push(`【現在の広場の流行/ユーザーの思考】: ${globalTrends.summary}`);
+      }
+      const combinedContext = contextPieces.filter(Boolean).join('\n\n');
 
       await generateCharacterResponseStream(
         currentChar,
@@ -850,11 +884,11 @@ function App() {
               </header>
 
               <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
-                <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] font-oswald">Current Echoes ({news.length})</span>
-                <span className="text-[10px] font-bold text-white/40 hover:text-white cursor-pointer transition-all tracking-widest uppercase font-oswald">Live Pulse</span>
+                <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] font-oswald">DRIPPING NOISE ({news.length})</span>
+                <span className="text-[10px] font-bold text-white/40 hover:text-white cursor-pointer transition-all tracking-widest uppercase font-oswald">Resonate</span>
               </div>
 
-              {news.map((n, idx) => {
+              {news.map(n => {
                 return (
                   <div key={n.id} className="mb-12">
                     <SpiritCard
@@ -988,7 +1022,7 @@ function App() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Trends</h2>
                   <button
-                    onClick={() => alert('同期を開始するには Antigravity に NotebookLM の URL を伝えてください。')}
+                    onClick={() => setShowNotebookModal(true)}
                     className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase hover:bg-white/10 transition-all"
                   >
                     /sync-notebooklm
@@ -998,6 +1032,34 @@ function App() {
               </header>
 
               <div className="space-y-12">
+                {globalTrends ? (
+                  <div className="group relative bg-[#111]/80 backdrop-blur-md border border-white/10 p-6 md:p-8 rounded-3xl overflow-hidden hover:bg-[#1a1a1a]/90 hover:border-white/20 transition-all duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#bd8a78]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                    <div className="relative">
+                      <div className="flex items-center gap-3 mb-6">
+                        <Cpu size={16} className="text-[#bd8a78]" />
+                        <span className="text-[10px] font-bold tracking-[0.4em] text-white/40 uppercase">Synchronized Thought</span>
+                      </div>
+                      <p className="text-xl md:text-2xl font-serif text-white/90 leading-relaxed mb-6">
+                        {globalTrends.summary}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {globalTrends.keywords.map((kw, i) => (
+                          <span key={i} className="px-3 py-1 bg-white/5 rounded-full text-xs text-white/50 border border-white/5">
+                            #{kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-20 border border-white/5 border-dashed rounded-3xl">
+                    <p className="text-white/30 text-sm font-bold tracking-widest">NO ACTIVE TRENDS</p>
+                    <p className="text-white/20 text-xs mt-2">/sync-notebooklm からあなたの思考を同期してください</p>
+                  </div>
+                )}
+                
+                {/* 従来の累積知識表示 */}
                 {/* Knowledge Sync Stats */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-6 bg-white/5 border border-white/10 rounded-[30px] flex flex-col gap-1">
@@ -1051,6 +1113,61 @@ function App() {
           </section>
         </main>
 
+        {/* NotebookLM Sync Modal */}
+        <AnimatePresence>
+          {showNotebookModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                className="w-full max-w-lg bg-[#111] border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl relative"
+              >
+                <button
+                  onClick={() => setShowNotebookModal(false)}
+                  className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+                <h3 className="text-2xl font-bold font-oswald uppercase tracking-wider text-white mb-2 flex items-center gap-3">
+                  <Cpu size={24} className="text-[#bd8a78]" />
+                  Sync Thought
+                </h3>
+                <p className="text-sm text-white/50 mb-6 leading-relaxed">
+                  NotebookLM のテキストや、現在のあなたの思考の断片をペーストしてください。
+                  抽出された文脈は「流行の重力」として広場全体に感染し、ゴーストたちの対話に影響を与えます。
+                </p>
+                <textarea
+                  value={notebookInput}
+                  onChange={(e) => setNotebookInput(e.target.value)}
+                  placeholder="思考の断片を入力..."
+                  className="w-full h-40 bg-black/50 border border-white/10 rounded-2xl p-4 text-white/80 text-sm focus:outline-none focus:border-[#bd8a78]/50 transition-colors mb-6 resize-none itako-scrollbar"
+                />
+                <div className="flex justify-end gap-4">
+                  <button
+                    onClick={() => setShowNotebookModal(false)}
+                    className="px-6 py-3 rounded-full text-xs font-bold tracking-widest uppercase text-white/40 hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSyncNotebook}
+                    disabled={syncingNotebook || !notebookInput.trim()}
+                    className="px-6 py-3 bg-white text-black rounded-full text-xs font-bold tracking-widest uppercase hover:bg-[#bd8a78] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {syncingNotebook ? <Loader2 size={14} className="animate-spin" /> : null}
+                    {syncingNotebook ? 'Syncing...' : 'Inject'}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {/* Floating Input Bar (UI/UX Pro Max) */}
         <div className="fixed bottom-10 left-0 right-0 p-4 z-[100] pointer-events-none pb-safe">
           <motion.div

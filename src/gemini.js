@@ -209,13 +209,12 @@ export const evaluateFutureSelf = async (bookmarks, userApiKey) => {
                 const model = genAI.getGenerativeModel({ model: m, systemInstruction: CHARACTER_CONFIGS.future_self.systemPrompt });
                 const result = await model.generateContent(prompt);
                 return result.response.text();
-            } catch {
-                if (keys.indexOf(k) === keys.length - 1 && FALLBACK_MODELS.indexOf(m) === FALLBACK_MODELS.length - 1) break;
-                continue;
+            } catch (e) {
+                console.warn(`Future self eval failed using key ${k} / model ${m}`, e);
             }
         }
     }
-    return "沈黙。";
+    return "時空の歪みに妨げられました。";
 };
 
 /**
