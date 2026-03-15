@@ -37,7 +37,7 @@ export default function App() {
   const [selectedCharIds, setSelectedCharIds] = useState(['soseki']);
   const [selectedLocationId, setSelectedLocationId] = useState('cafe');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [activeManagerTab, setActiveManagerTab] = useState('directory');
+  const [activeManagerTab, setActiveManagerTab] = useState('map');
   const [isUnderground, setIsUnderground] = useState(false);
   const [news, setNews] = useState([]);
   const [archives, setArchives] = useState([]);

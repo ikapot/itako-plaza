@@ -26,8 +26,8 @@ const ManagerContent = React.memo(({
             {/* Tabs for Manager */}
             <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 mb-8">
                 {[
-                    { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
                     { id: 'map', icon: <Globe size={14} />, label: 'Map', color: '#fdb913' },
+                    { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
                     { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
                 ].map(tab => {
                     const isActive = activeManagerTab === tab.id;
