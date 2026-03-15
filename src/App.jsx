@@ -66,19 +66,16 @@ export default function App() {
   const scrollRef = useRef(null);
   const lastLocationRef = useRef(null);
 
-  const handleToggleChar = useCallback((id) => {
+  function handleToggleChar(id) {
     setSelectedCharIds(prev => {
-      const isAlreadySelected = prev.includes(id);
-      if (isAlreadySelected) {
-        return prev.length > 1 ? prev.filter(cId => cId !== id) : prev; // 最低1人は保持
+      if (prev.includes(id)) {
+        return prev.length > 1 ? prev.filter(cId => cId !== id) : prev;
       }
-      if (prev.length >= 3) return prev; // 最大3人
-      return [...prev, id];
+      return prev.length < 3 ? [...prev, id] : prev;
     });
-  }, []);
+  }
 
   const handleSetChars = useCallback((ids) => {
-    // ダイスロールで3人を一括セット
     setSelectedCharIds(ids.slice(0, 3));
   }, []);
 
@@ -248,13 +245,13 @@ export default function App() {
 
         {/* Manager Overlay (Map, Registry, Connect) */}
         <AnimatePresence>
-          {activeManagerTab && (
+          {activeManagerTab ? (
             <motion.div 
               initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
               animate={{ opacity: 1, backdropFilter: 'blur(10px)' }}
               exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
               className="absolute inset-0 z-40 bg-black/40 flex items-center justify-center p-4 md:p-12 overflow-y-auto"
-              onClick={() => setActiveManagerTab(null)} // Click outside to close
+              onClick={() => setActiveManagerTab(null)}
             >
               <motion.div 
                 initial={{ scale: 0.95, y: 20 }}
@@ -277,7 +274,7 @@ export default function App() {
                 <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }} />
               </motion.div>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
 
