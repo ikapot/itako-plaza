@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cpu, Loader2 } from 'lucide-react';
+import { Share2, Bookmark, Flame, Wind, MessageSquare, Ghost, TrendingUp, Sparkles } from 'lucide-react';
 import SpiritCard from './SpiritCard';
 import WarholAvatar from './WarholAvatar';
 
@@ -214,6 +214,17 @@ const Timeline = React.memo(({
                                                 <p className={`text-base md:text-lg leading-relaxed text-white/70 ${!isUser ? 'font-serif' : 'font-sans'}`}>
                                                     {m.content}
                                                 </p>
+                                                {!isUser && (
+                                                    <div className="mt-6 flex justify-end">
+                                                        <button 
+                                                            onClick={() => handleBookmark?.(i)}
+                                                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[8px] font-bold text-white/20 uppercase tracking-widest hover:bg-[#bd8a78]/20 hover:text-[#bd8a78] transition-all group/btn"
+                                                        >
+                                                            <Bookmark size={10} className="group-hover/btn:fill-current" />
+                                                            栞を挟む
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </motion.div>
                                     );

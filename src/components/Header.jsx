@@ -21,6 +21,7 @@ export default function Header({
         { id: 'map', icon: <Globe size={14} />, label: 'Map', color: '#fdb913' },
         { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
         { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
+        { id: 'account', icon: <Settings size={14} />, label: 'Account', color: '#bd8a78' },
     ];
 
     return (

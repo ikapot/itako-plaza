@@ -1,8 +1,8 @@
 // Itako Plaza v1.2.1 - Simplified Architecture
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies } from './firebase';
-import { invokeGemini, generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent } from './gemini';
+import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies, saveBookmark, logout } from './firebase';
+import { invokeGemini, generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback } from './gemini';
 import { fetchFictionalizedNews } from './news';
 import { searchNDLArchive } from './ndl';
 import { INITIAL_CHARACTERS, INITIAL_LOCATIONS, AMBIENT_COLORS } from './constants';
@@ -16,7 +16,7 @@ import Timeline from './components/Timeline';
 import DashboardSidebar from './components/DashboardSidebar';
 import FloatingInputBar from './components/FloatingInputBar';
 import CharacterOverlay from './components/CharacterOverlay';
-import { X } from 'lucide-react';
+import { X, Activity } from 'lucide-react';
 
 function cleanKey(key) {
   if (typeof key !== 'string') return key;
@@ -54,6 +54,7 @@ export default function App() {
   const [syncingNotebook, setSyncingNotebook] = useState(false);
   const [isValidatingApi, setIsValidatingApi] = useState(false);
   const [apiConnectionStatus, setApiConnectionStatus] = useState('idle');
+  const [apiLogs, setApiLogs] = useState([]); // New state for API logs
   const [locationEnergies, setLocationEnergies] = useState({});
   const [enlargedCharId, setEnlargedCharId] = useState(null);
   const [showNotebookModal, setShowNotebookModal] = useState(false);
@@ -123,14 +124,53 @@ export default function App() {
       setUser(currentUser);
       if (currentUser) {
         setUserName(currentUser.displayName || '彷徨える魂');
-        const [savedBookMarks, data] = await Promise.all([fetchBookmarks(), fetchNotebookAccumulations()]);
+        const [savedBookMarks, data, energies] = await Promise.all([
+          fetchBookmarks(), 
+          fetchNotebookAccumulations(),
+          fetchLocationEnergies()
+        ]);
         setBookmarks(savedBookMarks);
         setSpiritSharedKnowledge(data.map(acc => acc.content).join('\n---\n'));
+        setLocationEnergies(energies);
         if (geminiKey) setIsAppReady(true);
       }
     });
     return () => unsubscribe();
   }, [geminiKey]);
+
+  const handleBookmark = async (index) => {
+    const msg = messages[index];
+    if (!msg || msg.role === 'user') return;
+    
+    // Find the previous user message for context
+    let userMsg = "";
+    for(let k = index - 1; k >= 0; k--) {
+      if (messages[k].role === 'user') {
+        userMsg = messages[k].content;
+        break;
+      }
+    }
+
+    const newBookmark = {
+      userMsg,
+      aiMsg: msg.content,
+      charId: msg.charId,
+      timestamp: Date.now()
+    };
+    
+    setBookmarks(prev => [newBookmark, ...prev]);
+    if (user) {
+      await saveBookmark(userMsg, msg.content, msg.charId);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setUser(null);
+    setBookmarks([]);
+    setMessages([]);
+    setIsAppReady(false);
+  };
 
   useEffect(() => {
     if (!geminiKey) return;
@@ -164,6 +204,15 @@ export default function App() {
       return () => clearInterval(eventInterval);
     }
   }, [geminiKey, isAppReady, globalTrends]);
+
+  useEffect(() => {
+    setGeminiDebugCallback((log) => {
+      setApiLogs(prevLogs => {
+        const newLog = { ...log, id: Date.now() + Math.random(), time: new Date().toLocaleTimeString() };
+        return [newLog, ...prevLogs].slice(0, 20); // Keep last 20 logs
+      });
+    });
+  }, []); // Run once on mount
 
   useEffect(() => {
     async function triggerLocationConversation() {
@@ -212,16 +261,21 @@ export default function App() {
       const otherChars = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id) && c.id !== charId);
 
       await generateCharacterResponseStream(currentChar, userMsg, isUnderground, context, geminiKey, depth, (chunk, meta) => {
-        setMessages(prev => {
-          const next = [...prev];
-          next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
-          return next;
-        });
-        if (meta?.sentiment) setGlobalSentiment(meta.sentiment);
-      }, location, otherChars);
-    } catch (e) { console.error(e); }
-    setLoading(false);
-  };
+      setMessages(prev => {
+        const next = [...prev];
+        next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
+        return next;
+      });
+      if (meta?.sentiment) setGlobalSentiment(meta.sentiment);
+    }, location, otherChars);
+    
+    // Automatically switch to Dialog tab
+    handleSlotChange(1);
+  } catch (e) {
+    console.error(e);
+  }
+  setLoading(false);
+};
 
   const handleSyncNotebook = async () => {
     if (!notebookInput.trim() || !geminiKey) return;
@@ -290,7 +344,7 @@ export default function App() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden" />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-black/40 backdrop-blur-3xl border-r border-white/10 z-[70] p-6 overflow-y-auto md:hidden shadow-3xl">
               <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment }} />
-              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }} />
+              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, globalSentiment, bookmarks, messages, userName }} />
             </motion.div>
           </>
         )}
@@ -303,38 +357,70 @@ export default function App() {
         <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies }} />
         
         {/* Main Timeline View */}
-        <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark: async (i) => {}, globalTrends, setShowNotebookModal, futureSelfCritique, archives, globalSentiment }} />
+        <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark, globalTrends, setShowNotebookModal, futureSelfCritique, archives, globalSentiment }} />
 
         {/* Manager Overlay (Map, Registry, Connect) */}
         <AnimatePresence>
           {activeManagerTab ? (
             <motion.div 
               initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-              animate={{ opacity: 1, backdropFilter: 'blur(10px)' }}
+              animate={{ opacity: 1, backdropFilter: 'blur(40px)' }}
               exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-              className="absolute inset-0 z-40 bg-black/40 flex items-center justify-center p-4 md:p-12 overflow-y-auto"
-              onClick={() => setActiveManagerTab(null)}
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
             >
-              <motion.div 
-                initial={{ scale: 0.95, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.95, y: 20 }}
-                className="w-full max-w-5xl bg-[#0a0a0a]/90 border border-white/10 rounded-[50px] p-8 md:p-12 shadow-3xl pointer-events-auto"
-                onClick={e => e.stopPropagation()}
-              >
-                <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-3xl font-black font-oswald uppercase tracking-widest text-white/80">
-                    {activeManagerTab}
-                  </h2>
-                  <button 
-                    onClick={() => setActiveManagerTab(null)}
-                    className="p-2 text-white/20 hover:text-white transition-colors"
-                  >
-                    Close
-                  </button>
+              <div className="absolute inset-0 bg-black/40" onClick={() => setActiveManagerTab(null)} />
+              
+              <div className="relative w-full max-w-5xl h-full max-h-[85vh] flex flex-col pointer-events-auto">
+                {/* Conduit Status Monitor (Debug Sidebar) */}
+                <div className="hidden xl:block absolute -right-64 top-0 w-60 h-full glass-spectral rounded-3xl p-4 overflow-hidden border-white/5">
+                  <h3 className="text-[10px] font-black tracking-[0.3em] uppercase text-white/20 mb-4 font-oswald flex items-center gap-2">
+                    <Activity size={12} className="text-emerald-500" />
+                    Spirit Conduits
+                  </h3>
+                  <div className="space-y-3 overflow-y-auto max-h-[90%] itako-scrollbar-thin pr-2">
+                    {apiLogs.map(log => (
+                      <div key={log.id} className="border-l-2 border-white/5 pl-3 py-1">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className={`text-[8px] font-bold uppercase tracking-widest ${
+                            log.type === 'error' ? 'text-red-400' : 
+                            log.type === 'success' ? 'text-emerald-400' : 'text-zinc-500'
+                          }`}>
+                            {log.type}
+                          </span>
+                          <span className="text-[7px] text-white/10">{log.time}</span>
+                        </div>
+                        <p className="text-[9px] font-medium text-white/60 truncate">{log.model}</p>
+                        {log.error && (
+                          <p className="text-[7px] text-red-500/60 leading-tight mt-1 break-words line-clamp-2">{log.error}</p>
+                        )}
+                      </div>
+                    ))}
+                    {apiLogs.length === 0 && (
+                      <p className="text-[9px] text-white/10 italic text-center py-10 tracking-widest uppercase font-oswald">Silence as a language...</p>
+                    )}
+                  </div>
                 </div>
-                <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, globalSentiment }} />
-              </motion.div>
+
+                <motion.div 
+                  layoutId="manager-content"
+                  className="w-full h-full glass-spectral rounded-[40px] border border-white/10 shadow-3xl overflow-hidden flex flex-col relative"
+                >
+                  <div className="flex justify-between items-center p-6 border-b border-white/5">
+                    <h2 className="text-2xl font-black font-oswald uppercase tracking-widest text-white/40">
+                      System / {activeManagerTab}
+                    </h2>
+                    <button 
+                      onClick={() => setActiveManagerTab(null)}
+                      className="p-2 text-white/20 hover:text-white transition-colors"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto itako-scrollbar-thin">
+                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, globalSentiment, bookmarks, messages, userName }} />
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
           ) : null}
         </AnimatePresence>

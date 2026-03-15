@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Globe, Cpu, MapPin, Search } from 'lucide-react';
+import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle } from 'lucide-react';
 import ThreeDMap from './ThreeDMap';
 import WarholAvatar from './WarholAvatar';
 
@@ -29,12 +29,14 @@ const ManagerContent = React.memo(({
     apiConnectionStatus,
     handleValidateApi,
     globalSentiment,
+    bookmarks,
+    messages,
+    userName
 }) => {
     return (
         <div className="space-y-12">
-
             <AnimatePresence mode="wait">
-                {activeManagerTab === 'map' ? (
+                {activeManagerTab === 'map' && (
                     <motion.div
                         key="map"
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -54,9 +56,9 @@ const ManagerContent = React.memo(({
                             globalSentiment={globalSentiment}
                         />
                     </motion.div>
-                ) : null}
+                )}
 
-                {activeManagerTab === 'directory' ? (
+                {activeManagerTab === 'directory' && (
                     <motion.div
                         key="directory"
                         initial={{ opacity: 0, y: 10 }}
@@ -77,16 +79,14 @@ const ManagerContent = React.memo(({
                                             : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}
                                     `}
                                 >
-                                    {/* Selection Glow Background */}
-                                    {isSelected ? (
+                                    {isSelected && (
                                         <motion.div 
                                             layoutId={`char-glow-${c.id}`}
                                             className="absolute inset-0 bg-white/5 blur-2xl pointer-events-none"
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                         />
-                                    ) : null}
-
+                                    )}
                                     <div onClick={(e) => { e.stopPropagation(); setEnlargedCharId(c.id); }} className="relative z-10 cursor-zoom-in">
                                         <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" isPreStyled={c.isPreStyled} />
                                     </div>
@@ -106,9 +106,9 @@ const ManagerContent = React.memo(({
                             );
                         })}
                     </motion.div>
-                ) : null}
+                )}
 
-                {activeManagerTab === 'connect' ? (
+                {activeManagerTab === 'connect' && (
                     <motion.div
                         key="connect"
                         initial={{ opacity: 0, y: 10 }}
@@ -116,7 +116,6 @@ const ManagerContent = React.memo(({
                         exit={{ opacity: 0, y: -10 }}
                         className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-10"
                     >
-                        {/* Status Header */}
                         <div className="flex items-center gap-6 p-8 bg-[#f15a24]/5 border border-[#f15a24]/10 rounded-[35px] relative overflow-hidden group">
                             <motion.div 
                                 animate={{ scale: geminiKey ? [1, 1.2, 1] : 1 }}
@@ -136,20 +135,13 @@ const ManagerContent = React.memo(({
                             </div>
                         </div>
 
-                        {/* Trinity Slot Management */}
                         <div className="space-y-6">
                             <div className="flex justify-between items-center px-2">
                                 <h3 className="text-[10px] font-bold text-white/30 tracking-widest uppercase font-oswald">Trinity Connection (推奨3スロット)</h3>
-                                <a 
-                                    href="https://aistudio.google.com/app/apikey" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-[9px] text-[#f15a24] hover:text-white transition-colors flex items-center gap-1.5 font-bold"
-                                >
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-[9px] text-[#f15a24] hover:text-white transition-colors flex items-center gap-1.5 font-bold">
                                     <Globe className="w-3 h-3" /> Get New Keys in AI Studio
                                 </a>
                             </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {[0, 1, 2].map(idx => {
                                     const allKeys = geminiKey.split(',').map(k => k.trim());
@@ -175,47 +167,82 @@ const ManagerContent = React.memo(({
                                     );
                                 })}
                             </div>
-
-                            {/* Magic Bulk Import */}
-                            <div className="relative">
-                                <textarea
-                                    placeholder="ここへ複数のキーを一括ペースト（カンマ・スペース・改行区切り対応）"
-                                    onChange={(e) => {
-                                        const val = e.target.value.trim();
-                                        if (!val) return;
-                                        // 複数の区切り文字に対応してスプリット
-                                        const detected = val.split(/[,\s\n]+/).filter(k => k.length > 20);
-                                        if (detected.length > 0) {
-                                            const newVal = detected.slice(0, 3).join(',');
-                                            setGeminiKey(newVal);
-                                            localStorage.setItem('itako_gemini_key', newVal);
-                                            e.target.value = ''; // Clear
-                                        }
-                                    }}
-                                    className="w-full bg-white/[0.02] border border-dashed border-white/10 rounded-[25px] p-4 text-[9px] text-white/20 focus:text-white focus:border-[#f15a24]/50 outline-none transition-all h-20 text-center flex items-center justify-center resize-none"
-                                />
-                                <div className="absolute inset-x-0 bottom-4 text-center pointer-events-none">
-                                    <span className="text-[8px] text-white/5 uppercase tracking-[0.3em] font-black">Quick Injection Portal</span>
-                                </div>
-                            </div>
                         </div>
 
                         <div className="pt-4">
-                            <button
-                                onClick={handleValidateApi}
-                                disabled={isValidatingApi}
-                                className={getConnectBtnStyle(apiConnectionStatus, geminiKey, isValidatingApi)}
-                            >
+                            <button onClick={handleValidateApi} disabled={isValidatingApi} className={getConnectBtnStyle(apiConnectionStatus, geminiKey, isValidatingApi)}>
                                 {isValidatingApi ? 'Validating Trinity...' : apiConnectionStatus === 'error' ? 'Retry Connection' : '回路を安定化させる (Connect All)'}
                             </button>
-                            {apiConnectionStatus === 'error' ? (
-                                <p className="mt-4 text-[8px] font-bold text-red-500 uppercase tracking-widest text-center animate-pulse">
-                                    ⚠️ Some conduits failed. Check keys and limits.
-                                </p>
-                            ) : null}
                         </div>
                     </motion.div>
-                ) : null}
+                )}
+
+                {activeManagerTab === 'account' && (
+                    <motion.div
+                        key="account"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="p-8 space-y-12 h-screen overflow-y-auto itako-scrollbar-thin"
+                    >
+                        <div className="flex items-center gap-6 p-8 bg-white/5 border border-white/10 rounded-[40px]">
+                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bd8a78] to-[#f15a24] flex items-center justify-center text-4xl shadow-2xl">
+                                {userName?.[0] || '魂'}
+                            </div>
+                            <div className="flex flex-col">
+                                <h1 className="text-3xl font-black font-oswald uppercase tracking-widest text-white">{userName}</h1>
+                                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]">Spirit Registry: Active</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {[
+                                { label: 'Bookmarks', val: bookmarks?.length || 0, icon: <Bookmark size={14} /> },
+                                { label: 'My Manifestations', val: messages.filter(m => m.role === 'user').length || 0, icon: <MessageCircle size={14} /> },
+                                { label: 'Directives', val: selectedCharIds?.length || 0, icon: <User size={14} /> },
+                                { label: 'Clarity', val: '98%', icon: <Settings size={14} /> },
+                            ].map((s, i) => (
+                                <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-3xl">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{s.label}</span>
+                                        <div className="text-white/10">{s.icon}</div>
+                                    </div>
+                                    <span className="text-xl font-black text-white font-oswald">{s.val}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="space-y-6">
+                            <h2 className="text-sm font-bold text-white/40 tracking-[0.3em] uppercase px-4 border-l-2 border-[#bd8a78]">Echo Bookmarks (栞)</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {(bookmarks || []).map((b, i) => (
+                                    <div key={i} className="p-6 bg-black/40 border border-white/10 rounded-[30px] space-y-4 hover:border-white/20 transition-all">
+                                        <div className="flex items-center gap-3">
+                                            <WarholAvatar src={characters.find(c=>c.id === b.charId)?.avatar} colorClass={characters.find(c=>c.id === b.charId)?.color} size="w-6 h-6" isSelected />
+                                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{characters.find(c=>c.id === b.charId)?.name}</span>
+                                        </div>
+                                        <p className="text-sm text-white/80 leading-relaxed italic line-clamp-3">"{b.aiMsg}"</p>
+                                    </div>
+                                ))}
+                                {(!bookmarks || bookmarks.length === 0) && (
+                                    <p className="text-xs text-white/10 tracking-widest uppercase italic px-6">囁きはまだ記録されていません。</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="space-y-6 pb-20">
+                            <h2 className="text-sm font-bold text-white/40 tracking-[0.3em] uppercase px-4 border-l-2 border-[#bd8a78]">Manifestations (自身の言葉)</h2>
+                            <div className="space-y-3">
+                                {messages.filter(m => m.role === 'user').map((m, i) => (
+                                    <div key={i} className="group flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all">
+                                        <p className="text-xs text-white/60 tracking-wide font-medium">{m.content}</p>
+                                        <span className="text-[8px] text-white/10 font-bold uppercase">{new Date().toLocaleDateString()}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
             </AnimatePresence>
         </div>
     );
