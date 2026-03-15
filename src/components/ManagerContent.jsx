@@ -23,36 +23,6 @@ const ManagerContent = React.memo(({
 }) => {
     return (
         <div className="space-y-12">
-            {/* Tabs for Manager */}
-            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 mb-8">
-                {[
-                    { id: 'map', icon: <Globe size={14} />, label: 'Map', color: '#fdb913' },
-                    { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
-                    { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
-                ].map(tab => {
-                    const isActive = activeManagerTab === tab.id;
-                    const bgColor = isActive ? tab.color : 'rgba(255,255,255,0.03)';
-                    const textColor = isActive ? '#000' : 'rgba(255,255,255,0.3)';
-                    const shadow = isActive ? `0 4px 15px ${tab.color}44` : 'none';
-                    const border = isActive ? 'border-white/20' : 'border-transparent';
-
-                    return (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveManagerTab(tab.id)}
-                            style={{
-                                backgroundColor: bgColor,
-                                color: textColor,
-                                boxShadow: shadow
-                            }}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-500 active:scale-95 cursor-pointer font-oswald border ${border}`}
-                        >
-                            {tab.icon}
-                            <span className="hidden md:inline">{tab.label}</span>
-                        </button>
-                    );
-                })}
-            </div>
 
             <AnimatePresence mode="wait">
                 {activeManagerTab === 'map' && (
