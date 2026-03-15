@@ -11,15 +11,15 @@ export default function SpiritCard({ title, content, author, portraitUrl, flavor
       className={`relative p-6 md:p-8 rounded-[32px] ${colorClass} mb-4 shadow-sm group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl`}
     >
       <div className="relative z-10 flex flex-col gap-6 text-inherit">
-        {author && (
+        {author ? (
           <div className="flex items-center justify-between border-b border-white/5 pb-3">
             <div className="flex items-center gap-3">
               <WarholAvatar src={portraitUrl || 'assets/soseki_warhol.png'} size="w-8 h-8" isSelected isPreStyled={isPreStyled || !portraitUrl} />
               <span className="text-[10px] font-bold tracking-[0.2em] opacity-40 uppercase">{author}</span>
-              {flavor && <span className="text-[10px] font-bold bg-white/5 px-3 py-1 rounded-full opacity-30">{flavor}</span>}
+              {flavor ? <span className="text-[10px] font-bold bg-white/5 px-3 py-1 rounded-full opacity-30">{flavor}</span> : null}
             </div>
           </div>
-        )}
+        ) : null}
         <div className="space-y-4">
           <h3 className="text-2xl md:text-3xl font-bold tracking-tighter leading-tight pr-12 opacity-90">{title}</h3>
           <p className="text-sm md:text-base leading-relaxed opacity-60 font-medium whitespace-pre-wrap">{content}</p>
