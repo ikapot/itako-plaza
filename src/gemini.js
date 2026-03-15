@@ -2,12 +2,26 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
 const FALLBACK_MODELS = [
-  "gemini-2.0-flash", 
-  "gemini-1.5-flash",
-  "gemini-1.5-pro"
+  "gemini-2.0-flash",
+  "gemini-1.5-flash", 
+  "gemini-1.5-flash-latest",
+  "gemini-1.5-pro",
+  "gemini-1.5-pro-latest"
+];
+
+const SAFETY_SETTINGS = [
+  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
 ];
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// --- Debug Monitor ---
+let debugCallback = null;
+export const setGeminiDebugCallback = (cb) => { debugCallback = cb; };
+const emitDebug = (data) => { if (debugCallback) debugCallback(data); };
 
 // --- 霊的エコー（Semantic Cache） ---
 const semanticCache = new Map();
@@ -114,6 +128,21 @@ const CHARACTER_CONFIGS = {
   }
 };
 
+const SPIRIT_INTERACTIONS = [
+  { 
+    ids: ['rand', 'fumiko'], 
+    prompt: "\n【魂の衝突: アイン・ランド vs 金子文子】\n「合理的利己心」と「虚無的な自己」が激突します。お互いの思想を認めつつも、その根源的な違い（理性か絶望か）を鋭く突き合ってください。" 
+  },
+  { 
+    ids: ['ichikawa', 'raicho'], 
+    prompt: "\n【魂の共鳴: 市川房枝 vs 平塚らいてう】\n「政治的な実務」と「内なる太陽」が交錯します。女性解放の目的は同じでも、手段と哲学の違いが生む火花を表現してください。" 
+  },
+  { 
+    ids: ['soseki', 'dosto'], 
+    prompt: "\n【魂の共鳴: 夏目漱石 vs ドストエフスキー】\n「胃弱の皮肉」と「癲癇の熱狂」。東西の文豪が、神経症的な自意識を通じて深い深淵で繋がります。" 
+  }
+];
+
 /**
  * 統合されたGemini呼び出しヘルパー (案3対応)
  */
@@ -139,24 +168,32 @@ class ApiResponse {
  */
 export async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = {}, isJson = false) {
   const keys = userApiKey.split(',').map(k => k.trim()).filter(Boolean);
+  if (keys.length === 0) throw new Error("API Conduits not configured. Please check the CONNECT tab.");
+
   let lastError = null;
 
-  for (const [keyIdx, key] of keys.entries()) {
-    for (const modelName of FALLBACK_MODELS) {
+  // 1. 各モデル候補を順番に試す
+  for (const modelName of FALLBACK_MODELS) {
+    // 2. 各モデルに対して、登録されている全キーを試す
+    for (let kIdx = 0; kIdx < keys.length; kIdx++) {
+      const currentKey = keys[kIdx];
       let retryCount = 0;
-      const maxRetries = 2;
+      const maxRetries = 1; // 複数キーがあるならリトライよりスイッチを優先
 
       while (retryCount <= maxRetries) {
         try {
-          const genAI = new GoogleGenerativeAI(key);
+          const genAI = new GoogleGenerativeAI(currentKey);
           const model = genAI.getGenerativeModel({
             model: modelName,
-            generationConfig: config,
-            systemInstruction: sysPrompt || undefined // 空文字列よりundefinedが安全な場合がある
+            generationConfig: isJson ? { ...config, responseMimeType: "application/json" } : config,
+            systemInstruction: sysPrompt || undefined,
+            safetySettings: SAFETY_SETTINGS
           });
 
-          const result = await model.generateContent(prompt);
-          const text = result.response.text();
+          emitDebug({ type: 'attempt', model: modelName, keyIndex: kIdx + 1 });
+          const result = await model.generateContent(prompt || "...");
+          const response = await result.response;
+          const text = response.text();
 
           let finalData = text;
           if (isJson) {
@@ -164,51 +201,60 @@ export async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = 
             finalData = JSON.parse(cleanJson);
           }
           
-          return new ApiResponse(finalData, modelName, keyIdx + 1);
+          emitDebug({ type: 'success', model: modelName, keyIndex: kIdx + 1 });
+          return new ApiResponse(finalData, modelName, kIdx + 1);
         } catch (error) {
+          emitDebug({ type: 'error', model: modelName, keyIndex: kIdx + 1, error: error.message, status: error.status });
           lastError = error;
-          const msg = error.message || "";
           const status = error.status || 0;
-          const isQuota = status === 429 || msg.includes('429') || msg.includes('Quota');
+          const msg = error.message || "";
+          
+          const is400 = status === 400 || msg.includes('400');
+          const is429 = status === 429 || msg.includes('429') || msg.includes('Quota');
+          const is404 = status === 404 || msg.includes('not found') || msg.includes('404');
           const isAuth = status === 401 || status === 403 || msg.includes('API_KEY_INVALID');
-          const isNotFound = status === 404 || msg.includes('not found');
 
-          console.warn(`[Gemini Attempt] ${modelName} (Key ${keyIdx + 1}, Try ${retryCount + 1}) failed: ${msg.substring(0, 80)}`);
+          console.warn(`[Gemini Attempt] ${modelName} (Key ${kIdx + 1}/${keys.length}, Try ${retryCount + 1}): ${status} ${msg.substring(0, 60)}`);
+
+          if (isAuth || is400) break; // このキー・モデルの組み合わせは無効なので次へ
           
-          if (isAuth) break; // このキーは全滅なので次のキーへ (外側のループ)
-          
-          if (isQuota) {
-            // 429時はモデルを切り替えず、少し待機してリトライ
-            retryCount++;
-            if (retryCount <= maxRetries) {
-              const waitTime = 3000 * retryCount + Math.random() * 1000;
-              console.log(`[Gemini] Retrying in ${Math.round(waitTime)}ms...`);
-              await sleep(waitTime);
+          if (is404) {
+            // このモデル名がこのキー（または環境）で使えない場合は、即座に次のモデル候補へ
+            break; 
+          }
+
+          if (is429) {
+            if (keys.length > 1 && kIdx < keys.length - 1) {
+              // 他にキーがあるなら即座に次へ
+              break; 
+            } else {
+              // 最後のキーなら指数バックオフで待機
+              const wait = Math.pow(2, retryCount) * 4000 + Math.random() * 2000;
+              console.log(`[Gemini] All conduits rate limited. Cooling down for ${Math.round(wait)}ms...`);
+              await sleep(wait);
+              retryCount++;
               continue;
             }
           }
 
-          if (isNotFound) {
-            // 404時はこのモデルを諦めて次のモデルへ
-            break; 
-          }
-
-          // その他のエラーも次のモデルへ
-          break;
+          // その他のエラー（500系など）
+          retryCount++;
+          await sleep(1000);
         }
       }
-      if (lastError?.status === 401 || lastError?.status === 403) break; 
     }
+    // モデルNameが404などで全滅した場合は、FALLBACK_MODELSの次の名前へ
+    console.log(`[Gemini] Switching to next fallback model: ${modelName} attempt finished.`);
   }
-  
+
   throw new Error(JSON.stringify({
     status: lastError?.status || 500,
-    message: lastError?.message || "All spiritual conduits collapsed.",
+    message: lastError?.message || "All spiritual conduits collapsed. Please verify your keys and network.",
     timestamp: new Date().toISOString()
   }));
 }
 
-export async function generateCharacterResponseStream(currentChar, userMessage, isUnderground = false, externalContext = "", userApiKey = "", interactionDepth = 0, onChunk, locationContext = null) {
+export async function generateCharacterResponseStream(currentChar, userMessage, isUnderground = false, externalContext = "", userApiKey = "", interactionDepth = 0, onChunk, locationContext = null, otherChars = []) {
   if (!userApiKey) {
     onChunk("【APIキーを入力してください】", { model: 'system', keyIndex: '-' });
     return;
@@ -231,11 +277,19 @@ export async function generateCharacterResponseStream(currentChar, userMessage, 
 ${isAtHome ? "【特記事項】ここはあなたの本来の居場所であり、ホームグラウンドです。言葉に自信と余裕、あるいは執着を込めてください。" : "ここはあなたの本来の仕事場ではありません。少しの違和感や、よそ者としての視点を交えてください。"}`;
   }
 
+  const allPresentChars = [currentChar, ...otherChars];
+  const interactionAugmentation = SPIRIT_INTERACTIONS
+    .filter(int => int.ids.every(id => allPresentChars.some(ap => ap.id === id)))
+    .map(int => int.prompt)
+    .join('\n');
+
   const systemPrompt = (config.systemPrompt || "") + 
                        depthInstruction + 
                        locAugmentation +
+                       interactionAugmentation +
                        (isUnderground ? "\n地下通路。本音を語れ。" : "") + 
-                       (externalContext ? `\n文脈: ${externalContext}` : "");
+                       (externalContext ? `\n文脈: ${externalContext}` : "") +
+                       "\n【感情タグの義務】発言の冒頭に、その時のあなたの心情を [serene, agitated, melancholic, joyful, chaotic, neutral] から1つ選び、 [serene] のようにブラケットで囲んで必ず付与してください。";
 
   const echo = await findEcho(systemPrompt, userMessage);
   if (echo) {
@@ -249,32 +303,64 @@ ${isAtHome ? "【特記事項】ここはあなたの本来の居場所であり
   }
 
   const keys = userApiKey.split(',').map(k => k.trim()).filter(Boolean);
-  for (const key of keys) {
-    for (const modelName of FALLBACK_MODELS) {
+  
+  // Model -> Key の順で試すことで、最新モデルを全キーで優先的に試用する
+  for (const modelName of FALLBACK_MODELS) {
+    for (let kIdx = 0; kIdx < keys.length; kIdx++) {
+      const key = keys[kIdx];
       try {
         const genAI = new GoogleGenerativeAI(key);
         const model = genAI.getGenerativeModel({
           model: modelName,
           generationConfig: config.generationConfig,
-          systemInstruction: systemPrompt
+          systemInstruction: systemPrompt,
+          safetySettings: SAFETY_SETTINGS
         });
 
+        emitDebug({ type: 'stream_start', model: modelName, keyIndex: kIdx + 1 });
         const result = await model.generateContentStream(userMessage);
         let fullText = "";
+        
         for await (const chunk of result.stream) {
           fullText += chunk.text();
-          onChunk(fullText, { model: modelName, keyIndex: keys.indexOf(key) + 1 });
+          emitDebug({ type: 'stream_chunk', model: modelName });
+          
+          let cleanText = fullText;
+          let sentiment = 'neutral';
+          
+          const match = fullText.match(/^\[(serene|agitated|melancholic|joyful|chaotic|neutral)\]/);
+          if (match) {
+            sentiment = match[1];
+            cleanText = fullText.replace(/^\[.*?\]\s*/, "");
+          }
+          
+          onChunk(cleanText, { 
+            model: modelName, 
+            keyIndex: kIdx + 1,
+            sentiment: sentiment
+          });
         }
         storeEcho(systemPrompt, userMessage, fullText);
         return;
       } catch (error) {
         const msg = error.message || "";
-        console.warn(`[Gemini Stream Attempt] ${modelName} failed: ${msg.substring(0, 60)}`);
-        if (error.status === 429 || msg.includes('429')) {
-          await sleep(1000);
-          continue;
+        const status = error.status || 0;
+        
+        const is429 = status === 429 || msg.includes('429') || msg.includes('Quota');
+        const is404 = status === 404 || msg.includes('not found') || msg.includes('404');
+        const isAuth = status === 401 || status === 403 || msg.includes('API_KEY_INVALID');
+
+        console.warn(`[Gemini Stream Attempt] ${modelName} (Key ${kIdx + 1}) failed: ${status} ${msg.substring(0, 60)}`);
+        
+        if (is429) {
+          if (keys.length > 1 && kIdx < keys.length - 1) continue; // 次のキーへ
+          await sleep(2000); 
+          continue; 
         }
-        if (error.status === 401 || error.status === 403 || msg.includes('API_KEY_INVALID')) break;
+        if (is404) break; // このモデルはこの環境で全滅の可能性が高いので次のモデルへ
+        if (isAuth) continue; // 次のキーへ
+        
+        // その他のエラー
         continue;
       }
     }
@@ -321,10 +407,11 @@ export async function extractTrendsFromNotebook(notebookText, userApiKey) {
 
 export async function generateWorldEvent(userApiKey, globalTrends) {
   if (!userApiKey) return null;
-  const trendsContext = globalTrends ? `現在の思考の重力: ${globalTrends.summary}` : "";
-  const prompt = `世界を揺さぶる「世界事変」を1つ生成してください。テーマ: war, earthquake, economic, thought
-${trendsContext}
-{ "type": "...", "content": "100文字以内の詩的文章" }`;
+  const trendsContext = globalTrends ? `現在の思考の重力: ${globalTrends.summary}` : "特になし";
+  const prompt = `あなたは「広場の精神」を司る観測者です。
+今の広場に漂う思考（${trendsContext}）に呼応し、あるいはそれを打ち破る「世界事変」を1つ生成してください。
+事変の種類(type)は [war, earthquake, economic, thought, miracle, collapse] から選び、その内容(content)を100文字以内の詩的かつ象徴的な文章で記述してください。
+出力は純粋なJSONのみにしてください。`;
   try {
     const res = await invokeGemini(userApiKey, prompt, "", {}, true);
     return res.data;
@@ -336,13 +423,24 @@ ${trendsContext}
 export async function generateLocationDialogueWithEvent(userApiKey, selectedChars, loc, event, spiritSharedKnowledge) {
   if (!userApiKey || selectedChars.length < 1) return [];
   const charDescriptions = selectedChars.map(c => `${c.name}: ${(CHARACTER_CONFIGS[c.id] || {}).systemPrompt}`).join('\n');
-  const eventContext = event ? `事変: [${event.type}] ${event.content}` : "事変なし";
-  const prompt = `
-場所: "${loc.name}" 説明: ${loc.description}
-${eventContext} 共有知識: ${spiritSharedKnowledge.substring(0, 500)}
-【登場人物】\n${charDescriptions}
-指示: 3〜6往復の文学的対話を生成してください。
-[ {"charId": "...", "content": "..."}, ... ]`;
+  const eventContext = event ? `【世界事変】: [${event.type}] ${event.content}` : "【現在の世界】: 特に大きな異変は見られない。";
+  const prompt = `あなたは「イタコプラザ」の口寄せです。
+以下の状況に基づき、死者（ゴースト）たちの対話を紡いでください。
+
+場所: "${loc.name}" (${loc.description})
+${eventContext}
+共有された知見: ${spiritSharedKnowledge.substring(0, 500)}
+
+【登場人物】
+${charDescriptions}
+${SPIRIT_INTERACTIONS.filter(int => int.ids.every(id => selectedChars.some(sc => sc.id === id))).map(int => int.prompt).join('\n')}
+
+指示: 
+1. 3〜6往復の対話を生成してください。
+2. 各発言はキャラクターの思想、場所の空気、そして世界事変の影響を反映させてください。
+3. 各発言に感情(sentiment) [serene, agitated, melancholic, joyful, chaotic, neutral] を付与してください。
+4. 出力形式は以下のJSON配列のみとしてください：
+[ {"charId": "...", "content": "...", "sentiment": "..."}, ... ]`;
   try {
     const res = await invokeGemini(userApiKey, prompt, "あなたは口寄せです。", { temperature: 0.8 }, true);
     return res.data;

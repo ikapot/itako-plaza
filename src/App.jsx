@@ -5,7 +5,7 @@ import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulat
 import { invokeGemini, generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent } from './gemini';
 import { fetchFictionalizedNews } from './news';
 import { searchNDLArchive } from './ndl';
-import { INITIAL_CHARACTERS, INITIAL_LOCATIONS } from './constants';
+import { INITIAL_CHARACTERS, INITIAL_LOCATIONS, AMBIENT_COLORS } from './constants';
 
 // Components
 import Header from './components/Header';
@@ -62,6 +62,9 @@ export default function App() {
     const cached = localStorage.getItem('itako_global_trends');
     return cached ? JSON.parse(cached) : null;
   });
+  const [isEventShaking, setIsEventShaking] = useState(false);
+  const isMeltingDown = useMemo(() => Object.values(locationEnergies).some(e => e > 85), [locationEnergies]);
+  const [globalSentiment, setGlobalSentiment] = useState('neutral');
 
   const scrollRef = useRef(null);
   const lastLocationRef = useRef(null);
@@ -149,7 +152,11 @@ export default function App() {
     const updateEvent = async () => {
       await new Promise(r => setTimeout(r, 4000)); // ニュース取得と重ならないようにさらに遅延
       const event = await generateWorldEvent(geminiKey, globalTrends);
-      if (event) setCurrentWorldEvent(event);
+      if (event) {
+        setCurrentWorldEvent(event);
+        setIsEventShaking(true);
+        setTimeout(() => setIsEventShaking(false), 800);
+      }
     };
     if (geminiKey && isAppReady) {
       updateEvent();
@@ -174,7 +181,9 @@ export default function App() {
       const dialogue = await generateLocationDialogueWithEvent(geminiKey, selectedChars, loc, currentWorldEvent, spiritSharedKnowledge);
       
       if (dialogue?.length) {
-        setMessages(prev => [...prev, ...dialogue.map(d => ({ role: 'ai', content: d.content, charId: d.charId }))]);
+        setMessages(prev => [...prev, ...dialogue.map(d => ({ role: 'ai', content: d.content, charId: d.charId, sentiment: d.sentiment }))]);
+        const lastSentiment = dialogue[dialogue.length - 1]?.sentiment;
+        if (lastSentiment) setGlobalSentiment(lastSentiment);
       }
       setLoading(false);
     }
@@ -200,6 +209,7 @@ export default function App() {
       const context = [spiritSharedKnowledge, globalTrends?.summary ? `【トレンド】: ${globalTrends.summary}` : ''].filter(Boolean).join('\n\n');
 
       const location = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
+      const otherChars = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id) && c.id !== charId);
 
       await generateCharacterResponseStream(currentChar, userMsg, isUnderground, context, geminiKey, depth, (chunk, meta) => {
         setMessages(prev => {
@@ -207,7 +217,8 @@ export default function App() {
           next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
           return next;
         });
-      }, location);
+        if (meta?.sentiment) setGlobalSentiment(meta.sentiment);
+      }, location, otherChars);
     } catch (e) { console.error(e); }
     setLoading(false);
   };
@@ -228,30 +239,71 @@ export default function App() {
   if (!isAppReady || !user) return <LandingPage user={user} onLoginComplete={setIsAppReady} />;
 
   const currentLocation = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
+  const ambient = AMBIENT_COLORS[globalSentiment] || AMBIENT_COLORS.neutral;
 
   return (
-    <div className="h-[100dvh] w-full overflow-hidden flex flex-col font-sans selection:bg-white/30"
-         style={{ backgroundColor: currentLocation?.color || '#000', backgroundImage: currentLocation?.pattern || 'none', backgroundSize: '40px 40px', color: '#fff' }}>
+    <div className={`h-[100dvh] w-full overflow-hidden flex flex-col font-sans selection:bg-white/30 relative
+                    ${isEventShaking ? 'spiritual-shake' : ''} 
+                    ${isMeltingDown ? 'ui-meltdown' : ''}`}
+         style={{ '--sentiment-accent': globalSentiment === 'neutral' ? 'rgba(255,255,255,0.02)' : `${ambient.color}44` }}>
+      
+      {/* Dynamic Background Layer */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            key={`${globalSentiment}-${selectedLocationId}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 3, ease: "easeInOut" }}
+            className="absolute inset-0"
+            style={{ 
+              backgroundColor: globalSentiment !== 'neutral' ? ambient.color : (currentLocation?.color || '#000'), 
+              backgroundImage: globalSentiment !== 'neutral' ? ambient.pattern : (currentLocation?.pattern || 'none'), 
+              backgroundSize: '40px 40px',
+            }}
+          />
+        </AnimatePresence>
+        {/* Persistent Overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20 opacity-60" />
+        
+        {/* Sentiment Glow Overlay */}
+        <AnimatePresence>
+          {globalSentiment !== 'neutral' && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.15 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{ 
+                backgroundColor: ambient.color,
+                filter: 'blur(100px)',
+              }}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+
       <AnimatePresence>
         {isDrawerOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden" />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-black/40 backdrop-blur-3xl border-r border-white/10 z-[70] p-6 overflow-y-auto md:hidden shadow-3xl">
-              <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab }} />
+              <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment }} />
               <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }} />
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab }} />
+      <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment }} />
       <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, validateGeminiApiKey, setIsAppReady }} />
 
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 flex overflow-hidden relative z-10">
         <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies }} />
         
         {/* Main Timeline View */}
-        <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark: async (i) => {}, globalTrends, setShowNotebookModal, futureSelfCritique, archives }} />
+        <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark: async (i) => {}, globalTrends, setShowNotebookModal, futureSelfCritique, archives, globalSentiment }} />
 
         {/* Manager Overlay (Map, Registry, Connect) */}
         <AnimatePresence>
@@ -281,7 +333,7 @@ export default function App() {
                     Close
                   </button>
                 </div>
-                <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }} />
+                <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, globalSentiment }} />
               </motion.div>
             </motion.div>
           ) : null}

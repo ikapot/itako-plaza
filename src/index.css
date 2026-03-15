@@ -10,6 +10,7 @@
   --itako-accent: #bd8a78;
   --itako-text: #ffffff;
   --itako-muted: #888888;
+  --sentiment-accent: rgba(255, 255, 255, 0.02);
   background-color: var(--itako-bg);
   color: var(--itako-text);
   letter-spacing: -0.01em;
@@ -63,6 +64,19 @@ body {
   border-radius: 10px;
 }
 
+.itako-scrollbar-thin::-webkit-scrollbar {
+  width: 2px;
+}
+
+.itako-scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.itako-scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
 .timeline-container {
   scroll-snap-type: x mandatory;
   display: flex !important;
@@ -110,14 +124,59 @@ body {
   /* Editorial Layouts */
   .editorial-grid {
     background-image: 
-      linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      linear-gradient(to right, var(--sentiment-accent) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--sentiment-accent) 1px, transparent 1px);
     background-size: 40px 40px;
+    transition: background-image 3s ease-in-out;
   }
 
   .glass-spectral {
     background: rgba(10, 10, 10, 0.6);
     backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Spiritual Glitch / Vibration */
+  .spiritual-glitch {
+    animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) infinite;
+  }
+
+  @keyframes glitch {
+    0% { transform: translate(0); text-shadow: none; filter: hue-rotate(0deg); }
+    20% { transform: translate(-2px, 2px); text-shadow: 2px 0 #f15a24, -2px 0 #00ffff; }
+    40% { transform: translate(-2px, -2px); text-shadow: -2px 0 #f15a24, 2px 0 #00ffff; filter: hue-rotate(90deg); }
+    60% { transform: translate(2px, 2px); text-shadow: 2px 0 #f15a24, -2px 0 #00ffff; }
+    80% { transform: translate(2px, -2px); text-shadow: -2px 0 #f15a24, 2px 0 #00ffff; filter: hue-rotate(-90deg); }
+    100% { transform: translate(0); }
+  }
+
+  .spiritual-shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+
+  .noise-erosion {
+    mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mask-size: 100px 100px;
+  }
+
+  .ui-meltdown {
+    animation: meltdown 0.2s steps(2) infinite;
+    filter: contrast(3) brightness(0.5) hue-rotate(45deg);
+  }
+
+  @keyframes meltdown {
+    0% { transform: translate(1px, 1px) rotate(0deg); opacity: 0.8;}
+    20% { transform: translate(-2px, -1px) rotate(-0.5deg); opacity: 1;}
+    40% { transform: translate(-3px, 0px) rotate(0.5deg); opacity: 0.7;}
+    60% { transform: translate(3px, 1px) rotate(-0.5deg); opacity: 0.9;}
+    80% { transform: translate(-1px, -1px) rotate(0.5deg); opacity: 0.8;}
+    100% { transform: translate(1px, 2px) rotate(0deg); opacity: 1;}
   }
 }

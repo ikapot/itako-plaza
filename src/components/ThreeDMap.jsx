@@ -100,16 +100,16 @@ const CharTile = React.memo(({ char, isSelected, isRolling, onToggle }) => {
       )}
 
       {/* Name */}
-      <span className={`text-[6px] font-oswald uppercase tracking-wide text-center leading-tight line-clamp-2
+      <span className={`text-[7.5px] md:text-[10px] font-oswald uppercase tracking-wide text-center leading-[1.1] line-clamp-2 px-0.5
         ${isSelected ? 'text-white font-black' : isMain ? 'text-white/60 group-hover:text-white/90' : 'text-white/25 group-hover:text-white/60'}`}>
         {char.name}
       </span>
 
       {/* DATA dot */}
-      {isMain && <span className="text-[4px] text-[#f15a24]/40 mt-0.5">◆</span>}
+      {isMain && <span className="text-[4px] mt-0.5" style={{ color: isSelected ? 'white' : '#f15a2499' }}>◆</span>}
 
       {/* Tooltip */}
-      <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm px-1.5 py-1 rounded text-[6px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-[300] text-center">
+      <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm px-1.5 py-1 rounded text-[7px] md:text-[9px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-[300] text-center">
         <div className="font-bold">{char.name}</div>
         <div className="text-white/50">{char.flavor}</div>
         <div className={`text-[5px] mt-0.5 ${isMain ? 'text-[#f15a24]/70' : 'text-white/30'}`}>
@@ -140,7 +140,7 @@ const LocTile = React.memo(({ loc, isSelected, isRolling, energy, onSelect }) =>
           className="absolute inset-[-4px] bg-white/5 blur-md rounded-full pointer-events-none"
         />
       ) : null}
-      <span className={`text-[7px] font-oswald uppercase tracking-wide text-center leading-tight
+      <span className={`text-[8px] md:text-[11px] font-oswald uppercase tracking-wide text-center leading-[1.1] px-0.5
         ${isSelected ? 'text-white font-black' : 'text-white/40 group-hover:text-white/70'}`}>
         {loc.name}
       </span>
@@ -149,7 +149,7 @@ const LocTile = React.memo(({ loc, isSelected, isRolling, energy, onSelect }) =>
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
       ) : null}
       {/* Tooltip */}
-      <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm px-1.5 py-1 rounded text-[6px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-[300] max-w-[110px] text-center leading-tight">
+      <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm px-1.5 py-1 rounded text-[7px] md:text-[9px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-[300] max-w-[110px] text-center leading-tight">
         {loc.description?.slice(0, 40)}
       </div>
     </div>
@@ -157,8 +157,87 @@ const LocTile = React.memo(({ loc, isSelected, isRolling, energy, onSelect }) =>
 });
 LocTile.displayName = 'LocTile';
 
+// ── Noise Overlay Component ──────────────────────────────────
+const NoiseOverlay = ({ intensity = 0.05, glitch = false }) => (
+  <div 
+    className={`absolute inset-0 pointer-events-none mix-blend-overlay ${glitch ? 'spiritual-glitch' : ''}`}
+    style={{ 
+      opacity: intensity,
+      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+      backgroundSize: '150px 150px'
+    }}
+  />
+);
+
+// ── Spiritual Connection Lines ────────────────────────────────
+const SpiritualLines = ({ selectedChars, cubeSize = 240 }) => {
+  const half = cubeSize / 2;
+  
+  const get3DPos = (char) => {
+    const r = Math.floor(char.pos / 3);
+    const c = char.pos % 3;
+    const x = (c - 1) * 80;
+    const y = (r - 1) * 80;
+    
+    switch (char.face) {
+      case 0: return { x, y, z: half };
+      case 1: return { x: -x, y, z: -half };
+      case 2: return { x: half, y, z: -x };
+      case 3: return { x: -half, y, z: x };
+      case 4: return { x, y: -half, z: -y };
+      case 5: return { x, y: half, z: y };
+      default: return { x: 0, y: 0, z: 0 };
+    }
+  };
+
+  const points = useMemo(() => selectedChars.map(get3DPos), [selectedChars]);
+  const connections = useMemo(() => {
+    const conn = [];
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        conn.push([points[i], points[j]]);
+      }
+    }
+    return conn;
+  }, [points]);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none" style={{ transformStyle: 'preserve-3d' }}>
+      {connections.map(([p1, p2], i) => {
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const dz = p2.z - p1.z;
+        const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        
+        return (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: [0, 0.4, 0], scaleX: 1 }}
+            transition={{ duration: 3, repeat: Infinity, delay: i * 0.5 }}
+            className="absolute origin-left h-[1px]"
+            style={{
+              left: '50%',
+              top: '50%',
+              width: `${dist}px`,
+              backgroundColor: 'rgba(241, 90, 36, 0.6)',
+              boxShadow: '0 0 10px rgba(241, 90, 36, 0.8)',
+              transformStyle: 'preserve-3d',
+              transform: `
+                translate3d(${p1.x}px, ${p1.y}px, ${p1.z}px)
+                rotateY(${Math.atan2(dx, dz) * 180 / Math.PI}deg)
+                rotateX(${Math.atan2(-dy, Math.sqrt(dx*dx + dz*dz)) * 180 / Math.PI}deg)
+              `,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
 // ── Cube component ───────────────────────────────────────────
-function Cube({ cubeRef, faceItems, renderTile, faceIdx, onJumpToFace, isRolling, faceLabels, accentColor }) {
+function Cube({ cubeRef, faceItems, renderTile, faceIdx, onJumpToFace, isRolling, faceLabels, accentColor, energy = 0, selectedChars = [] }) {
   return (
     <div className="relative h-[330px] flex items-center justify-center" style={{ perspective: '800px' }}>
       {/* Face nav (right side, hover to reveal) */}
@@ -168,7 +247,7 @@ function Cube({ cubeRef, faceItems, renderTile, faceIdx, onJumpToFace, isRolling
             key={label}
             onClick={() => !isRolling && onJumpToFace(idx)}
             disabled={isRolling}
-            className={`px-1.5 py-0.5 rounded border text-[5px] font-oswald tracking-wider uppercase transition-all
+            className={`px-1.5 py-0.5 rounded border text-[7px] md:text-[9px] font-oswald tracking-wider uppercase transition-all
               ${faceIdx === idx
                 ? `border-[${accentColor}]/60 bg-[${accentColor}]/20 text-white`
                 : 'border-white/10 bg-transparent text-white/30 hover:border-white/30 hover:text-white/70'}`}
@@ -187,12 +266,24 @@ function Cube({ cubeRef, faceItems, renderTile, faceIdx, onJumpToFace, isRolling
         {faceItems.map((items, fi) => (
           <div
             key={fi}
-            className="absolute grid grid-cols-3 grid-rows-3 gap-1"
-            style={{ width: `${CUBE_SIZE}px`, height: `${CUBE_SIZE}px`, ...FACE_STYLES[fi], transformStyle: 'preserve-3d' }}
+            className="absolute grid grid-cols-3 grid-rows-3 gap-1 overflow-hidden"
+            style={{ 
+              width: `${CUBE_SIZE}px`, 
+              height: `${CUBE_SIZE}px`, 
+              ...FACE_STYLES[fi], 
+              transformStyle: 'preserve-3d',
+              backgroundColor: 'rgba(5,5,5,0.8)',
+              border: `1px solid ${accentColor}22`
+            }}
           >
             {items.map(item => renderTile(item))}
+            <NoiseOverlay intensity={0.05 + (energy / 200)} glitch={energy > 50} />
           </div>
         ))}
+        {/* Connection lines for characters only */}
+        {accentColor === '#f15a24' && selectedChars.length > 1 && (
+          <SpiritualLines selectedChars={selectedChars} />
+        )}
       </div>
     </div>
   );
@@ -208,7 +299,18 @@ function ThreeDMap({
   characters,
   handleToggleChar,
   onSetChars,
+  globalSentiment = 'neutral',
 }) {
+  const sentimentAccents = {
+    neutral: '#f15a24',
+    serene: '#00ffff',
+    agitated: '#ff0000',
+    melancholic: '#4f46e5',
+    joyful: '#f59e0b',
+    chaotic: '#d946ef',
+  };
+  const accentColor = sentimentAccents[globalSentiment] || '#f15a24';
+
   const charCubeRef = useRef(null);
   const locCubeRef  = useRef(null);
   const charRot     = useRef({ x: 0, y: 0 });
@@ -340,7 +442,11 @@ function ThreeDMap({
           className={`relative px-7 py-2.5 rounded-full font-black font-oswald text-sm tracking-[0.2em] uppercase transition-all border-2 overflow-hidden
             ${isRolling
               ? 'border-white/15 text-white/25 cursor-not-allowed'
-              : 'border-white text-white hover:bg-white hover:text-black cursor-pointer shadow-[0_0_30px_rgba(255,255,255,0.2)]'}`}
+              : 'border-white text-white hover:bg-white hover:text-black cursor-pointer'}`}
+          style={{ 
+            boxShadow: !isRolling ? `0 0 30px ${accentColor}44` : 'none',
+            borderColor: !isRolling ? accentColor : 'rgba(255,255,255,0.15)'
+          }}
         >
           {/* Shimmer */}
           {!isRolling && (
@@ -362,8 +468,8 @@ function ThreeDMap({
         {/* Soul (Character) Dice */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-center gap-2 mb-1">
-            <span className="text-[8px] font-oswald uppercase tracking-widest text-[#f15a24]/70">🎭 Soul Dice</span>
-            <span className="text-[7px] text-white/25">{CHAR_THEME[charFaceIdx]}</span>
+            <span className="text-[9px] md:text-[11px] font-oswald uppercase tracking-widest" style={{ color: `${accentColor}99` }}>👤 Character Dice</span>
+            <span className="text-[8px] md:text-[10px] text-white/20">{CHAR_THEME[charFaceIdx]}</span>
             <span className="text-[7px] text-[#f15a24]/30">
               {(selectedCharIds?.length || 0)}/3 selected
             </span>
@@ -376,15 +482,17 @@ function ThreeDMap({
             onJumpToFace={jumpCharFace}
             isRolling={isRolling}
             faceLabels={FACE_LABELS}
-            accentColor="#f15a24"
+            accentColor={accentColor}
+            energy={selectedCharIds.length * 15}
+            selectedChars={selectedChars}
           />
         </div>
 
         {/* Location Dice */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-center gap-2 mb-1">
-            <span className="text-[8px] font-oswald uppercase tracking-widest text-white/50">📍 Location Dice</span>
-            <span className="text-[7px] text-white/25">{LOC_THEME[locFaceIdx]}</span>
+            <span className="text-[9px] md:text-[11px] font-oswald uppercase tracking-widest text-white/50">📍 Location Dice</span>
+            <span className="text-[8px] md:text-[10px] text-white/25">{LOC_THEME[locFaceIdx]}</span>
           </div>
           <Cube
             cubeRef={locCubeRef}
@@ -395,34 +503,35 @@ function ThreeDMap({
             isRolling={isRolling}
             faceLabels={FACE_LABELS}
             accentColor="#ffffff"
+            energy={locationEnergies[selectedLocationId] || 10}
           />
         </div>
       </div>
 
       {/* ─── Selection Summary ───────────────────────── */}
-      <div className="mx-0.5 py-2 px-3 bg-white/5 border border-white/10 rounded-xl">
-        <div className="flex flex-wrap gap-1.5 items-center">
-          <span className="text-[7px] text-white/30 uppercase tracking-widest font-oswald shrink-0">召喚：</span>
+      <div className="mx-0.5 py-3 px-4 bg-white/5 border border-white/10 rounded-xl">
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-[9px] md:text-[11px] text-white/30 uppercase tracking-widest font-oswald shrink-0">召喚：</span>
 
           {selectedChars.length > 0
             ? selectedChars.map(c => (
               <span
                 key={c.id}
-                className={`text-[8px] px-2 py-0.5 rounded border transition-all
+                className={`text-[9px] md:text-[11px] px-2.5 py-1 rounded border transition-all font-bold
                   ${c.isMainChar
-                    ? 'text-[#f15a24]/90 bg-[#f15a24]/10 border-[#f15a24]/25'
-                    : 'text-white/60 bg-white/5 border-white/10'}`}
+                    ? 'text-[#f15a24] bg-[#f15a24]/10 border-[#f15a24]/30'
+                    : 'text-white/80 bg-white/5 border-white/10'}`}
               >
                 {c.name}
               </span>
             ))
-            : <span className="text-[8px] text-white/15 italic">未選択（最大3人）</span>
+            : <span className="text-[9px] md:text-[11px] text-white/15 italic">未選択（最大3人）</span>
           }
 
           {selectedLoc && (
             <>
-              <span className="text-[8px] text-white/20 mx-0.5">@</span>
-              <span className="text-[8px] text-white/70 bg-white/10 border border-white/20 px-2 py-0.5 rounded">
+              <span className="text-[9px] md:text-[11px] text-white/20 mx-0.5">@</span>
+              <span className="text-[9px] md:text-[11px] text-white bg-white/10 border border-white/30 px-2.5 py-1 rounded font-bold">
                 {selectedLoc.name}
               </span>
             </>

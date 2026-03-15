@@ -27,7 +27,7 @@ export const INITIAL_CHARACTERS = [
 
   // ── Face 2: 女性の先駆者 ─────────────────────────────────────────────
   { id: 'raicho', face: 2, pos: 0, name: '平塚らいてう', role: '思想家', homeLocationId: 'shrine', flavor: '太陽', color: 'bg-orange-900/50', isMainChar: true, description: '青踏社主宰。元始、女性は太陽であったと宣言した、内なる光を放つ霊。', avatar: 'assets/raicho_warhol.webp', isPreStyled: true },
-  { id: 'ichikawa', face: 2, pos: 1, name: '市川房枝', role: '政治家', homeLocationId: 'office', flavor: '厳格', color: 'bg-itako-sage', isMainChar: true, description: '婦人運動家、参議院議員。政治の浄化と有権者の啓発を厳格に説き続ける。', avatar: null },
+  { id: 'ichikawa', face: 2, pos: 1, name: '市川房枝', role: '政治家', homeLocationId: 'office', flavor: '厳格', color: 'bg-itako-sage', isMainChar: true, description: '婦人運動家、参議院議員。政治の浄化と有権者の啓発を厳格に説き続ける目標。', avatar: 'assets/ichikawa_warhol.webp', isPreStyled: true },
   { id: 'nora', face: 2, pos: 2, name: 'ノラ', role: '人形の家の脱出者', homeLocationId: 'door', flavor: '自立', color: 'bg-itako-sand', description: 'イプセンの戯曲が産んだ女性解放のシンボル。扉を閉めた音は今も響く。', avatar: null },
   { id: 'curie', face: 2, pos: 3, name: 'マリー・キュリー', role: '科学者', homeLocationId: 'lighthouse', flavor: '放射線', color: 'bg-itako-sage', description: '放射性元素を発見し、科学の聖域に女性として踏み込んだ。体は蝕まれていた。', avatar: null },
   { id: 'woolf', face: 2, pos: 4, name: 'ヴァージニア・ウルフ', role: '意識の流れ作家', homeLocationId: 'lake', flavor: '波', color: 'bg-blue-950/60', description: '自分だけの部屋を持つことを訴え、川の中に消えた作家。', avatar: null },
@@ -128,3 +128,12 @@ export const INITIAL_LOCATIONS = [
   { id: 'piano', name: '廃ピアノの間', face: 4, pos: 9, tags: ['quiet'], description: '鍵盤に指が触れると、存在しないはずの音が鳴る。', color: '#0a0505', pattern: 'repeating-linear-gradient(90deg, #111, #000 2px)' },
   { id: 'office', name: '執務室', face: 0, pos: 9, tags: ['quiet'], description: '永遠に片付かない書類の山。誰かの志が積み重なっている。', color: '#111520', pattern: 'none' },
 ];
+
+export const AMBIENT_COLORS = {
+  neutral: { color: '#000000', pattern: 'radial-gradient(circle, #111 2px, transparent 2px)' },
+  serene: { color: '#051515', pattern: 'radial-gradient(circle at 50% 50%, #0a2a2a 0%, #000 80%)' },
+  agitated: { color: '#1a0505', pattern: 'radial-gradient(ellipse at center, #300 0%, transparent 70%)' },
+  melancholic: { color: '#0a0a15', pattern: 'linear-gradient(to bottom, #1a2a3a 1px, transparent 1px)' },
+  joyful: { color: '#1a1505', pattern: 'radial-gradient(circle, #2a2005 2px, transparent 2px)' },
+  chaotic: { color: '#0f0515', pattern: 'repeating-linear-gradient(45deg, #102 0, #102 1px, transparent 0, transparent 20px)' },
+};

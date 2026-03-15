@@ -4,6 +4,46 @@ import { Cpu, Loader2 } from 'lucide-react';
 import SpiritCard from './SpiritCard';
 import WarholAvatar from './WarholAvatar';
 
+const DialogueEcho = React.memo(({ messages, accentColor }) => {
+    const echos = useMemo(() => {
+        // 最近の過去メッセージから10個抽出
+        return messages.slice(0, -1).slice(-15).map((m, i) => ({
+            id: i,
+            text: m.content.slice(0, 40) + (m.content.length > 40 ? '...' : ''),
+            x: 10 + Math.random() * 80,
+            y: 20 + Math.random() * 60,
+            duration: 20 + Math.random() * 40,
+            delay: Math.random() * 10,
+        }));
+    }, [messages]);
+
+    return (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none">
+            {echos.map(e => (
+                <motion.div
+                    key={e.id}
+                    initial={{ opacity: 0, y: 100 }}
+                    animate={{ 
+                        opacity: [0, 0.15, 0],
+                        y: [-100, -300],
+                        scale: [0.9, 1.1]
+                    }}
+                    transition={{ 
+                        duration: e.duration, 
+                        repeat: Infinity, 
+                        delay: e.delay,
+                        ease: "linear"
+                    }}
+                    className="absolute text-[8px] md:text-[10px] font-serif italic tracking-widest whitespace-nowrap"
+                    style={{ left: `${e.x}%`, top: `${e.y}%`, color: accentColor }}
+                >
+                    {e.text}
+                </motion.div>
+            ))}
+        </div>
+    );
+});
+
 const Timeline = React.memo(({
     scrollRef,
     handleScroll,
@@ -20,7 +60,18 @@ const Timeline = React.memo(({
     setShowNotebookModal,
     futureSelfCritique,
     archives,
+    globalSentiment = 'neutral',
 }) => {
+    const sentimentAccents = {
+        neutral: 'rgba(255,255,255,0.4)',
+        serene: 'rgba(0,255,255,0.4)',
+        agitated: 'rgba(255,0,0,0.4)',
+        melancholic: 'rgba(79,70,229,0.4)',
+        joyful: 'rgba(245,158,11,0.4)',
+        chaotic: 'rgba(217,70,239,0.4)',
+    };
+    const accentColor = sentimentAccents[globalSentiment] || sentimentAccents.neutral;
+
     // Create a map for O(1) character lookups
     const charMap = useMemo(() => {
         return characters.reduce((acc, char) => {
@@ -35,8 +86,9 @@ const Timeline = React.memo(({
             onScroll={handleScroll}
             className="timeline-container flex-1 itako-scrollbar"
         >
+            <DialogueEcho messages={messages} accentColor={accentColor} />
             {/* Slot 1: News */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black editorial-grid">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms]">
                 <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
@@ -92,7 +144,7 @@ const Timeline = React.memo(({
             </section>
 
             {/* Slot 2: Main Dialog */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-black editorial-grid">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms]">
                 <div className="max-w-2xl mx-auto min-h-full flex flex-col">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
@@ -179,7 +231,7 @@ const Timeline = React.memo(({
             </section>
 
             {/* Slot 3: Trends */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black editorial-grid">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms]">
                 <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}

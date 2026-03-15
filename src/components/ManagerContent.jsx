@@ -28,6 +28,7 @@ const ManagerContent = React.memo(({
     isValidatingApi,
     apiConnectionStatus,
     handleValidateApi,
+    globalSentiment,
 }) => {
     return (
         <div className="space-y-12">
@@ -50,6 +51,7 @@ const ManagerContent = React.memo(({
                             characters={characters}
                             handleToggleChar={handleToggleChar}
                             onSetChars={handleSetChars}
+                            globalSentiment={globalSentiment}
                         />
                     </motion.div>
                 ) : null}

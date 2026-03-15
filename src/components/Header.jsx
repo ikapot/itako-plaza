@@ -8,7 +8,8 @@ export default function Header({
     activeSlot,
     onSlotClick,
     activeManagerTab,
-    setActiveManagerTab
+    setActiveManagerTab,
+    globalSentiment = 'neutral'
 }) {
     const navItems = [
         { id: 0, icon: <TrendingUp size={20} />, color: '#98a436', label: 'News' },
@@ -31,8 +32,23 @@ export default function Header({
                 >
                     <Menu size={26} strokeWidth={2.5} />
                 </button>
-                <div className="hidden lg:block">
+                <div className="hidden lg:flex items-center gap-4">
                     <Logo />
+                    {globalSentiment !== 'neutral' && (
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="px-3 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-2"
+                        >
+                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" 
+                                 style={{ backgroundColor: globalSentiment === 'serene' ? '#00ffff' : 
+                                                          globalSentiment === 'agitated' ? '#ff0000' :
+                                                          globalSentiment === 'melancholic' ? '#4f46e5' :
+                                                          globalSentiment === 'joyful' ? '#f59e0b' :
+                                                          globalSentiment === 'chaotic' ? '#d946ef' : '#fff' }} />
+                            <span className="text-[8px] font-black tracking-[0.2em] uppercase text-white/40 font-oswald">{globalSentiment}</span>
+                        </motion.div>
+                    )}
                 </div>
             </div>
 
