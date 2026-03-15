@@ -36,7 +36,7 @@ const Timeline = React.memo(({
             className="timeline-container flex-1 itako-scrollbar"
         >
             {/* Slot 1: News */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black editorial-grid">
                 <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
@@ -92,7 +92,7 @@ const Timeline = React.memo(({
             </section>
 
             {/* Slot 2: Main Dialog */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-black">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-black editorial-grid">
                 <div className="max-w-2xl mx-auto min-h-full flex flex-col">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
@@ -180,7 +180,7 @@ const Timeline = React.memo(({
             </section>
 
             {/* Slot 3: Trends */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black editorial-grid">
                 <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}

@@ -16,58 +16,65 @@ const DashboardSidebar = React.memo(({
     locationEnergies,
 }) => {
     return (
-        <div className="hidden md:flex flex-col gap-4 z-[110] absolute top-1/2 -translate-y-1/2 left-0 pl-6 pointer-events-none items-start">
+        <div className="hidden md:flex flex-col gap-3 z-[110] absolute top-1/2 -translate-y-1/2 left-0 pl-6 pointer-events-none items-start">
             {/* 1. Account & Gear */}
             <motion.div
-                initial={{ width: 64, height: 64 }}
-                whileHover={{ width: 360 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="pointer-events-auto flex flex-col bg-[#050505]/80 backdrop-blur-3xl border border-white/10 rounded-[32px] overflow-hidden group/item shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="pointer-events-auto flex flex-col glass-spectral rounded-3xl overflow-hidden group/item shadow-2xl border-white/5"
             >
-                <div className="flex items-center gap-4 p-2 w-[340px] h-[64px] box-border">
-                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 shrink-0 group-hover/item:bg-white/10 transition-colors">
-                        <User size={18} className="text-white/40 group-hover/item:text-white" />
+                <div className="flex items-center gap-4 p-3 pr-6">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 shrink-0 group-hover/item:border-white/30 transition-all">
+                        <User size={16} className="text-white/40 group-hover/item:text-white" />
                     </div>
-                    <div className="flex-1 flex items-center justify-between opacity-0 group-hover/item:opacity-100 transition-all duration-300 pr-4">
-                        <div className="flex flex-col">
-                            <input
-                                type="text"
-                                value={userName}
-                                onChange={(e) => setUserName(e.target.value)}
-                                className="bg-transparent border-none text-sm font-bold tracking-tight text-white focus:ring-0 p-0 w-32"
-                                placeholder="Account Name..."
-                            />
-                            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em] font-oswald text-left">Participant ID</span>
-                        </div>
-                        <button
-                            onClick={() => setShowSettings(true)}
-                            className="p-3 text-white/20 hover:text-white transform hover:rotate-90 transition-all duration-500 cursor-pointer"
-                        >
-                            <Settings size={20} />
-                        </button>
+                    <div className="flex flex-col">
+                        <input
+                            type="text"
+                            value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
+                            className="bg-transparent border-none text-xs font-black tracking-widest text-white/90 focus:ring-0 p-0 w-24 uppercase font-oswald"
+                            placeholder="VOID..."
+                        />
+                        <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.4em] font-oswald text-left">Entity ID</span>
                     </div>
+                    <button
+                        onClick={() => setShowSettings(true)}
+                        className="p-1.5 text-white/10 hover:text-[#bd8a78] transition-colors cursor-pointer ml-2"
+                    >
+                        <Settings size={14} />
+                    </button>
                 </div>
             </motion.div>
 
-            {/* Remaining sections removed to consolidate at the top via Header tabs */}
-
-            {/* 4. Connection Status */}
-            <motion.div
-                initial={{ width: 64, height: 64 }}
-                whileHover={{ width: 280 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="pointer-events-auto flex flex-col bg-[#050505]/80 backdrop-blur-3xl border border-white/10 rounded-[32px] overflow-hidden group/item shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
-            >
-                <div className="w-[280px] flex items-center gap-4 p-2 h-[64px] box-border">
-                    <div className="w-12 h-12 rounded-full bg-transparent flex flex-col items-center justify-center shrink-0 group-hover/item:bg-white/5 transition-colors">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    </div>
-                    <div className="flex flex-col opacity-0 group-hover/item:opacity-100 transition-all duration-300">
-                        <span className="text-[10px] font-bold text-white/80 tracking-widest uppercase mb-1 whitespace-nowrap">System Online</span>
-                        <span className="text-[8px] text-white/40 tracking-[0.2em] uppercase font-oswald whitespace-nowrap">Secure Connection</span>
-                    </div>
+            {/* 2. Ritual Pulse */}
+            <div className="pointer-events-auto glass-spectral rounded-2xl p-3 flex flex-col gap-2 border-white/5">
+                <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
+                    <span className="text-[8px] font-black text-white/40 tracking-[0.3em] uppercase font-oswald italic">Ritual Stability: 98%</span>
                 </div>
-            </motion.div>
+                <div className="w-32 h-[1px] bg-white/5 relative overflow-hidden">
+                    <motion.div 
+                        animate={{ x: ['-100%', '100%'] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent" 
+                    />
+                </div>
+            </div>
+
+            {/* 3. Soul Echo Frequency */}
+            <div className="pointer-events-auto glass-spectral rounded-2xl p-3 flex flex-col gap-1 border-white/5">
+                <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.5em] font-oswald">Echo Frequency</span>
+                <div className="flex items-end gap-0.5 h-4">
+                    {[0.3, 0.7, 0.4, 0.8, 0.5, 0.9, 0.6].map((h, i) => (
+                        <motion.div 
+                            key={i}
+                            animate={{ height: [`${h * 100}%`, `${(1-h) * 100}%`, `${h * 100}%`] }}
+                            transition={{ duration: 1 + Math.random(), repeat: Infinity }}
+                            className="w-[3px] bg-white/10 rounded-full"
+                        />
+                    ))}
+                </div>
+            </div>
         </div>
     );
 });
