@@ -6,12 +6,20 @@ export default function Header({
     openDrawer,
     openSettings,
     activeSlot,
-    onSlotClick
+    onSlotClick,
+    activeManagerTab,
+    setActiveManagerTab
 }) {
     const navItems = [
         { id: 0, icon: <TrendingUp size={20} />, color: '#98a436', label: 'News' },
         { id: 1, icon: <MessageSquare size={20} />, color: '#fdb913', label: 'Dialog' },
         { id: 2, icon: <Ghost size={20} />, color: '#f15a24', label: 'Trends' },
+    ];
+
+    const modeTabs = [
+        { id: 'map', icon: <Globe size={14} />, label: 'Map', color: '#fdb913' },
+        { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
+        { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
     ];
 
     return (
@@ -23,7 +31,31 @@ export default function Header({
                 >
                     <Menu size={26} strokeWidth={2.5} />
                 </button>
-                <Logo />
+                <div className="hidden lg:block">
+                    <Logo />
+                </div>
+            </div>
+
+            {/* NEW: Mode Tabs in Header Center */}
+            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 scale-90 sm:scale-100">
+                {modeTabs.map(tab => {
+                    const isActive = activeManagerTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveManagerTab(tab.id)}
+                            style={{
+                                backgroundColor: isActive ? tab.color : 'transparent',
+                                color: isActive ? '#000' : 'rgba(255,255,255,0.3)',
+                                boxShadow: isActive ? `0 4px 15px ${tab.color}44` : 'none'
+                            }}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase transition-all duration-300 active:scale-95 border ${isActive ? 'border-white/20' : 'border-transparent'}`}
+                        >
+                            {tab.icon}
+                            <span className="hidden sm:inline">{tab.label}</span>
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Timeline Buttons moved to Header */}
