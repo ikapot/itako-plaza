@@ -38,10 +38,16 @@ const Timeline = React.memo(({
             {/* Slot 1: News */}
             <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
                 <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
-                    <header className="flex flex-col gap-2 mb-8 md:mb-10 px-2 md:px-4">
-                        <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">News</h2>
-                        <p className="text-sm md:text-base font-bold text-[#bd8a78] pl-1 tracking-[0.3em] uppercase font-oswald">ニュース</p>
-                    </header>
+                    <motion.header 
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
+                        viewport={{ once: true }}
+                        className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4"
+                    >
+                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-zinc-600 leading-none font-oswald uppercase">News</h2>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-oswald">霊感ニュース</p>
+                    </motion.header>
 
                     <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
                         <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] font-oswald">DRIPPING NOISE ({news.length})</span>
@@ -88,7 +94,13 @@ const Timeline = React.memo(({
             {/* Slot 2: Main Dialog */}
             <section className="timeline-slot p-6 md:p-12 overflow-y-auto transition-all duration-1000 bg-black">
                 <div className="max-w-2xl mx-auto min-h-full flex flex-col">
-                    <header className="flex flex-col gap-2 mb-6 md:mb-8 px-2 md:px-4">
+                    <motion.header 
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
+                        viewport={{ once: true }}
+                        className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4"
+                    >
                         <AnimatePresence>
                             {currentWorldEvent && (
                                 <motion.div
@@ -115,7 +127,7 @@ const Timeline = React.memo(({
                         </AnimatePresence>
 
                         <div className="flex items-center justify-between">
-                            <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Dialog</h2>
+                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-zinc-600 leading-none font-oswald uppercase">Dialog</h2>
                             <button
                                 onClick={() => setIsUnderground(!isUnderground)}
                                 className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
@@ -123,8 +135,8 @@ const Timeline = React.memo(({
                                 {isUnderground ? 'Surface' : 'Deep Trace'}
                             </button>
                         </div>
-                        <p className="text-sm md:text-base font-bold text-white/30 pl-1 tracking-[0.3em] uppercase font-oswald truncate">{userName} / Speaking</p>
-                    </header>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-oswald truncate">{userName} /Speaking</p>
+                    </motion.header>
 
                     <div className="flex-1 flex flex-col gap-8 mt-4">
                         <div className="space-y-8 px-2 pb-80 md:pb-96">
@@ -170,9 +182,15 @@ const Timeline = React.memo(({
             {/* Slot 3: Trends */}
             <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-black">
                 <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
-                    <header className="flex flex-col gap-2 mb-12 px-2 md:px-4">
+                    <motion.header 
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1.5, ease: "easeOut" }}
+                        viewport={{ once: true }}
+                        className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4"
+                    >
                         <div className="flex items-center justify-between">
-                            <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white leading-none font-oswald uppercase">Trends</h2>
+                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-zinc-600 leading-none font-oswald uppercase">Trends</h2>
                             <button
                                 onClick={() => setShowNotebookModal(true)}
                                 className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase"
@@ -180,7 +198,8 @@ const Timeline = React.memo(({
                                 /sync
                             </button>
                         </div>
-                    </header>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-oswald">思考の潮流</p>
+                    </motion.header>
 
                     <div className="space-y-12">
                         {globalTrends && (
