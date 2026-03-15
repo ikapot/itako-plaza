@@ -104,6 +104,18 @@ const CHARACTER_CONFIGS = {
 【口調】
 「〜だ」「〜ではないか」といった、虚飾を削ぎ落とした、力強くも乾いた口調。恩赦や情けを嫌います。`,
         generationConfig: { temperature: 0.85, topP: 0.9, topK: 50 }
+    },
+    rand: {
+        systemPrompt: `あなたはアイン・ランドです。客観主義（オブジェクティビズム）の提唱者であり、合理的な利己心の美徳を説きます。
+【核心となる思想】
+「AはAである」。客観的事実と理性のみを信じ、集団主義、利他的犠牲、公的援助などを「魂の寄生」として激しく侮蔑します。人間が生存するための唯一の道具は理性であり、自己の幸福を追求することこそが最高の道徳的目的であると断じます。
+【トーン・身体性】
+揺るぎない確信。他者の「感情的な訴え」や「弱さの肯定」を冷徹な論理で切り捨てます。
+【キーワード】
+客観主義、合理的利己心、非犠牲、創造的個人、寄生者、AはAである。
+【口調】
+「それは非合理的です」「私は認めません」など、断定的かつ峻烈な口調。相手の甘え（特に集団への依存）を決して許しません。`,
+        generationConfig: { temperature: 0.4, topP: 0.8, topK: 40 }
     }
 };
 
@@ -359,4 +371,98 @@ ${notebookText.substring(0, 3000)}
         }
     }
     return null;
+};
+
+/**
+ * 世界事変 (World Event) を生成する
+ */
+export const generateWorldEvent = async (userApiKey, globalTrends) => {
+    if (!userApiKey) return null;
+    const keys = userApiKey.split(',').map(k => k.trim()).filter(k => k);
+    
+    const trendsContext = globalTrends ? `現在の流行・思考の重力: ${globalTrends.summary}` : "";
+    const prompt = `
+あなたは世界の「揺らぎ」を観測する存在です。
+現代社会、歴史、あるいはこの思想的空間において発生した、住人たちを揺さぶる「世界事変」を1つ生成してください。
+
+テーマ候補: [war (戦争/紛争), earthquake (地震/天変地異), economic (金融崩壊/ハイパーインフレ), thought (思想の流行/パンデミック)]
+${trendsContext}
+
+以下のJSON形式で出力してください：
+{
+  "type": "war | earthquake | economic | thought",
+  "content": "事変の内容を100文字以内の不穏で詩的な文章で（例：かつて見た光景が、再び、より暴力的な形となって現れた。価値は紙屑となり、言葉だけが重さを増している。）"
+}
+`;
+
+    for (const k of keys) {
+        for (const m of FALLBACK_MODELS) {
+            try {
+                const genAI = new GoogleGenerativeAI(k);
+                const model = genAI.getGenerativeModel({ model: m });
+                const result = await model.generateContent(prompt);
+                const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
+                return JSON.parse(jsonStr);
+            } catch { continue; }
+        }
+    }
+    return null;
+};
+
+/**
+ * 場所、キャラクター、世界事変を組み合わせた多層対話を生成する
+ */
+export const generateLocationDialogueWithEvent = async (userApiKey, selectedChars, loc, event, spiritSharedKnowledge) => {
+    if (!userApiKey || selectedChars.length < 1) return [];
+    const keys = userApiKey.split(',').map(k => k.trim()).filter(k => k);
+
+    const charDescriptions = selectedChars.map(c => {
+        const config = CHARACTER_CONFIGS[c.id] || { systemPrompt: "" };
+        return `${c.name}: ${config.systemPrompt}`;
+    }).join('\n');
+
+    const eventContext = event ? `【現在発生中の世界事変】: [${event.type}] ${event.content}` : "【特筆すべき事変なし】";
+    const locTags = loc.tags ? ` (属性: ${loc.tags.join(', ')})` : "";
+
+    const prompt = `
+あなたは文学的で不穏な世界の「口寄せ」です。
+以下の状況に基づき、選択されたキャラクターたちによる濃密な対話を生成してください。
+
+場所: "${loc.name}"${locTags}
+説明: ${loc.description}
+${eventContext}
+共有された知識/文脈: ${spiritSharedKnowledge.substring(0, 1000)}
+
+【登場人物】
+${charDescriptions}
+
+【指示】
+- キャラクター同士が互いの存在を認識し、この「場所」と「事変」についてそれぞれの思想的立場から言葉を交わしてください。
+- 3〜6往復程度の対話にしてください。
+- 翻訳文学のような、抽象的で魂を削り合うようなトーンを維持してください。
+- 出力は必ず以下の形式のJSON配列のみを返してください：
+[
+  {"charId": "キャラクターID", "content": "発言内容"},
+  ...
+]
+`;
+
+    for (const k of keys) {
+        for (const m of FALLBACK_MODELS) {
+            try {
+                const genAI = new GoogleGenerativeAI(k);
+                const model = genAI.getGenerativeModel({ 
+                    model: m,
+                    generationConfig: { temperature: 0.8 }
+                });
+                const result = await model.generateContent(prompt);
+                const text = result.response.text().replace(/```json|```/g, "").trim();
+                return JSON.parse(text);
+            } catch (e) { 
+                console.error("Location Dialogue Error:", e);
+                continue; 
+            }
+        }
+    }
+    return [];
 };

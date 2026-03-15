@@ -9,12 +9,37 @@ const CubeMap = ({ locations, selectedLocationId, onSelectLocation, locationEner
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   
-  // Spring for smooth rotation
-  const springX = useSpring(x, { stiffness: 60, damping: 20 });
-  const springY = useSpring(y, { stiffness: 60, damping: 20 });
+  // Spring for smooth rotation - slowed down for weightiness
+  const springX = useSpring(x, { stiffness: 40, damping: 25 });
+  const springY = useSpring(y, { stiffness: 40, damping: 25 });
   
-  const rotateX = useTransform(springY, val => val * 0.5);
-  const rotateY = useTransform(springX, val => val * 0.5);
+  const rotateX = useTransform(springY, val => val);
+  const rotateY = useTransform(springX, val => val);
+
+  // Auto-rotate when location changes
+  useEffect(() => {
+    const selectedLoc = locations.find(l => l.id === selectedLocationId);
+    if (selectedLoc && !isDragging) {
+      // Face mapping: [x, y] in degrees
+      const faceRotations = [
+        [0, 0],      // Front (Face 0)
+        [0, 180],    // Back (Face 1)
+        [0, -90],    // Right (Face 2)
+        [0, 90],     // Left (Face 3)
+        [-90, 0],    // Top (Face 4)
+        [90, 0],     // Bottom (Face 5)
+      ];
+      const [targetX, targetY] = faceRotations[selectedLoc.face];
+      
+      // Calculate minimal jump
+      const currentX = x.get();
+      const currentY = y.get();
+
+      // Simple set for now, but we could do wrapping logic
+      x.set(targetY);
+      y.set(targetX);
+    }
+  }, [selectedLocationId, locations]);
 
   const handlePointerDown = (e) => {
     setIsDragging(true);
@@ -23,8 +48,9 @@ const CubeMap = ({ locations, selectedLocationId, onSelectLocation, locationEner
 
   const handlePointerMove = (e) => {
     if (!isDragging) return;
-    x.set(x.get() + e.movementX);
-    y.set(y.get() - e.movementY);
+    // Scale movement to degrees
+    x.set(x.get() + e.movementX * 0.5);
+    y.set(y.get() - e.movementY * 0.5);
   };
 
   const handlePointerUp = () => {
