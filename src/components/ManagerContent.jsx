@@ -26,7 +26,7 @@ const ManagerContent = React.memo(({
         <div className="space-y-12">
 
             <AnimatePresence mode="wait">
-                {activeManagerTab === 'map' && (
+                {activeManagerTab === 'map' ? (
                     <motion.div
                         key="map"
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -45,9 +45,9 @@ const ManagerContent = React.memo(({
                             onSetChars={handleSetChars}
                         />
                     </motion.div>
-                )}
+                ) : null}
 
-                {activeManagerTab === 'directory' && (
+                {activeManagerTab === 'directory' ? (
                     <motion.div
                         key="directory"
                         initial={{ opacity: 0, y: 10 }}
@@ -69,14 +69,14 @@ const ManagerContent = React.memo(({
                                     `}
                                 >
                                     {/* Selection Glow Background */}
-                                    {isSelected && (
+                                    {isSelected ? (
                                         <motion.div 
                                             layoutId={`char-glow-${c.id}`}
                                             className="absolute inset-0 bg-white/5 blur-2xl pointer-events-none"
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                         />
-                                    )}
+                                    ) : null}
 
                                     <div onClick={(e) => { e.stopPropagation(); setEnlargedCharId(c.id); }} className="relative z-10 cursor-zoom-in">
                                         <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" isPreStyled={c.isPreStyled} />
@@ -97,9 +97,9 @@ const ManagerContent = React.memo(({
                             );
                         })}
                     </motion.div>
-                )}
+                ) : null}
 
-                {activeManagerTab === 'connect' && (
+                {activeManagerTab === 'connect' ? (
                     <motion.div
                         key="connect"
                         initial={{ opacity: 0, y: 10 }}
@@ -140,14 +140,14 @@ const ManagerContent = React.memo(({
                             >
                                 {isValidatingApi ? 'Validating...' : apiConnectionStatus === 'error' ? 'Retry Connection' : '接続する (Connect)'}
                             </button>
-                            {apiConnectionStatus === 'error' && (
+                            {apiConnectionStatus === 'error' ? (
                                 <p className="text-[8px] font-bold text-red-500 uppercase tracking-widest text-center animate-pulse">
                                     Invalid API Key or Limit Exceeded.
                                 </p>
-                            )}
+                            ) : null}
                         </div>
                     </motion.div>
-                )}
+                ) : null}
             </AnimatePresence>
         </div>
     );

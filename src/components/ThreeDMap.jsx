@@ -55,27 +55,39 @@ function rollToFace(cubeRef, rotRef, faceIdx, duration, onComplete) {
   });
 }
 
+// ── Helper: Get Tile Styles ──
+function getCharTileStyle(isSelected, isMain) {
+  const base = "relative cursor-pointer group transition-all duration-300 flex flex-col items-center justify-center p-0.5 overflow-hidden rounded-sm";
+  
+  if (isSelected) {
+    return `${base} border-2 border-white/90 bg-white/15 shadow-[0_0_15px_rgba(255,255,255,0.35)] scale-105 z-10`;
+  }
+  
+  if (isMain) {
+    return `${base} border border-[#f15a24]/40 hover:border-[#f15a24]/80 hover:bg-[#f15a24]/5`;
+  }
+  
+  return `${base} border border-white/8 hover:border-white/25 hover:bg-white/5 opacity-40 hover:opacity-80`;
+}
+
 // ── CharTile ────────────────────────────────────────────────
 const CharTile = React.memo(({ char, isSelected, isRolling, onToggle }) => {
   const isMain = !!char.isMainChar;
+  const tileStyle = getCharTileStyle(isSelected, isMain);
+
   return (
     <div
       onClick={() => !isRolling && onToggle(char.id)}
-      className={`relative cursor-pointer group transition-all duration-300 flex flex-col items-center justify-center p-0.5 overflow-hidden rounded-sm
-        ${isSelected
-          ? 'border-2 border-white/90 bg-white/15 shadow-[0_0_15px_rgba(255,255,255,0.35)] scale-105 z-10'
-          : isMain
-            ? 'border border-[#f15a24]/40 hover:border-[#f15a24]/80 hover:bg-[#f15a24]/5'
-            : 'border border-white/8 hover:border-white/25 hover:bg-white/5 opacity-40 hover:opacity-80'}`}
+      className={tileStyle}
     >
       {/* Main char pulse */}
-      {isMain && !isSelected && (
+      {isMain && !isSelected ? (
         <motion.div
           animate={{ opacity: [0.15, 0.5, 0.15] }}
           transition={{ duration: 2.5, repeat: Infinity }}
           className="absolute inset-0 border border-[#f15a24]/25 rounded-sm pointer-events-none"
         />
-      )}
+      ) : null}
 
       {/* Avatar / initial */}
       {char.avatar ? (
@@ -110,35 +122,39 @@ const CharTile = React.memo(({ char, isSelected, isRolling, onToggle }) => {
 CharTile.displayName = 'CharTile';
 
 // ── LocTile ──────────────────────────────────────────────────
-const LocTile = React.memo(({ loc, isSelected, isRolling, energy, onSelect }) => (
-  <div
-    onClick={() => !isRolling && onSelect(loc.id)}
-    className={`relative cursor-pointer group border transition-all duration-300 flex flex-col items-center justify-center p-0.5 overflow-hidden
-      ${isSelected
-        ? 'border-white/80 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-105 z-10'
-        : 'border-white/10 hover:border-white/40 hover:bg-white/5'}`}
-  >
-    {energy > 30 && (
-      <motion.div
-        animate={{ opacity: [0.05, 0.25, 0.05] }}
-        transition={{ duration: 3, repeat: Infinity }}
-        className="absolute inset-[-4px] bg-white/5 blur-md rounded-full pointer-events-none"
-      />
-    )}
-    <span className={`text-[7px] font-oswald uppercase tracking-wide text-center leading-tight
-      ${isSelected ? 'text-white font-black' : 'text-white/40 group-hover:text-white/70'}`}>
-      {loc.name}
-    </span>
-    {isSelected && (
-      <motion.div layoutId="loc-glow" className="absolute inset-0 bg-white/10 blur-xl pointer-events-none"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
-    )}
-    {/* Tooltip */}
-    <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm px-1.5 py-1 rounded text-[6px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-[300] max-w-[110px] text-center leading-tight">
-      {loc.description?.slice(0, 40)}
+const LocTile = React.memo(({ loc, isSelected, isRolling, energy, onSelect }) => {
+  const getLocStyle = () => {
+    const base = "relative cursor-pointer group border transition-all duration-300 flex flex-col items-center justify-center p-0.5 overflow-hidden";
+    if (isSelected) {
+      return `${base} border-white/80 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-105 z-10`;
+    }
+    return `${base} border-white/10 hover:border-white/40 hover:bg-white/5`;
+  };
+
+  return (
+    <div onClick={() => !isRolling && onSelect(loc.id)} className={getLocStyle()}>
+      {energy > 30 ? (
+        <motion.div
+          animate={{ opacity: [0.05, 0.25, 0.05] }}
+          transition={{ duration: 3, repeat: Infinity }}
+          className="absolute inset-[-4px] bg-white/5 blur-md rounded-full pointer-events-none"
+        />
+      ) : null}
+      <span className={`text-[7px] font-oswald uppercase tracking-wide text-center leading-tight
+        ${isSelected ? 'text-white font-black' : 'text-white/40 group-hover:text-white/70'}`}>
+        {loc.name}
+      </span>
+      {isSelected ? (
+        <motion.div layoutId="loc-glow" className="absolute inset-0 bg-white/10 blur-xl pointer-events-none"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
+      ) : null}
+      {/* Tooltip */}
+      <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm px-1.5 py-1 rounded text-[6px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-[300] max-w-[110px] text-center leading-tight">
+        {loc.description?.slice(0, 40)}
+      </div>
     </div>
-  </div>
-));
+  );
+});
 LocTile.displayName = 'LocTile';
 
 // ── Cube component ───────────────────────────────────────────
