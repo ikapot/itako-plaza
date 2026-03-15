@@ -14,6 +14,7 @@ const ManagerContent = React.memo(({
     characters,
     selectedCharIds,
     handleToggleChar,
+    handleSetChars,
     setEnlargedCharId,
     geminiKey,
     setGeminiKey,
@@ -39,6 +40,9 @@ const ManagerContent = React.memo(({
                             setSelectedLocationId={setSelectedLocationId}
                             selectedCharIds={selectedCharIds}
                             locationEnergies={locationEnergies}
+                            characters={characters}
+                            handleToggleChar={handleToggleChar}
+                            onSetChars={handleSetChars}
                         />
                     </motion.div>
                 )}

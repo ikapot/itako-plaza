@@ -61,19 +61,20 @@ export default function App() {
   const scrollRef = useRef(null);
   const lastLocationRef = useRef(null);
 
-  const characters = useMemo(() => INITIAL_CHARACTERS.map(c => ({
-    ...c,
-    status: c.id === 'soseki' ? { '胃痛レベル': 3 } : { '不気味さ': '80%' }
-  })), []);
-
   const handleToggleChar = useCallback((id) => {
     setSelectedCharIds(prev => {
       const isAlreadySelected = prev.includes(id);
-      if (isAlreadySelected && prev.length > 1) {
-        return prev.filter(cId => cId !== id);
+      if (isAlreadySelected) {
+        return prev.length > 1 ? prev.filter(cId => cId !== id) : prev; // 最低1人は保持
       }
-      return [...new Set([...prev, id])];
+      if (prev.length >= 3) return prev; // 最大3人
+      return [...prev, id];
     });
+  }, []);
+
+  const handleSetChars = useCallback((ids) => {
+    // ダイスロールで3人を一括セット
+    setSelectedCharIds(ids.slice(0, 3));
   }, []);
 
   const handleSlotChange = useCallback(async (index) => {
@@ -155,7 +156,7 @@ export default function App() {
       setLoading(true);
       updateLocationEnergy(selectedLocationId, 15);
 
-      const selectedChars = characters.filter(c => selectedCharIds.includes(c.id));
+      const selectedChars = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id));
       const loc = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
       const { generateLocationDialogueWithEvent } = await import('./gemini');
       const dialogue = await generateLocationDialogueWithEvent(geminiKey, selectedChars, loc, currentWorldEvent, spiritSharedKnowledge);
@@ -176,7 +177,7 @@ export default function App() {
     setLoading(true);
 
     const charId = selectedCharIds[0];
-    const currentChar = characters.find(c => c.id === charId);
+    const currentChar = APP_CHARACTERS.find(c => c.id === charId);
     
     searchNDLArchive(userMsg).then(res => res?.length && setArchives(prev => [...res, ...prev].slice(0, 5)));
 
@@ -225,7 +226,7 @@ export default function App() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden" />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-black/40 backdrop-blur-3xl border-r border-white/10 z-[70] p-6 overflow-y-auto md:hidden shadow-3xl">
               <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab }} />
-              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters, selectedCharIds, handleToggleChar, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }} />
+              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }} />
             </motion.div>
           </>
         )}
@@ -235,10 +236,10 @@ export default function App() {
       <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, validateGeminiApiKey, setIsAppReady }} />
 
       <div className="flex-1 flex overflow-hidden relative">
-        <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies }} />
+        <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies }} />
         
         {/* Main Timeline View */}
-        <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark: async (i) => {}, globalTrends, setShowNotebookModal, futureSelfCritique, archives }} />
+        <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark: async (i) => {}, globalTrends, setShowNotebookModal, futureSelfCritique, archives }} />
 
         {/* Manager Overlay (Map, Registry, Connect) */}
         <AnimatePresence>
@@ -268,7 +269,7 @@ export default function App() {
                     Close
                   </button>
                 </div>
-                <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters, selectedCharIds, handleToggleChar, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }} />
+                <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }} />
               </motion.div>
             </motion.div>
           )}
@@ -276,7 +277,7 @@ export default function App() {
       </div>
 
       <FloatingInputBar {...{ input, setInput, handleSendMessage, loading }} />
-      <CharacterOverlay {...{ enlargedCharId, setEnlargedCharId, characters, handleTalkTo }} />
+      <CharacterOverlay {...{ enlargedCharId, setEnlargedCharId, characters: APP_CHARACTERS, handleTalkTo }} />
       {/* Sync Modal Simplified */}
       <AnimatePresence>{showNotebookModal && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">

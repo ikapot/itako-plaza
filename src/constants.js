@@ -1,13 +1,73 @@
+// キャラクター定義（54人）
+// face: 0=文豪列伝(Front), 1=闇の系譜(Back), 2=女性の先駆者(Right),
+//        3=西洋の魂(Left), 4=芸術家・詩人(Top), 5=異界の存在(Bottom)
+
 export const INITIAL_CHARACTERS = [
-  { id: 'soseki', name: '夏目漱石', role: '大学教授', homeLocationId: 'school', flavor: '胃痛', color: 'bg-itako-clay', description: '日本の小説家、英文学者。大学教授としての職務と創作の狭間で胃を病んでいる。', avatar: 'assets/soseki_warhol.png', isPreStyled: true },
-  { id: 'dosto', name: 'ドストエフスキー', role: '債務者・作家', homeLocationId: 'casino', flavor: '借金', color: 'bg-itako-sand', description: 'ロシアの文豪。ルーレットへの執着と膨大な借金、そして信仰の間で魂が微振動している。', avatar: 'assets/dosto_warhol.png', isPreStyled: true },
-  { id: 'ichikawa', name: '市川房枝', role: '政治家', homeLocationId: 'office', flavor: '厳格', color: 'bg-itako-sage', description: '婦人運動家、参議院議員。政治の浄化と有権者の啓発を、広場でも厳格に説き続ける。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg' },
-  { id: 'atsuko', name: 'Atsuko', role: '古本屋の店主', homeLocationId: 'archive_room', flavor: '見守り', color: 'bg-itako-sand', description: '広場の地下深く、崩れかけの書庫で古本を売る。すべてを記録し、観察する不気味な存在。', avatar: 'assets/atsuko_warhol.png', isPreStyled: true },
-  { id: 'k_kokoro', name: 'K', role: '無職・書生', homeLocationId: 'stair', flavor: '絶望', color: 'bg-zinc-800', description: 'かつては学生。今はただ絶望の螺旋階段を上り下りする、目的を持たない魂。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Japanese_student_c1900.jpg/330px-Japanese_student_c1900.jpg' },
-  { id: 'alyosha', name: 'アリョーシャ', role: '修道士', homeLocationId: 'temple', flavor: '信仰', color: 'bg-itako-sage', description: '『カラマーゾフの兄弟』の三男。泥の中でも光を失わず、あらゆる罪を許そうとする。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alyosha_Vanya.jpg/330px-Alyosha_Vanya.jpg' },
-  { id: 'raicho', name: '平塚らいてう', role: '思想家', homeLocationId: 'shrine', flavor: '太陽', color: 'bg-orange-900/50', description: '青踏社主宰。元始、女性は太陽であったと宣言した、内なる光を放つ霊。', avatar: 'assets/raicho_warhol.png', isPreStyled: true },
-  { id: 'fumiko', name: '金子文子', role: '浮浪・アナキスト', homeLocationId: 'underpass', flavor: '自己', color: 'bg-red-950/60', description: '国家を否定し、ガード下や独房で「自己」の主体性を貫いた。無籍者。', avatar: 'assets/fumiko_warhol.png', isPreStyled: true },
-  { id: 'rand', name: 'アイン・ランド', role: '富裕層インタビュアー', homeLocationId: 'throne', flavor: '利己', color: 'bg-zinc-700', description: '客観主義者。成功した強者のみにマイクを向け、弱さという寄生を断罪する。', avatar: 'assets/rand_warhol.png', isPreStyled: true },
+  // ── Face 0: 文豪列伝 ──────────────────────────────────────────────
+  { id: 'soseki', face: 0, pos: 0, name: '夏目漱石', role: '大学教授', homeLocationId: 'school', flavor: '胃痛', color: 'bg-itako-clay', isMainChar: true, description: '日本の小説家、英文学者。大学教授としての職務と創作の狭間で胃を病んでいる。', avatar: 'assets/soseki_warhol.webp', isPreStyled: true },
+  { id: 'ogai', face: 0, pos: 1, name: '森鴎外', role: '軍医・文豪', homeLocationId: 'library', flavor: '知性', color: 'bg-zinc-700', description: '軍医でありながら文学を愛し、近代と伝統の狭間で二重生活を送った。', avatar: null },
+  { id: 'akutagawa', face: 0, pos: 2, name: '芥川龍之介', role: '鬼才作家', homeLocationId: 'mirror', flavor: '不安', color: 'bg-red-950/50', description: '鋭敏な感受性と知性、そして「薄ぼんやりした不安」に追われ続けた天才。', avatar: null },
+  { id: 'dazai', face: 0, pos: 3, name: '太宰治', role: '恥の多い生涯', homeLocationId: 'canal', flavor: '失格', color: 'bg-zinc-800', description: '人間失格を自称しながら、それでも言葉で世界と戦い続けた魂。', avatar: null },
+  { id: 'mishima', face: 0, pos: 4, name: '三島由紀夫', role: '作家・武人', homeLocationId: 'roof', flavor: '美と死', color: 'bg-red-900/60', description: '美への執着と肉体の鍛錬、そして壮絶な最期まで自らを物語の主人公とした。', avatar: null },
+  { id: 'kawabata', face: 0, pos: 5, name: '川端康成', role: 'ノーベル賞作家', homeLocationId: 'garden', flavor: '余韻', color: 'bg-itako-sage', description: '雪国の純白の中に、消えゆくものへの哀愁を刻んだ。', avatar: null },
+  { id: 'kafuka', face: 0, pos: 6, name: 'カフカ', role: '保険局員・作家', homeLocationId: 'waiting', flavor: '変身', color: 'bg-zinc-700', description: '虫になった男と不条理な城を描いた、実存の悪夢の語り手。', avatar: null },
+  { id: 'borges', face: 0, pos: 7, name: 'ボルヘス', role: '図書館司書', homeLocationId: 'archive', flavor: '迷宮', color: 'bg-itako-sand', description: '無限の図書館と砂の本を夢想した、盲目の宇宙論者。', avatar: null },
+  { id: 'k_kokoro', face: 0, pos: 8, name: 'K', role: '無職・書生', homeLocationId: 'stair', flavor: '絶望', color: 'bg-zinc-800', isMainChar: true, description: 'かつては学生。今はただ絶望の螺旋階段を上り下りする、目的を持たない魂。', avatar: null },
+
+  // ── Face 1: 闇の系譜 ──────────────────────────────────────────────
+  { id: 'dosto', face: 1, pos: 0, name: 'ドストエフスキー', role: '債務者・作家', homeLocationId: 'casino', flavor: '借金', color: 'bg-itako-sand', isMainChar: true, description: 'ロシアの文豪。ルーレットへの執着と膨大な借金、そして信仰の間で魂が微振動している。', avatar: 'assets/dosto_warhol.webp', isPreStyled: true },
+  { id: 'nietzsche', face: 1, pos: 1, name: 'ニーチェ', role: '反哲学者', homeLocationId: 'monolith', flavor: '超人', color: 'bg-zinc-700', description: '神は死んだ。超人の到来を高らかに宣言したが、自身は錯乱の闇に消えた。', avatar: null },
+  { id: 'poe', face: 1, pos: 2, name: 'エドガー・アラン・ポー', role: '幻想作家', homeLocationId: 'box', flavor: '奈落', color: 'bg-zinc-800', description: '黒猫と大鴉に囲まれ、酒と死と美の幻想を紡いだ。', avatar: null },
+  { id: 'marquis', face: 1, pos: 3, name: 'サド侯爵', role: '囚人・作家', homeLocationId: 'prison', flavor: '快楽', color: 'bg-red-950/60', description: '監獄の闇の中で最も過激な思想を書き続けた。', avatar: null },
+  { id: 'baudelaire', face: 1, pos: 4, name: 'ボードレール', role: '呪われた詩人', homeLocationId: 'backalley', flavor: '悪の華', color: 'bg-zinc-700', description: '悪と美を同一視した詩人。梅毒と貧困の中で近代詩を発明した。', avatar: null },
+  { id: 'rimbaud', face: 1, pos: 5, name: 'ランボー', role: '天才少年詩人', homeLocationId: 'slum', flavor: '放浪', color: 'bg-itako-sand', description: '10代で詩を書き捨て、アフリカへ消えた伝説の放浪者。', avatar: null },
+  { id: 'fumiko', face: 1, pos: 6, name: '金子文子', role: '浮浪・アナキスト', homeLocationId: 'underpass', flavor: '自己', color: 'bg-red-950/60', isMainChar: true, description: '国家を否定し、ガード下や独房で「自己」の主体性を貫いた。無籍者。', avatar: 'assets/fumiko_warhol.webp', isPreStyled: true },
+  { id: 'atsuko', face: 1, pos: 7, name: 'Atsuko', role: '古本屋の店主', homeLocationId: 'archive_room', flavor: '見守り', color: 'bg-itako-sand', isMainChar: true, description: '広場の地下深く、崩れかけの書庫で古本を売る。すべてを記録し、観察する不気味な存在。', avatar: 'assets/atsuko_warhol.webp', isPreStyled: true },
+  { id: 'sade_ghost', face: 1, pos: 8, name: '深淵の囚人', role: '幽霊', homeLocationId: 'door', flavor: '呪縛', color: 'bg-red-950/40', description: 'かつて牢獄に幽閉され、今もこの広場の暗い回廊をさまよう名無しの存在。', avatar: null },
+
+  // ── Face 2: 女性の先駆者 ─────────────────────────────────────────────
+  { id: 'raicho', face: 2, pos: 0, name: '平塚らいてう', role: '思想家', homeLocationId: 'shrine', flavor: '太陽', color: 'bg-orange-900/50', isMainChar: true, description: '青踏社主宰。元始、女性は太陽であったと宣言した、内なる光を放つ霊。', avatar: 'assets/raicho_warhol.webp', isPreStyled: true },
+  { id: 'ichikawa', face: 2, pos: 1, name: '市川房枝', role: '政治家', homeLocationId: 'office', flavor: '厳格', color: 'bg-itako-sage', isMainChar: true, description: '婦人運動家、参議院議員。政治の浄化と有権者の啓発を厳格に説き続ける。', avatar: null },
+  { id: 'nora', face: 2, pos: 2, name: 'ノラ', role: '人形の家の脱出者', homeLocationId: 'door', flavor: '自立', color: 'bg-itako-sand', description: 'イプセンの戯曲が産んだ女性解放のシンボル。扉を閉めた音は今も響く。', avatar: null },
+  { id: 'curie', face: 2, pos: 3, name: 'マリー・キュリー', role: '科学者', homeLocationId: 'lighthouse', flavor: '放射線', color: 'bg-itako-sage', description: '放射性元素を発見し、科学の聖域に女性として踏み込んだ。体は蝕まれていた。', avatar: null },
+  { id: 'woolf', face: 2, pos: 4, name: 'ヴァージニア・ウルフ', role: '意識の流れ作家', homeLocationId: 'lake', flavor: '波', color: 'bg-blue-950/60', description: '自分だけの部屋を持つことを訴え、川の中に消えた作家。', avatar: null },
+  { id: 'beauvoir', face: 2, pos: 5, name: 'ボーヴォワール', role: '哲学者・作家', homeLocationId: 'cafe', flavor: '実存', color: 'bg-itako-clay', description: '第二の性を書いたフェミニズムの知的母。サルトルと対等であることを貫いた。', avatar: null },
+  { id: 'nightingale', face: 2, pos: 6, name: 'ナイチンゲール', role: '看護師・統計学者', homeLocationId: 'altar', flavor: '灯り', color: 'bg-itako-sage', description: '戦場を訪れた天使ではなく、統計と感染管理で戦場を変えた科学者の魂。', avatar: null },
+  { id: 'yosano', face: 2, pos: 7, name: '与謝野晶子', role: '歌人', homeLocationId: 'graveyard', flavor: '炎', color: 'bg-red-900/50', description: '「君死にたまことなかれ」と叫び、近代に女性の情念の詩を刻んだ。', avatar: null },
+  { id: 'higuchi', face: 2, pos: 8, name: '樋口一葉', role: '明治の作家', homeLocationId: 'market', flavor: '五千円', color: 'bg-itako-sand', description: '貧困の中で24年の生涯に傑作を書き残した。今も紙幣に刻まれている。', avatar: null },
+
+  // ── Face 3: 西洋の魂 ──────────────────────────────────────────────
+  { id: 'rand', face: 3, pos: 0, name: 'アイン・ランド', role: '富裕層インタビュアー', homeLocationId: 'throne', flavor: '利己', color: 'bg-zinc-700', isMainChar: true, description: '客観主義者。成功した強者のみにマイクを向け、弱さという寄生を断罪する。', avatar: 'assets/rand_warhol.webp', isPreStyled: true },
+  { id: 'alyosha', face: 3, pos: 1, name: 'アリョーシャ', role: '修道士', homeLocationId: 'temple', flavor: '信仰', color: 'bg-itako-sage', isMainChar: true, description: '『カラマーゾフの兄弟』の三男。泥の中でも光を失わず、あらゆる罪を許そうとする。', avatar: null },
+  { id: 'socrates', face: 3, pos: 2, name: 'ソクラテス', role: '無知の知', homeLocationId: 'oracle', flavor: '問答', color: 'bg-itako-sand', description: '毒杯を飲み干した哲学者。問いかけだけが残り、答えは常に別の問いになる。', avatar: null },
+  { id: 'descartes', face: 3, pos: 3, name: 'デカルト', role: '懐疑論者', homeLocationId: 'mirror', flavor: '我思う', color: 'bg-zinc-700', description: 'すべてを疑い続けた末に「思う自己」だけを信じた。今は夢の中を漂う。', avatar: null },
+  { id: 'spinoza', face: 3, pos: 4, name: 'スピノザ', role: 'レンズ研磨師・哲学者', homeLocationId: 'window', flavor: '汎神論', color: 'bg-itako-sage', description: '神イコール自然という異端の思想を、レンズを磨きながら書いた。', avatar: null },
+  { id: 'hegel', face: 3, pos: 5, name: 'ヘーゲル', role: '弁証法の巨人', homeLocationId: 'tower', flavor: '止揚', color: 'bg-zinc-700', description: '正反合の弁証法で歴史を裁いた。精神の旅の完成を求めた。', avatar: null },
+  { id: 'marx', face: 3, pos: 6, name: 'マルクス', role: '革命家', homeLocationId: 'factory', flavor: '資本', color: 'bg-red-900/60', description: '資本主義の亡霊として、今も世界に出没する。万国の労働者よ、団結せよ。', avatar: null },
+  { id: 'freud', face: 3, pos: 7, name: 'フロイト', role: '精神分析家', homeLocationId: 'waiting', flavor: '無意識', color: 'bg-zinc-800', description: '夢と性と死を織り交ぜ、人間の無意識の地図を描いた。', avatar: null },
+  { id: 'wittgenstein', face: 3, pos: 8, name: 'ウィトゲンシュタイン', role: '論理哲学者', homeLocationId: 'void', flavor: '沈黙', color: 'bg-zinc-700', description: '語りえないことについては沈黙しなければならない。最後は学校の教師になった。', avatar: null },
+
+  // ── Face 4: 芸術家・詩人 ─────────────────────────────────────────
+  { id: 'vangogh', face: 4, pos: 0, name: 'ゴッホ', role: '後期印象派画家', homeLocationId: 'graveyard', flavor: '向日葵', color: 'bg-yellow-900/60', description: '渦を巻く星空と向日葵。耳を切り裂いた孤独な魂が、今もキャンバスで燃えている。', avatar: null },
+  { id: 'dali', face: 4, pos: 1, name: 'ダリ', role: 'シュルレアリスト', homeLocationId: 'mirror', flavor: '夢', color: 'bg-itako-clay', description: '溶ける時計と燃えるキリンの夢想家。パラノイア的批判的方法の発明者。', avatar: null },
+  { id: 'basho', face: 4, pos: 2, name: '松尾芭蕉', role: '俳諧師', homeLocationId: 'mountain', flavor: '閑さ', color: 'bg-itako-sage', description: '古池や蛙飛び込む水の音。この一句で時空を圧縮した永遠の放浪者。', avatar: null },
+  { id: 'shakespeare', face: 4, pos: 3, name: 'シェイクスピア', role: '劇作家', homeLocationId: 'theatre', flavor: '悲劇', color: 'bg-itako-sand', description: 'ハムレット、マクベス、リア王。人間のすべてを舞台に乗せた。', avatar: null },
+  { id: 'beethoven', face: 4, pos: 4, name: 'ベートーヴェン', role: '作曲家', homeLocationId: 'roof', flavor: '運命', color: 'bg-zinc-800', description: '聴覚を失いながらも第九を書いた。耳はなくとも、音楽は魂で鳴り続けた。', avatar: null },
+  { id: 'chopin', face: 4, pos: 5, name: 'ショパン', role: '詩人のピアノ', homeLocationId: 'piano', flavor: '夜想曲', color: 'bg-itako-sand', description: '亡命ポーランド人として、ピアノで祖国を語り続けた。心臓だけが故郷に帰った。', avatar: null },
+  { id: 'hokusai', face: 4, pos: 6, name: '葛飾北斎', role: '浮世絵師', homeLocationId: 'sea', flavor: '波', color: 'bg-blue-950/60', description: '90歳まで筆を持ち、自らを画狂老人と名乗った。富嶽三十六景の波は永遠に砕け続ける。', avatar: null },
+  { id: 'rilke', face: 4, pos: 7, name: 'リルケ', role: '詩人', homeLocationId: 'tower', flavor: '天使', color: 'bg-itako-sand', description: 'ドゥイノの悲歌を10年かけて書いた。天使は美しいからこそ恐ろしい。', avatar: null },
+  { id: 'dickinson', face: 4, pos: 8, name: 'ディキンソン', role: '隠遁詩人', homeLocationId: 'window', flavor: '不死', color: 'bg-itako-sage', description: '生涯で1789篇の詩を書き、白い服を着て自室に引きこもった。', avatar: null },
+
+  // ── Face 5: 異界の存在 ──────────────────────────────────────────────
+  { id: 'future_self', face: 5, pos: 0, name: '未来の自分', role: '時空の旅人', homeLocationId: 'gate', flavor: '予言', color: 'bg-zinc-700', isMainChar: true, description: '2036年の「あなた自身」。10年前の自分を静かに見守り、ときに語りかける。', avatar: null },
+  { id: 'oracle_ghost', face: 5, pos: 1, name: '巫女の霊', role: '神託者', homeLocationId: 'oracle', flavor: '予兆', color: 'bg-purple-950/60', description: '過去と未来を同時に見透かす存在。言葉は常に二重の意味を持つ。', avatar: null },
+  { id: 'void_entity', face: 5, pos: 2, name: '虚無の声', role: '無名の存在', homeLocationId: 'void', flavor: '無言', color: 'bg-zinc-900', description: '名前も形もない。ただ「問い」だけが残された。', avatar: null },
+  { id: 'shadow', face: 5, pos: 3, name: '影', role: 'あなたの影', homeLocationId: 'mirror_abyss', flavor: '境界', color: 'bg-zinc-800', description: 'ユングの言う「シャドウ」。抑圧されたすべてが集まった、もう一人の自分。', avatar: null },
+  { id: 'anima', face: 5, pos: 4, name: 'アニマ', role: '魂の女性像', homeLocationId: 'lake', flavor: '深層', color: 'bg-blue-950/50', description: '男性の無意識に宿る女性原理。夢の中の謎めいた声の正体。', avatar: null },
+  { id: 'trickster', face: 5, pos: 5, name: 'トリックスター', role: '道化・境界の怪物', homeLocationId: 'neon', flavor: '混沌', color: 'bg-yellow-900/50', description: '神話的なトリックスター。秩序を破壊し、新しい秩序を生む境界の存在。', avatar: null },
+  { id: 'persona', face: 5, pos: 6, name: 'ペルソナ', role: '仮面', homeLocationId: 'theatre', flavor: '演技', color: 'bg-zinc-700', description: '社会に見せる顔。本当の自己とは何かを問い続けるもう一つの「私」。', avatar: null },
+  { id: 'itako_spirit', face: 5, pos: 7, name: 'イタコの霊', role: '口寄せ', homeLocationId: 'core', flavor: '媒介', color: 'bg-purple-950/50', description: 'この広場の源。死者の言葉を生者に伝える、口寄せの霊的媒介者。', avatar: null },
+  { id: 'end_being', face: 5, pos: 8, name: '終焉の者', role: '完了', homeLocationId: 'end', flavor: '完結', color: 'bg-zinc-900', description: 'すべての物語の最後に現れる存在。始まりとは終わりのことである。', avatar: null },
 ];
 
 export const INITIAL_LOCATIONS = [
@@ -65,4 +125,6 @@ export const INITIAL_LOCATIONS = [
   { id: 'throne', name: '空の玉座', face: 5, pos: 6, tags: ['wide'], description: '支配なき支配者が坐る、絶対的な不在。', color: '#050505', pattern: 'none' },
   { id: 'mirror_abyss', name: '深淵の鏡', face: 5, pos: 7, tags: ['narrow'], description: '覗き込む時、向こう側もあなたを見ている。', color: '#000', pattern: 'radial-gradient(circle at center, #111, transparent)' },
   { id: 'end', name: '終焉', face: 5, pos: 8, tags: ['wide'], description: 'すべてが完了し、新たな静止が始まる。', color: '#111', pattern: 'none' },
+  { id: 'piano', name: '廃ピアノの間', face: 4, pos: 9, tags: ['quiet'], description: '鍵盤に指が触れると、存在しないはずの音が鳴る。', color: '#0a0505', pattern: 'repeating-linear-gradient(90deg, #111, #000 2px)' },
+  { id: 'office', name: '執務室', face: 0, pos: 9, tags: ['quiet'], description: '永遠に片付かない書類の山。誰かの志が積み重なっている。', color: '#111520', pattern: 'none' },
 ];
