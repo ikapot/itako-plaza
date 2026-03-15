@@ -61,10 +61,10 @@ export default function App() {
   const scrollRef = useRef(null);
   const lastLocationRef = useRef(null);
 
-  const characters = INITIAL_CHARACTERS.map(c => ({
+  const characters = useMemo(() => INITIAL_CHARACTERS.map(c => ({
     ...c,
-    status: c.id === 'soseki' ? { '胃痛レベル': 3 } : { '不気味さ': '80%' } // Simplified status setup
-  }));
+    status: c.id === 'soseki' ? { '胃痛レベル': 3 } : { '不気味さ': '80%' }
+  })), []);
 
   const handleToggleChar = useCallback((id) => {
     setSelectedCharIds(prev => (prev.includes(id) && prev.length > 1) 
@@ -229,7 +229,43 @@ export default function App() {
 
       <div className="flex-1 flex overflow-hidden relative">
         <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies }} />
+        
+        {/* Main Timeline View */}
         <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark: async (i) => {}, globalTrends, setShowNotebookModal, futureSelfCritique, archives }} />
+
+        {/* Manager Overlay (Map, Registry, Connect) */}
+        <AnimatePresence>
+          {activeManagerTab && (
+            <motion.div 
+              initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+              animate={{ opacity: 1, backdropFilter: 'blur(10px)' }}
+              exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+              className="absolute inset-0 z-40 bg-black/40 flex items-center justify-center p-4 md:p-12 overflow-y-auto"
+              onClick={() => setActiveManagerTab(null)} // Click outside to close
+            >
+              <motion.div 
+                initial={{ scale: 0.95, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.95, y: 20 }}
+                className="w-full max-w-5xl bg-[#0a0a0a]/90 border border-white/10 rounded-[50px] p-8 md:p-12 shadow-3xl pointer-events-auto"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-8">
+                  <h2 className="text-3xl font-black font-oswald uppercase tracking-widest text-white/80">
+                    {activeManagerTab}
+                  </h2>
+                  <button 
+                    onClick={() => setActiveManagerTab(null)}
+                    className="p-2 text-white/20 hover:text-white transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+                <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters, selectedCharIds, handleToggleChar, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }} />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <FloatingInputBar {...{ input, setInput, handleSendMessage, loading }} />

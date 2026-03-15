@@ -45,18 +45,11 @@ export async function fetchFictionalizedNews(apiKey) {
 
 export async function generateCharacterNewsComment(newsItem, charId, apiKey) {
   if (!apiKey) return "";
-  const keys = apiKey.split(',').map(k => k.trim()).filter(Boolean);
   const prompt = `あなたは「${charId}」の魂です。ニュース「${newsItem.title}」に対して、不気味な独白を述べてください。`;
 
-  for (const key of keys) {
-    for (const modelName of FALLBACK_MODELS) {
-      try {
-        const genAI = new GoogleGenerativeAI(key);
-        const model = genAI.getGenerativeModel({ model: modelName });
-        const result = await model.generateContent(prompt);
-        return result.response.text();
-      } catch { continue; }
-    }
+  try {
+    return await invokeGemini(apiKey, prompt, "あなたは口寄せです。", { temperature: 0.9 });
+  } catch {
+    return "沈黙。";
   }
-  return "沈黙。";
 }
