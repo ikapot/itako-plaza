@@ -2,10 +2,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
 const FALLBACK_MODELS = [
-  "gemini-2.0-flash", // ログで唯一反応（429）しているため最優先へ
+  "gemini-2.0-flash", 
   "gemini-1.5-flash",
-  "gemini-1.5-flash-latest",
-  "gemini-1.5-flash-8b",
   "gemini-1.5-pro"
 ];
 
@@ -145,39 +143,61 @@ export async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = 
 
   for (const [keyIdx, key] of keys.entries()) {
     for (const modelName of FALLBACK_MODELS) {
-      try {
-        const genAI = new GoogleGenerativeAI(key);
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: config,
-          systemInstruction: sysPrompt
-        });
+      let retryCount = 0;
+      const maxRetries = 2;
 
-        const result = await model.generateContent(prompt);
-        const text = result.response.text();
+      while (retryCount <= maxRetries) {
+        try {
+          const genAI = new GoogleGenerativeAI(key);
+          const model = genAI.getGenerativeModel({
+            model: modelName,
+            generationConfig: config,
+            systemInstruction: sysPrompt || undefined // 空文字列よりundefinedが安全な場合がある
+          });
 
-        let finalData = text;
-        if (isJson) {
-          const cleanJson = text.replace(/```json|```/g, "").trim();
-          finalData = JSON.parse(cleanJson);
+          const result = await model.generateContent(prompt);
+          const text = result.response.text();
+
+          let finalData = text;
+          if (isJson) {
+            const cleanJson = text.replace(/```json|```/g, "").trim();
+            finalData = JSON.parse(cleanJson);
+          }
+          
+          return new ApiResponse(finalData, modelName, keyIdx + 1);
+        } catch (error) {
+          lastError = error;
+          const msg = error.message || "";
+          const status = error.status || 0;
+          const isQuota = status === 429 || msg.includes('429') || msg.includes('Quota');
+          const isAuth = status === 401 || status === 403 || msg.includes('API_KEY_INVALID');
+          const isNotFound = status === 404 || msg.includes('not found');
+
+          console.warn(`[Gemini Attempt] ${modelName} (Key ${keyIdx + 1}, Try ${retryCount + 1}) failed: ${msg.substring(0, 80)}`);
+          
+          if (isAuth) break; // このキーは全滅なので次のキーへ (外側のループ)
+          
+          if (isQuota) {
+            // 429時はモデルを切り替えず、少し待機してリトライ
+            retryCount++;
+            if (retryCount <= maxRetries) {
+              const waitTime = 3000 * retryCount + Math.random() * 1000;
+              console.log(`[Gemini] Retrying in ${Math.round(waitTime)}ms...`);
+              await sleep(waitTime);
+              continue;
+            }
+          }
+
+          if (isNotFound) {
+            // 404時はこのモデルを諦めて次のモデルへ
+            break; 
+          }
+
+          // その他のエラーも次のモデルへ
+          break;
         }
-        
-        return new ApiResponse(finalData, modelName, keyIdx + 1);
-      } catch (error) {
-        lastError = error;
-        const msg = error.message || "";
-        const isQuota = error.status === 429 || msg.includes('429');
-        const isAuth = error.status === 401 || error.status === 403 || msg.includes('API_KEY_INVALID');
-        
-        console.warn(`[Gemini Attempt] ${modelName} (Key ${keyIdx + 1}) failed: ${msg.substring(0, 60)}`);
-        
-        if (isAuth) break; // このキーは無効なので次のキーへ
-        if (isQuota) {
-          await sleep(2000); 
-          continue; 
-        }
-        continue;
       }
+      if (lastError?.status === 401 || lastError?.status === 403) break; 
     }
   }
   

@@ -131,16 +131,23 @@ export default function App() {
 
   useEffect(() => {
     if (!geminiKey) return;
-    fetchFictionalizedNews(geminiKey).then(setNews);
+    
+    // 起動時のリクエストが重ならないようにずらす
+    const timeout = setTimeout(() => {
+      fetchFictionalizedNews(geminiKey).then(setNews);
+    }, 2000);
     
     const energyInterval = setInterval(async () => setLocationEnergies(await fetchLocationEnergies()), 10000);
 
-    return () => { clearInterval(energyInterval); };
+    return () => { 
+      clearTimeout(timeout);
+      clearInterval(energyInterval); 
+    };
   }, [geminiKey]);
 
   useEffect(() => {
     const updateEvent = async () => {
-      await new Promise(r => setTimeout(r, 2000)); // 起動直後のバーストを避ける
+      await new Promise(r => setTimeout(r, 4000)); // ニュース取得と重ならないようにさらに遅延
       const event = await generateWorldEvent(geminiKey, globalTrends);
       if (event) setCurrentWorldEvent(event);
     };
@@ -155,12 +162,15 @@ export default function App() {
     async function triggerLocationConversation() {
       if (!geminiKey || !isAppReady || lastLocationRef.current === selectedLocationId) return;
       lastLocationRef.current = selectedLocationId;
+      
+      // 他の初期化処理が落ち着くまで待機
+      await new Promise(r => setTimeout(r, 6000));
+      
       setLoading(true);
       updateLocationEnergy(selectedLocationId, 15);
 
       const selectedChars = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id));
       const loc = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
-      const { generateLocationDialogueWithEvent } = await import('./gemini');
       const dialogue = await generateLocationDialogueWithEvent(geminiKey, selectedChars, loc, currentWorldEvent, spiritSharedKnowledge);
       
       if (dialogue?.length) {
@@ -169,7 +179,7 @@ export default function App() {
       setLoading(false);
     }
     triggerLocationConversation();
-  }, [selectedLocationId, selectedCharIds, geminiKey, currentWorldEvent, characters, isAppReady, spiritSharedKnowledge]);
+  }, [selectedLocationId, selectedCharIds, geminiKey, currentWorldEvent, APP_CHARACTERS, isAppReady, spiritSharedKnowledge]);
 
   const handleSendMessage = async () => {
     if (!input.trim() || loading) return;

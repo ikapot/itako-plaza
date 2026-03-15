@@ -4,6 +4,13 @@ import { User, Globe, Cpu, MapPin, Search } from 'lucide-react';
 import ThreeDMap from './ThreeDMap';
 import WarholAvatar from './WarholAvatar';
 
+function getConnectBtnStyle(status, key, loading) {
+  const base = "w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald";
+  if (status === 'success') return `${base} bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.6)]`;
+  if (key && !loading) return `${base} bg-white/10 text-white`;
+  return `${base} bg-white/5 text-white/20`;
+}
+
 const ManagerContent = React.memo(({
     activeManagerTab,
     setActiveManagerTab,
@@ -105,44 +112,103 @@ const ManagerContent = React.memo(({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-8"
+                        className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-10"
                     >
-                        <div className="flex items-center gap-4 p-8 bg-[#f15a24]/5 border border-[#f15a24]/10 rounded-3xl">
-                            <div className={`w-3 h-3 rounded-full ${geminiKey ? 'bg-[#f15a24] animate-pulse shadow-[0_0_15px_rgba(241,90,36,0.8)]' : 'bg-white/10'}`} />
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-[#f15a24]/80 tracking-widest uppercase mb-1 font-oswald">
-                                    {geminiKey ? `Verified Connection (${geminiKey.split(',').filter(k=>k.trim()).length} Keys)` : 'Awaiting Connection'}
+                        {/* Status Header */}
+                        <div className="flex items-center gap-6 p-8 bg-[#f15a24]/5 border border-[#f15a24]/10 rounded-[35px] relative overflow-hidden group">
+                            <motion.div 
+                                animate={{ scale: geminiKey ? [1, 1.2, 1] : 1 }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className={`w-4 h-4 rounded-full relative z-10 ${geminiKey ? 'bg-[#f15a24] shadow-[0_0_20px_rgba(241,90,36,0.8)]' : 'bg-white/10'}`} 
+                            />
+                            <div className="flex flex-col relative z-10">
+                                <span className="text-[11px] font-black text-[#f15a24] tracking-widest uppercase mb-1 font-oswald">
+                                    {geminiKey ? `Active Spiritual Conduits (${geminiKey.split(',').filter(k=>k.trim()).length}/3)` : 'Connection Severed'}
                                 </span>
-                                <p className="text-[9px] text-white/20 leading-relaxed font-serif">
-                                    {geminiKey ? '精神の回路は正常に接続されています。複数の鍵による並行接続が有効です。' : '対話を開始するにはAPIキーが必要です。カンマ区切りで複数指定可能。'}
+                                <p className="text-[10px] text-white/40 leading-relaxed font-serif italic">
+                                    {geminiKey ? '複数の霊的回路が同期しています。並列処理により制限を超越します。' : '対話を開始するにはAPIキーを接続してください。3つの鍵が推奨されます。'}
                                 </p>
+                            </div>
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
+                                <Cpu className="w-12 h-12 text-[#f15a24]" />
                             </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <textarea
-                                placeholder="Enter Gemini API Keys (comma separated)..."
-                                value={geminiKey}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    setGeminiKey(val);
-                                    localStorage.setItem('itako_gemini_key', val);
-                                }}
-                                className="w-full bg-black/60 border border-white/30 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/50 outline-none transition-all placeholder:text-white/10 font-mono resize-none min-h-[80px]"
-                            />
+                        {/* Trinity Slot Management */}
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center px-2">
+                                <h3 className="text-[10px] font-bold text-white/30 tracking-widest uppercase font-oswald">Trinity Connection (推奨3スロット)</h3>
+                                <a 
+                                    href="https://aistudio.google.com/app/apikey" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-[9px] text-[#f15a24] hover:text-white transition-colors flex items-center gap-1.5 font-bold"
+                                >
+                                    <Globe className="w-3 h-3" /> Get New Keys in AI Studio
+                                </a>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {[0, 1, 2].map(idx => {
+                                    const allKeys = geminiKey.split(',').map(k => k.trim());
+                                    const currentK = allKeys[idx] || '';
+                                    return (
+                                        <div key={idx} className="relative group">
+                                            <div className="absolute -top-2 left-4 px-2 py-0.5 bg-black border border-white/10 rounded-full text-[7px] text-white/20 font-black z-20">SLOT {idx+1}</div>
+                                            <input
+                                                type="password"
+                                                placeholder="API KEY..."
+                                                value={currentK}
+                                                onChange={(e) => {
+                                                    const next = [...allKeys];
+                                                    next[idx] = e.target.value;
+                                                    const newVal = next.filter(Boolean).join(',');
+                                                    setGeminiKey(newVal);
+                                                    localStorage.setItem('itako_gemini_key', newVal);
+                                                }}
+                                                className={`w-full bg-black/40 border rounded-[25px] p-5 pt-7 text-xs font-mono outline-none transition-all
+                                                    ${currentK ? 'border-[#f15a24]/30 text-white' : 'border-white/10 text-white/10 hover:border-white/20'}`}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Magic Bulk Import */}
+                            <div className="relative">
+                                <textarea
+                                    placeholder="ここへ複数のキーを一括ペースト（カンマ・スペース・改行区切り対応）"
+                                    onChange={(e) => {
+                                        const val = e.target.value.trim();
+                                        if (!val) return;
+                                        // 複数の区切り文字に対応してスプリット
+                                        const detected = val.split(/[,\s\n]+/).filter(k => k.length > 20);
+                                        if (detected.length > 0) {
+                                            const newVal = detected.slice(0, 3).join(',');
+                                            setGeminiKey(newVal);
+                                            localStorage.setItem('itako_gemini_key', newVal);
+                                            e.target.value = ''; // Clear
+                                        }
+                                    }}
+                                    className="w-full bg-white/[0.02] border border-dashed border-white/10 rounded-[25px] p-4 text-[9px] text-white/20 focus:text-white focus:border-[#f15a24]/50 outline-none transition-all h-20 text-center flex items-center justify-center resize-none"
+                                />
+                                <div className="absolute inset-x-0 bottom-4 text-center pointer-events-none">
+                                    <span className="text-[8px] text-white/5 uppercase tracking-[0.3em] font-black">Quick Injection Portal</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-4">
                             <button
                                 onClick={handleValidateApi}
                                 disabled={isValidatingApi}
-                                className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald ${apiConnectionStatus === 'success'
-                                    ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.6)]'
-                                    : geminiKey && !isValidatingApi ? 'bg-white/10 text-white' : 'bg-white/5 text-white/20'
-                                    }`}
+                                className={getConnectBtnStyle(apiConnectionStatus, geminiKey, isValidatingApi)}
                             >
-                                {isValidatingApi ? 'Validating...' : apiConnectionStatus === 'error' ? 'Retry Connection' : '接続する (Connect)'}
+                                {isValidatingApi ? 'Validating Trinity...' : apiConnectionStatus === 'error' ? 'Retry Connection' : '回路を安定化させる (Connect All)'}
                             </button>
                             {apiConnectionStatus === 'error' ? (
-                                <p className="text-[8px] font-bold text-red-500 uppercase tracking-widest text-center animate-pulse">
-                                    Invalid API Key or Limit Exceeded.
+                                <p className="mt-4 text-[8px] font-bold text-red-500 uppercase tracking-widest text-center animate-pulse">
+                                    ⚠️ Some conduits failed. Check keys and limits.
                                 </p>
                             ) : null}
                         </div>
