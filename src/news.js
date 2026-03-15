@@ -1,24 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const FALLBACK_MODELS = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash-8b"];
+import { invokeGemini } from "./gemini";
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-async function executeWithRetry(operation, maxRetries = 3) {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      return await operation();
-    } catch (error) {
-      const isQuota = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
-      if (isQuota && attempt < maxRetries - 1) {
-        const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
-        await sleep(delay);
-        continue;
-      }
-      throw error;
-    }
-  }
-}
 
 export async function fetchFictionalizedNews(apiKey) {
   if (!apiKey) return [];
@@ -33,7 +15,6 @@ export async function fetchFictionalizedNews(apiKey) {
     return JSON.parse(cachedData);
   }
 
-  const keys = apiKey.split(',').map(k => k.trim()).filter(Boolean);
   const prompt = `
 電脳の煉獄へ滴り落ちてきた「現代社会の歪み」を象徴する出来事を3つ挙げ、不穏で詩的なテキストとして出力してください。
 [
@@ -48,24 +29,15 @@ export async function fetchFictionalizedNews(apiKey) {
   }
 ]`;
 
-  for (const key of keys) {
-    for (const modelName of FALLBACK_MODELS) {
-      try {
-        const genAI = new GoogleGenerativeAI(key);
-        const model = genAI.getGenerativeModel({ model: modelName });
-        const result = await executeWithRetry(() => model.generateContent(prompt));
-        const jsonStr = result.response.text().replace(/```json|```/g, "").trim();
-        const newsData = JSON.parse(jsonStr);
-        
-        newsData.forEach(n => n.meta = { model: modelName });
-        localStorage.setItem(CACHE_KEY, JSON.stringify(newsData));
-        localStorage.setItem(CACHE_TIME_KEY, now.toString());
-        return newsData;
-      } catch (err) {
-        if (err.status === 429 || err.message?.includes('429')) continue;
-        break;
-      }
+  try {
+    const newsData = await invokeGemini(apiKey, prompt, "あなたは電脳世界の口寄せです。", { temperature: 0.8 }, true);
+    if (newsData && Array.isArray(newsData)) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(newsData));
+      localStorage.setItem(CACHE_TIME_KEY, now.toString());
+      return newsData;
     }
+  } catch (err) {
+    console.warn("News generation failed", err);
   }
 
   return [{ id: 1, title: "静かなる断絶", content: "沈黙だけが、今の我々に残された唯一の共通言語だ。", original: "Network Timeout" }];
