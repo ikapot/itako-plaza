@@ -40,9 +40,20 @@ if (isConfigValid) {
             cb(dummyCurrentUser);
             return () => { dummyAuthCallbacks.delete(cb); };
         },
-        get currentUser() { return dummyCurrentUser; }
+        get currentUser() { return dummyCurrentUser; },
+        onIdTokenChanged: (cb) => {
+            dummyAuthCallbacks.add(cb);
+            cb(dummyCurrentUser);
+            return () => { dummyAuthCallbacks.delete(cb); };
+        }
     };
-    db = {};
+    // db を空のオブジェクトではなく、Firestore のメソッド呼び出しに対してエラーを投げない Proxy にする
+    db = new Proxy({}, {
+        get: (target, prop) => {
+            if (prop === 'type' || prop === '_type') return 'Firestore';
+            return () => ({}); // ほとんどのメソッドがオブジェクトを返すように
+        }
+    });
 }
 
 const triggerAuthChange = (user) => {
@@ -98,6 +109,10 @@ export const loginAnonymously = async () => {
  * 栞（ブックマーク）を保存
  */
 export const saveBookmark = async (userMsg, aiMsg, charId) => {
+    if (!isConfigValid || !db || typeof db.collection !== 'function') {
+        console.warn("SaveBookmark ignored: Firebase not connected.");
+        return;
+    }
     const user = auth.currentUser;
     if (!user) return;
     try {
@@ -117,6 +132,7 @@ export const saveBookmark = async (userMsg, aiMsg, charId) => {
  * 保存された栞を全取得
  */
 export const fetchBookmarks = async () => {
+    if (!isConfigValid || !db || typeof db.collection !== 'function') return [];
     const user = auth.currentUser;
     if (!user) return [];
     try {
@@ -137,6 +153,7 @@ export const fetchBookmarks = async () => {
  * NotebookLMの蓄積データを保存
  */
 export const saveNotebookAccumulation = async (content) => {
+    if (!isConfigValid || !db || typeof db.collection !== 'function') return;
     const user = auth.currentUser;
     if (!user || !content.trim()) return;
     try {
@@ -154,6 +171,7 @@ export const saveNotebookAccumulation = async (content) => {
  * NotebookLMの蓄積データを全取得
  */
 export const fetchNotebookAccumulations = async () => {
+    if (!isConfigValid || !db || typeof db.collection !== 'function') return [];
     const user = auth.currentUser;
     if (!user) return [];
     try {
@@ -173,7 +191,7 @@ export const fetchNotebookAccumulations = async () => {
  * 霊的エコー（セマンティックキャッシュ）を検索
  */
 export const findEchoInFirestore = async (systemPrompt, userMsg) => {
-    if (!isConfigValid || !db) return null;
+    if (!isConfigValid || !db || typeof db.collection !== 'function') return null;
     const cacheKey = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
     try {
         const q = query(
@@ -192,10 +210,10 @@ export const findEchoInFirestore = async (systemPrompt, userMsg) => {
 };
 
 /**
- * 霊적エコーを保存
+ * 霊的エコーを保存
  */
 export const saveEchoToFirestore = async (systemPrompt, userMsg, response) => {
-    if (!isConfigValid || !db) return;
+    if (!isConfigValid || !db || typeof db.collection !== 'function') return;
     const cacheKey = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
     try {
         await addDoc(collection(db, "semantic_echoes"), {
@@ -212,7 +230,7 @@ export const saveEchoToFirestore = async (systemPrompt, userMsg, response) => {
  * 特定の場所の霊的エネルギーを更新
  */
 export const updateLocationEnergy = async (locationId, amount = 10) => {
-    if (!isConfigValid || !db) return;
+    if (!isConfigValid || !db || typeof db.doc !== 'function') return;
     try {
         const locRef = doc(db, "location_energy", locationId);
         const snap = await getDoc(locRef);
@@ -237,7 +255,7 @@ export const updateLocationEnergy = async (locationId, amount = 10) => {
  * 全場所の霊的エネルギーを取得
  */
 export const fetchLocationEnergies = async () => {
-    if (!isConfigValid || !db) return {};
+    if (!isConfigValid || !db || typeof db.collection !== 'function') return {};
     try {
         const snapshot = await getDocs(collection(db, "location_energy"));
         const energies = {};

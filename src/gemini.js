@@ -2,9 +2,13 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
 const FALLBACK_MODELS = [
+  "gemini-1.5-flash-latest",
+  "gemini-1.5-pro-latest",
+  "gemini-2.0-flash-exp",
   "gemini-1.5-flash",
   "gemini-1.5-pro",
-  "gemini-2.0-flash",
+  "gemini-3-flash-preview",
+  "gemini-2.5-flash"
 ];
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
