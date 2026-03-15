@@ -1,7 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
-const FALLBACK_MODELS = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash-8b"];
+const FALLBACK_MODELS = [
+  "gemini-1.5-flash-latest",
+  "gemini-1.5-flash",
+  "gemini-1.5-flash-8b",
+  "gemini-2.0-flash",
+  "gemini-1.5-pro"
+];
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -137,10 +143,16 @@ async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = {}, isJ
         return text;
       } catch (error) {
         lastError = error;
-        const isQuota = error.status === 429 || error.message?.includes('429') || error.message?.includes('Quota');
-        if (isQuota) continue;
-        console.error(`Gemini Error (${modelName}):`, error);
-        break; // キーが無効な場合などは次のキーへ
+        const msg = error.message || "";
+        const isQuota = error.status === 429 || msg.includes('429');
+        const isAuth = error.status === 401 || error.status === 403 || msg.includes('API_KEY_INVALID');
+        
+        console.warn(`[Gemini Attempt] ${modelName} failed: ${msg.substring(0, 60)}`);
+        
+        if (isAuth) break; // このキーは無効
+        if (isQuota) { await sleep(1000); continue; }
+        // その他のエラー（404など）は次のモデルを試す
+        continue;
       }
     }
   }
@@ -207,8 +219,14 @@ ${isAtHome ? "【特記事項】ここはあなたの本来の居場所であり
         storeEcho(systemPrompt, userMessage, fullText);
         return;
       } catch (error) {
-        if (error.status === 429 || error.message?.includes('429')) continue;
-        break;
+        const msg = error.message || "";
+        console.warn(`[Gemini Stream Attempt] ${modelName} failed: ${msg.substring(0, 60)}`);
+        if (error.status === 429 || msg.includes('429')) {
+          await sleep(1000);
+          continue;
+        }
+        if (error.status === 401 || error.status === 403 || msg.includes('API_KEY_INVALID')) break;
+        continue;
       }
     }
   }

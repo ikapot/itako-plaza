@@ -67,8 +67,8 @@ const googleProvider = isConfigValid ? new GoogleAuthProvider() : null;
 
 export const loginWithGoogle = async () => {
     if (!isConfigValid) {
-        console.warn("Using dummy Google login");
-        const user = { uid: 'dummy-google-user', displayName: 'GUEST (No Firebase)' };
+        console.warn("Using dummy Google login due to missing config");
+        const user = { uid: 'dummy-google-user', displayName: 'GUEST (Local)' };
         triggerAuthChange(user);
         return user;
     }
@@ -77,13 +77,23 @@ export const loginWithGoogle = async () => {
         return result.user;
     } catch (error) {
         console.error("Google Auth Error:", error);
+        if (error.code === 'auth/configuration-not-found' || error.message.includes('CONFIGURATION_NOT_FOUND')) {
+           console.warn("Falling back to dummy login due to Firebase configuration error.");
+           const user = { uid: 'dummy-google-err', displayName: 'GUEST (Fallback)' };
+           triggerAuthChange(user);
+           return user;
+        }
         return null;
     }
 };
 
 export const logout = () => {
     if (isConfigValid) {
-        signOut(auth);
+        try {
+            signOut(auth);
+        } catch (e) {
+            triggerAuthChange(null);
+        }
     } else {
         triggerAuthChange(null);
     }
@@ -101,6 +111,12 @@ export const loginAnonymously = async () => {
         return result.user;
     } catch (error) {
         console.error("Auth Error:", error);
+        if (error.code === 'auth/configuration-not-found' || error.message.includes('CONFIGURATION_NOT_FOUND')) {
+            console.warn("Falling back to dummy guest login.");
+            const user = { uid: 'dummy-anon-err', displayName: 'GUEST (Link)' };
+            triggerAuthChange(user);
+            return user;
+        }
         return null;
     }
 };
