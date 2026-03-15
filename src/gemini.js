@@ -153,13 +153,13 @@ async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = {}, isJ
   throw lastError || new Error("All spiritual conduits collapsed.");
 }
 
-export async function generateCharacterResponseStream(char, userMessage, isUnderground = false, externalContext = "", userApiKey = "", interactionDepth = 0, onChunk) {
+export async function generateCharacterResponseStream(currentChar, userMessage, isUnderground = false, externalContext = "", userApiKey = "", interactionDepth = 0, onChunk, locationContext = null) {
   if (!userApiKey) {
     onChunk("【APIキーを入力してください】", { model: 'system', keyIndex: '-' });
     return;
   }
 
-  const config = CHARACTER_CONFIGS[char.id] || { systemPrompt: char.systemPrompt, generationConfig: { temperature: 0.7 } };
+  const config = CHARACTER_CONFIGS[currentChar.id] || { systemPrompt: currentChar.systemPrompt, generationConfig: { temperature: 0.7 } };
   
   const depthInstructions = {
     0: "\n【重要行動指示: 邂逅】挨拶や当惑など、初対面の簡潔な返答のみを行ってください（1〜2文）。",
@@ -168,8 +168,17 @@ export async function generateCharacterResponseStream(char, userMessage, isUnder
   };
   const depthInstruction = depthInstructions[interactionDepth] || depthInstructions.default;
 
+  // 場所に応じたコンテキストの追加
+  let locAugmentation = "";
+  if (locationContext) {
+    const isAtHome = currentChar.homeLocationId === locationContext.id;
+    locAugmentation = `\n現在地: "${locationContext.name}" (${locationContext.description})
+${isAtHome ? "【特記事項】ここはあなたの本来の居場所であり、ホームグラウンドです。言葉に自信と余裕、あるいは執着を込めてください。" : "ここはあなたの本来の仕事場ではありません。少しの違和感や、よそ者としての視点を交えてください。"}`;
+  }
+
   const systemPrompt = (config.systemPrompt || "") + 
                        depthInstruction + 
+                       locAugmentation +
                        (isUnderground ? "\n地下通路。本音を語れ。" : "") + 
                        (externalContext ? `\n文脈: ${externalContext}` : "");
 

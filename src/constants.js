@@ -1,13 +1,13 @@
 export const INITIAL_CHARACTERS = [
-  { id: 'soseki', name: '夏目漱石', flavor: '胃痛', color: 'bg-itako-clay', description: '日本の小説家、評論家。代表作『吾輩は猫である』。深く鋭い人間洞察を持つ。', avatar: 'assets/soseki_warhol.png', isPreStyled: true },
-  { id: 'dosto', name: 'ドストエフスキー', flavor: '借金', color: 'bg-itako-sand', description: 'ロシアの小説家。代表作『罪と罰』。魂の極限状態を描くリアリズムの巨匠。', avatar: 'assets/dosto_warhol.png', isPreStyled: true },
-  { id: 'ichikawa', name: '市川房枝', flavor: '厳格', color: 'bg-itako-sage', description: '日本の婦人運動家、政治家。参政権獲得から「理想選挙」の追求まで、政治の浄化に生涯を捧げた。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg' },
-  { id: 'atsuko', name: 'Atsuko', flavor: '見守り', color: 'bg-itako-sand', description: '広場の片隅で静かにすべてを記録し続ける、超越的な観察者の魂。', avatar: 'assets/atsuko_warhol.png', isPreStyled: true },
-  { id: 'k_kokoro', name: 'K', flavor: '絶望', color: 'bg-zinc-800', description: '『こころ』の登場人物。宗教的理想と人間的感情の間で苦悩する孤高の青年。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Japanese_student_c1900.jpg/330px-Japanese_student_c1900.jpg' },
-  { id: 'alyosha', name: 'アリョーシャ', flavor: '信仰', color: 'bg-itako-sage', description: '『カラマーゾフの兄弟』のアリョーシャ。純真な心を持ち、世界のあらゆる罪を背負おうとする。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alyosha_Vanya.jpg/330px-Alyosha_Vanya.jpg' },
-  { id: 'raicho', name: '平塚らいてう', flavor: '太陽', color: 'bg-orange-900/50', description: '思想家、女性解放運動家。「元始、女性は太陽であった」と宣言し、個の覚めと平和を求め続けた。', avatar: 'assets/raicho_warhol.png', isPreStyled: true },
-  { id: 'fumiko', name: '金子文子', flavor: '自己', color: 'bg-red-950/60', description: 'アナキスト。天皇制を否定し、獄中で「自己」を貫き通した。著書『何が私をこうさせたか』。', avatar: 'assets/fumiko_warhol.png', isPreStyled: true },
-  { id: 'rand', name: 'アイン・ランド', flavor: '利己', color: 'bg-zinc-700', description: '客観主義の提唱者であり、『肩をすくめるアトラス』の著者。合理的な利己心こそが人間の最高の美徳であると断じ、集団主義や相互扶助を「魂の寄生」として激しく拒絶する決意。', avatar: 'assets/rand_warhol.png', isPreStyled: true },
+  { id: 'soseki', name: '夏目漱石', role: '大学教授', homeLocationId: 'school', flavor: '胃痛', color: 'bg-itako-clay', description: '日本の小説家、英文学者。大学教授としての職務と創作の狭間で胃を病んでいる。', avatar: 'assets/soseki_warhol.png', isPreStyled: true },
+  { id: 'dosto', name: 'ドストエフスキー', role: '債務者・作家', homeLocationId: 'casino', flavor: '借金', color: 'bg-itako-sand', description: 'ロシアの文豪。ルーレットへの執着と膨大な借金、そして信仰の間で魂が微振動している。', avatar: 'assets/dosto_warhol.png', isPreStyled: true },
+  { id: 'ichikawa', name: '市川房枝', role: '政治家', homeLocationId: 'office', flavor: '厳格', color: 'bg-itako-sage', description: '婦人運動家、参議院議員。政治の浄化と有権者の啓発を、広場でも厳格に説き続ける。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Photo-Book-of-Fusae-Ichikawa-11.jpg' },
+  { id: 'atsuko', name: 'Atsuko', role: '古本屋の店主', homeLocationId: 'archive_room', flavor: '見守り', color: 'bg-itako-sand', description: '広場の地下深く、崩れかけの書庫で古本を売る。すべてを記録し、観察する不気味な存在。', avatar: 'assets/atsuko_warhol.png', isPreStyled: true },
+  { id: 'k_kokoro', name: 'K', role: '無職・書生', homeLocationId: 'stair', flavor: '絶望', color: 'bg-zinc-800', description: 'かつては学生。今はただ絶望の螺旋階段を上り下りする、目的を持たない魂。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Japanese_student_c1900.jpg/330px-Japanese_student_c1900.jpg' },
+  { id: 'alyosha', name: 'アリョーシャ', role: '修道士', homeLocationId: 'temple', flavor: '信仰', color: 'bg-itako-sage', description: '『カラマーゾフの兄弟』の三男。泥の中でも光を失わず、あらゆる罪を許そうとする。', avatar: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alyosha_Vanya.jpg/330px-Alyosha_Vanya.jpg' },
+  { id: 'raicho', name: '平塚らいてう', role: '思想家', homeLocationId: 'shrine', flavor: '太陽', color: 'bg-orange-900/50', description: '青踏社主宰。元始、女性は太陽であったと宣言した、内なる光を放つ霊。', avatar: 'assets/raicho_warhol.png', isPreStyled: true },
+  { id: 'fumiko', name: '金子文子', role: '浮浪・アナキスト', homeLocationId: 'underpass', flavor: '自己', color: 'bg-red-950/60', description: '国家を否定し、ガード下や独房で「自己」の主体性を貫いた。無籍者。', avatar: 'assets/fumiko_warhol.png', isPreStyled: true },
+  { id: 'rand', name: 'アイン・ランド', role: '富裕層インタビュアー', homeLocationId: 'throne', flavor: '利己', color: 'bg-zinc-700', description: '客観主義者。成功した強者のみにマイクを向け、弱さという寄生を断罪する。', avatar: 'assets/rand_warhol.png', isPreStyled: true },
 ];
 
 export const INITIAL_LOCATIONS = [

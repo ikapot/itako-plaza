@@ -170,13 +170,15 @@ export default function App() {
       const depth = Math.min(Math.floor(messages.filter(m => m.charId === charId).length / 2), 2);
       const context = [spiritSharedKnowledge, globalTrends?.summary ? `【トレンド】: ${globalTrends.summary}` : ''].filter(Boolean).join('\n\n');
 
+      const location = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
+
       await generateCharacterResponseStream(currentChar, userMsg, isUnderground, context, geminiKey, depth, (chunk, meta) => {
         setMessages(prev => {
           const next = [...prev];
           next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
           return next;
         });
-      });
+      }, location);
     } catch (e) { console.error(e); }
     setLoading(false);
   };

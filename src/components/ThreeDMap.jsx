@@ -1,13 +1,14 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
+import { INITIAL_CHARACTERS } from '../constants';
 
 /**
  * ThreeDMap Component
  * アトミズム的、かつ霊的な 3D 空間地図。
  * 54 か所の場所を 3D キューブの各面に配置し、ワイヤーフレームの箱で表現します。
  */
-function ThreeDMap({ locations, selectedLocationId, setSelectedLocationId, selectedCharIds }) {
+function ThreeDMap({ locations, selectedLocationId, setSelectedLocationId, selectedCharIds, locationEnergies }) {
   const containerRef = useRef(null);
   const cubeRef = useRef(null);
 
@@ -69,7 +70,8 @@ function ThreeDMap({ locations, selectedLocationId, setSelectedLocationId, selec
           >
             {faceLocs.map((loc) => {
               const isActive = loc.id === selectedLocationId;
-              const isCharHere = false; // 将来的にキャラの位置を紐づけることも可能
+              const energy = locationEnergies?.[loc.id] || 0;
+              const energyScale = 1 + (energy / 200); // エネルギーに応じてわずかに拡大
               
               return (
                 <div
@@ -88,8 +90,18 @@ function ThreeDMap({ locations, selectedLocationId, setSelectedLocationId, selec
                   `}
                   style={{
                     transformStyle: 'preserve-3d',
+                    transform: `scale(${energyScale})`,
                   }}
                 >
+                  {/* Energy Aura (for locations with high energy) */}
+                  {energy > 30 && (
+                    <motion.div 
+                        animate={{ opacity: [0.1, 0.3, 0.1], scale: [1, 1.2, 1] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                        className="absolute inset-x-[-10px] inset-y-[-10px] bg-white/5 blur-lg rounded-full pointer-events-none"
+                    />
+                  )}
+
                   {/* Wireframe box lines (Virtual box depth) */}
                   <div className={`absolute inset-0 border border-white/5 -translate-z-4 pointer-events-none transition-opacity duration-700 ${isActive ? 'opacity-100' : 'opacity-0'}`} />
                   
@@ -99,6 +111,17 @@ function ThreeDMap({ locations, selectedLocationId, setSelectedLocationId, selec
                   `}>
                     {loc.name}
                   </span>
+
+                  {/* Energy Pulses (Visualizing the "flow" of conversation) */}
+                  {energy > 10 && (
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        <motion.div 
+                            animate={{ y: ['-100%', '200%'], opacity: [0, 0.3, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, delay: Math.random() * 2 }}
+                            className="w-full h-[2px] bg-white/20 blur-[1px]"
+                        />
+                    </div>
+                  )}
                   
                   {/* Glow effect for selection */}
                   {isActive && (
@@ -111,34 +134,41 @@ function ThreeDMap({ locations, selectedLocationId, setSelectedLocationId, selec
                   )}
 
                   {/* Soul Wisps (Selected Characters) */}
-                  {isActive && selectedCharIds.length > 0 && (
+                  {selectedCharIds.length > 0 && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none transform-style-3d">
-                        {selectedCharIds.map((charId, idx) => (
-                            <motion.div
-                                key={charId}
-                                animate={{
-                                    y: [0, -10, 0],
-                                    x: [0, idx % 2 === 0 ? 5 : -5, 0],
-                                    scale: [1, 1.2, 1],
-                                    opacity: [0.4, 0.8, 0.4]
-                                }}
-                                transition={{
-                                    duration: 2 + idx,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                }}
-                                className="absolute w-2 h-2 bg-white rounded-full blur-[2px] shadow-[0_0_10px_white]"
-                                style={{
-                                    transform: `translateZ(20px) rotateY(${idx * 45}deg)`,
-                                }}
-                            />
-                        ))}
+                        {selectedCharIds.map((charId, idx) => {
+                            const char = INITIAL_CHARACTERS.find(c => c.id === charId);
+                            const IsAtHome = char?.homeLocationId === loc.id;
+                            const IsCurrentlySelected = isActive;
+                            
+                            if (!IsAtHome && !IsCurrentlySelected) return null;
+
+                            return (
+                                <motion.div
+                                    key={charId}
+                                    animate={{
+                                        y: [0, -15, 0],
+                                        scale: IsCurrentlySelected ? [1, 1.5, 1] : [0.5, 0.8, 0.5],
+                                        opacity: IsCurrentlySelected ? [0.6, 1, 0.6] : [0.2, 0.4, 0.2]
+                                    }}
+                                    transition={{
+                                        duration: 3 + idx,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                    className={`absolute w-3 h-3 rounded-full blur-[2px] ${IsCurrentlySelected ? 'bg-white shadow-[0_0_15px_white]' : 'bg-white/30 shadow-[0_0_5px_white/20]'}`}
+                                    style={{
+                                        transform: `translateZ(25px) rotateY(${idx * 60}deg)`,
+                                    }}
+                                />
+                            );
+                        })}
                     </div>
                   )}
                   
                   {/* Tooltip on hover */}
                   <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md px-2 py-1 rounded text-[7px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-[100]">
-                    {loc.description}
+                    {loc.description} {energy > 0 ? `| Intensity: ${Math.round(energy)}` : ''}
                   </div>
                 </div>
               );

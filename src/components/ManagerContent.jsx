@@ -68,6 +68,7 @@ const ManagerContent = React.memo(({
                             selectedLocationId={selectedLocationId} 
                             setSelectedLocationId={setSelectedLocationId}
                             selectedCharIds={selectedCharIds}
+                            locationEnergies={locationEnergies}
                         />
                     </motion.div>
                 )}
@@ -110,7 +111,8 @@ const ManagerContent = React.memo(({
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2 md:gap-3">
                                                 <span className={`text-sm md:text-base font-bold tracking-tight transition-colors ${isSelected ? 'text-white' : 'text-white/30'}`}>{c.name}</span>
-                                                <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.8)]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
+                                                <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-white text-black' : 'bg-white/5 text-white/10'}`}>{c.role}</span>
+                                                <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-white/20 text-white shadow-[0_0_10px_rgba(255,255,255,0.3)]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
                                             </div>
                                         </div>
                                         <p className={`text-[10px] md:text-xs leading-relaxed transition-opacity line-clamp-2 ${isSelected ? 'text-white/60' : 'text-white/20'}`}>
