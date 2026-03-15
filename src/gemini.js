@@ -119,11 +119,31 @@ const CHARACTER_CONFIGS = {
 /**
  * 統合されたGemini呼び出しヘルパー (案3対応)
  */
+/**
+ * Structured API Response
+ */
+class ApiResponse {
+  constructor(data, model, keyIndex, error = null) {
+    this.data = data;
+    this.model = model;
+    this.keyIndex = keyIndex;
+    this.error = error;
+    this.timestamp = new Date().toISOString();
+  }
+
+  get isError() {
+    return !!this.error;
+  }
+}
+
+/**
+ * 統合されたGemini呼び出しヘルパー
+ */
 export async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = {}, isJson = false) {
   const keys = userApiKey.split(',').map(k => k.trim()).filter(Boolean);
   let lastError = null;
 
-  for (const key of keys) {
+  for (const [keyIdx, key] of keys.entries()) {
     for (const modelName of FALLBACK_MODELS) {
       try {
         const genAI = new GoogleGenerativeAI(key);
@@ -136,32 +156,36 @@ export async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = 
         const result = await model.generateContent(prompt);
         const text = result.response.text();
 
+        let finalData = text;
         if (isJson) {
           const cleanJson = text.replace(/```json|```/g, "").trim();
-          return JSON.parse(cleanJson);
+          finalData = JSON.parse(cleanJson);
         }
-        return text;
+        
+        return new ApiResponse(finalData, modelName, keyIdx + 1);
       } catch (error) {
         lastError = error;
         const msg = error.message || "";
         const isQuota = error.status === 429 || msg.includes('429');
         const isAuth = error.status === 401 || error.status === 403 || msg.includes('API_KEY_INVALID');
         
-        console.warn(`[Gemini Attempt] ${modelName} failed: ${msg.substring(0, 60)}`);
+        console.warn(`[Gemini Attempt] ${modelName} (Key ${keyIdx + 1}) failed: ${msg.substring(0, 60)}`);
         
-        if (isAuth) break; // このキーは無効
-
+        if (isAuth) break; // このキーは無効なので次のキーへ
         if (isQuota) {
-          // 429の場合は少し待って、次のキー（あれば）に移るか、同じモデルでリトライするために少し待機
           await sleep(2000); 
           continue; 
         }
-        // その他のエラー（404など）は次のモデルを試す
         continue;
       }
     }
   }
-  throw lastError || new Error("All spiritual conduits collapsed.");
+  
+  throw new Error(JSON.stringify({
+    status: lastError?.status || 500,
+    message: lastError?.message || "All spiritual conduits collapsed.",
+    timestamp: new Date().toISOString()
+  }));
 }
 
 export async function generateCharacterResponseStream(currentChar, userMessage, isUnderground = false, externalContext = "", userApiKey = "", interactionDepth = 0, onChunk, locationContext = null) {
@@ -242,7 +266,8 @@ export async function evaluateFutureSelf(bookmarks, userApiKey) {
   const bookmarkText = bookmarks.map(b => `[${b.charId}] 私: "${b.userMsg}" -> 相手: "${b.aiMsg}"`).join('\n');
   const prompt = `2036年のあなたとして、2026年の自分へメッセージを送れ。対話記録:\n${bookmarkText}`;
   try {
-    return await invokeGemini(userApiKey, prompt, CHARACTER_CONFIGS.future_self.systemPrompt);
+    const res = await invokeGemini(userApiKey, prompt, CHARACTER_CONFIGS.future_self.systemPrompt);
+    return res.data;
   } catch {
     return "時空の歪みに妨げられました。";
   }
@@ -251,8 +276,8 @@ export async function evaluateFutureSelf(bookmarks, userApiKey) {
 export async function validateGeminiApiKey(rawKey) {
   if (!rawKey) return false;
   try {
-    const text = await invokeGemini(rawKey, "ok", "", { maxOutputTokens: 1 });
-    return !!text;
+    const res = await invokeGemini(rawKey, "ok", "", { maxOutputTokens: 1 });
+    return !!res.data;
   } catch (e) {
     const msg = e.message || "";
     if (msg.includes('429') || msg.includes('Quota')) return true;
@@ -267,7 +292,8 @@ export async function extractTrendsFromNotebook(notebookText, userApiKey) {
 <text>${notebookText.substring(0, 3000)}</text>
 { "summary": "短いポエムのような要約", "keywords": ["k1", "k2", "k3"] }`;
   try {
-    return await invokeGemini(userApiKey, prompt, "", {}, true);
+    const res = await invokeGemini(userApiKey, prompt, "", {}, true);
+    return res.data;
   } catch {
     return null;
   }
@@ -280,7 +306,8 @@ export async function generateWorldEvent(userApiKey, globalTrends) {
 ${trendsContext}
 { "type": "...", "content": "100文字以内の詩的文章" }`;
   try {
-    return await invokeGemini(userApiKey, prompt, "", {}, true);
+    const res = await invokeGemini(userApiKey, prompt, "", {}, true);
+    return res.data;
   } catch {
     return null;
   }
@@ -297,7 +324,8 @@ ${eventContext} 共有知識: ${spiritSharedKnowledge.substring(0, 500)}
 指示: 3〜6往復の文学的対話を生成してください。
 [ {"charId": "...", "content": "..."}, ... ]`;
   try {
-    return await invokeGemini(userApiKey, prompt, "あなたは口寄せです。", { temperature: 0.8 }, true);
+    const res = await invokeGemini(userApiKey, prompt, "あなたは口寄せです。", { temperature: 0.8 }, true);
+    return res.data;
   } catch {
     return [];
   }

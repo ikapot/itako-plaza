@@ -102,28 +102,27 @@ const Timeline = React.memo(({
                         className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4"
                     >
                         <AnimatePresence>
-                            {currentWorldEvent && (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 1.1, y: -20 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 20 }}
-                                    className={`mb-6 p-4 rounded-xl backdrop-blur-xl border border-white/10 shadow-2xl flex items-center gap-3 transition-colors duration-1000 ${
-                                        currentWorldEvent.type === 'war' ? 'bg-red-950/40 text-red-100' :
-                                        currentWorldEvent.type === 'earthquake' ? 'bg-amber-950/40 text-amber-100' :
-                                        'bg-white/5 text-white/50'
-                                    }`}
-                                >
-                                    <div className={`w-2 h-2 rounded-full animate-pulse flex-shrink-0 ${
-                                        currentWorldEvent.type === 'war' ? 'bg-red-500' :
-                                        currentWorldEvent.type === 'earthquake' ? 'bg-amber-500' :
-                                        'bg-white/30'
-                                    }`} />
-                                    <div className="flex flex-col overflow-hidden">
-                                        <span className="text-[8px] font-black tracking-[0.2em] uppercase opacity-40 mb-1">Anomaly Log / 歴史の震動</span>
-                                        <span className="text-xs md:text-sm font-medium tracking-wider">{currentWorldEvent.content}</span>
-                                    </div>
-                                </motion.div>
-                            )}
+                            {currentWorldEvent && (() => {
+                                const eventConfig = {
+                                    war: { bg: 'bg-red-950/40 text-red-100', dot: 'bg-red-500' },
+                                    earthquake: { bg: 'bg-amber-950/40 text-amber-100', dot: 'bg-amber-500' }
+                                };
+                                const config = eventConfig[currentWorldEvent.type] || { bg: 'bg-white/5 text-white/50', dot: 'bg-white/30' };
+                                return (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 1.1, y: -20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 20 }}
+                                        className={`mb-6 p-4 rounded-xl backdrop-blur-xl border border-white/10 shadow-2xl flex items-center gap-3 transition-colors duration-1000 ${config.bg}`}
+                                    >
+                                        <div className={`w-2 h-2 rounded-full animate-pulse flex-shrink-0 ${config.dot}`} />
+                                        <div className="flex flex-col overflow-hidden">
+                                            <span className="text-[8px] font-black tracking-[0.2em] uppercase opacity-40 mb-1">Anomaly Log / 歴史の震動</span>
+                                            <span className="text-xs md:text-sm font-medium tracking-wider">{currentWorldEvent.content}</span>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })()}
                         </AnimatePresence>
 
                         <div className="flex items-center justify-between">

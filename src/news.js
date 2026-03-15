@@ -2,17 +2,28 @@ import { invokeGemini } from "./gemini";
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+const CACHE_KEY = 'itako_news_cache';
+const CACHE_TIME_KEY = 'itako_news_cache_time';
+const CACHE_EXPIRY_MS = 3600000;
+
+function isCacheValid(now) {
+  const cachedData = localStorage.getItem(CACHE_KEY);
+  const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+  if (!cachedData || !cachedTime) return false;
+  return (now - parseInt(cachedTime)) < CACHE_EXPIRY_MS;
+}
+
+function updateCache(data, timestamp) {
+  localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  localStorage.setItem(CACHE_TIME_KEY, timestamp.toString());
+}
+
 export async function fetchFictionalizedNews(apiKey) {
   if (!apiKey) return [];
 
-  const CACHE_KEY = 'itako_news_cache';
-  const CACHE_TIME_KEY = 'itako_news_cache_time';
-  const cachedData = localStorage.getItem(CACHE_KEY);
-  const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
   const now = Date.now();
-
-  if (cachedData && cachedTime && (now - parseInt(cachedTime)) < 3600000) {
-    return JSON.parse(cachedData);
+  if (isCacheValid(now)) {
+    return JSON.parse(localStorage.getItem(CACHE_KEY));
   }
 
   const prompt = `
@@ -30,10 +41,10 @@ export async function fetchFictionalizedNews(apiKey) {
 ]`;
 
   try {
-    const newsData = await invokeGemini(apiKey, prompt, "あなたは電脳世界の口寄せです。", { temperature: 0.8 }, true);
+    const res = await invokeGemini(apiKey, prompt, "あなたは電脳世界の口寄せです。", { temperature: 0.8 }, true);
+    const newsData = res.data;
     if (newsData && Array.isArray(newsData)) {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(newsData));
-      localStorage.setItem(CACHE_TIME_KEY, now.toString());
+      updateCache(newsData, now);
       return newsData;
     }
   } catch (err) {
@@ -48,7 +59,8 @@ export async function generateCharacterNewsComment(newsItem, charId, apiKey) {
   const prompt = `あなたは「${charId}」の魂です。ニュース「${newsItem.title}」に対して、不気味な独白を述べてください。`;
 
   try {
-    return await invokeGemini(apiKey, prompt, "あなたは口寄せです。", { temperature: 0.9 });
+    const res = await invokeGemini(apiKey, prompt, "あなたは口寄せです。", { temperature: 0.9 });
+    return res.data;
   } catch {
     return "沈黙。";
   }

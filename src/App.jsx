@@ -67,9 +67,13 @@ export default function App() {
   })), []);
 
   const handleToggleChar = useCallback((id) => {
-    setSelectedCharIds(prev => (prev.includes(id) && prev.length > 1) 
-      ? prev.filter(cId => cId !== id) 
-      : [...new Set([...prev, id])]);
+    setSelectedCharIds(prev => {
+      const isAlreadySelected = prev.includes(id);
+      if (isAlreadySelected && prev.length > 1) {
+        return prev.filter(cId => cId !== id);
+      }
+      return [...new Set([...prev, id])];
+    });
   }, []);
 
   const handleSlotChange = useCallback(async (index) => {
@@ -94,16 +98,19 @@ export default function App() {
 
   const handleValidateApi = useCallback(async () => {
     if (!geminiKey || isValidatingApi) return;
+    
     setIsValidatingApi(true);
-    if (await validateGeminiApiKey(geminiKey)) {
+    const isValid = await validateGeminiApiKey(geminiKey);
+    
+    if (isValid) {
       setApiConnectionStatus('success');
       setIsAppReady(true);
-      if (isDrawerOpen) setIsDrawerOpen(false);
+      setIsDrawerOpen(false);
     } else {
       setApiConnectionStatus('error');
     }
     setIsValidatingApi(false);
-  }, [geminiKey, isValidatingApi, isDrawerOpen]);
+  }, [geminiKey, isValidatingApi]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {

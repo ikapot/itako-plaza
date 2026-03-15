@@ -12,14 +12,19 @@ const FloatingInputBar = React.memo(({
             <motion.div
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="max-w-xl mx-auto flex items-center gap-4 bg-black/90 backdrop-blur-3xl border border-white/30 p-2 pl-6 rounded-full shadow-[0_30px_60px_-12px_rgba(0,0,0,0.9)] pointer-events-auto transition-all duration-700 hover:border-white/50 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,1)] focus-within:border-[#bd8a78] group"
+                className="max-w-xl mx-auto flex items-center gap-4 glass-spectral p-2 pl-6 rounded-full shadow-2xl pointer-events-auto transition-all duration-700 hover:border-white/30 group"
             >
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="深淵へ言葉を記す..."
-                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
-                    className="flex-1 bg-transparent border-none focus:outline-none text-white/80 text-sm md:text-base py-4 resize-none h-14 leading-relaxed placeholder:text-white/5 font-sans itako-scrollbar"
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage();
+                        }
+                    }}
+                    className="flex-1 bg-transparent border-none focus:outline-none text-white/80 text-sm md:text-base py-4 resize-none h-14 leading-relaxed placeholder:text-zinc-800 font-sans itako-scrollbar"
                 />
                 <button
                     onClick={handleSendMessage}
