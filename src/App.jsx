@@ -1,5 +1,5 @@
 // Itako Plaza v1.2.1 - Simplified Architecture
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies } from './firebase';
 import { invokeGemini, generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent } from './gemini';
