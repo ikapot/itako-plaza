@@ -83,4 +83,15 @@ body {
   .pt-safe {
     padding-top: max(1rem, env(safe-area-inset-top));
   }
+
+  /* 3D Space Utilities */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+  .-translate-z-4 {
+    transform: translateZ(-16px);
+  }
 }

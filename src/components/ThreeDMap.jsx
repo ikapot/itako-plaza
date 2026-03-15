@@ -60,7 +60,7 @@ function ThreeDMap({ locations, selectedLocationId, setSelectedLocationId, selec
       {/* 3D Cube Container */}
       <div 
         ref={cubeRef}
-        className="relative w-full h-full flex items-center justify-center transform-style-3d pointer-events-none"
+        className="relative w-full h-full flex items-center justify-center transform-style-3d py-20"
       >
         {faces.map((faceLocs, faceIdx) => (
           <div 
