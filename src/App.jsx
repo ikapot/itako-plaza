@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies } from './firebase';
 import { generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook } from './gemini';
-import { generateClaudeResponseStream, validateClaudeApiKey } from './claude';
 import { fetchFictionalizedNews } from './news';
 import { searchNDLArchive } from './ndl';
 import { INITIAL_CHARACTERS, INITIAL_LOCATIONS } from './constants';
@@ -30,7 +29,6 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState(() => localStorage.getItem('itako_user_name') || '無名の参列者');
   const [geminiKey, setGeminiKey] = useState(() => cleanKey(localStorage.getItem('itako_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || ''));
-  const [claudeKey, setClaudeKey] = useState(() => cleanKey(localStorage.getItem('itako_claude_key') || ''));
   const [isAppReady, setIsAppReady] = useState(false);
   const [activeSlot, setActiveSlot] = useState(0);
   const [input, setInput] = useState('');
@@ -172,23 +170,13 @@ export default function App() {
       const depth = Math.min(Math.floor(messages.filter(m => m.charId === charId).length / 2), 2);
       const context = [spiritSharedKnowledge, globalTrends?.summary ? `【トレンド】: ${globalTrends.summary}` : ''].filter(Boolean).join('\n\n');
 
-      if (isUnderground && claudeKey) {
-        await generateClaudeResponseStream(claudeKey, userMsg, context, (chunk, meta) => {
-          setMessages(prev => {
-            const next = [...prev];
-            next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
-            return next;
-          });
+      await generateCharacterResponseStream(currentChar, userMsg, isUnderground, context, geminiKey, depth, (chunk, meta) => {
+        setMessages(prev => {
+          const next = [...prev];
+          next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
+          return next;
         });
-      } else {
-        await generateCharacterResponseStream(currentChar, userMsg, isUnderground, context, geminiKey, depth, (chunk, meta) => {
-          setMessages(prev => {
-            const next = [...prev];
-            next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
-            return next;
-          });
-        });
-      }
+      });
     } catch (e) { console.error(e); }
     setLoading(false);
   };
@@ -226,7 +214,7 @@ export default function App() {
       </AnimatePresence>
 
       <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} />
-      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, claudeKey, setClaudeKey, isValidatingApi, apiConnectionStatus, validateGeminiApiKey, validateClaudeApiKey, setIsAppReady }} />
+      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, validateGeminiApiKey, setIsAppReady }} />
 
       <div className="flex-1 flex overflow-hidden relative">
         <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies }} />

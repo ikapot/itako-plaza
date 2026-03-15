@@ -7,12 +7,9 @@ const SettingsOverlay = React.memo(({
     setShowSettings, 
     geminiKey, 
     setGeminiKey, 
-    claudeKey,
-    setClaudeKey,
     isValidatingApi, 
     apiConnectionStatus, 
     validateGeminiApiKey, 
-    validateClaudeApiKey,
     setIsAppReady 
 }) => {
     return (
@@ -93,33 +90,6 @@ const SettingsOverlay = React.memo(({
                                 )}
                             </div>
 
-                            <div className="pt-6 border-t border-white/5 space-y-4">
-                                <div className="flex justify-between items-end">
-                                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Anthropic Engine Key (Optional)</label>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${claudeKey ? 'bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]' : 'bg-white/10'}`} />
-                                </div>
-                                <input
-                                    type="password"
-                                    placeholder="sk-ant-api..."
-                                    value={claudeKey}
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        setClaudeKey(val);
-                                        localStorage.setItem('itako_claude_key', val);
-                                    }}
-                                    className="w-full bg-black border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-cyan-500/30 outline-none transition-all placeholder:text-white/5 font-mono"
-                                />
-                                <button
-                                    onClick={async () => {
-                                        if (claudeKey && !isValidatingApi) {
-                                            await validateClaudeApiKey(claudeKey);
-                                        }
-                                    }}
-                                    className="w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase bg-white/5 text-white/40 hover:bg-white/10 hover:text-white transition-all font-oswald"
-                                >
-                                    検証 (Validate)
-                                </button>
-                            </div>
 
                             <div className="pt-6 border-t border-white/5">
                                 <p className="text-[9px] leading-relaxed text-white/20 font-serif italic text-center">

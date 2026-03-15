@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Globe, Cpu, MapPin } from 'lucide-react';
-import CubeMap from './CubeMap';
+import { User, Globe, Cpu, MapPin, Search } from 'lucide-react';
+import ThreeDMap from './ThreeDMap';
 import WarholAvatar from './WarholAvatar';
 
 const ManagerContent = React.memo(({
@@ -58,16 +58,16 @@ const ManagerContent = React.memo(({
                 {activeManagerTab === 'map' && (
                     <motion.div
                         key="map"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
                         className="space-y-6"
                     >
-                        <CubeMap 
+                        <ThreeDMap 
                             locations={locations} 
                             selectedLocationId={selectedLocationId} 
-                            onSelectLocation={setSelectedLocationId} 
-                            locationEnergies={locationEnergies}
+                            setSelectedLocationId={setSelectedLocationId}
+                            selectedCharIds={selectedCharIds}
                         />
                     </motion.div>
                 )}
@@ -86,16 +86,31 @@ const ManagerContent = React.memo(({
                                 <button
                                     key={c.id}
                                     onClick={() => handleToggleChar(c.id)}
-                                    className={`w-full group text-left flex items-start gap-4 md:gap-6 p-4 md:p-6 rounded-[35px] transition-all duration-300 border active:scale-[0.98] ${isSelected ? 'bg-white/10 border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.1)] translate-x-2' : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}`}
+                                    className={`
+                                        w-full group relative text-left flex items-start gap-4 md:gap-6 p-4 md:p-6 rounded-[35px] transition-all duration-500 border active:scale-[0.98] overflow-hidden
+                                        ${isSelected 
+                                            ? 'bg-white/10 border-white/40 shadow-[0_0_30px_rgba(255,255,255,0.15)] translate-x-2' 
+                                            : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}
+                                    `}
                                 >
-                                    <div onClick={(e) => { e.stopPropagation(); setEnlargedCharId(c.id); }} className="cursor-zoom-in">
+                                    {/* Selection Glow Background */}
+                                    {isSelected && (
+                                        <motion.div 
+                                            layoutId={`char-glow-${c.id}`}
+                                            className="absolute inset-0 bg-white/5 blur-2xl pointer-events-none"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                        />
+                                    )}
+
+                                    <div onClick={(e) => { e.stopPropagation(); setEnlargedCharId(c.id); }} className="relative z-10 cursor-zoom-in">
                                         <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" isPreStyled={c.isPreStyled} />
                                     </div>
-                                    <div className="flex-1 space-y-1 md:space-y-2 py-0.5 md:py-1">
+                                    <div className="relative z-10 flex-1 space-y-1 md:space-y-2 py-0.5 md:py-1">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2 md:gap-3">
                                                 <span className={`text-sm md:text-base font-bold tracking-tight transition-colors ${isSelected ? 'text-white' : 'text-white/30'}`}>{c.name}</span>
-                                                <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-[#bd8a78]/40 text-white shadow-[0_0_10px_rgba(189,138,120,0.5)]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
+                                                <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isSelected ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.8)]' : 'bg-white/5 text-white/10'}`}>{c.flavor}</span>
                                             </div>
                                         </div>
                                         <p className={`text-[10px] md:text-xs leading-relaxed transition-opacity line-clamp-2 ${isSelected ? 'text-white/60' : 'text-white/20'}`}>
