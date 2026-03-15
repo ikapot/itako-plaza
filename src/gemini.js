@@ -119,7 +119,7 @@ const CHARACTER_CONFIGS = {
 /**
  * 統合されたGemini呼び出しヘルパー (案3対応)
  */
-async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = {}, isJson = false) {
+export async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = {}, isJson = false) {
   const keys = userApiKey.split(',').map(k => k.trim()).filter(Boolean);
   let lastError = null;
 
