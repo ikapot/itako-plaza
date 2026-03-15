@@ -123,14 +123,23 @@ export default function App() {
     if (!geminiKey) return;
     fetchFictionalizedNews(geminiKey).then(setNews);
     
-    const updateEvent = async () => setCurrentWorldEvent(await (await import('./gemini')).generateWorldEvent(geminiKey, globalTrends));
-    updateEvent();
-    const eventInterval = setInterval(updateEvent, 300000);
-
     const energyInterval = setInterval(async () => setLocationEnergies(await fetchLocationEnergies()), 10000);
 
-    return () => { clearInterval(eventInterval); clearInterval(energyInterval); };
-  }, [geminiKey, globalTrends]);
+    return () => { clearInterval(energyInterval); };
+  }, [geminiKey]);
+
+  useEffect(() => {
+    const updateEvent = async () => {
+      await new Promise(r => setTimeout(r, 2000)); // 起動直後のバーストを避ける
+      const event = await generateWorldEvent(geminiKey, globalTrends);
+      if (event) setCurrentWorldEvent(event);
+    };
+    if (geminiKey && isAppReady) {
+      updateEvent();
+      const eventInterval = setInterval(updateEvent, 300000);
+      return () => clearInterval(eventInterval);
+    }
+  }, [geminiKey, isAppReady, globalTrends]);
 
   useEffect(() => {
     async function triggerLocationConversation() {

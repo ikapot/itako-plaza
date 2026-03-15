@@ -1,4 +1,4 @@
-import { User, Menu, Settings, TrendingUp, MessageSquare, Ghost } from 'lucide-react';
+import { User, Menu, Settings, TrendingUp, MessageSquare, Ghost, Globe, Cpu } from 'lucide-react';
 import Logo from './Logo';
 
 export default function Header({

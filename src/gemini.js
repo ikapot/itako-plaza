@@ -2,10 +2,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
 const FALLBACK_MODELS = [
-  "gemini-1.5-flash-latest",
+  "gemini-2.0-flash", // ログで唯一反応（429）しているため最優先へ
   "gemini-1.5-flash",
+  "gemini-1.5-flash-latest",
   "gemini-1.5-flash-8b",
-  "gemini-2.0-flash",
   "gemini-1.5-pro"
 ];
 
@@ -150,7 +150,12 @@ async function invokeGemini(userApiKey, prompt, sysPrompt = "", config = {}, isJ
         console.warn(`[Gemini Attempt] ${modelName} failed: ${msg.substring(0, 60)}`);
         
         if (isAuth) break; // このキーは無効
-        if (isQuota) { await sleep(1000); continue; }
+
+        if (isQuota) {
+          // 429の場合は少し待って、次のキー（あれば）に移るか、同じモデルでリトライするために少し待機
+          await sleep(2000); 
+          continue; 
+        }
         // その他のエラー（404など）は次のモデルを試す
         continue;
       }
