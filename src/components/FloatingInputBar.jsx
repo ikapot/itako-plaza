@@ -12,7 +12,8 @@ const FloatingInputBar = React.memo(({
             <motion.div
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="max-w-xl mx-auto flex items-center gap-4 glass-spectral p-2 pl-6 rounded-full shadow-2xl pointer-events-auto transition-all duration-700 hover:border-white/30 group"
+                whileHover={{ scale: 1.01 }}
+                className="max-w-xl mx-auto flex items-center gap-3 glass-spectral p-2 pl-6 rounded-full pointer-events-auto transition-all duration-1000 group"
             >
                 <textarea
                     value={input}
@@ -24,15 +25,14 @@ const FloatingInputBar = React.memo(({
                             handleSendMessage();
                         }
                     }}
-                    className="flex-1 bg-transparent border-none focus:outline-none text-white/80 text-sm md:text-base py-4 resize-none h-14 leading-relaxed placeholder:text-zinc-800 font-sans itako-scrollbar"
+                    className="flex-1 bg-transparent border-none focus:outline-none text-white/90 text-sm md:text-base py-4 resize-none h-14 leading-relaxed placeholder:text-white/10 font-sans tracking-wide"
                 />
                 <button
                     onClick={handleSendMessage}
                     disabled={loading || !input.trim()}
-                    className="w-12 h-12 rounded-full bg-white hover:bg-[#bd8a78] hover:text-white text-black flex items-center justify-center transition-all duration-500 active:scale-90 disabled:opacity-5 shadow-inner group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] overflow-hidden relative cursor-pointer"
+                    className="w-12 h-12 rounded-full border border-white/10 hover:border-white/40 hover:bg-white/5 text-white/40 hover:text-white flex items-center justify-center transition-all duration-700 active:scale-95 disabled:opacity-5 overflow-hidden relative"
                 >
-                    <div className="relative z-10 font-oswald font-black text-xl">+</div>
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                    <div className="relative z-10 font-oswald font-extralight text-2xl">+</div>
                 </button>
             </motion.div>
         </div>

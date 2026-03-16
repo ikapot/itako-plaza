@@ -127,7 +127,7 @@ const Timeline = React.memo(({
                                             viewport={{ once: true }}
                                             className={`flex ${dIdx % 2 === 0 ? 'justify-end' : 'justify-start'} w-full`}
                                         >
-                                            <div className={`p-6 md:p-8 rounded-[35px] border shadow-2xl max-w-[85%] ${dIdx % 2 === 0 ? 'bg-zinc-900/90 border-white/10' : 'bg-black/80 border-white/5'}`}>
+                                            <div className={`p-6 md:p-8 rounded-[35px] border shadow-2xl max-w-[85%] glass-ethereal spiritual-float ${dIdx % 2 === 0 ? 'border-white/10' : 'border-white/5'}`}>
                                                 <div className="flex items-center gap-3 mb-3">
                                                     {char && <WarholAvatar src={char.avatar} size="w-6 h-6" isSelected isPreStyled={char.isPreStyled} colorClass={char.color} />}
                                                     <span className="text-[9px] font-bold tracking-[0.3em] text-white/40 uppercase">{char?.name || d.charId}</span>
@@ -203,7 +203,7 @@ const Timeline = React.memo(({
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
                                             className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                                         >
-                                            <div className={`group relative p-6 md:p-8 rounded-[35px] transition-all duration-500 max-w-[95%] md:max-w-[85%] ${isUser ? 'bg-zinc-900 shadow-2xl border border-white/10' : 'bg-black border border-white/5'}`}>
+                                            <div className={`group relative p-6 md:p-8 rounded-[35px] transition-all duration-1000 max-w-[95%] md:max-w-[85%] glass-ethereal ${isUser ? 'border-white/10' : 'border-white/5 spiritual-float'}`}>
                                                 {!isUser && (
                                                     <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
                                                         <div className="flex items-center gap-3">
@@ -266,7 +266,7 @@ const Timeline = React.memo(({
 
                     <div className="space-y-12">
                         {globalTrends && (
-                            <div className="bg-[#111] p-8 rounded-3xl border border-white/10">
+                            <div className="glass-ethereal p-8 rounded-3xl border border-white/10 spiritual-float">
                                 <p className="text-xl font-serif text-white/90 leading-relaxed mb-6">
                                     {globalTrends.summary}
                                 </p>
