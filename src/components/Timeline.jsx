@@ -24,7 +24,7 @@ const DialogueEcho = React.memo(({ messages, accentColor }) => {
                     key={e.id}
                     initial={{ opacity: 0, y: 100 }}
                     animate={{ 
-                        opacity: [0, 0.15, 0],
+                        opacity: [0, 0.08, 0],
                         y: [-100, -300],
                         scale: [0.9, 1.1]
                     }}
@@ -88,7 +88,7 @@ const Timeline = React.memo(({
         >
             <DialogueEcho messages={messages} accentColor={accentColor} />
             {/* Slot 1: News */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms]">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms] flex flex-col items-start">
                 <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
@@ -97,7 +97,7 @@ const Timeline = React.memo(({
                         viewport={{ once: true }}
                         className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4"
                     >
-                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-zinc-600 leading-none font-oswald uppercase">News</h2>
+                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-zinc-900/60 leading-none font-oswald uppercase">News</h2>
                         <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-oswald">霊感ニュース</p>
                     </motion.header>
 
@@ -144,7 +144,7 @@ const Timeline = React.memo(({
             </section>
 
             {/* Slot 2: Main Dialog */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms]">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms] flex flex-col items-start">
                 <div className="max-w-2xl mx-auto min-h-full flex flex-col">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
@@ -178,7 +178,7 @@ const Timeline = React.memo(({
                         </AnimatePresence>
 
                         <div className="flex items-center justify-between">
-                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-zinc-600 leading-none font-oswald uppercase">Dialog</h2>
+                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-zinc-900/60 leading-none font-oswald uppercase">Dialog</h2>
                             <button
                                 onClick={() => setIsUnderground(!isUnderground)}
                                 className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
@@ -242,7 +242,7 @@ const Timeline = React.memo(({
             </section>
 
             {/* Slot 3: Trends */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms]">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms] flex flex-col items-start">
                 <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
@@ -252,7 +252,7 @@ const Timeline = React.memo(({
                         className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4"
                     >
                         <div className="flex items-center justify-between">
-                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-zinc-600 leading-none font-oswald uppercase">Trends</h2>
+                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-zinc-900/60 leading-none font-oswald uppercase">Trends</h2>
                             <button
                                 onClick={() => setShowNotebookModal(true)}
                                 className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase"

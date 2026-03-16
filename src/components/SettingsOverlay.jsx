@@ -30,8 +30,11 @@ const SettingsOverlay = React.memo(({
                         className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm max-h-[90vh] bg-zinc-900 border border-white/10 p-8 rounded-[40px] z-[120] shadow-3xl overflow-y-auto itako-scrollbar"
                     >
                         <div className="flex items-center justify-between mb-10">
-                            <span className="text-xl font-bold font-oswald tracking-widest text-white uppercase">Atmosphere</span>
-                            <button onClick={() => setShowSettings(false)} className="text-white/20 hover:text-white"><X size={20} /></button>
+                            <div className="flex flex-col">
+                                <span className="text-xl font-bold font-oswald tracking-widest text-white uppercase">Circuit Control</span>
+                                <span className="text-[8px] font-black text-[#f15a24] tracking-[0.3em] uppercase">霊的回路の制御盤</span>
+                            </div>
+                            <button onClick={() => setShowSettings(false)} className="text-white/20 hover:text-white transition-transform active:scale-90"><X size={20} /></button>
                         </div>
 
                         <div className="space-y-10">
@@ -46,20 +49,30 @@ const SettingsOverlay = React.memo(({
 
                             <div className="pt-6 border-t border-white/5 space-y-4">
                                 <div className="flex justify-between items-end">
-                                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Gemini Engine Key</label>
+                                    <div className="flex flex-col">
+                                        <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em] font-oswald text-left">Spiritual Frequency</label>
+                                        <span className="text-[7px] font-bold text-white/10 uppercase tracking-[0.2em]">霊的周波数 (API Key)</span>
+                                    </div>
                                     <div className={`w-1.5 h-1.5 rounded-full ${geminiKey ? 'bg-[#f15a24] shadow-[0_0_10px_rgba(241,90,36,0.5)]' : 'bg-white/10'}`} />
                                 </div>
+                                <label className="block text-xs text-white/60 mb-1 uppercase tracking-widest">
+                                    霊的周波数 / Spiritual Frequency (Gemini or OpenRouter API Key)
+                                </label>
                                 <input
                                     type="password"
-                                    placeholder="Enter API Key..."
-                                    value={geminiKey}
+                                    value={geminiKey} // Assuming geminiKey is used for both for simplicity based on original code
                                     onChange={(e) => {
                                         const val = e.target.value;
                                         setGeminiKey(val);
                                         localStorage.setItem('itako_gemini_key', val);
                                     }}
-                                    className="w-full bg-black border border-white/5 rounded-2xl p-4 text-white text-[10px] focus:ring-1 ring-[#f15a24]/30 outline-none transition-all placeholder:text-white/5 font-mono"
+                                    placeholder="sk-or-v1-..."
+                                    className="w-full bg-black/40 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-white/50 transition-colors"
                                 />
+                                <p className="mt-2 text-[10px] text-white/40 leading-relaxed">
+                                    ※ Google AI Studio または OpenRouter のキーを入力してください。<br/>
+                                    OpenRouter を使用すると、文豪ごとに最適なモデル（Claude 3.5 Sonnet等）が自動的に割り当てられます。
+                                </p>
                                 <button
                                     onClick={async () => {
                                         if (geminiKey && !isValidatingApi) {
@@ -76,7 +89,7 @@ const SettingsOverlay = React.memo(({
                                         : geminiKey && !isValidatingApi ? 'bg-white/10 text-white' : 'bg-white/5 text-white/20'
                                         }`}
                                 >
-                                    {isValidatingApi ? 'Validating...' : apiConnectionStatus === 'error' ? 'Retry Connection' : '接続する (Connect)'}
+                                    {isValidatingApi ? 'Synchronizing...' : apiConnectionStatus === 'error' ? 'Circuit Failure / Retry' : '回路を安定化させる (Stabilize)'}
                                 </button>
                                 {apiConnectionStatus === 'error' && (
                                     <p className="text-[8px] font-bold text-red-500 uppercase tracking-widest text-center animate-pulse">

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies, saveBookmark, logout } from './firebase';
-import { invokeGemini, generateCharacterResponseStream, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback } from './gemini';
+import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback } from './gemini';
 import { fetchFictionalizedNews } from './news';
 import { searchNDLArchive } from './ndl';
 import { INITIAL_CHARACTERS, INITIAL_LOCATIONS, AMBIENT_COLORS } from './constants';
@@ -260,14 +260,26 @@ export default function App() {
       const location = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
       const otherChars = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id) && c.id !== charId);
 
-      await generateCharacterResponseStream(currentChar, userMsg, isUnderground, context, geminiKey, depth, (chunk, meta) => {
-      setMessages(prev => {
-        const next = [...prev];
-        next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
-        return next;
+      await streamSpiritualDialogue({
+        character: currentChar,
+        message: userMsg,
+        apiKey: geminiKey,
+        options: {
+          isUnderground,
+          externalContext: context,
+          interactionDepth: depth,
+          location,
+          others: otherChars
+        },
+        onChunk: (chunk, meta) => {
+          setMessages(prev => {
+            const next = [...prev];
+            next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
+            return next;
+          });
+          if (meta?.sentiment) setGlobalSentiment(meta.sentiment);
+        }
       });
-      if (meta?.sentiment) setGlobalSentiment(meta.sentiment);
-    }, location, otherChars);
     
     // Automatically switch to Dialog tab
     handleSlotChange(1);

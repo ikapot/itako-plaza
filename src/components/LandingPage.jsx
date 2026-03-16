@@ -160,12 +160,23 @@ export default function LandingPage({ onLoginComplete, user }) {
                                 className="space-y-8"
                             >
                                 <h2 className="text-3xl font-bold tracking-tighter text-white/90">
-                                    口寄せの準備。
+                                    降霊の準備。
                                 </h2>
-                                <div className="space-y-4">
-                                    <p className="text-sm text-zinc-500">
-                                        対話を開始するには、あなたの Gemini API Key が必要です。
-                                    </p>
+                                <div className="space-y-6">
+                                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3">
+                                        <p className="text-[11px] text-white/40 leading-relaxed font-serif italic">
+                                            「あなたの守護文豪を呼ぶための周波数（APIキー）をセットしてください。それは深淵と現世を繋ぐ唯一の鍵となります。」
+                                        </p>
+                                        <a 
+                                            href="https://aistudio.google.com/app/apikey" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 text-[10px] font-bold text-[#f15a24] hover:text-white transition-colors uppercase tracking-widest"
+                                        >
+                                            <LogIn size={12} />
+                                            Get Spiritual Key (AI Studio)
+                                        </a>
+                                    </div>
                                     <div className="space-y-2">
                                         <input
                                             type="password"
@@ -179,7 +190,7 @@ export default function LandingPage({ onLoginComplete, user }) {
                                             disabled={!tempKey || isConnecting}
                                             className={`w-full py-4 rounded-full font-bold transition-all duration-500 disabled:opacity-50 ${isValidated
                                                 ? 'bg-[#f15a24] text-white shadow-[0_0_20px_rgba(241,90,36,0.6)]'
-                                                : tempKey && !isConnecting ? 'bg-zinc-100 text-black' : 'bg-zinc-200 text-black'
+                                                : tempKey && !isConnecting ? 'bg-white text-black' : 'bg-white/20 text-white/20'
                                                 }`}
                                         >
                                             <div className="flex items-center justify-center gap-2">
@@ -190,10 +201,10 @@ export default function LandingPage({ onLoginComplete, user }) {
                                                             transition={{ repeat: Infinity, duration: 1 }}
                                                             className="w-2 h-2 rounded-full bg-white"
                                                         />
-                                                        <span>接続中...</span>
+                                                        <span className="text-[10px] uppercase tracking-widest">Synchronizing...</span>
                                                     </>
                                                 ) : (
-                                                    <span>接続する (Connect)</span>
+                                                    <span className="text-[10px] uppercase tracking-widest">回路を開く (Open Circuit)</span>
                                                 )}
                                             </div>
                                         </button>
