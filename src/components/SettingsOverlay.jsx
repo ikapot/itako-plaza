@@ -58,17 +58,24 @@ const SettingsOverlay = React.memo(({
                                 <label className="block text-xs text-white/60 mb-1 uppercase tracking-widest">
                                     霊的周波数 / Spiritual Frequency (Gemini or OpenRouter API Key)
                                 </label>
-                                <input
-                                    type="password"
-                                    value={geminiKey} // Assuming geminiKey is used for both for simplicity based on original code
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        setGeminiKey(val);
-                                        localStorage.setItem('itako_gemini_key', val);
-                                    }}
-                                    placeholder="sk-or-v1-..."
-                                    className="w-full bg-black/40 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-white/50 transition-colors"
-                                />
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="password"
+                                        value={geminiKey}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setGeminiKey(val);
+                                            localStorage.setItem('itako_gemini_key', val);
+                                        }}
+                                        placeholder="sk-or-v1-..."
+                                        className="flex-1 bg-black/40 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-white/50 transition-colors"
+                                    />
+                                    <div className="flex gap-1.5 px-1">
+                                        <div className={`spectral-node ${apiConnectionStatus === 'success' ? 'spectral-node-active' : apiConnectionStatus === 'error' ? 'spectral-node-error' : isValidatingApi ? 'spectral-node-validating' : ''}`} />
+                                        <div className={`spectral-node hidden md:block ${apiConnectionStatus === 'success' ? 'spectral-node-active' : ''}`} style={{ transitionDelay: '0.1s' }} />
+                                        <div className={`spectral-node hidden md:block ${apiConnectionStatus === 'success' ? 'spectral-node-active' : ''}`} style={{ transitionDelay: '0.2s' }} />
+                                    </div>
+                                </div>
                                 <p className="mt-2 text-[10px] text-white/40 leading-relaxed">
                                     ※ Google AI Studio または OpenRouter のキーを入力してください。<br/>
                                     OpenRouter を使用すると、文豪ごとに最適なモデル（Claude 3.5 Sonnet等）が自動的に割り当てられます。

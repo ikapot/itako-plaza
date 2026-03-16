@@ -311,6 +311,7 @@ export default function App() {
     <div className={`h-[100dvh] w-full overflow-hidden flex flex-col font-sans selection:bg-white/30 relative
                     ${isEventShaking ? 'spiritual-shake' : ''} 
                     ${isMeltingDown ? 'ui-meltdown' : ''}`}
+         data-api-status={apiConnectionStatus}
          style={{ '--sentiment-accent': globalSentiment === 'neutral' ? 'rgba(255,255,255,0.02)' : `${ambient.color}44` }}>
       
       {/* Dynamic Background Layer */}

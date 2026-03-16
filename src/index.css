@@ -129,7 +129,46 @@ body {
       linear-gradient(to right, var(--sentiment-accent) 1px, transparent 1px),
       linear-gradient(to bottom, var(--sentiment-accent) 1px, transparent 1px);
     background-size: 40px 40px;
-    transition: background-image 3s ease-in-out;
+    transition: background-image 3s ease-in-out, opacity 2s ease-in-out;
+  }
+
+  @keyframes spectralFlow {
+    from { background-position: 0 0; }
+    to { background-position: 400px 400px; }
+  }
+
+  [data-api-status="success"] .editorial-grid {
+    animation: spectralFlow 180s linear infinite !important;
+    opacity: 0.12;
+  }
+
+  @keyframes nodePulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); filter: blur(2px); }
+    50% { opacity: 1; transform: scale(1.3); filter: blur(5px); }
+  }
+
+  .spectral-node {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .spectral-node-active {
+    background: #f15a24;
+    box-shadow: 0 0 15px #f15a24, 0 0 30px rgba(241, 90, 36, 0.3);
+    animation: nodePulse 4s ease-in-out infinite;
+  }
+
+  .spectral-node-error {
+    background: #ef4444;
+    box-shadow: 0 0 10px #ef4444;
+  }
+
+  .spectral-node-validating {
+    background: #fdb913;
+    animation: nodePulse 1s ease-in-out infinite;
   }
 
   .glass-spectral {
