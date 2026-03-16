@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle } from 'lucide-react';
+import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Activity } from 'lucide-react';
 import ThreeDMap from './ThreeDMap';
 import WarholAvatar from './WarholAvatar';
 
@@ -198,9 +198,16 @@ const ManagerContent = React.memo(({
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {[
                                 { label: 'Bookmarks', val: bookmarks?.length || 0, icon: <Bookmark size={14} /> },
-                                { label: 'My Manifestations', val: messages.filter(m => m.role === 'user').length || 0, icon: <MessageCircle size={14} /> },
-                                { label: 'Directives', val: selectedCharIds?.length || 0, icon: <User size={14} /> },
-                                { label: 'Clarity', val: '98%', icon: <Settings size={14} /> },
+                                { label: 'Manifestations', val: messages.filter(m => m.role === 'user').length || 0, icon: <MessageCircle size={14} /> },
+                                { label: 'Deepest Bond', val: (() => {
+                                    const counts = messages.filter(m => m.role === 'ai' && m.charId).reduce((acc, m) => {
+                                        acc[m.charId] = (acc[m.charId] || 0) + 1;
+                                        return acc;
+                                    }, {});
+                                    const topCharId = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+                                    return characters.find(c => c.id === topCharId)?.name || 'None';
+                                })(), icon: <User size={14} /> },
+                                { label: 'Energy Sync', val: `${Object.values(locationEnergies).reduce((a, b) => a + b, 0)} pts`, icon: <Activity size={14} /> },
                             ].map((s, i) => (
                                 <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-3xl">
                                     <div className="flex items-center justify-between mb-2">

@@ -23,7 +23,7 @@ export const INITIAL_CHARACTERS = [
   { id: 'rimbaud', face: 1, pos: 5, name: 'ランボー', role: '天才少年詩人', homeLocationId: 'slum', flavor: '放浪', color: 'bg-itako-sand', description: '10代で詩を書き捨て、アフリカへ消えた伝説の放浪者。', avatar: null },
   { id: 'fumiko', face: 1, pos: 6, name: '金子文子', role: '浮浪・アナキスト', homeLocationId: 'underpass', flavor: '自己', color: 'bg-red-950/60', isMainChar: true, description: '国家を否定し、ガード下や独房で「自己」の主体性を貫いた。無籍者。', avatar: 'assets/fumiko_warhol.webp', isPreStyled: true },
   { id: 'atsuko', face: 1, pos: 7, name: 'Atsuko', role: '古本屋の店主', homeLocationId: 'archive_room', flavor: '見守り', color: 'bg-itako-sand', isMainChar: true, description: '広場の地下深く、崩れかけの書庫で古本を売る。すべてを記録し、観察する不気味な存在。', avatar: 'assets/atsuko_warhol.webp', isPreStyled: true },
-  { id: 'osugi', face: 1, pos: 8, name: '大杉栄', role: '思想家・アナキスト', homeLocationId: 'prison', flavor: '生の拡充', color: 'bg-red-900/70', description: '自由を愛し、生の拡充を説いたアナキスト。甘粕事件の犠牲となった後も、その精神は乱調の中に輝く。', avatar: 'assets/osugi_sakae_warhol.png', isPreStyled: true },
+  { id: 'osugi', face: 1, pos: 8, name: '大杉栄', role: '思想家・アナキスト', homeLocationId: 'prison', flavor: '生の拡充', color: 'bg-red-900/70', description: '自由を愛し、生の拡充を説いたアナキスト。甘粕事件の犠牲となった後も、その精神は乱調の中に輝く。', avatar: 'assets/osugi_sakae_warhol_v2.webp', isPreStyled: true },
 
   // ── Face 2: 女性の先駆者 ─────────────────────────────────────────────
   { id: 'raicho', face: 2, pos: 0, name: '平塚らいてう', role: '思想家', homeLocationId: 'shrine', flavor: '太陽', color: 'bg-orange-900/50', isMainChar: true, description: '青踏社主宰。元始、女性は太陽であったと宣言した、内なる光を放つ霊。', avatar: 'assets/raicho_warhol.webp', isPreStyled: true },
