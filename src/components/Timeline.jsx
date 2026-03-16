@@ -88,8 +88,8 @@ const Timeline = React.memo(({
         >
             <DialogueEcho messages={messages} accentColor={accentColor} />
             {/* Slot 1: News */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms] flex flex-col items-start">
-                <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms] flex flex-col items-start pt-20 md:pt-32">
+                <div className="max-w-2xl mx-auto w-full pb-80 md:pb-96">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -144,38 +144,39 @@ const Timeline = React.memo(({
             </section>
 
             {/* Slot 2: Main Dialog */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms] flex flex-col items-start">
-                <div className="max-w-2xl mx-auto min-h-full flex flex-col">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms] flex flex-col items-start pt-20 md:pt-32">
+                <div className="max-w-2xl mx-auto w-full min-h-full flex flex-col pb-80 md:pb-96">
+                    <AnimatePresence>
+                        {currentWorldEvent && (() => {
+                            const eventConfig = {
+                                war: { bg: 'bg-red-950/40 text-red-100', dot: 'bg-red-500' },
+                                earthquake: { bg: 'bg-amber-950/40 text-amber-100', dot: 'bg-amber-500' }
+                            };
+                            const config = eventConfig[currentWorldEvent.type] || { bg: 'bg-white/5 text-white/50', dot: 'bg-white/30' };
+                            return (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 1.1, y: -20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 20 }}
+                                    className={`mb-6 p-4 rounded-xl backdrop-blur-xl border border-white/10 shadow-2xl flex items-center gap-3 transition-colors duration-1000 ${config.bg} absolute -top-16 left-0 right-0 z-50`}
+                                >
+                                    <div className={`w-2 h-2 rounded-full animate-pulse flex-shrink-0 ${config.dot}`} />
+                                    <div className="flex flex-col overflow-hidden">
+                                        <span className="text-[8px] font-black tracking-[0.2em] uppercase opacity-40 mb-1">Anomaly Log / 歴史の震動</span>
+                                        <span className="text-xs md:text-sm font-medium tracking-wider">{currentWorldEvent.content}</span>
+                                    </div>
+                                </motion.div>
+                            );
+                        })()}
+                    </AnimatePresence>
+
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1.5, ease: "easeOut" }}
                         viewport={{ once: true }}
-                        className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4"
+                        className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4 relative"
                     >
-                        <AnimatePresence>
-                            {currentWorldEvent && (() => {
-                                const eventConfig = {
-                                    war: { bg: 'bg-red-950/40 text-red-100', dot: 'bg-red-500' },
-                                    earthquake: { bg: 'bg-amber-950/40 text-amber-100', dot: 'bg-amber-500' }
-                                };
-                                const config = eventConfig[currentWorldEvent.type] || { bg: 'bg-white/5 text-white/50', dot: 'bg-white/30' };
-                                return (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 1.1, y: -20 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 20 }}
-                                        className={`mb-6 p-4 rounded-xl backdrop-blur-xl border border-white/10 shadow-2xl flex items-center gap-3 transition-colors duration-1000 ${config.bg}`}
-                                    >
-                                        <div className={`w-2 h-2 rounded-full animate-pulse flex-shrink-0 ${config.dot}`} />
-                                        <div className="flex flex-col overflow-hidden">
-                                            <span className="text-[8px] font-black tracking-[0.2em] uppercase opacity-40 mb-1">Anomaly Log / 歴史の震動</span>
-                                            <span className="text-xs md:text-sm font-medium tracking-wider">{currentWorldEvent.content}</span>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })()}
-                        </AnimatePresence>
 
                         <div className="flex items-center justify-between">
                             <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-none font-oswald uppercase" style={{ color: '#2a2a2a' }}>Dialog</h2>
@@ -242,8 +243,8 @@ const Timeline = React.memo(({
             </section>
 
             {/* Slot 3: Trends */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms] flex flex-col items-start">
-                <div className="max-w-2xl mx-auto py-8 md:py-12 pb-80 md:pb-96">
+            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid transition-colors duration-[3000ms] flex flex-col items-start pt-20 md:pt-32">
+                <div className="max-w-2xl mx-auto w-full pb-80 md:pb-96">
                     <motion.header 
                         initial={{ opacity: 0, y: 50 }}
                         whileInView={{ opacity: 1, y: 0 }}
