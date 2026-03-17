@@ -54,10 +54,10 @@ const DashboardSidebar = React.memo(({
                     <span className="text-[8px] font-black text-white/40 tracking-[0.3em] uppercase font-oswald italic">Ritual Stability: 98%</span>
                 </div>
                 <div className="w-32 h-[1px] bg-white/5 relative overflow-hidden">
-                    <motion.div 
+                    <motion.div
                         animate={{ x: ['-100%', '100%'] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent" 
+                        className="absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                     />
                 </div>
             </div>
@@ -67,9 +67,9 @@ const DashboardSidebar = React.memo(({
                 <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.5em] font-oswald text-left">Echo Frequency</span>
                 <div className="flex items-end gap-0.5 h-4">
                     {[0.3, 0.7, 0.4, 0.8, 0.5, 0.9, 0.6].map((h, i) => (
-                        <motion.div 
+                        <motion.div
                             key={i}
-                            animate={{ height: [`${h * 100}%`, `${(1-h) * 100}%`, `${h * 100}%`] }}
+                            animate={{ height: [`${h * 100}%`, `${(1 - h) * 100}%`, `${h * 100}%`] }}
                             transition={{ duration: 1 + Math.random(), repeat: Infinity }}
                             className="w-[3px] bg-white/10 rounded-full"
                         />
