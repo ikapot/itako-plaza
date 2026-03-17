@@ -10,63 +10,51 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
     const containerRef = useRef(null);
 
     return (
-        <div ref={containerRef} className="max-w-3xl mx-auto w-full pb-32 pt-20 px-4 md:px-8 relative mt-12 bg-black/40 rounded-[40px] backdrop-blur-md border border-white/5 shadow-2xl">
-             <div className="flex flex-col relative z-10 w-full pb-10">
+        <div ref={containerRef} className="max-w-2xl mx-auto w-full pb-32 pt-12 px-4 relative mt-12 bg-black/20 rounded-3xl backdrop-blur-sm border border-white/5">
+             <div className="flex flex-col relative z-10 w-full mb-[-2rem]">
                  {characters.map((c, i) => {
                      const isExpanded = expandedId === c.id;
                      const isLight = i % 2 !== 0;
-                     // より紙幣や古い書類に近い色味に微調整
-                     const bgColor = isLight ? 'bg-[#F2EFE9]' : 'bg-[#4A3B32]';
-                     const textColor = isLight ? 'text-[#2C241B]' : 'text-[#F2EFE9]';
+                     const bgColor = isLight ? 'bg-[#EAE0D5]' : 'bg-[#5C4033]';
+                     const textColor = isLight ? 'text-[#3C2A21]' : 'text-[#EAE0D5]';
                      
                      const alignment = i % 3 === 0 ? 'justify-start' : i % 3 === 1 ? 'justify-center' : 'justify-end';
                      const isSelected = selectedCharIds.includes(c.id);
                      const prvtIndex = (i + 1).toString().padStart(2, '0');
                      
-                     // 展開時と通常時のマージン計算を修正（上の要素が見切れないように全体を下げる）
-                     const marginTop = i === 0 ? '0' : (expandedId === characters[i-1]?.id ? '2rem' : '-2.5rem');
-                     
                      return (
                          <div 
                              key={c.id}
-                             className={`relative w-full font-serif`}
+                             className={`relative transition-all duration-700 ease-in-out w-full font-serif`}
                              style={{
-                                 transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
-                                 marginTop,
+                                 marginTop: i === 0 ? '0' : (expandedId === characters[i-1]?.id ? '2rem' : '-3rem'),
                                  zIndex: isExpanded ? 60 : i
                              }}
                          >
                              {/* Tab */}
-                             <div className={`flex w-full ${alignment} px-6 md:px-16 pointer-events-none drop-shadow-md`}>
+                             <div className={`flex w-full ${alignment} px-4 md:px-12 pointer-events-none`}>
                                  <button 
                                      onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                                     style={{ transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}
-                                     className={`${bgColor} ${textColor} px-6 md:px-10 py-2.5 md:py-3.5 rounded-t-xl md:rounded-t-[20px] text-[10px] md:text-xs font-bold tracking-widest uppercase border-b-0 pointer-events-auto border border-black/10 hover:-translate-y-2 relative z-20 font-sans shadow-[0_-4px_10px_rgba(0,0,0,0.15)] focus:outline-none focus:ring-2 focus:ring-[#bd8a78] focus:ring-offset-2 focus:ring-offset-black`}
+                                     className={`${bgColor} ${textColor} px-5 md:px-8 py-2 md:py-3 rounded-t-xl md:rounded-t-2xl shadow-md text-[10px] md:text-xs font-bold tracking-widest uppercase border-b-0 pointer-events-auto border border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-sans`}
                                  >
-                                     <span className="opacity-40 mr-3 font-oswald text-[9px] md:text-[10px]">No.{prvtIndex}</span>
-                                     <span className={isExpanded ? "font-black" : "opacity-90"}>{c.role.substring(0,8)}</span>
+                                     <span className="opacity-50 mr-2">Archivo {prvtIndex}</span>
+                                     <span className={isExpanded ? "font-black" : ""}>{c.role.substring(0,6)}</span>
                                  </button>
                              </div>
                              
                              {/* Folder Body */}
                              <div 
                                 onClick={() => !isExpanded && setExpandedId(c.id)}
-                                style={{ transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}
-                                className={`w-full rounded-2xl md:rounded-3xl ${bgColor} ${textColor} shadow-[0_-8px_30px_rgba(0,0,0,0.6)] border border-black/20 overflow-hidden cursor-pointer relative z-10 group overflow-hidden`}
+                                className={`w-full rounded-2xl ${bgColor} ${textColor} shadow-[0_-5px_25px_rgba(0,0,0,0.5)] border border-black/20 overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10`}
                              >
-                                 {/* Paper Texture Overlay */}
-                                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnPjxmaWx0ZXIgaWQ9J24nPjxmZVR1cmJ1bGVuY2UgdHlwZT0nZnJhY3RhbE5vaXNlJyBiYXNlRnJlcXVlbmN5PScwLjknIG51bU9jdGF2ZXM9JzMnLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0nMTAwJScgaGVpZ2h0PScxMDAlJyBmaWx0ZXI9J3VybCgjbiknIG9wYWNpdHk9JzAuMDUnLz48L3N2Zz4=')] pointer-events-none mix-blend-overlay opacity-50" />
                                  <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"/>
                                  
-                                 <div 
-                                     style={{ transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}
-                                     className={`${isExpanded ? 'max-h-[1200px] opacity-100 p-8 md:p-12 cursor-default' : 'max-h-[3.5rem] md:max-h-[4rem] opacity-80 p-0 flex items-center px-8 group-hover:bg-black/5 group-hover:opacity-100'}`}
-                                 >
+                                 <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-8 cursor-default' : 'max-h-[3.5rem] md:max-h-[4rem] opacity-80 p-0 flex items-center px-6 hover:bg-black/5 hover:opacity-100'}`}>
                                      
                                      {!isExpanded ? (
                                          <div className="w-full flex items-center justify-between pointer-events-none py-4">
-                                             <span className="text-sm md:text-base font-black tracking-[0.2em] line-clamp-1 flex-1 font-hina">{c.name}</span>
-                                             <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest hidden sm:block font-sans">{c.flavor}</span>
+                                             <span className="text-sm md:text-base font-black uppercase tracking-[0.2em] line-clamp-1 flex-1 font-oswald">{c.name}</span>
+                                             <span className="text-[9px] font-bold opacity-50 uppercase tracking-widest hidden sm:block font-sans">{c.flavor}</span>
                                          </div>
                                      ) : (
                                          <div className="space-y-6 md:space-y-8" onClick={e => e.stopPropagation()}>
@@ -120,7 +108,7 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
              </div>
 
              {/* The Box Front Bottom */}
-             <div className="relative z-[100] w-[112%] -ml-[6%] mt-8 drop-shadow-2xl pointer-events-none">
+             <div className="relative z-[100] w-[110%] -ml-[5%] mt-4 drop-shadow-2xl pointer-events-none">
                  <div className="w-full h-32 md:h-48 bg-[#4A3525] rounded-b-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-t-[8px] border-[#3A2515] flex items-center justify-center relative overflow-hidden">
                      <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80 pointer-events-none" />
                      {/* Label */}

@@ -17,6 +17,7 @@ import Timeline from './components/Timeline';
 import DashboardSidebar from './components/DashboardSidebar';
 import FloatingInputBar from './components/FloatingInputBar';
 import CharacterOverlay from './components/CharacterOverlay';
+import NamePromptModal from './components/NamePromptModal';
 import { X, Activity } from 'lucide-react';
 
 function cleanKey(key) {
@@ -53,7 +54,20 @@ export default function App() {
 
   // --- 3. Dialogue & Knowledge States ---
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('itako_messages');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  
+  // Persist messages whenever they change
+  useEffect(() => {
+    localStorage.setItem('itako_messages', JSON.stringify(messages));
+  }, [messages]);
+
   const [loading, setLoading] = useState(false);
   const [replyTo, setReplyTo] = useState(null); // { id, content, charId }
   const [alaya, setAlaya] = useState(() => localStorage.getItem('itako_alaya') || "");
@@ -79,6 +93,20 @@ export default function App() {
   const [spiritualError, setSpiritualError] = useState(null);
   const [syncingNotebook, setSyncingNotebook] = useState(false);
   const [notebookInput, setNotebookInput] = useState('');
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+
+  // 初回起動時、名前が未設定なら案内人が名前を聞く
+  useEffect(() => {
+      if (isAppReady && userName === '無名の参列者') {
+          setShowNamePrompt(true);
+      }
+  }, [isAppReady, userName]);
+
+  const handleSetName = useCallback((newName) => {
+      setUserName(newName);
+      localStorage.setItem('itako_user_name', newName);
+      setShowNamePrompt(false);
+  }, []);
 
   // Derived Values
   const isMeltingDown = useMemo(() => Object.values(locationEnergies).some(e => e > 85), [locationEnergies]);
@@ -577,6 +605,8 @@ export default function App() {
           </motion.div>
         ) : null}
       </AnimatePresence>
+
+      <NamePromptModal isOpen={showNamePrompt} onSubmit={handleSetName} />
     </div>
   );
 }
