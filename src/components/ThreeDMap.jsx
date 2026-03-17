@@ -55,47 +55,79 @@ function rollToFace(cubeRef, rotRef, faceIdx, duration, onComplete) {
 
 // ── Helper: Get Tile Styles ──
 function getCharTileStyle(isSelected, isMain) {
-  const base = "relative cursor-pointer group transition-all duration-300 flex flex-col items-center justify-center p-0.5 overflow-hidden rounded-sm";
-  if (isSelected) return `${base} border-2 border-white/90 bg-white/15 shadow-[0_0_15px_rgba(255,255,255,0.35)] scale-105 z-10`;
-  if (isMain) return `${base} border border-[#f15a24]/40 hover:border-[#f15a24]/80 hover:bg-[#f15a24]/5`;
-  return `${base} border border-white/8 hover:border-white/25 hover:bg-white/5 opacity-40 hover:opacity-80`;
+  const base = "relative cursor-pointer group transition-all duration-500 flex flex-col items-center justify-center p-0.5 overflow-hidden rounded-full";
+  if (isSelected) return `${base} border border-white/40 bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-110 z-20`;
+  return `${base} border border-transparent hover:border-white/20`;
 }
 
 // ── CharTile ────────────────────────────────────────────────
 const CharTile = React.memo(function CharTile({ char, isSelected, isRolling, onToggle }) {
   const isMain = !!char.isMainChar;
   const tileStyle = getCharTileStyle(isSelected, isMain);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Spectral state: Not selected AND not hovered
+  const isSpectral = !isSelected && !isHovered;
 
   return (
-    <div onClick={function toggle() { if (!isRolling) onToggle(char.id); }} className={tileStyle}>
-      {isMain && !isSelected ? (
-        <motion.div
-            animate={{ opacity: [0.15, 0.5, 0.15] }}
-            transition={{ duration: 2.5, repeat: Infinity }}
-            className="absolute inset-0 border border-[#f15a24]/25 rounded-sm pointer-events-none"
-        />
-      ) : null}
+    <div 
+      onClick={function toggle() { if (!isRolling) onToggle(char.id); }} 
+      onMouseEnter={function enter() { setIsHovered(true); }}
+      onMouseLeave={function leave() { setIsHovered(false); }}
+      className={tileStyle}
+    >
+      <AnimatePresence mode="wait">
+        {isSpectral ? (
+          <motion.div
+            key="spectral"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 1.5, opacity: 0 }}
+            className="flex items-center justify-center"
+          >
+            <motion.div
+              animate={{ 
+                scale: [1, 1.3, 1],
+                opacity: [0.3, 0.6, 0.3],
+                boxShadow: [
+                  '0 0 5px rgba(255,255,255,0.2)',
+                  '0 0 15px rgba(255,255,255,0.5)',
+                  '0 0 5px rgba(255,255,255,0.2)'
+                ]
+              }}
+              transition={{ duration: 3 + Math.random() * 2, repeat: Infinity }}
+              className={`w-1.5 h-1.5 rounded-full ${isMain ? 'bg-[#f15a24]' : 'bg-white/40'}`}
+              style={{ 
+                boxShadow: isMain ? '0 0 10px rgba(241, 90, 36, 0.6)' : '0 0 5px rgba(255,255,255,0.3)'
+              }}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="manifested"
+            initial={{ scale: 0.8, opacity: 0, filter: 'blur(10px)' }}
+            animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
+            className="flex flex-col items-center justify-center w-full h-full"
+          >
+            {char.avatar ? (
+              <img src={char.avatar} alt={char.name} className="w-8 h-8 object-cover rounded-full opacity-90 mb-1 border border-white/20" loading="lazy" />
+            ) : (
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black mb-1 border border-white/10 ${char.color || 'bg-zinc-800/80'} text-white`}>
+                {char.name.slice(0, 1)}
+              </div>
+            )}
+            <span className={`text-[8px] font-oswald uppercase tracking-wider text-center leading-tight px-1 text-white`}>
+              {char.name}
+            </span>
+            {isMain && <span className="text-[5px] mt-0.5 text-[#f15a24]">◆</span>}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {char.avatar ? (
-        <img src={char.avatar} alt={char.name} className="w-7 h-7 object-cover rounded-sm opacity-80 mb-0.5" loading="lazy" />
-      ) : (
-        <div className={`w-7 h-7 rounded-sm flex items-center justify-center text-[9px] font-black mb-0.5 ${isMain ? 'text-[#f15a24]/80' : 'text-white/40'} ${char.color || 'bg-zinc-800/80'}`}>
-          {char.name.slice(0, 1)}
-        </div>
-      )}
-
-      <span className={`text-[7.5px] md:text-[10px] font-oswald uppercase tracking-wide text-center leading-[1.1] line-clamp-2 px-0.5 ${isSelected ? 'text-white font-black' : isMain ? 'text-white/60 group-hover:text-white/90' : 'text-white/25 group-hover:text-white/60'}`}>
-        {char.name}
-      </span>
-
-      {isMain ? <span className="text-[4px] mt-0.5" style={{ color: isSelected ? 'white' : '#f15a2499' }}>◆</span> : null}
-
-      <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm px-1.5 py-1 rounded text-[7px] md:text-[9px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-[300] text-center">
-        <div className="font-bold">{char.name}</div>
-        <div className="text-white/50">{char.flavor}</div>
-        <div className={`text-[5px] mt-0.5 ${isMain ? 'text-[#f15a24]/70' : 'text-white/30'}`}>
-          {isMain ? '◆ NotebookLM済' : '準備中'}
-        </div>
+      <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md px-2 py-1.5 rounded-lg text-[9px] text-white opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none border border-white/15 z-[300] text-center translate-y-2 group-hover:translate-y-0 shadow-2xl">
+        <div className="font-bold tracking-widest">{char.name}</div>
+        <div className="text-white/40 text-[7.5px] uppercase">{char.flavor}</div>
+        {isMain && <div className="text-[6px] mt-1 text-[#f15a24]/80 tracking-widest">INITIATED</div>}
       </div>
     </div>
   );
@@ -103,29 +135,61 @@ const CharTile = React.memo(function CharTile({ char, isSelected, isRolling, onT
 
 // ── LocTile ──────────────────────────────────────────────────
 const LocTile = React.memo(function LocTile({ loc, isSelected, isRolling, energy, onSelect }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const isSpectral = !isSelected && !isHovered;
+
   const getLocStyle = function style() {
-    const base = "relative cursor-pointer group border transition-all duration-300 flex flex-col items-center justify-center p-0.5 overflow-hidden";
-    if (isSelected) return `${base} border-white/80 bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-105 z-10`;
-    return `${base} border-white/10 hover:border-white/40 hover:bg-white/5`;
+    const base = "relative cursor-pointer group transition-all duration-500 flex flex-col items-center justify-center p-0.5 overflow-hidden rounded-full";
+    if (isSelected) return `${base} border border-white/50 bg-white/5 shadow-[0_0_25px_rgba(255,255,255,0.15)] scale-110 z-20`;
+    return `${base} border border-transparent hover:border-white/20`;
   };
 
   return (
-    <div onClick={function select() { if (!isRolling) onSelect(loc.id); }} className={getLocStyle()}>
-      {energy > 30 ? (
-        <motion.div
-            animate={{ opacity: [0.05, 0.25, 0.05] }}
-            transition={{ duration: 3, repeat: Infinity }}
-            className="absolute inset-[-4px] bg-white/5 blur-md rounded-full pointer-events-none"
-        />
-      ) : null}
-      <span className={`text-[8px] md:text-[11px] font-oswald uppercase tracking-wide text-center leading-[1.1] px-0.5 ${isSelected ? 'text-white font-black' : 'text-white/40 group-hover:text-white/70'}`}>
-        {loc.name}
-      </span>
-      {isSelected ? (
-        <motion.div layoutId="loc-glow" className="absolute inset-0 bg-white/10 blur-xl pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
-      ) : null}
-      <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-sm px-1.5 py-1 rounded text-[7px] md:text-[9px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 z-[300] max-w-[110px] text-center leading-tight">
-        {loc.description?.slice(0, 40)}
+    <div 
+      onClick={function select() { if (!isRolling) onSelect(loc.id); }} 
+      onMouseEnter={function enter() { setIsHovered(true); }}
+      onMouseLeave={function leave() { setIsHovered(false); }}
+      className={getLocStyle()}
+    >
+      <AnimatePresence mode="wait">
+        {isSpectral ? (
+          <motion.div
+            key="spectral"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 1.5, opacity: 0 }}
+            className="flex items-center justify-center"
+          >
+            <motion.div
+              animate={{ 
+                scale: [1, 1.4, 1],
+                opacity: [0.2, 0.5, 0.2],
+              }}
+              transition={{ duration: 4 + Math.random() * 2, repeat: Infinity }}
+              className="w-1.5 h-1.5 bg-white/30 rounded-full"
+              style={{ 
+                boxShadow: `0 0 ${10 + (energy/5)}px rgba(255,255,255,${0.2 + (energy/200)})` 
+              }}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="manifested"
+            initial={{ scale: 0.8, opacity: 0, filter: 'blur(10px)' }}
+            animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
+            className="flex flex-col items-center justify-center p-1 w-full h-full"
+          >
+            <span className={`text-[9px] font-oswald uppercase tracking-widest text-center leading-tight text-white`}>
+              {loc.name}
+            </span>
+            <div className={`mt-1.5 h-0.5 bg-white/40 rounded-full transition-all`} style={{ width: `${Math.min(100, energy)}%` }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md px-2 py-1.5 rounded-lg text-[9px] text-white opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none border border-white/15 z-[300] max-w-[120px] text-center leading-tight shadow-2xl translate-y-2 group-hover:translate-y-0">
+        <div className="font-bold mb-1">{loc.name}</div>
+        <div className="text-[7.5px] text-white/50">{loc.description?.slice(0, 45)}...</div>
       </div>
     </div>
   );
@@ -216,18 +280,18 @@ const SpiritualLines = React.memo(function SpiritualLines({ selectedChars, cubeS
 const CubeFace = React.memo(function CubeFace({ fi, items, renderTile, energy, accentColor }) {
   return (
     <div
-        className="absolute grid grid-cols-3 grid-rows-3 gap-1 overflow-hidden"
+        className="absolute grid grid-cols-3 grid-rows-3 gap-0 overflow-hidden"
         style={{ 
           width: `${CUBE_SIZE}px`, 
           height: `${CUBE_SIZE}px`, 
           ...FACE_STYLES[fi], 
           transformStyle: 'preserve-3d',
-          backgroundColor: 'rgba(5,5,5,0.8)',
-          border: `1px solid ${accentColor}22`
+          backgroundColor: 'rgba(2,2,2,0.6)',
+          border: `0.5px solid ${accentColor}11`
         }}
     >
         {items.map(function renderSingle(item) { return renderTile(item); })}
-        <NoiseOverlay intensity={0.05 + (energy / 200)} glitch={energy > 50} />
+        <NoiseOverlay intensity={0.03 + (energy / 300)} glitch={false} />
     </div>
   );
 });
@@ -235,17 +299,17 @@ const CubeFace = React.memo(function CubeFace({ fi, items, renderTile, energy, a
 function Cube({ cubeRef, faceItems, renderTile, faceIdx, onJumpToFace, isRolling, faceLabels, accentColor, energy = 0, selectedChars = [] }) {
   return (
     <div className="relative h-[330px] flex items-center justify-center" style={{ perspective: '800px' }}>
-      <div className="absolute top-1 right-0 flex flex-col gap-1 z-50 opacity-20 hover:opacity-100 transition-opacity">
+      <div className="absolute top-1 right-0 flex flex-col gap-1 z-50 opacity-10 hover:opacity-100 transition-all duration-700">
         {faceLabels.map(function renderNav(label, idx) {
           return (
             <button
                 key={label}
                 onClick={function jump() { if (!isRolling) onJumpToFace(idx); }}
                 disabled={isRolling}
-                className={`px-1.5 py-0.5 rounded border text-[7px] md:text-[9px] font-oswald tracking-wider uppercase transition-all
-                ${faceIdx === idx ? `border-[${accentColor}]/60 bg-[${accentColor}]/20 text-white` : 'border-white/10 bg-transparent text-white/30 hover:border-white/30 hover:text-white/70'}`}
+                className={`px-1.5 py-0.5 rounded-sm border text-[6.5px] font-oswald tracking-widest uppercase transition-all
+                ${faceIdx === idx ? `border-[${accentColor}]/50 bg-white/5 text-white` : 'border-white/5 bg-transparent text-white/20 hover:border-white/10 hover:text-white/40'}`}
             >
-                {label}
+                {label.slice(0, 1)}
             </button>
           );
         })}
