@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, AlertCircle } from 'lucide-react';
+import { Sparkles, AlertCircle, ChevronDown, Cpu } from 'lucide-react';
+import { OPENROUTER_MODELS } from '../gemini';
 
 /**
  * PortalGrimoire - The Ritualistic API Key Entry UI
@@ -11,13 +12,16 @@ export default function PortalGrimoire({
     setGeminiKey, 
     isValidatingApi, 
     apiConnectionStatus, 
-    handleValidateApi 
+    handleValidateApi,
+    preferredModel,
+    setPreferredModel
 }) {
     const [detectedKey, setDetectedKey] = useState('');
     const [isResonating, setIsResonating] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [editingSlot, setEditingSlot] = useState(null); 
     const [turningSlot, setTurningSlot] = useState(null); 
+    const [showModelList, setShowModelList] = useState(false);
+    const [customModel, setCustomModel] = useState('');
 
     function isKeyPattern(str) {
         return str.length > 20 && (str.startsWith('AIza') || str.startsWith('sk-or-'));
@@ -143,6 +147,57 @@ export default function PortalGrimoire({
                                                     <span className="text-[9px] font-black uppercase tracking-widest text-white/80">Key Resonating</span>
                                                 </div>
                                                 <p className="text-[8px] text-white/30 truncate mb-4 font-mono">{detectedKey}</p>
+                                                
+                                                {detectedKey.startsWith('sk-or-') && (
+                                                    <div className="mb-4 p-3 bg-black/40 rounded-xl border border-white/5">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <span className="text-[7px] text-white/30 uppercase tracking-widest">Selected Model</span>
+                                                            <Cpu size={10} className="text-[#f15a24]/50" />
+                                                        </div>
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); setShowModelList(!showModelList); }}
+                                                            className="w-full flex items-center justify-between px-2 py-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-[9px] text-white/80 transition-colors border border-white/10"
+                                                        >
+                                                            <span className="truncate">{OPENROUTER_MODELS.find(m => m.id === preferredModel)?.name || preferredModel}</span>
+                                                            <ChevronDown size={12} className={`transition-transform ${showModelList ? 'rotate-180' : ''}`} />
+                                                        </button>
+                                                        
+                                                        <AnimatePresence>
+                                                            {showModelList && (
+                                                                <motion.div 
+                                                                    initial={{ height: 0, opacity: 0 }}
+                                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                                    exit={{ height: 0, opacity: 0 }}
+                                                                    className="overflow-hidden mt-2 space-y-1"
+                                                                >
+                                                                    {OPENROUTER_MODELS.map(m => (
+                                                                        <button
+                                                                            key={m.id}
+                                                                            onClick={() => { setPreferredModel(m.id); setShowModelList(false); }}
+                                                                            className={`w-full text-left px-2 py-1.5 rounded hover:bg-white/10 text-[8px] transition-colors ${preferredModel === m.id ? 'text-[#f15a24] bg-[#f15a24]/5' : 'text-white/40'}`}
+                                                                        >
+                                                                            {m.name}
+                                                                        </button>
+                                                                    ))}
+                                                                    <div className="pt-1 mt-1 border-t border-white/5">
+                                                                        <input 
+                                                                            type="text"
+                                                                            placeholder="Custom model ID..."
+                                                                            className="w-full bg-transparent p-1 text-[8px] text-white/60 outline-none"
+                                                                            onKeyDown={(e) => {
+                                                                                if (e.key === 'Enter') {
+                                                                                    setPreferredModel(e.target.value);
+                                                                                    setShowModelList(false);
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                )}
+
                                                 <button 
                                                     onClick={handleConsecrate}
                                                     disabled={isValidatingApi}

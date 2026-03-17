@@ -29,10 +29,13 @@ const ManagerContent = React.memo(({
     isValidatingApi,
     apiConnectionStatus,
     handleValidateApi,
+    handleGo,
     globalSentiment,
     bookmarks,
     messages,
-    userName
+    userName,
+    preferredModel,
+    setPreferredModel
 }) => {
     return (
         <div className="space-y-12">
@@ -54,6 +57,7 @@ const ManagerContent = React.memo(({
                             characters={characters}
                             handleToggleChar={handleToggleChar}
                             onSetChars={handleSetChars}
+                            onGo={handleGo}
                             globalSentiment={globalSentiment}
                         />
                     </motion.div>
@@ -142,6 +146,8 @@ const ManagerContent = React.memo(({
                             isValidatingApi={isValidatingApi}
                             apiConnectionStatus={apiConnectionStatus}
                             handleValidateApi={handleValidateApi}
+                            preferredModel={preferredModel}
+                            setPreferredModel={setPreferredModel}
                         />
                     </motion.div>
                 )}

@@ -2,10 +2,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies, saveBookmark, logout } from './firebase';
-import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback } from './gemini';
+import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback, getPreferredModel, setPreferredModel as setGeminiPreferredModel, distillSpiritualAlaya } from './gemini';
 import { fetchFictionalizedNews } from './news';
 import { searchNDLArchive } from './ndl';
 import { INITIAL_CHARACTERS, INITIAL_LOCATIONS, AMBIENT_COLORS } from './constants';
+import SpiritNoiseOverlay from './components/SpiritNoiseOverlay';
 
 // Components
 import Header from './components/Header';
@@ -66,6 +67,9 @@ export default function App() {
   const [isEventShaking, setIsEventShaking] = useState(false);
   const isMeltingDown = useMemo(() => Object.values(locationEnergies).some(e => e > 85), [locationEnergies]);
   const [globalSentiment, setGlobalSentiment] = useState('neutral');
+  const [preferredModel, setPreferredModel] = useState(() => getPreferredModel());
+  const [spiritualError, setSpiritualError] = useState(null);
+  const [alaya, setAlaya] = useState(() => localStorage.getItem('itako_alaya') || "");
 
   const scrollRef = useRef(null);
   const lastLocationRef = useRef(null);
@@ -81,6 +85,11 @@ export default function App() {
 
   const handleSetChars = useCallback((ids) => {
     setSelectedCharIds(ids.slice(0, 3));
+  }, []);
+
+  const handleSetPreferredModel = useCallback((modelId) => {
+    setPreferredModel(modelId);
+    setGeminiPreferredModel(modelId);
   }, []);
 
   const handleSlotChange = useCallback(async (index) => {
@@ -102,6 +111,26 @@ export default function App() {
       scrollRef.current?.scrollTo({ left: window.innerWidth, behavior: 'smooth' });
     }, 100);
   }, [handleToggleChar, handleSlotChange]);
+  
+  const handleGo = useCallback(() => {
+    handleSlotChange(1);
+    setActiveManagerTab(null);
+    setIsDrawerOpen(false);
+  }, [handleSlotChange]);
+
+  useEffect(() => {
+    async function updateAlaya() {
+      // 10メッセージごとに要約を更新
+      if (messages.length > 0 && messages.length % 10 === 0 && geminiKey) {
+        const summary = await distillSpiritualAlaya(messages, geminiKey);
+        if (summary) {
+          setAlaya(summary);
+          localStorage.setItem('itako_alaya', summary);
+        }
+      }
+    }
+    updateAlaya();
+  }, [messages.length, geminiKey]);
 
   const handleValidateApi = useCallback(async () => {
     if (!geminiKey || isValidatingApi) return;
@@ -216,9 +245,11 @@ export default function App() {
 
   useEffect(() => {
     async function triggerLocationConversation() {
-      if (!geminiKey || !isAppReady || lastLocationRef.current === selectedLocationId) return;
-      lastLocationRef.current = selectedLocationId;
+      if (!geminiKey || !isAppReady) return;
       
+      const charTag = selectedCharIds.join(',');
+      if (lastLocationRef.current === (selectedLocationId + charTag)) return;
+      lastLocationRef.current = selectedLocationId + charTag;
       // 他の初期化処理が落ち着くまで待機
       await new Promise(r => setTimeout(r, 6000));
       
@@ -269,25 +300,31 @@ export default function App() {
           externalContext: context,
           interactionDepth: depth,
           location,
-          others: otherChars
+          others: otherChars,
+          alaya 
         },
         onChunk: (chunk, meta) => {
           setMessages(prev => {
             const next = [...prev];
-            next[next.length - 1] = { ...next[next.length - 1], content: chunk, meta };
+            const lastIdx = next.length - 1;
+            if (next[lastIdx] && next[lastIdx].charId === charId) {
+              next[lastIdx] = { ...next[lastIdx], content: chunk, sentiment: meta.sentiment };
+            }
             return next;
           });
-          if (meta?.sentiment) setGlobalSentiment(meta.sentiment);
+          if (meta.sentiment) setGlobalSentiment(meta.sentiment);
         }
       });
     
-    // Automatically switch to Dialog tab
-    handleSlotChange(1);
-  } catch (e) {
-    console.error(e);
-  }
-  setLoading(false);
-};
+      // Automatically switch to Dialog tab
+      handleSlotChange(1);
+    } catch (error) {
+      console.error("Spiritual Dialogue Failed:", error);
+      setSpiritualError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   async function handleSyncNotebook() {
     if (!notebookInput.trim() || !geminiKey) return;
@@ -321,6 +358,8 @@ export default function App() {
         isValidatingApi={isValidatingApi}
         apiConnectionStatus={apiConnectionStatus}
         handleValidateApi={handleValidateApi}
+        preferredModel={preferredModel}
+        setPreferredModel={handleSetPreferredModel}
       />
     );
   }
@@ -378,14 +417,19 @@ export default function App() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden" />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-black/40 backdrop-blur-3xl border-r border-white/10 z-[70] p-6 overflow-y-auto md:hidden shadow-3xl">
               <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
-              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, globalSentiment, bookmarks, messages, userName }} />
+              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, handleGo, globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
       <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
-      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, validateGeminiApiKey, setIsAppReady }} />
+      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, validateGeminiApiKey, setIsAppReady, preferredModel, setPreferredModel: handleSetPreferredModel }} />
+      <SpiritNoiseOverlay 
+        error={spiritualError} 
+        onRetry={() => { setSpiritualError(null); handleSendMessage(); }} 
+        onDismiss={() => setSpiritualError(null)} 
+      />
 
       <div className="flex-1 flex overflow-hidden relative z-10">
         <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies }} />
@@ -451,7 +495,7 @@ export default function App() {
                     </button>
                   </div>
                   <div className="flex-1 overflow-y-auto itako-scrollbar-thin">
-                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, globalSentiment, bookmarks, messages, userName }} />
+                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, handleGo, globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
                   </div>
                 </motion.div>
               </div>

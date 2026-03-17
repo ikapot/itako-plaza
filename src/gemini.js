@@ -9,6 +9,25 @@ const FALLBACK_MODELS = [
   "gemini-1.5-pro"
 ];
 
+export const OPENROUTER_MODELS = [
+  { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fastest)" },
+  { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet (Best Drama)" },
+  { id: "anthropic/claude-3-haiku", name: "Claude 3 Haiku (Cost Effective)" },
+  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
+  { id: "deepseek/deepseek-chat", name: "DeepSeek V3" },
+  { id: "meta-llama/llama-3.1-70b-instruct", name: "Llama 3.1 70B" },
+  { id: "liquid/lfm-40b", name: "Liquid LFM 40B" }
+];
+
+let preferredOpenRouterModel = localStorage.getItem('itako_preferred_model') || "google/gemini-2.0-flash-001";
+
+export const setPreferredModel = (modelId) => {
+  preferredOpenRouterModel = modelId;
+  localStorage.setItem('itako_preferred_model', modelId);
+};
+
+export const getPreferredModel = () => preferredOpenRouterModel;
+
 const SAFETY_SETTINGS = [
   { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
   { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -24,6 +43,7 @@ export const SPIRITUAL_ERRORS = {
   AUTH_FAILED: 'FREQUENCY_MISMATCH',
   NOT_FOUND: 'GHOST_MISSING',
   NETWORK: 'VOID_DISRUPTION',
+  OPENROUTER_ERROR: 'SPECTRAL_INTERFERENCE',
   UNKNOWN: 'VOID_COLLAPSE'
 };
 
@@ -175,7 +195,11 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw { status: response.status, message: errorData.error?.message || "OpenRouter Failed" };
+    throw { 
+      status: response.status, 
+      code: SPIRITUAL_ERRORS.OPENROUTER_ERROR,
+      message: errorData.error?.message || "Spectral connection lost (OpenRouter)" 
+    };
   }
 
   if (stream && onChunk) {
@@ -216,8 +240,9 @@ export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config 
   if (isOpenRouter) {
     emitDebug({ type: 'attempt', model: "OpenRouter/Single", keyIndex: 1 });
     try {
+      const targetModel = config.model || preferredOpenRouterModel;
       const messages = [{ role: "user", content: sysPrompt ? `${sysPrompt}\n\n${prompt}` : prompt }];
-      const res = await fetchOpenRouter(firstKey, messages, "google/gemini-2.0-flash-001", config);
+      const res = await fetchOpenRouter(firstKey, messages, targetModel, config);
       let finalData = res;
       if (isJson) {
         try {
@@ -229,7 +254,7 @@ export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config 
         }
       }
       emitDebug({ type: 'success', model: "OpenRouter", keyIndex: 1 });
-      return new SpiritualResponse({ data: finalData, model: "OpenRouter/Gemini", keyIndex: 1 });
+      return new SpiritualResponse({ data: finalData, model: `OpenRouter/${targetModel.split('/').pop()}`, keyIndex: 1 });
     } catch (e) {
       emitDebug({ type: 'error', model: "OpenRouter", error: e.message });
       throw e;
@@ -289,13 +314,14 @@ export async function streamSpiritualDialogue({
     return;
   }
 
-  const { isUnderground = false, externalContext = "", location = null, others = [] } = options;
+  const { isUnderground = false, externalContext = "", location = null, others = [], alaya = "" } = options;
   const config = CHARACTER_CONFIGS[character.id] || { systemPrompt: character.systemPrompt, generationConfig: { temperature: 0.7 } };
   
   let systemPrompt = config.systemPrompt || character.systemPrompt || "";
   if (isUnderground) systemPrompt += "\n【深層意識】建前を捨て、本音と欲望を語ってください。";
   if (externalContext) systemPrompt += `\n【外部状況】${externalContext}`;
   if (location) systemPrompt += `\n【現在地】"${location.name}" (${location.description})`;
+  if (alaya) systemPrompt += `\n【阿頼耶識（これまでのあらすじ）】${alaya}`;
   
   const allPresent = [character.id, ...others.map(o => o.id)];
   SPIRIT_INTERACTIONS.filter(int => int.ids.every(id => allPresent.includes(id)))
@@ -320,7 +346,7 @@ export async function streamSpiritualDialogue({
   if (firstKey.startsWith("sk-or-")) {
     try {
       emitDebug({ type: 'stream_start', model: "OpenRouter", keyIndex: 1 });
-      const targetModel = config.model || "google/gemini-2.0-flash-001";
+      const targetModel = config.model || preferredOpenRouterModel;
       const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: message }];
       const fullText = await fetchOpenRouter(firstKey, messages, targetModel, config.generationConfig, true, (text) => {
         onChunk(text.replace(/^\[.*?\]\s*/, ""), { model: targetModel, keyIndex: 1, sentiment: extractSentiment(text) });
@@ -328,8 +354,12 @@ export async function streamSpiritualDialogue({
       await storeEcho(systemPrompt, message, fullText);
       return;
     } catch (e) {
-      onChunk(`共鳴失敗: ${e.message}`, { model: 'error', error: e });
-      return;
+      console.error("OpenRouter Stream Error:", e);
+      throw {
+        code: SPIRITUAL_ERRORS.OPENROUTER_ERROR,
+        model: targetModel,
+        originalError: e
+      };
     }
   }
 
@@ -393,6 +423,21 @@ export async function generateLocationDialogueWithEvent(apiKey, chars, loc, even
   const prompt = `場所: ${loc.name}\n事変: ${event?.content || '平穏'}\n登場人物:\n${charContext}\n3-5往復の対話をJSONで紡げ。 [ {"charId": "...", "content": "...", "sentiment": "..."} ]`;
   const res = await invokeGemini(apiKey, prompt, "口寄せ。純粋なJSONのみ出力せよ。", {}, true);
   return res.data;
+}
+
+export async function distillSpiritualAlaya(messages, apiKey) {
+  if (!apiKey || messages.length < 5) return null;
+  
+  const thread = messages.map(m => `[${m.charId}] ${m.userMsg ? '私: ' + m.userMsg : '相手: ' + m.aiMsg}`).join('\n');
+  const prompt = `以下の魂の交流を、阿頼耶識（潜在意識の記憶）として150文字程度で要約せよ。これまでの関係性や重要な出来事を重点的に記すこと:\n\n${thread}`;
+  
+  try {
+    const res = await invokeGemini(apiKey, prompt, "あなたは「阿頼耶識」の記録者。これまでの対話の核心のみを抽出せよ。");
+    return res.data;
+  } catch (e) {
+    console.error("Alaya distillation failed:", e);
+    return null;
+  }
 }
 
 export function getCharacterConfig(id) {

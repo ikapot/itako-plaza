@@ -30,9 +30,25 @@ const FloatingInputBar = React.memo(({
                 <button
                     onClick={handleSendMessage}
                     disabled={loading || !input.trim()}
-                    className="w-12 h-12 rounded-full border border-white/10 hover:border-white/40 hover:bg-white/5 text-white/40 hover:text-white flex items-center justify-center transition-all duration-700 active:scale-95 disabled:opacity-5 overflow-hidden relative"
+                    className={`
+                        px-6 h-12 rounded-full border flex items-center gap-3 transition-all duration-500 active:scale-95 disabled:opacity-20 disabled:grayscale overflow-hidden relative group/send
+                        ${input.trim() 
+                            ? 'bg-[#f15a24] border-[#f15a24]/50 text-white shadow-[0_0_20px_rgba(241,90,36,0.3)]' 
+                            : 'bg-white/5 border-white/10 text-white/30'}
+                    `}
                 >
-                    <div className="relative z-10 font-oswald font-extralight text-2xl">+</div>
+                    {input.trim() && (
+                        <motion.div 
+                            layoutId="btn-glow"
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                            animate={{ x: ['-200%', '200%'] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        />
+                    )}
+                    <span className="font-oswald font-black text-[10px] tracking-[0.2em] relative z-10">
+                        {loading ? 'SYNCING...' : 'MANIFEST'}
+                    </span>
+                    <div className="relative z-10 text-lg transition-transform group-hover/send:translate-x-1">→</div>
                 </button>
             </motion.div>
         </div>

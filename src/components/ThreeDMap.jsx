@@ -271,6 +271,7 @@ function ThreeDMap({
   characters,
   handleToggleChar,
   onSetChars,
+  onGo,
   globalSentiment = 'neutral',
 }) {
   const sentimentAccents = { neutral: '#f15a24', serene: '#00ffff', agitated: '#ff0000', melancholic: '#4f46e5', joyful: '#f59e0b', chaotic: '#d946ef' };
@@ -400,6 +401,22 @@ function ThreeDMap({
               <span className="text-[9px] md:text-[11px] text-white bg-white/10 border border-white/30 px-2.5 py-1 rounded font-bold">{selectedLoc.name}</span>
             </>
           ) : null}
+          
+          <div className="flex-1" />
+          
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onGo}
+            disabled={isRolling || selectedCharIds.length === 0}
+            className={`px-8 py-2 rounded-full font-black font-oswald text-[10px] tracking-[0.3em] uppercase transition-all shadow-lg border ${
+              isRolling || selectedCharIds.length === 0
+                ? 'bg-white/5 border-white/5 text-white/10 cursor-not-allowed'
+                : 'bg-[#f15a24] border-[#f15a24]/50 text-white hover:bg-[#ff6a3a] shadow-[0_0_20px_rgba(241,90,36,0.4)]'
+            }`}
+          >
+            決定 / MANIFEST
+          </motion.button>
         </div>
       </div>
     </div>

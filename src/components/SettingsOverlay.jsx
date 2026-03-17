@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, ChevronDown, Cpu } from 'lucide-react';
+import { OPENROUTER_MODELS } from '../gemini';
 import SpectralResonator from './SpectralResonator';
 
 const SettingsOverlay = React.memo(({ 
@@ -11,8 +12,11 @@ const SettingsOverlay = React.memo(({
     isValidatingApi, 
     apiConnectionStatus, 
     validateGeminiApiKey, 
-    setIsAppReady 
+    setIsAppReady,
+    preferredModel,
+    setPreferredModel
 }) => {
+    const [showModelList, setShowModelList] = React.useState(false);
     return (
         <AnimatePresence>
             {showSettings && (
@@ -78,8 +82,57 @@ const SettingsOverlay = React.memo(({
                                             localStorage.setItem('itako_gemini_key', val);
                                         }}
                                         placeholder="sk-or-v1-..."
-                                        className="w-full bg-black/40 border border-white/20 rounded-[20px] px-4 py-3 text-white text-xs font-mono outline-none focus:border-[#f15a24]/50 transition-colors text-center"
                                     />
+                                    
+                                    {geminiKey.startsWith('sk-or-') && (
+                                        <div className="w-full mt-4 p-4 bg-black/40 rounded-2xl border border-white/5 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[8px] font-bold text-white/30 uppercase tracking-[0.2em]">Active Model</span>
+                                                <Cpu size={12} className="text-[#f15a24]/50" />
+                                            </div>
+                                            <button 
+                                                onClick={() => setShowModelList(!showModelList)}
+                                                className="w-full flex items-center justify-between px-3 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] text-white/80 transition-all border border-white/10"
+                                            >
+                                                <span className="truncate">{OPENROUTER_MODELS.find(m => m.id === preferredModel)?.name || preferredModel}</span>
+                                                <ChevronDown size={14} className={`transition-transform duration-300 ${showModelList ? 'rotate-180' : ''}`} />
+                                            </button>
+                                            
+                                            <AnimatePresence>
+                                                {showModelList && (
+                                                    <motion.div 
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: 'auto', opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        className="overflow-hidden space-y-1 pt-2"
+                                                    >
+                                                        {OPENROUTER_MODELS.map(m => (
+                                                            <button
+                                                                key={m.id}
+                                                                onClick={() => { setPreferredModel(m.id); setShowModelList(false); }}
+                                                                className={`w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 text-[9px] transition-colors ${preferredModel === m.id ? 'text-[#f15a24] bg-[#f15a24]/5' : 'text-white/40'}`}
+                                                            >
+                                                                {m.name}
+                                                            </button>
+                                                        ))}
+                                                        <div className="pt-2 mt-2 border-t border-white/5 px-1">
+                                                            <input 
+                                                                type="text"
+                                                                placeholder="Custom model ID (e.g. meta-llama/llama-3-8b)..."
+                                                                className="w-full bg-transparent p-1 text-[9px] text-white/50 outline-none placeholder:text-white/10"
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        setPreferredModel(e.target.value);
+                                                                        setShowModelList(false);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                    )}
                                 </div>
                                 <p className="mt-2 text-[10px] text-white/40 leading-relaxed">
                                     ※ Google AI Studio または OpenRouter のキーを入力してください。<br/>

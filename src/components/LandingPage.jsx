@@ -13,7 +13,9 @@ export default function LandingPage({
     setGeminiKey, 
     isValidatingApi, 
     apiConnectionStatus, 
-    handleValidateApi 
+    handleValidateApi,
+    preferredModel,
+    setPreferredModel
 }) {
     const [step, setStep] = useState('gate'); // 'gate', 'ritual'
 
@@ -163,6 +165,8 @@ export default function LandingPage({
                                 isValidatingApi={isValidatingApi}
                                 apiConnectionStatus={apiConnectionStatus}
                                 handleValidateApi={handleValidateApi}
+                                preferredModel={preferredModel}
+                                setPreferredModel={setPreferredModel}
                             />
                         </div>
 
