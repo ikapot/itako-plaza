@@ -1,4 +1,5 @@
 import { User, Menu, Settings, TrendingUp, MessageSquare, Ghost, Globe, Cpu } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Logo from './Logo';
 
 export default function Header({

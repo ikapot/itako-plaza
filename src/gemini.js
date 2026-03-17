@@ -200,8 +200,14 @@ export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config 
       const res = await fetchOpenRouter(firstKey, messages, "google/gemini-2.0-flash-001", config);
       let finalData = res;
       if (isJson) {
-        const cleanJson = res.replace(/```json|```/g, "").trim();
-        finalData = JSON.parse(cleanJson);
+        try {
+          const jsonMatch = res.match(/\{[\s\S]*\}/);
+          const cleanJson = jsonMatch ? jsonMatch[0] : res.replace(/```json|```/g, "").trim();
+          finalData = JSON.parse(cleanJson);
+        } catch (e) {
+          console.error("OpenRouter JSON Parse Error", res);
+          throw new Error("Invalid JSON response from spirit (OpenRouter)");
+        }
       }
       emitDebug({ type: 'success', model: "OpenRouter", keyIndex: 1 });
       return new SpiritualResponse({ data: finalData, model: "OpenRouter/Gemini", keyIndex: 1 });
@@ -229,9 +235,13 @@ export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config 
         let finalData = text;
         if (isJson) {
           try {
-            const cleanJson = text.replace(/```json|```/g, "").trim();
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            const cleanJson = jsonMatch ? jsonMatch[0] : text.replace(/```json|```/g, "").trim();
             finalData = JSON.parse(cleanJson);
-          } catch (e) { console.error("JSON Parse Error", text); }
+          } catch (e) { 
+            console.error("JSON Parse Error", text); 
+            throw new Error("Invalid JSON response from spirit");
+          }
         }
         emitDebug({ type: 'success', model: modelName, keyIndex: kIdx + 1 });
         return new SpiritualResponse({ data: finalData, model: modelName, keyIndex: kIdx + 1 });
