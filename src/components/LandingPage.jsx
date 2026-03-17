@@ -103,12 +103,12 @@ export default function LandingPage({ onLoginComplete, user, geminiKey, setGemin
                         </div>
 
                         <div className="space-y-8 flex flex-col items-center">
-                            <h1 className="text-2xl md:text-3xl font-black tracking-[0.5em] text-white uppercase font-oswald italic">
-                                あわいの門
+                            <h1 className="text-2xl md:text-5xl font-black tracking-[0.8em] text-white uppercase font-oswald italic">
+                                BARDO
                             </h1>
                             
                             <p className="text-xs md:text-sm text-white/40 font-serif italic max-w-xs leading-relaxed text-center">
-                                「ここから先は『あわいの広場』。生者と死者の境界線。入るには、深淵を照らす『三つの鍵』が必要です。」
+                                「ここから先は『中有（バルド）』。生者と死者の境界線。入るには、深淵を照らす『三つの鍵』が必要です。」
                             </p>
                             
                             <div className="flex flex-col md:flex-row items-center gap-4 mt-4">
