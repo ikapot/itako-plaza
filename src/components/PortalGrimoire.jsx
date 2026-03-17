@@ -16,22 +16,22 @@ const PortalGrimoire = ({
     const [detectedKey, setDetectedKey] = useState('');
     const [isResonating, setIsResonating] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [editingSlot, setEditingSlot] = useState(null); // Which slot is being clicked/pasted to
+    const [turningSlot, setTurningSlot] = useState(null); // Which slot is currently "turning"
 
     // Validate if a string looks like an API key
     const isKeyPattern = (str) => {
         return str.length > 20 && (str.startsWith('AIza') || str.startsWith('sk-or-'));
     };
 
-    // Check clipboard when window gains focus
+    // Check clipboard when window gains focus (Automatic Resonance)
     const checkClipboard = useCallback(async () => {
         try {
-            // Some browsers require explicit permission or a user gesture
             if (!navigator.clipboard) return;
             const text = await navigator.clipboard.readText();
             const trimmed = text.trim();
             
             if (isKeyPattern(trimmed)) {
-                // If it's a new key we don't already have
                 const currentKeys = geminiKey.split(',').map(k => k.trim());
                 if (!currentKeys.includes(trimmed) && trimmed !== detectedKey) {
                     setDetectedKey(trimmed);
@@ -39,9 +39,7 @@ const PortalGrimoire = ({
                     setErrorMessage('');
                 }
             }
-        } catch (e) {
-            // Silence clipboard errors to avoid breaking immersion
-        }
+        } catch (e) {}
     }, [geminiKey, detectedKey]);
 
     useEffect(() => {
@@ -49,160 +47,208 @@ const PortalGrimoire = ({
         return () => window.removeEventListener('focus', checkClipboard);
     }, [checkClipboard]);
 
-    const handleConsecrate = () => {
-        if (!detectedKey) return;
-        
+    const performConsecrate = (key, slotIndex) => {
         const currentKeys = geminiKey.split(',').map(k => k.trim()).filter(Boolean);
         
-        if (currentKeys.includes(detectedKey)) {
+        if (currentKeys.includes(key)) {
             setErrorMessage('このカギは違います。');
-            setIsResonating(false);
-            return;
+            return false;
         }
 
-        if (currentKeys.length >= 3) {
-            setErrorMessage('器が満たされています。');
-            return;
-        }
-
-        const nextKeys = [...currentKeys, detectedKey].join(',');
-        setGeminiKey(nextKeys);
-        localStorage.setItem('itako_gemini_key', nextKeys);
+        // Trigger turning animation
+        const actualSlot = slotIndex !== null ? slotIndex : currentKeys.length;
+        setTurningSlot(actualSlot);
         
-        // Reset state
-        setDetectedKey('');
-        setIsResonating(false);
-        setErrorMessage('');
+        setTimeout(() => {
+            const nextKeys = [...currentKeys];
+            if (slotIndex !== null) {
+                nextKeys[slotIndex] = key;
+            } else {
+                nextKeys.push(key);
+            }
+            
+            setGeminiKey(nextKeys.join(','));
+            localStorage.setItem('itako_gemini_key', nextKeys.join(','));
+            
+            setTurningSlot(null);
+            setDetectedKey('');
+            setIsResonating(false);
+            setErrorMessage('');
+            setEditingSlot(null);
+        }, 800);
+
+        return true;
+    };
+
+    const handleConsecrate = () => {
+        if (detectedKey) performConsecrate(detectedKey, null);
+    };
+
+    const handleManualPaste = (idx, e) => {
+        const val = e.target.value.trim();
+        if (isKeyPattern(val)) {
+            performConsecrate(val, idx);
+        } else if (val.length > 5) {
+            setErrorMessage('鍵の形状が正しくありません。');
+        }
     };
 
     const handleClearKeys = () => {
         setGeminiKey('');
         localStorage.removeItem('itako_gemini_key');
         setErrorMessage('');
+        setEditingSlot(null);
     };
 
-    const keySlots = geminiKey.split(',').map(k => k.trim()).filter(Boolean);
+    const keySlots = geminiKey.split(',').map(k => k.trim());
 
     return (
         <div className="flex flex-col items-center py-12 px-4 space-y-12">
-            {/* The Portal Grimoire (Pseudo-3D CSS) */}
+            {/* The Portal Grimoire */}
             <div className="relative group perspective-1000">
                 <motion.div 
                     animate={isResonating ? { 
-                        rotateY: [0, 5, -5, 0],
-                        z: [0, 20, 0],
-                        boxShadow: "0 0 50px rgba(241, 90, 36, 0.4)"
+                        rotateY: [0, 2, -2, 0],
+                        z: [0, 10, 0],
+                        boxShadow: "0 0 40px rgba(241, 90, 36, 0.3)"
                     } : {}}
-                    transition={{ duration: 0.5, repeat: isResonating ? Infinity : 0 }}
+                    transition={{ duration: 1.5, repeat: isResonating ? Infinity : 0 }}
                     className="relative w-64 h-80 transform-style-3d cursor-default"
                 >
-                    {/* Book Base (Stacked Layers for depth) */}
-                    {[...Array(5)].map((_, i) => (
+                    {/* Book Base */}
+                    {[...Array(3)].map((_, i) => (
                         <div 
                             key={i}
-                            className="absolute inset-0 bg-[#1a1a1a] rounded-r-lg border-l-4 border-zinc-800"
-                            style={{ 
-                                transform: `translateZ(${-i * 2}px)`,
-                                opacity: 1 - i * 0.1
-                            }}
+                            className="absolute inset-0 bg-[#151515] rounded-r-lg border-l-4 border-zinc-900"
+                            style={{ transform: `translateZ(${-i * 3}px)` }}
                         />
                     ))}
 
                     {/* Book Cover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black rounded-r-lg border border-white/10 shadow-3xl overflow-hidden">
-                        {/* Decorative Pattern */}
-                        <div className="absolute inset-0 opacity-10 pointer-events-none">
-                            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                                <pattern id="bookPattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                                    <path d="M20 0 L40 20 L20 40 L0 20 Z" fill="none" stroke="white" strokeWidth="0.5" />
-                                </pattern>
-                                <rect width="100%" height="100%" fill="url(#bookPattern)" />
-                            </svg>
-                        </div>
-
-                        {/* Three Keyholes (Slots) */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 to-black rounded-r-lg border border-white/5 shadow-3xl overflow-hidden">
+                        {/* Three Keyholes (Interaction target) */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center space-y-8 p-8">
                             {[0, 1, 2].map(idx => {
                                 const hasKey = !!keySlots[idx];
+                                const isEditing = editingSlot === idx;
+                                const isTurning = turningSlot === idx;
+
                                 return (
-                                    <div key={idx} className="relative group/keyhole">
-                                        <div className={`w-12 h-16 rounded-t-full border transition-all duration-700
-                                                        ${hasKey ? 'border-[#f15a24] bg-[#f15a24]/10 shadow-[0_0_15px_#f15a24]' : 'border-white/10 bg-black'}`}>
-                                            {hasKey && (
+                                    <div 
+                                        key={idx} 
+                                        className="relative flex items-center group/slot"
+                                        onClick={() => !hasKey && !isTurning && setEditingSlot(idx)}
+                                    >
+                                        {/* Key Turning Gear / Aura */}
+                                        <AnimatePresence>
+                                            {isTurning && (
                                                 <motion.div 
-                                                    animate={{ opacity: [0.4, 1, 0.4] }}
-                                                    transition={{ duration: 2, repeat: Infinity }}
-                                                    className="absolute inset-0 flex items-center justify-center"
+                                                    initial={{ scale: 0, opacity: 0, rotate: 0 }}
+                                                    animate={{ scale: 2, opacity: [0, 0.5, 0], rotate: 180 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="absolute inset-0 border border-[#f15a24]/30 rounded-full pointer-events-none"
+                                                />
+                                            )}
+                                        </AnimatePresence>
+
+                                        <motion.div 
+                                            animate={isTurning ? { 
+                                                rotate: [0, 90, 180],
+                                                scale: [1, 1.1, 1]
+                                            } : isEditing ? { 
+                                                scale: 1.05, 
+                                                borderColor: 'rgba(241,90,36,0.8)',
+                                                boxShadow: '0 0 20px rgba(241,90,36,0.2)'
+                                            } : {}}
+                                            transition={{ duration: 0.8, ease: "easeInOut" }}
+                                            className={`w-14 h-18 rounded-t-full border transition-all duration-500 cursor-pointer flex items-center justify-center relative
+                                                        ${hasKey ? 'border-[#f15a24] bg-[#f15a24]/5 shadow-[0_0_20px_rgba(241,90,36,0.4)]' : 
+                                                          isEditing ? 'border-[#f15a24] bg-[#f15a24]/10' : 'border-white/5 bg-black/40 hover:border-white/20'}`}
+                                        >
+                                            <AnimatePresence mode="wait">
+                                                {hasKey ? (
+                                                    <motion.div 
+                                                        key="check"
+                                                        initial={{ opacity: 0, scale: 0.5 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        className="text-[#f15a24] flex flex-col items-center"
+                                                    >
+                                                        <Sparkles size={16} />
+                                                        <div className="w-[1px] h-4 bg-[#f15a24] mt-1 opacity-50" />
+                                                    </motion.div>
+                                                ) : isEditing ? (
+                                                    <motion.div 
+                                                        key="input" 
+                                                        initial={{ opacity: 0, y: 10 }} 
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        className="flex flex-col items-center gap-1"
+                                                    >
+                                                        <div className="w-4 h-4 rounded-full border border-[#f15a24] animate-pulse" />
+                                                        <input 
+                                                            autoFocus
+                                                            type="password"
+                                                            onChange={(e) => handleManualPaste(idx, e)}
+                                                            onBlur={() => !isTurning && setEditingSlot(null)}
+                                                            className="w-10 bg-transparent text-white text-[8px] text-center outline-none"
+                                                            placeholder="..."
+                                                        />
+                                                    </motion.div>
+                                                ) : (
+                                                    <motion.div key="empty" className="flex flex-col items-center opacity-20 group-hover/slot:opacity-50 transition-opacity">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-white mb-1" />
+                                                        <div className="w-[1px] h-4 bg-white" />
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </motion.div>
+                                        
+                                        <div className="absolute -left-16 text-[7px] font-black text-white/5 tracking-widest uppercase origin-right -rotate-90">
+                                            Gate {idx + 1}
+                                        </div>
+
+                                        {/* Error text local to slot */}
+                                        <AnimatePresence>
+                                            {isEditing && errorMessage && (
+                                                <motion.div 
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="absolute left-20 w-40 text-[9px] font-bold text-red-500 leading-tight italic"
                                                 >
-                                                    <Sparkles size={16} className="text-[#f15a24]" />
+                                                    {errorMessage}
                                                 </motion.div>
                                             )}
-                                        </div>
-                                        <div className="w-14 h-2 bg-zinc-800 rounded-sm border-t border-white/5" />
-                                        
-                                        {/* Tooltip for key existence */}
-                                        <div className="absolute -right-20 top-1/2 -translate-y-1/2 text-[8px] font-bold text-white/20 tracking-widest uppercase opacity-0 group-hover/keyhole:opacity-100 transition-opacity">
-                                            {hasKey ? 'Consecrated' : 'Empty'}
-                                        </div>
+                                        </AnimatePresence>
                                     </div>
                                 );
                             })}
                         </div>
-
-                        {/* Resonance Glow Overlay */}
-                        <AnimatePresence>
-                            {isResonating && (
-                                <motion.div 
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="absolute inset-0 bg-[#f15a24]/10 mix-blend-overlay pointer-events-none"
-                                />
-                            )}
-                        </AnimatePresence>
                     </div>
                 </motion.div>
 
                 {/* Itako's Voice Display */}
                 <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-80 text-center pointer-events-none">
                     <AnimatePresence mode="wait">
-                        {isResonating ? (
+                        {turningSlot !== null ? (
+                            <motion.p key="turning" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs font-serif italic text-emerald-400">
+                                「……封印が、解かれます」
+                            </motion.p>
+                        ) : isResonating ? (
                             <motion.p 
                                 key="resonance"
                                 initial={{ opacity: 0, scale: 1.1 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0 }}
                                 className="text-[10px] md:text-xs font-serif italic text-[#f15a24] tracking-widest leading-relaxed drop-shadow-[0_0_8px_rgba(241,90,36,0.6)]"
                             >
                                 「そなたが持つその光の断片……ここに捧げますか？」
                             </motion.p>
-                        ) : errorMessage ? (
-                            <motion.p 
-                                key="error"
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-sm font-bold text-red-500 tracking-tighter"
-                                style={{ textShadow: "0 0 10px rgba(239, 68, 68, 0.5)" }}
-                            >
-                                {errorMessage}
-                            </motion.p>
-                        ) : geminiKey ? (
-                            <motion.p 
-                                key="presence"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.4 }}
-                                className="text-[10px] text-white/60 tracking-[0.2em]"
-                            >
-                                回路は静かに、通電を待っています。
+                        ) : editingSlot !== null ? (
+                            <motion.p key="editing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] text-white/60 tracking-[0.2em]">
+                                鍵穴に、授かった鍵を直接流し込んでください。
                             </motion.p>
                         ) : (
-                            <motion.p 
-                                key="void"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.3 }}
-                                className="text-[10px] text-white/40 tracking-widest uppercase"
-                            >
-                                冥界の門を開く「三つの鍵」をここに……
+                            <motion.p key="void" initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} className="text-[10px] text-white/40 tracking-widest uppercase">
+                                鍵穴をクリックして、鍵を差し込んでください。
                             </motion.p>
                         )}
                     </AnimatePresence>
@@ -214,13 +260,13 @@ const PortalGrimoire = ({
                 <AnimatePresence>
                     {isResonating && (
                         <motion.button
-                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
                             onClick={handleConsecrate}
-                            className="w-full py-4 rounded-full bg-[#f15a24] text-white font-black text-xs tracking-[0.3em] uppercase shadow-[0_0_30px_rgba(241,90,36,0.8)] hover:scale-105 active:scale-95 transition-all font-oswald"
+                            className="w-full py-4 rounded-full bg-[#f15a24] text-white font-black text-xs tracking-[0.3em] uppercase shadow-[0_0_30px_rgba(241,90,36,0.5)] font-oswald"
                         >
-                            鍵を奉納する (Consecrate Key)
+                            自動検知した鍵を奉納する
                         </motion.button>
                     )}
                 </AnimatePresence>
@@ -234,16 +280,12 @@ const PortalGrimoire = ({
                                     : geminiKey && !isValidatingApi ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-transparent text-white/10 border-white/5 opacity-50 cursor-not-allowed'}`}
                 >
                     {isValidatingApi ? '回路を安定させています...' : 
-                     apiConnectionStatus === 'success' ? '回路は完全に開通しました' : 
-                     apiConnectionStatus === 'error' ? '回路の不整合を修復する' : '回路を安定化させる (Stabilize)'}
+                     apiConnectionStatus === 'success' ? '回路は完全に開通しました' : '回路を安定化させる (Stabilize)'}
                 </button>
 
                 {geminiKey && (
-                    <button 
-                        onClick={handleClearKeys}
-                        className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em] hover:text-red-400 transition-colors py-2"
-                    >
-                        鍵をすべて返却する (Revoke All Keys)
+                    <button onClick={handleClearKeys} className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em] hover:text-red-400 transition-colors py-2">
+                        すべての鍵を引き抜く
                     </button>
                 )}
             </div>
