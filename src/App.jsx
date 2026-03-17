@@ -1,5 +1,5 @@
 // Itako Plaza v1.2.1 - Simplified Architecture
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, useTransition, startTransition } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies, saveBookmark, logout } from './firebase';
 import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback, getPreferredModel, setPreferredModel as setGeminiPreferredModel, distillSpiritualAlaya } from './gemini';
@@ -237,6 +237,11 @@ export default function App() {
         setCurrentWorldEvent(event);
         setIsEventShaking(true);
         setTimeout(() => setIsEventShaking(false), 800);
+        
+        // 発生した事変に関連する本を検索
+        searchNDLArchive(event.content.substring(0, 10)).then(res => {
+          if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 10));
+        });
       }
     };
     if (geminiKey && isAppReady) {
@@ -246,11 +251,24 @@ export default function App() {
     }
   }, [geminiKey, isAppReady, globalTrends]);
 
+  // ニュースに連動した書誌検索
+  useEffect(() => {
+    if (news?.length > 0) {
+      const topNews = news[0];
+      const keyword = topNews.title.replace(/「|」|『|』/g, "").substring(0, 8);
+      searchNDLArchive(keyword).then(res => {
+        if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 10));
+      });
+    }
+  }, [news]);
+
   useEffect(() => {
     setGeminiDebugCallback((log) => {
-      setApiLogs(prevLogs => {
-        const newLog = { ...log, id: Date.now() + Math.random(), time: new Date().toLocaleTimeString() };
-        return [newLog, ...prevLogs].slice(0, 20); // Keep last 20 logs
+      startTransition(() => {
+        setApiLogs(prevLogs => {
+          const newLog = { ...log, id: Date.now() + Math.random(), time: new Date().toLocaleTimeString() };
+          return [newLog, ...prevLogs].slice(0, 20); // Keep last 20 logs
+        });
       });
     });
   }, []); // Run once on mount
@@ -341,7 +359,11 @@ export default function App() {
             }
             return next;
           });
-          if (meta.sentiment) setGlobalSentiment(meta.sentiment);
+          if (meta.sentiment) {
+            startTransition(() => {
+              setGlobalSentiment(meta.sentiment);
+            });
+          }
         }
       });
     
@@ -389,8 +411,6 @@ export default function App() {
         isValidatingApi={isValidatingApi}
         apiConnectionStatus={apiConnectionStatus}
         handleValidateApi={handleValidateApi}
-        preferredModel={preferredModel}
-        setPreferredModel={handleSetPreferredModel}
       />
     );
   }
@@ -452,7 +472,7 @@ export default function App() {
       </AnimatePresence>
 
       <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
-      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, setIsAppReady, preferredModel, setPreferredModel: handleSetPreferredModel }} />
+      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, setIsAppReady }} />
       <SpiritNoiseOverlay 
         error={spiritualError} 
         onRetry={() => { setSpiritualError(null); handleSendMessage(); }} 
@@ -523,7 +543,7 @@ export default function App() {
                     </button>
                   </div>
                   <div className="flex-1 overflow-y-auto itako-scrollbar-thin">
-                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, handleGo, globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
+                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, handleGo, globalSentiment, bookmarks, messages, userName }} />
                   </div>
                 </motion.div>
               </div>

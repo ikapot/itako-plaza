@@ -13,9 +13,7 @@ export default function LandingPage({
     setGeminiKey, 
     isValidatingApi, 
     apiConnectionStatus, 
-    handleValidateApi,
-    preferredModel,
-    setPreferredModel
+    handleValidateApi
 }) {
     const [step, setStep] = useState('gate'); // 'gate', 'ritual'
 
@@ -126,7 +124,7 @@ export default function LandingPage({
 
                         {/* Subtle Navigation or Action Link */}
                         <motion.a
-                            href="https://aistudio.google.com/app/apikey"
+                            href="https://openrouter.ai/keys"
                             target="_blank"
                             rel="noopener noreferrer"
                             initial={{ opacity: 0 }}
@@ -134,7 +132,7 @@ export default function LandingPage({
                             whileHover={{ opacity: 1 }}
                             className="mt-8 text-[8px] md:text-[10px] text-white font-black tracking-[0.5em] uppercase flex items-center gap-2 border-b border-white/20 pb-1"
                         >
-                            鍵を取得する (Get API Key) <Sparkles size={10} className="text-[#f15a24]" />
+                            鍵を取得する (Get OpenRouter Key) <Sparkles size={10} className="text-[#f15a24]" />
                         </motion.a>
                     </motion.div>
                 ) : step === 'ritual' ? (
@@ -163,8 +161,6 @@ export default function LandingPage({
                                 isValidatingApi={isValidatingApi}
                                 apiConnectionStatus={apiConnectionStatus}
                                 handleValidateApi={handleValidateApi}
-                                preferredModel={preferredModel}
-                                setPreferredModel={setPreferredModel}
                             />
                         </div>
 

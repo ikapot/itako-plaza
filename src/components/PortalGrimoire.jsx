@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, AlertCircle, ChevronDown, Cpu, ShieldCheck, CheckCircle2, Key, RefreshCw } from 'lucide-react';
-import { OPENROUTER_MODELS } from '../gemini';
+import { Sparkles, AlertCircle, Cpu, ShieldCheck, CheckCircle2, Key, RefreshCw } from 'lucide-react';
 
 /**
  * PortalGrimoire.jsx
@@ -12,13 +11,10 @@ export default function PortalGrimoire({
     setGeminiKey, 
     isValidatingApi, 
     apiConnectionStatus, 
-    handleValidateApi,
-    preferredModel,
-    setPreferredModel
+    handleValidateApi
 }) {
     const [localKey, setLocalKey] = useState(geminiKey || '');
     const [isEditing, setIsEditing] = useState(!geminiKey);
-    const [showModelList, setShowModelList] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
@@ -135,39 +131,6 @@ export default function PortalGrimoire({
                                 「深淵への鍵を入力し、回路を固定してください」
                             </p>
                         )}
-                    </motion.div>
-                )}
-
-                {/* Model Selection */}
-                {geminiKey && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-6 border-t border-white/5 space-y-4">
-                        <div className="flex items-center justify-between mb-2 px-2">
-                            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em]">Resonance Model</span>
-                            <Cpu size={12} className="text-[#f15a24]/40" />
-                        </div>
-                        <button 
-                            onClick={() => setShowModelList(!showModelList)}
-                            className="w-full flex items-center justify-between px-5 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[11px] text-white/80 transition-all border border-white/10"
-                        >
-                            <span>{OPENROUTER_MODELS.find(m => m.id === preferredModel)?.name || 'Default Model'}</span>
-                            <ChevronDown size={14} className={`transition-transform duration-300 ${showModelList ? 'rotate-180' : ''}`} />
-                        </button>
-                        
-                        <AnimatePresence>
-                            {showModelList && (
-                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-1 mt-2">
-                                    {OPENROUTER_MODELS.map(m => (
-                                        <button
-                                            key={m.id}
-                                            onClick={() => { setPreferredModel(m.id); setShowModelList(false); }}
-                                            className={`w-full text-left px-5 py-2.5 rounded-lg hover:bg-white/10 text-[10px] transition-colors ${preferredModel === m.id ? 'text-[#f15a24] bg-[#f15a24]/5' : 'text-white/30'}`}
-                                        >
-                                            {m.name}
-                                        </button>
-                                    ))}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
                     </motion.div>
                 )}
             </div>

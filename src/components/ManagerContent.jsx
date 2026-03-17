@@ -33,9 +33,7 @@ const ManagerContent = React.memo(({
     globalSentiment,
     bookmarks,
     messages,
-    userName,
-    preferredModel,
-    setPreferredModel
+    userName
 }) => {
     const stats = useMemo(() => [
         { label: 'Bookmarks', val: bookmarks?.length || 0, icon: <Bookmark size={14} /> },
@@ -160,8 +158,6 @@ const ManagerContent = React.memo(({
                             isValidatingApi={isValidatingApi}
                             apiConnectionStatus={apiConnectionStatus}
                             handleValidateApi={handleValidateApi}
-                            preferredModel={preferredModel}
-                            setPreferredModel={setPreferredModel}
                         />
                     </motion.div>
                 ) : null}

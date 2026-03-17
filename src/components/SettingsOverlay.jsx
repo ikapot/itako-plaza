@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Cpu, Key, CheckCircle2, AlertCircle, ChevronDown, RefreshCw } from 'lucide-react';
-import { OPENROUTER_MODELS } from '../gemini';
+import { X, Cpu, Key, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 
 const SettingsOverlay = React.memo(({ 
     showSettings, 
@@ -10,11 +9,8 @@ const SettingsOverlay = React.memo(({
     setGeminiKey, 
     isValidatingApi, 
     apiConnectionStatus, 
-    handleValidateApi,
-    preferredModel,
-    setPreferredModel
+    handleValidateApi
 }) => {
-    const [showModelList, setShowModelList] = React.useState(false);
 
     return (
         <AnimatePresence>
@@ -68,36 +64,6 @@ const SettingsOverlay = React.memo(({
                                         </div>
                                     </div>
 
-                                    {/* Model Picker */}
-                                    <div className="pt-4 border-t border-white/5 space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Active Model</span>
-                                            <Cpu size={12} className="text-[#f15a24]/50" />
-                                        </div>
-                                        <button 
-                                            onClick={() => setShowModelList(!showModelList)}
-                                            className="w-full flex items-center justify-between px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] text-white/80 transition-all border border-white/10"
-                                        >
-                                            <span className="truncate">{OPENROUTER_MODELS.find(m => m.id === preferredModel)?.name || 'Select Model'}</span>
-                                            <ChevronDown size={14} className={`transition-transform duration-300 ${showModelList ? 'rotate-180' : ''}`} />
-                                        </button>
-                                        
-                                        <AnimatePresence>
-                                            {showModelList && (
-                                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-1">
-                                                    {OPENROUTER_MODELS.map(m => (
-                                                        <button
-                                                            key={m.id}
-                                                            onClick={() => { setPreferredModel(m.id); setShowModelList(false); }}
-                                                            className={`w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 text-[9px] transition-colors ${preferredModel === m.id ? 'text-[#f15a24] bg-[#f15a24]/5' : 'text-white/40'}`}
-                                                        >
-                                                            {m.name}
-                                                        </button>
-                                                    ))}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
                                 </div>
                             </div>
 

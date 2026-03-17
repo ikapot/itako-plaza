@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, ChevronRight } from 'lucide-react';
 import SpiritCard from './SpiritCard';
 import WarholAvatar from './WarholAvatar';
 
@@ -46,6 +46,41 @@ const DialogueEcho = React.memo(function DialogueEcho({ messages, accentColor })
             {echos.map(function renderEcho(e) {
                 return <MemoizedEchoItem key={e.id} e={e} accentColor={accentColor} />;
             })}
+        </div>
+    );
+});
+
+const SpectralBookCover = React.memo(function BookCover({ title, author, idx }) {
+    const gradients = [
+        'from-zinc-900 to-indigo-950',
+        'from-zinc-900 to-red-950',
+        'from-zinc-900 to-emerald-950',
+        'from-zinc-900 to-amber-950',
+        'from-zinc-900 to-purple-950'
+    ];
+    const gradient = gradients[idx % gradients.length];
+    
+    return (
+        <div className={`shrink-0 w-24 h-36 md:w-32 md:h-48 bg-gradient-to-br ${gradient} border border-white/10 rounded-sm shadow-2xl relative overflow-hidden flex flex-col p-2 md:p-4 group-hover:scale-105 transition-transform duration-700`}>
+            <div className="absolute inset-0 opacity-20 pointer-events-none">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent)]" />
+                <div className="editorial-grid w-full h-full scale-150" />
+            </div>
+            <div className="relative z-10 h-full flex flex-col justify-between">
+                <div className="space-y-1">
+                    <div className="w-4 h-0.5 bg-white/20 mb-2" />
+                    <h5 className="text-[6px] md:text-[8px] font-black leading-tight text-white/90 line-clamp-4 font-oswald uppercase">
+                        {title}
+                    </h5>
+                </div>
+                <div className="text-right">
+                    <span className="text-[5px] md:text-[7px] font-bold text-white/30 uppercase tracking-tighter">
+                        {author?.substring(0, 15)}
+                    </span>
+                </div>
+            </div>
+            {/* Spine detail */}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-black/40 border-r border-white/5" />
         </div>
     );
 });
@@ -252,32 +287,36 @@ const Timeline = React.memo(function Timeline({
                 </div>
             </section>
 
-            {/* Slot 3: Trends */}
+            {/* Slot 3: Library (Archives) */}
             <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-20 md:pt-32">
                 <div className="max-w-2xl mx-auto w-full pb-80 md:pb-96">
                     <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-none font-oswald uppercase" style={{ color: '#2a2a2a' }}>Trends</h2>
-                            <button
-                                onClick={function sync() { setShowNotebookModal(true); }}
-                                className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase"
-                            >
-                                /sync
-                            </button>
+                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-none font-oswald uppercase" style={{ color: '#2a2a2a' }}>Library</h2>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={function sync() { setShowNotebookModal(true); }}
+                                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase hover:bg-white/10 transition-all"
+                                >
+                                    /sync
+                                </button>
+                            </div>
                         </div>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-oswald">思考の潮流</p>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-oswald">思考と記録の書架</p>
                     </header>
 
-                    <div className="space-y-12">
+                    <div className="space-y-16">
                         {globalTrends ? (
-                            <div className="glass-ethereal p-8 rounded-3xl border border-white/10 spiritual-float">
-                                <p className="text-xl font-serif text-white/90 leading-relaxed mb-6">
-                                    {globalTrends.summary}
+                            <div className="glass-ethereal p-10 rounded-[40px] border border-white/10 spiritual-float relative overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#bd8a78]/40 to-transparent" />
+                                <span className="text-[10px] font-black text-[#bd8a78] tracking-[0.4em] uppercase mb-4 block">Current Sentiment Arc</span>
+                                <p className="text-2xl font-serif text-white/90 leading-relaxed mb-8 italic">
+                                    「{globalTrends.summary}」
                                 </p>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-3">
                                     {globalTrends.keywords.map(function renderKw(kw, i) {
                                         return (
-                                            <span key={i} className="px-3 py-1 bg-white/5 rounded-full text-xs text-white/50 border border-white/5">
+                                            <span key={i} className="px-4 py-1.5 bg-white/5 rounded-full text-[10px] font-bold text-white/40 border border-white/5 hover:text-[#bd8a78] transition-colors cursor-default">
                                                 #{kw}
                                             </span>
                                         );
@@ -286,22 +325,75 @@ const Timeline = React.memo(function Timeline({
                             </div>
                         ) : null}
                         
-                        <div className="p-10 rounded-[50px] bg-white/5 border border-white/10 shadow-2xl">
-                            <h3 className="text-3xl font-bold text-white tracking-tighter leading-tight">
-                                {futureSelfCritique || "潮流を待つ..."}
-                            </h3>
+                        <div className="relative">
+                            <div className="absolute -left-6 top-0 bottom-0 w-px bg-white/5" />
+                            <h3 className="text-[10px] font-black tracking-[0.5em] text-white/20 uppercase mb-8 pl-4">Archives curated from NDL</h3>
+                            
+                            <div className="grid grid-cols-1 gap-6 pl-4">
+                                {archives.map(function renderArchive(c, idx) {
+                                    return (
+                                        <motion.a
+                                            href={c.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            key={idx}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            whileInView={{ opacity: 1, x: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: idx * 0.1 }}
+                                            className="group block p-8 bg-white/[0.02] border border-white/5 rounded-[40px] hover:bg-white/[0.05] hover:border-[#bd8a78]/30 transition-all duration-500 relative overflow-hidden"
+                                        >
+                                            <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-10 transition-opacity">
+                                                <Bookmark size={48} className="text-[#bd8a78]" />
+                                            </div>
+                                            
+                                            <div className="flex flex-row gap-6 md:gap-8">
+                                                <SpectralBookCover title={c.title} author={c.author} idx={idx} />
+                                                
+                                                <div className="flex-1 flex flex-col justify-center gap-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-1 h-8 bg-[#bd8a78]/40 group-hover:h-12 transition-all duration-500" />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[9px] font-black text-[#bd8a78] uppercase tracking-[0.3em] mb-1">{c.author}</span>
+                                                            <h4 className="text-lg md:text-xl font-bold text-white/90 leading-snug group-hover:text-white transition-colors line-clamp-2">{c.title}</h4>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <p className="hidden md:block text-sm text-white/40 italic font-serif leading-relaxed line-clamp-2 pl-4">
+                                                        {c.quote}
+                                                    </p>
+                                                    
+                                                    <div className="flex items-center justify-between mt-2 pl-0 md:pl-4">
+                                                        <span className="text-[8px] font-bold text-white/10 uppercase tracking-widest group-hover:text-[#bd8a78]/50 transition-colors">
+                                                            {c.year || 'Deep Archive'} / NDL
+                                                        </span>
+                                                        <div className="flex items-center gap-2 text-[10px] font-black text-[#bd8a78]/0 group-hover:text-[#bd8a78]/60 transition-all tracking-[0.2em] uppercase">
+                                                            <span>Open Archive</span>
+                                                            <ChevronRight size={12} />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.a>
+                                    );
+                                })}
+                                {archives.length === 0 && (
+                                    <div className="py-20 text-center border border-dashed border-white/5 rounded-[40px]">
+                                        <p className="text-[10px] text-white/20 italic tracking-widest uppercase">書架は静寂に包まれています。</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {archives.map(function renderArchive(c, idx) {
-                                return (
-                                    <div key={idx} className="p-8 bg-white/5 border border-white/10 rounded-[40px]">
-                                        <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-2">{c.author}</div>
-                                        <div className="text-lg font-bold text-white/80 leading-tight mb-2">{c.title}</div>
-                                        <p className="text-xs text-white/40 italic font-serif">"{c.quote}"</p>
-                                    </div>
-                                );
-                            })}
+                        <div className="p-12 rounded-[60px] bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5 shadow-2xl relative overflow-hidden group">
+                           <div className="absolute top-0 right-0 p-8 text-6xl font-black text-white/[0.02] select-none font-oswald uppercase">CRITIQUE</div>
+                           <h4 className="text-[9px] font-black text-[#f15a24] tracking-[0.4em] uppercase mb-6 flex items-center gap-2">
+                               <div className="w-2 h-2 rounded-full bg-[#f15a24] animate-pulse" />
+                               Future Self Echo / 2036
+                           </h4>
+                           <p className="text-2xl md:text-3xl font-bold text-white/80 tracking-tighter leading-tight relative z-10">
+                               {futureSelfCritique || "潮流が定着するのを待っています..."}
+                           </p>
                         </div>
                     </div>
                 </div>
