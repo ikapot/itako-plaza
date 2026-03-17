@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Activity } from 'lucide-react';
 import ThreeDMap from './ThreeDMap';
 import WarholAvatar from './WarholAvatar';
-import SpectralResonator from './SpectralResonator';
+import PortalGrimoire from './PortalGrimoire';
 
 function getConnectBtnStyle(status, key, loading) {
   const base = "w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald";
@@ -136,55 +136,13 @@ const ManagerContent = React.memo(({
                             </div>
                         </div>
 
-                        <div className="space-y-6">
-                            <div className="flex justify-between items-center px-2">
-                                <h3 className="text-[10px] font-bold text-white/30 tracking-widest uppercase font-oswald text-left">Trinity Connection (推奨3スロット)</h3>
-                                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-[9px] text-[#f15a24] hover:text-white transition-colors flex items-center gap-1.5 font-bold">
-                                    <Globe className="w-3 h-3" /> Get New Keys in AI Studio
-                                </a>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                {[0, 1, 2].map(idx => {
-                                    const allKeys = geminiKey.split(',').map(k => k.trim());
-                                    const currentK = allKeys[idx] || '';
-                                    let slotStatus = 'idle';
-                                    if (currentK) {
-                                        if (isValidatingApi) slotStatus = 'validating';
-                                        else if (apiConnectionStatus === 'success') slotStatus = 'success';
-                                        else if (apiConnectionStatus === 'error') slotStatus = 'error';
-                                    }
-
-                                    return (
-                                        <div key={idx} className="flex flex-col items-center gap-6 group">
-                                            <SpectralResonator status={slotStatus} delay={idx * 0.2} />
-                                            <div className="relative w-full">
-                                                <div className="absolute -top-2 left-4 px-2 py-0.5 bg-black border border-white/10 rounded-full text-[7px] text-white/20 font-black z-20">SLOT {idx+1}</div>
-                                                <input
-                                                    type="password"
-                                                    placeholder="API KEY..."
-                                                    value={currentK}
-                                                    onChange={(e) => {
-                                                        const next = [...allKeys];
-                                                        next[idx] = e.target.value;
-                                                        const newVal = next.filter(Boolean).join(',');
-                                                        setGeminiKey(newVal);
-                                                        localStorage.setItem('itako_gemini_key', newVal);
-                                                    }}
-                                                    className={`w-full bg-black/40 border rounded-[25px] p-4 pt-6 text-xs font-mono outline-none transition-all text-center
-                                                        ${currentK ? 'border-[#f15a24]/30 text-white' : 'border-white/10 text-white/10 hover:border-white/20'}`}
-                                                />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        <div className="pt-4">
-                            <button onClick={handleValidateApi} disabled={isValidatingApi} className={getConnectBtnStyle(apiConnectionStatus, geminiKey, isValidatingApi)}>
-                                {isValidatingApi ? 'Validating Trinity...' : apiConnectionStatus === 'error' ? 'Retry Connection' : '回路を安定化させる (Connect All)'}
-                            </button>
-                        </div>
+                        <PortalGrimoire 
+                            geminiKey={geminiKey}
+                            setGeminiKey={setGeminiKey}
+                            isValidatingApi={isValidatingApi}
+                            apiConnectionStatus={apiConnectionStatus}
+                            handleValidateApi={handleValidateApi}
+                        />
                     </motion.div>
                 )}
 
