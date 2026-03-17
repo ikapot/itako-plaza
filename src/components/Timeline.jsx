@@ -317,9 +317,9 @@ const Timeline = React.memo(function Timeline({
             {/* Slot 3: Library (Archives) */}
             <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-20 md:pt-32">
                 <div className="max-w-2xl mx-auto w-full pb-80 md:pb-96">
-                    <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
+                    <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-0">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-none font-oswald uppercase" style={{ color: '#2a2a2a' }}>Library</h2>
+                            <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none font-oswald uppercase break-all w-full pr-4" style={{ color: '#2a2a2a' }}>LIBRARY</h2>
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={function sync() { setShowNotebookModal(true); }}
