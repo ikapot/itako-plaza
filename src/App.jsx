@@ -302,7 +302,24 @@ export default function App() {
     setSyncingNotebook(false);
   };
 
-  if (!isAppReady || !user) return <LandingPage user={user} onLoginComplete={setIsAppReady} />;
+  if (!isAppReady || !user) {
+    return (
+      <LandingPage 
+        user={user} 
+        onLoginComplete={(key) => {
+          if (key) {
+            setGeminiKey(key);
+            setIsAppReady(true);
+          }
+        }}
+        geminiKey={geminiKey}
+        setGeminiKey={setGeminiKey}
+        isValidatingApi={isValidatingApi}
+        apiConnectionStatus={apiConnectionStatus}
+        handleValidateApi={handleValidateApi}
+      />
+    );
+  }
 
   const currentLocation = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
   const ambient = AMBIENT_COLORS[globalSentiment] || AMBIENT_COLORS.neutral;
