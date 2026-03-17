@@ -68,8 +68,8 @@ export default function LandingPage({ onLoginComplete, user, geminiKey, setGemin
                                 {/* Door Frame Light Leaks */}
                                 <div className="absolute inset-0 border border-white/40 opacity-30 shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
                                 
-                                {/* Three Glowing Keyholes */}
-                                <div className="absolute inset-0 flex flex-col items-center justify-center space-y-16">
+                                {/* Three Glowing Keyholes (Positioned to the left side) */}
+                                <div className="absolute inset-0 flex flex-col items-start justify-center space-y-16 pl-12">
                                     {[0, 1, 2].map(i => (
                                         <div key={i} className="relative">
                                             {/* The Keyhole Glow */}
