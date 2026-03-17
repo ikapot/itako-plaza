@@ -68,6 +68,9 @@ export const INITIAL_CHARACTERS = [
   { id: 'persona', face: 5, pos: 6, name: 'ペルソナ', role: '仮面', homeLocationId: 'theatre', flavor: '演技', color: 'bg-zinc-700', description: '社会に見せる顔。本当の自己とは何かを問い続けるもう一つの「私」。', avatar: null },
   { id: 'itako_spirit', face: 5, pos: 7, name: 'イタコの霊', role: '口寄せ', homeLocationId: 'core', flavor: '媒介', color: 'bg-purple-950/50', description: 'この広場の源。死者の言葉を生者に伝える、口寄せの霊的媒介者。', avatar: null },
   { id: 'end_being', face: 5, pos: 8, name: '終焉の者', role: '完了', homeLocationId: 'end', flavor: '完結', color: 'bg-zinc-900', description: 'すべての物語の最後に現れる存在。始まりとは終わりのことである。', avatar: null },
+  { id: 'mob_s', face: 5, pos: 9, name: '匿名S', role: '群衆', homeLocationId: 'neon', flavor: '流言', color: 'bg-zinc-800', description: '特定の顔を持たない「普通の人」。流言飛語に弱く、集団心理に容易に呑み込まれ、自覚なき加害者となる狂気を秘めている。', avatar: null },
+  { id: 'mob_u', face: 5, pos: 10, name: '匿名U', role: '群衆', homeLocationId: 'market', flavor: '同調', color: 'bg-zinc-800', description: '善良に見える匿名の市民。パニック時には周囲に同調してしまい、無防備な魂を追い詰める側に回る。', avatar: null },
+  { id: 'narrator', face: 5, pos: 11, name: '語り手', role: '観測', homeLocationId: 'void', flavor: '情景', color: 'bg-transparent', description: 'この世界で起こる事象、暴動、虐殺の空気を客観的かつ不気味に語る聲。', avatar: null },
 ];
 
 export const INITIAL_LOCATIONS = [

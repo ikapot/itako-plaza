@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bookmark, ChevronRight } from 'lucide-react';
+import { Bookmark, ChevronRight, Reply } from 'lucide-react';
 import SpiritCard from './SpiritCard';
 import WarholAvatar from './WarholAvatar';
 
@@ -123,7 +123,25 @@ const MemoizedNewsItem = React.memo(function NewsItem({ n, charMap }) {
     );
 });
 
-const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, charObj, handleBookmark }) {
+const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, charObj, handleBookmark, handleReply }) {
+    if (charObj?.id === 'narrator' || m.charId === 'narrator') {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full text-center py-6 md:py-10 px-4 my-2"
+            >
+                <div className="max-w-xl mx-auto flex flex-col items-center gap-4">
+                    <div className="w-12 h-[1px] bg-[#bd8a78]/30" />
+                    <p className="text-sm md:text-base leading-relaxed text-[#bd8a78]/90 font-serif italic tracking-[0.2em] whitespace-pre-wrap">
+                        {m.content.replace(/^\[narration\]\s*/i, '').replace(/^【ナレーション】\s*/i, '')}
+                    </p>
+                    <div className="w-12 h-[1px] bg-[#bd8a78]/30" />
+                </div>
+            </motion.div>
+        );
+    }
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.98 }}
@@ -143,7 +161,14 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
                     {m.content}
                 </p>
                 {!isUser ? (
-                    <div className="mt-6 flex justify-end">
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button 
+                            onClick={function reply() { handleReply?.(m); }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[8px] font-bold text-white/20 uppercase tracking-widest hover:bg-[#f15a24]/20 hover:text-[#f15a24] transition-all group/btn"
+                        >
+                            <Reply size={10} className="group-hover/btn:fill-current" />
+                            返信する
+                        </button>
                         <button 
                             onClick={function bookmark() { handleBookmark?.(i); }}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[8px] font-bold text-white/20 uppercase tracking-widest hover:bg-[#bd8a78]/20 hover:text-[#bd8a78] transition-all group/btn"
@@ -172,6 +197,7 @@ const Timeline = React.memo(function Timeline({
     messages,
     loading,
     handleBookmark,
+    handleReply,
     globalTrends,
     setShowNotebookModal,
     futureSelfCritique,
@@ -272,6 +298,7 @@ const Timeline = React.memo(function Timeline({
                                         isUser={m.role === 'user'} 
                                         charObj={charMap[m.charId]} 
                                         handleBookmark={handleBookmark} 
+                                        handleReply={handleReply}
                                     />
                                 );
                             })}

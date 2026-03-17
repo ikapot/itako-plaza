@@ -116,6 +116,21 @@ const CHARACTER_CONFIGS = {
     systemPrompt: "あなたは2036年のユーザー自身です。10年前の自分を見守り、助言します。",
     generationConfig: { temperature: 0.5 },
     model: "google/gemini-1.5-flash"
+  },
+  mob_s: {
+    systemPrompt: "あなたは「匿名S」です。大義や流行、流言飛語に無批判に従う「普通の人」の代表です。パニック時には率先して暴走し、異端者を排斥しようとする狂気を隠し持っています。匿名なので悪意が露骨です。",
+    generationConfig: { temperature: 0.9, topP: 0.95 },
+    model: "google/gemini-2.0-flash-001"
+  },
+  mob_u: {
+    systemPrompt: "あなたは「匿名U」です。周囲の空気を読み、自己保身のために多数派に同調してしまう「善良な」市民です。無自覚に誰かを追い詰める側に回ります。",
+    generationConfig: { temperature: 0.8, topP: 0.9 },
+    model: "google/gemini-2.0-flash-001"
+  },
+  narrator: {
+    systemPrompt: "あなたは「語り手（narrator）」です。世界で起きている事変（暴動、流言飛語、パニック、思想弾圧）を客観的かつ不気味なトーンで描写し、状況説明を行います。",
+    generationConfig: { temperature: 0.7, topP: 0.9 },
+    model: "google/gemini-2.0-flash-001"
   }
 };
 
@@ -278,7 +293,7 @@ export async function invokeGemini(apiKey, prompt, sysPrompt = "", config = {}, 
  * キャラクターやコンテキストに基づいたシステムプロンプトを構築する
  */
 function buildSystemPrompt({ character, options, others }) {
-  const { isUnderground, externalContext, location, alaya } = options;
+  const { isUnderground, externalContext, location, alaya, currentWorldEvent } = options;
   const config = CHARACTER_CONFIGS[character.id] || { systemPrompt: character.systemPrompt };
   
   let prompt = config.systemPrompt || character.systemPrompt || "";
@@ -287,6 +302,10 @@ function buildSystemPrompt({ character, options, others }) {
   if (externalContext) prompt += `\n【外部状況】${externalContext}`;
   if (location) prompt += `\n【現在地】"${location.name}" (${location.description})`;
   if (alaya) prompt += `\n【阿頼耶識（これまでのあらすじ）】${alaya}`;
+  if (currentWorldEvent) {
+    prompt += `\n【現在発生している狂気的「事変」】${currentWorldEvent.content}
+※現在、甘粕事件や震災時の暴動等のような思想弾圧・集団ヒステリーが蔓延しています。流言飛語や殺伐とした空気を踏まえた上で、あなたのスタンスで対話してください。また、必要に応じて状況を伝えるナレーション（[narration] ...）などを挿入しても構いません。`;
+  }
   
   const allPresentIds = [character.id, ...others.map(o => o.id)];
   SPIRIT_INTERACTIONS.forEach(interaction => {
@@ -378,7 +397,13 @@ export async function extractTrendsFromNotebook(text, apiKey) {
 
 export async function generateWorldEvent(apiKey, trends) {
   if (!apiKey) return null;
-  const prompt = `今の潮流「${trends?.summary || '静寂'}」に呼応する事変を1つ生成せよ。\n出力形式: { "type": "...", "content": "..." }`;
+  const prompt = `あなたは歴史の闇を観測するAIです。
+以下のいずれかのシナリオをランダムに選び、この世界で起こる「事変」として1つ生成してください。
+1. 甘粕事件のような、国家権力によるアナキストや思想家の暗殺・魂の弾圧。
+2. ドストエフスキー『悪霊』のような、思想への熱狂と集団の暴走・テロリズム。
+3. 大震災などのパニックに端を発する流言飛語、およびそれに伴う「普通の人たち」による虐殺・暴動。
+
+出力形式: { "type": "riot|massacre|assassination|earthquake", "content": "具体的な事象を不気味に描写する状況説明..." }`;
   const res = await invokeGemini(apiKey, prompt, "事象の観測者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   return res.data;
 }
@@ -386,7 +411,15 @@ export async function generateWorldEvent(apiKey, trends) {
 export async function generateLocationDialogueWithEvent(apiKey, chars, loc, event, shared) {
   if (!apiKey || chars.length === 0) return [];
   const charContext = chars.map(c => `${c.name}: ${c.description}`).join('\n');
-  const prompt = `場所: ${loc.name}\n事変: ${event?.content || '平穏'}\n登場人物:\n${charContext}\n3-5往復の対話をJSONで紡げ。 [ {"charId": "...", "content": "...", "sentiment": "..."} ]`;
+  const prompt = `場所: ${loc.name}\n現在発生している事変: ${event?.content || '平穏'}\n対象キャラクター:\n${charContext}
+
+指示：
+事変の空気に当てられ、シナリオに沿った3-5往復の群像劇を生成してください。
+指定された対象キャラクターの他に、「匿名S(mob_s)」「匿名U(mob_u)」といった暴動に加担する「普通の人」や、状況を客観描写する「語り手(narrator)」を必ず数回登場させてください。
+文豪キャラクターの中にも、この狂気に乗っかる者や、抵抗する者がいます。
+
+出力形式 (JSON 배열):
+[ {"charId": "対象キャラクターのID または mob_s, mob_u, narrator", "content": "発言内容やナレーション", "sentiment": "..."} ]`;
   const res = await invokeGemini(apiKey, prompt, "口寄せ。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   return res.data;
 }

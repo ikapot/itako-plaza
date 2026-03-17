@@ -55,6 +55,7 @@ export default function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [replyTo, setReplyTo] = useState(null); // { id, content, charId }
   const [alaya, setAlaya] = useState(() => localStorage.getItem('itako_alaya') || "");
   const [bookmarks, setBookmarks] = useState([]);
   const [spiritSharedKnowledge, setSpiritSharedKnowledge] = useState('');
@@ -318,19 +319,29 @@ export default function App() {
       interactionDepth,
       location,
       others,
-      alaya
+      alaya,
+      currentWorldEvent
     };
-  }, [spiritSharedKnowledge, globalTrends, messages, selectedLocationId, selectedCharIds, isUnderground, alaya]);
+  }, [spiritSharedKnowledge, globalTrends, messages, selectedLocationId, selectedCharIds, isUnderground, alaya, currentWorldEvent]);
+
+  const handleCancelReply = useCallback(() => {
+    setReplyTo(null);
+  }, []);
 
   const handleSendMessage = async () => {
     if (!input.trim() || loading) return;
     
-    const userMsg = input;
+    // リプライ対象がある場合、メッセージに引用枠を付与する
+    const userMsg = replyTo 
+      ? `＞ ${replyTo.charId}: 「${replyTo.content}」\n\n${input}`
+      : input;
+      
     const charId = selectedCharIds[0];
     const currentChar = APP_CHARACTERS.find(c => c.id === charId);
 
     // 1. UI状態の即時更新
     setInput('');
+    setReplyTo(null); // 送信後にリプライ状態をリセット
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setLoading(true);
 
@@ -483,7 +494,7 @@ export default function App() {
         <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, setActiveManagerTab }} />
         
         {/* Main Timeline View */}
-        <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark, globalTrends, setShowNotebookModal, futureSelfCritique, archives, globalSentiment }} />
+        <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark, handleReply: setReplyTo, globalTrends, setShowNotebookModal, futureSelfCritique, archives, globalSentiment }} />
 
         {/* Manager Overlay (Map, Registry, Connect) */}
         <AnimatePresence>
@@ -552,7 +563,7 @@ export default function App() {
         </AnimatePresence>
       </div>
 
-      <FloatingInputBar {...{ input, setInput, handleSendMessage, loading }} />
+      <FloatingInputBar {...{ input, setInput, handleSendMessage, loading, replyTo, onCancelReply: handleCancelReply }} />
       <CharacterOverlay {...{ enlargedCharId, setEnlargedCharId, characters: APP_CHARACTERS, handleTalkTo }} />
       {/* Sync Modal Simplified */}
       <AnimatePresence>

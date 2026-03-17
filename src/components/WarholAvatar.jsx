@@ -6,11 +6,13 @@ const WarholAvatar = ({ src, colorClass = "bg-itako-clay", size = "w-12 h-12", i
         {!isPreStyled ? <div className={`absolute inset-0 ${colorClass} opacity-80`} /> : null}
 
         {/* Screen Print Layer 2: Portrait */}
-        <img
-            src={src}
-            alt="portrait"
-            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out ${isSelected ? 'scale-110' : 'scale-100'} ${isPreStyled ? 'mix-blend-normal' : 'grayscale contrast-[3] brightness-[1.2] mix-blend-multiply'}`}
-        />
+        {src ? (
+            <img
+                src={src}
+                alt="portrait"
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out ${isSelected ? 'scale-110' : 'scale-100'} ${isPreStyled ? 'mix-blend-normal' : 'grayscale contrast-[3] brightness-[1.2] mix-blend-multiply'}`}
+            />
+        ) : null}
 
         {/* Screen Print Layer 3: Texture Overlay */}
         <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none" />
