@@ -224,9 +224,9 @@ const ManagerContent = React.memo(({
                             </div>
                         </div>
                     </motion.div>
-                )}
+                ) : null}
                 
-                {activeManagerTab === 'grimoire' && (
+                {activeManagerTab === 'grimoire' ? (
                     <motion.div
                         key="grimoire"
                         initial={{ opacity: 0, y: 10 }}
@@ -282,7 +282,7 @@ const ManagerContent = React.memo(({
                             </footer>
                         </section>
                     </motion.div>
-                )}
+                ) : null}
             </AnimatePresence>
         </div>
     );
