@@ -235,7 +235,9 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
  * 霊的知能への統一アクセスポイント (OpenRouter)
  */
 export async function invokeGemini(apiKey, prompt, sysPrompt = "", config = {}, isJson = false) {
-  if (!apiKey) throw new Error(SPIRITUAL_ERRORS.AUTH_FAILED);
+  if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
+    throw new Error(SPIRITUAL_ERRORS.AUTH_FAILED);
+  }
 
   const targetModel = config.model || preferredOpenRouterModel;
   const messages = [{ role: "user", content: sysPrompt ? `${sysPrompt}\n\n${prompt}` : prompt }];
@@ -293,7 +295,7 @@ export async function streamSpiritualDialogue({
   options = {},
   onChunk
 }) {
-  if (!apiKey) {
+  if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
     onChunk("【霊的周波数が未設定です】", { model: 'system', keyIndex: '-' });
     return;
   }

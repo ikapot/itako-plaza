@@ -21,7 +21,10 @@ import { X, Activity } from 'lucide-react';
 
 function cleanKey(key) {
   if (typeof key !== 'string') return key;
-  return key.trim();
+  const trimmed = key.trim();
+  if (trimmed === 'undefined' || trimmed === 'null' || trimmed === '') return '';
+  const match = trimmed.match(/^[A-Z0-9_]+=(.*)$/);
+  return match ? match[1].trim() : trimmed;
 }
 
 const APP_CHARACTERS = INITIAL_CHARACTERS.map(c => ({
