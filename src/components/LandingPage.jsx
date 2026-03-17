@@ -46,58 +46,97 @@ export default function LandingPage({ onLoginComplete, user, geminiKey, setGemin
                 {step === 'gate' && (
                     <motion.div
                         key="gate"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
-                        className="relative z-10 flex flex-col items-center max-w-2xl px-8 text-center"
+                        className="relative z-10 flex flex-col items-center w-full h-full justify-center px-8"
                     >
-                        {/* The Large Gate (Logo/Branding) */}
-                        <motion.div 
-                            animate={{ 
-                                y: [0, -10, 0],
-                                filter: ["drop-shadow(0 0 0px #f15a2400)", "drop-shadow(0 0 20px #f15a2433)", "drop-shadow(0 0 0px #f15a2400)"]
-                            }}
-                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                            className="mb-12"
-                        >
-                            <div className="scale-[3] md:scale-[5] mb-8">
-                                <Logo />
-                            </div>
-                        </motion.div>
-
-                        <div className="space-y-6">
-                            <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-white uppercase font-oswald italic">
-                                The Monolith Gate
-                            </h1>
-                            <div className="flex flex-col items-center gap-4">
-                                <p className="text-sm md:text-lg text-white/40 font-serif italic max-w-md leading-relaxed">
-                                    「ここから先は『あわいの広場』。生者と死者の境界線。入るには、深淵を照らす『三つの鍵』が必要です。」
-                                </p>
+                        {/* The Mysterious Door (Inspired by User Image) */}
+                        <div className="relative group mb-12">
+                            {/* Inner Glow (Light leaking from edges) */}
+                            <motion.div 
+                                animate={{ 
+                                    boxShadow: [
+                                        "0 0 20px rgba(255,255,255,0.1), inset 0 0 10px rgba(255,255,255,0.05)",
+                                        "0 0 40px rgba(255,255,255,0.2), inset 0 0 20px rgba(255,255,255,0.1)",
+                                        "0 0 20px rgba(255,255,255,0.1), inset 0 0 10px rgba(255,255,255,0.05)"
+                                    ]
+                                }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                className="w-[200px] h-[350px] md:w-[260px] md:h-[450px] bg-black border border-white/20 relative rounded-sm overflow-hidden"
+                            >
+                                {/* Door Frame Light Leaks */}
+                                <div className="absolute inset-0 border border-white/40 opacity-30 shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
                                 
+                                {/* Three Glowing Keyholes */}
+                                <div className="absolute inset-0 flex flex-col items-center justify-center space-y-16">
+                                    {[0, 1, 2].map(i => (
+                                        <div key={i} className="relative">
+                                            {/* The Keyhole Glow */}
+                                            <motion.div 
+                                                animate={{ 
+                                                    scale: [1, 1.5, 1],
+                                                    opacity: [0.3, 0.8, 0.3],
+                                                    boxShadow: [
+                                                        "0 0 5px #fff",
+                                                        "0 0 15px #fff",
+                                                        "0 0 5px #fff"
+                                                    ]
+                                                }}
+                                                transition={{ duration: 3, delay: i * 0.5, repeat: Infinity }}
+                                                className="w-1.5 h-3 bg-white rounded-full blur-[1px]"
+                                            />
+                                            {/* Ray of light */}
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white/10 rounded-full blur-xl pointer-events-none" />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Logo as a subtle emblem */}
+                                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 scale-50 opacity-20 group-hover:opacity-40 transition-opacity">
+                                    <Logo />
+                                </div>
+                            </motion.div>
+
+                            {/* Light Leak Lines (Horizontal/Vertical outside the door) */}
+                            <div className="absolute -inset-4 border border-white/5 pointer-events-none" />
+                        </div>
+
+                        <div className="space-y-8 flex flex-col items-center">
+                            <h1 className="text-2xl md:text-3xl font-black tracking-[0.5em] text-white uppercase font-oswald italic">
+                                あわいの門
+                            </h1>
+                            
+                            <p className="text-xs md:text-sm text-white/40 font-serif italic max-w-xs leading-relaxed text-center">
+                                「ここから先は『あわいの広場』。生者と死者の境界線。入るには、深淵を照らす『三つの鍵』が必要です。」
+                            </p>
+                            
+                            <div className="flex flex-col md:flex-row items-center gap-4 mt-4">
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleEnterGate}
-                                    className="group relative mt-8 px-12 py-5 bg-white text-black rounded-full font-black text-xs tracking-[0.5em] uppercase overflow-hidden"
+                                    className="px-10 py-4 bg-white text-black rounded-full font-black text-[10px] tracking-[0.3em] uppercase hover:bg-zinc-200 transition-colors"
                                 >
-                                    <span className="relative z-10 flex items-center gap-2">
-                                        門を開く <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                                    </span>
-                                    <motion.div 
-                                        className="absolute inset-0 bg-[#f15a24]"
-                                        initial={{ x: "-100%" }}
-                                        whileHover={{ x: 0 }}
-                                        transition={{ duration: 0.4 }}
-                                    />
+                                    門を開く
                                 </motion.button>
+                                
+                                <motion.a
+                                    href="https://aistudio.google.com/app/apikey"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    whileHover={{ scale: 1.05 }}
+                                    className="px-10 py-4 border border-white/20 text-white rounded-full font-black text-[10px] tracking-[0.3em] uppercase hover:bg-white/5 transition-colors flex items-center gap-2"
+                                >
+                                    鍵を取りに行く <Sparkles size={12} className="text-[#f15a24]" />
+                                </motion.a>
                             </div>
                         </div>
 
                         {/* Subtle Footer */}
-                        <div className="mt-20 flex gap-12 text-[8px] font-bold text-white/10 tracking-[0.4em] uppercase">
+                        <div className="mt-16 flex gap-8 text-[7px] font-bold text-white/5 tracking-[0.4em] uppercase">
                             <span>Established in 1923</span>
-                            <span>Ethereal Protocol v1.2</span>
-                            <span>Spiritual Echo System</span>
+                            <span>Ethereal Protocol</span>
                         </div>
                     </motion.div>
                 )}
