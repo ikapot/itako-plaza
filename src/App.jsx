@@ -289,29 +289,33 @@ export default function App() {
   setLoading(false);
 };
 
-  const handleSyncNotebook = async () => {
+  async function handleSyncNotebook() {
     if (!notebookInput.trim() || !geminiKey) return;
     setSyncingNotebook(true);
-    const trends = await extractTrendsFromNotebook(notebookInput, geminiKey);
-    if (trends) {
-      setGlobalTrends(trends);
-      localStorage.setItem('itako_global_trends', JSON.stringify(trends));
-      setShowNotebookModal(false);
-      setNotebookInput('');
+    try {
+      const trends = await extractTrendsFromNotebook(notebookInput, geminiKey);
+      if (trends) {
+        setGlobalTrends(trends);
+        localStorage.setItem('itako_global_trends', JSON.stringify(trends));
+        setShowNotebookModal(false);
+        setNotebookInput('');
+      }
+    } finally {
+      setSyncingNotebook(false);
     }
-    setSyncingNotebook(false);
-  };
+  }
 
   if (!isAppReady || !user) {
+    function prepareSession(key) {
+      if (!key) return;
+      setGeminiKey(key);
+      setIsAppReady(true);
+    }
+
     return (
       <LandingPage 
         user={user} 
-        onLoginComplete={(key) => {
-          if (key) {
-            setGeminiKey(key);
-            setIsAppReady(true);
-          }
-        }}
+        onLoginComplete={prepareSession}
         geminiKey={geminiKey}
         setGeminiKey={setGeminiKey}
         isValidatingApi={isValidatingApi}

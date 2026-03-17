@@ -131,6 +131,26 @@ function extractSentiment(text) {
   return match ? match[1] : 'neutral';
 }
 
+// --- JSON Extraction Helper ---
+function extractJson(text) {
+  // First, try to extract specifically from markdown code blocks
+  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/g;
+  let match = codeBlockRegex.exec(text);
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+
+  // If no code block, try to find the outermost { } or [ ]
+  const structureRegex = /([{\[]([\s\S]*)[}\]])/s;
+  const structMatch = text.match(structureRegex);
+  if (structMatch && structMatch[1]) {
+    return structMatch[1].trim();
+  }
+
+  // Last resort: just cleanup surrounding whitespace
+  return text.replace(/```json|```/g, "").trim();
+}
+
 // --- API Execution ---
 
 async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = false, onChunk = null) {
@@ -201,8 +221,7 @@ export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config 
       let finalData = res;
       if (isJson) {
         try {
-          const jsonMatch = res.match(/\{[\s\S]*\}/);
-          const cleanJson = jsonMatch ? jsonMatch[0] : res.replace(/```json|```/g, "").trim();
+          const cleanJson = extractJson(res);
           finalData = JSON.parse(cleanJson);
         } catch (e) {
           console.error("OpenRouter JSON Parse Error", res);
@@ -235,8 +254,7 @@ export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config 
         let finalData = text;
         if (isJson) {
           try {
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            const cleanJson = jsonMatch ? jsonMatch[0] : text.replace(/```json|```/g, "").trim();
+            const cleanJson = extractJson(text);
             finalData = JSON.parse(cleanJson);
           } catch (e) { 
             console.error("JSON Parse Error", text); 

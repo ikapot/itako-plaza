@@ -6,26 +6,24 @@ import { Sparkles, AlertCircle } from 'lucide-react';
  * PortalGrimoire - The Ritualistic API Key Entry UI
  * Transforms technical configuration into a spiritual ceremony.
  */
-const PortalGrimoire = ({ 
+export default function PortalGrimoire({ 
     geminiKey, 
     setGeminiKey, 
     isValidatingApi, 
     apiConnectionStatus, 
     handleValidateApi 
-}) => {
+}) {
     const [detectedKey, setDetectedKey] = useState('');
     const [isResonating, setIsResonating] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const [editingSlot, setEditingSlot] = useState(null); // Which slot is being clicked/pasted to
-    const [turningSlot, setTurningSlot] = useState(null); // Which slot is currently "turning"
+    const [editingSlot, setEditingSlot] = useState(null); 
+    const [turningSlot, setTurningSlot] = useState(null); 
 
-    // Validate if a string looks like an API key
-    const isKeyPattern = (str) => {
+    function isKeyPattern(str) {
         return str.length > 20 && (str.startsWith('AIza') || str.startsWith('sk-or-'));
-    };
+    }
 
-    // Check clipboard when window gains focus (Automatic Resonance)
-    const checkClipboard = useCallback(async () => {
+    const checkClipboard = useCallback(async function checkClipboard() {
         try {
             if (!navigator.clipboard) return;
             const text = await navigator.clipboard.readText();
@@ -42,12 +40,12 @@ const PortalGrimoire = ({
         } catch (e) {}
     }, [geminiKey, detectedKey]);
 
-    useEffect(() => {
+    useEffect(function setupClipboardListener() {
         window.addEventListener('focus', checkClipboard);
         return () => window.removeEventListener('focus', checkClipboard);
     }, [checkClipboard]);
 
-    const performConsecrate = (key, slotIndex) => {
+    function performConsecrate(key, slotIndex) {
         const currentKeys = geminiKey.split(',').map(k => k.trim()).filter(Boolean);
         
         if (currentKeys.includes(key)) {
@@ -55,11 +53,10 @@ const PortalGrimoire = ({
             return false;
         }
 
-        // Trigger turning animation
         const actualSlot = slotIndex !== null ? slotIndex : currentKeys.length;
         setTurningSlot(actualSlot);
         
-        setTimeout(() => {
+        setTimeout(function updateKeyState() {
             const nextKeys = [...currentKeys];
             if (slotIndex !== null) {
                 nextKeys[slotIndex] = key;
@@ -67,8 +64,9 @@ const PortalGrimoire = ({
                 nextKeys.push(key);
             }
             
-            setGeminiKey(nextKeys.join(','));
-            localStorage.setItem('itako_gemini_key', nextKeys.join(','));
+            const keyString = nextKeys.join(',');
+            setGeminiKey(keyString);
+            localStorage.setItem('itako_gemini_key', keyString);
             
             setTurningSlot(null);
             setDetectedKey('');
@@ -78,80 +76,119 @@ const PortalGrimoire = ({
         }, 800);
 
         return true;
-    };
+    }
 
-    const handleConsecrate = () => {
+    function handleConsecrate() {
         if (detectedKey) performConsecrate(detectedKey, null);
-    };
+    }
 
-    const handleManualPaste = (idx, e) => {
+    function handleManualPaste(idx, e) {
         const val = e.target.value.trim();
         if (isKeyPattern(val)) {
             performConsecrate(val, idx);
         } else if (val.length > 5) {
             setErrorMessage('鍵の形状が正しくありません。');
         }
-    };
+    }
 
-    const handleClearKeys = () => {
+    function handleClearKeys() {
         setGeminiKey('');
         localStorage.removeItem('itako_gemini_key');
         setErrorMessage('');
         setEditingSlot(null);
-    };
+    }
 
-    const keySlots = geminiKey.split(',').map(k => k.trim());
+    const currentKeys = geminiKey.split(',').map(k => k.trim());
 
     return (
-        <div className="flex flex-col items-center py-12 px-4 space-y-12">
-            {/* The Portal Grimoire */}
-            <div className="relative group perspective-1000">
+        <div className="relative w-full h-full flex flex-col items-center justify-center py-12">
+            <div className="perspective-1000 relative w-full max-w-2xl h-[450px] md:h-[550px] flex items-center justify-center">
+                <div className="absolute inset-x-8 inset-y-0 bg-white/[0.01] rounded-lg shadow-2xl -rotate-1 border border-white/5" />
+                <div className="absolute inset-x-4 inset-y-0 bg-white/[0.01] rounded-lg shadow-2xl rotate-1 border border-white/5" />
+                
                 <motion.div 
-                    animate={isResonating ? { 
-                        rotateY: [0, 2, -2, 0],
-                        z: [0, 10, 0],
-                        boxShadow: "0 0 40px rgba(241, 90, 36, 0.3)"
-                    } : {}}
-                    transition={{ duration: 1.5, repeat: isResonating ? Infinity : 0 }}
-                    className="relative w-64 h-80 transform-style-3d cursor-default"
+                    initial={{ rotateY: -10, opacity: 0 }}
+                    animate={{ rotateY: 0, opacity: 1 }}
+                    className="relative w-full h-full bg-[#111] border border-white/10 rounded-xl overflow-hidden glass-spectral flex flex-col md:flex-row transform-style-3d shadow-[0_30px_60px_rgba(0,0,0,0.8)]"
                 >
-                    {/* Book Base */}
-                    {[...Array(3)].map((_, i) => (
-                        <div 
-                            key={i}
-                            className="absolute inset-0 bg-[#151515] rounded-r-lg border-l-4 border-zinc-900"
-                            style={{ transform: `translateZ(${-i * 3}px)` }}
-                        />
-                    ))}
+                    <div className="w-full md:w-1/2 h-full border-r border-white/5 flex flex-col p-8 md:p-12 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-16 h-16 border-l border-t border-white/10 rounded-tl-3xl m-4" />
+                        <div className="absolute bottom-0 right-0 w-16 h-16 border-r border-b border-white/10 rounded-br-3xl m-4" />
+                        
+                        <div className="flex-1 flex flex-col justify-center space-y-8 relative z-10">
+                            <div className="space-y-4">
+                                <h3 className="text-xl md:text-2xl font-black italic tracking-widest text-[#f15a24] font-oswald uppercase">
+                                    Spectral Resonator
+                                </h3>
+                                <div className="w-12 h-1 bg-[#f15a24] rounded-full" />
+                            </div>
 
-                    {/* Book Cover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 to-black rounded-r-lg border border-white/5 shadow-3xl overflow-hidden">
-                        {/* Three Keyholes (Interaction target) */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center space-y-8 p-8">
-                            {[0, 1, 2].map(idx => {
-                                const hasKey = !!keySlots[idx];
-                                const isEditing = editingSlot === idx;
+                            <div className="space-y-6">
+                                <p className="text-[10px] md:text-xs leading-relaxed text-white/40 font-serif italic text-justify">
+                                    「三つの鍵は、過去・現在・未来を繋ぐ灯火。ここに奉納されし鍵が、深淵の霧を晴らす回路となります。」
+                                </p>
+
+                                <AnimatePresence mode="wait">
+                                    {isResonating && (
+                                        <motion.div 
+                                            key="action"
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            className="space-y-4"
+                                        >
+                                            <div className="p-4 bg-[#f15a24]/5 border border-[#f15a24]/30 rounded-2xl">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Sparkles size={14} className="text-[#f15a24]" />
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-white/80">Key Resonating</span>
+                                                </div>
+                                                <p className="text-[8px] text-white/30 truncate mb-4 font-mono">{detectedKey}</p>
+                                                <button 
+                                                    onClick={handleConsecrate}
+                                                    disabled={isValidatingApi}
+                                                    className="w-full py-3 bg-[#f15a24] text-white rounded-full font-black text-[9px] tracking-[0.3em] uppercase transition-all hover:scale-105 active:scale-95 shadow-[0_10px_20px_rgba(241,90,36,0.3)]"
+                                                >
+                                                    {isValidatingApi ? 'Consecrating...' : '奉納する'}
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </div>
+
+                        {(apiConnectionStatus === 'error' || currentKeys.filter(Boolean).length > 0) && (
+                            <button 
+                                onClick={handleClearKeys}
+                                className="mt-8 text-[8px] font-black text-white/10 tracking-[0.3em] uppercase hover:text-[#f15a24] transition-colors self-start"
+                            >
+                                Reset Ritual
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center p-8 bg-black/20">
+                        <div className="flex flex-col gap-10">
+                            {[0, 1, 2].map(function renderSlot(idx) {
+                                const key = currentKeys[idx] || '';
+                                const hasKey = !!key;
                                 const isTurning = turningSlot === idx;
+                                const isEditing = editingSlot === idx;
 
                                 return (
-                                    <div 
-                                        key={idx} 
-                                        className="relative flex items-center group/slot"
-                                        onClick={() => !hasKey && !isTurning && setEditingSlot(idx)}
-                                    >
-                                        {/* Key Turning Gear / Aura */}
+                                    <div key={idx} className="relative flex items-center group/slot">
                                         <AnimatePresence>
                                             {isTurning && (
                                                 <motion.div 
-                                                    initial={{ scale: 0, opacity: 0, rotate: 0 }}
-                                                    animate={{ scale: 2, opacity: [0, 0.5, 0], rotate: 180 }}
-                                                    exit={{ opacity: 0 }}
-                                                    className="absolute inset-0 border border-[#f15a24]/30 rounded-full pointer-events-none"
+                                                    initial={{ scale: 0, opacity: 1 }}
+                                                    animate={{ scale: 3, opacity: 0 }}
+                                                    className="absolute inset-0 border border-[#f15a24] rounded-full pointer-events-none"
                                                 />
                                             )}
                                         </AnimatePresence>
 
                                         <motion.div 
+                                            onClick={function clickSlot() { setEditingSlot(idx); setErrorMessage(''); }}
                                             animate={isTurning ? { 
                                                 rotate: [0, 90, 180],
                                                 scale: [1, 1.1, 1]
@@ -187,8 +224,8 @@ const PortalGrimoire = ({
                                                         <input 
                                                             autoFocus
                                                             type="password"
-                                                            onChange={(e) => handleManualPaste(idx, e)}
-                                                            onBlur={() => !isTurning && setEditingSlot(null)}
+                                                            onChange={function manualPaste(e) { handleManualPaste(idx, e); }}
+                                                            onBlur={function blurSlot() { if (!isTurning) setEditingSlot(null); }}
                                                             className="w-10 bg-transparent text-white text-[8px] text-center outline-none"
                                                             placeholder="..."
                                                         />
@@ -206,7 +243,6 @@ const PortalGrimoire = ({
                                             Gate {idx + 1}
                                         </div>
 
-                                        {/* Error text local to slot */}
                                         <AnimatePresence>
                                             {isEditing && errorMessage && (
                                                 <motion.div 
@@ -226,7 +262,6 @@ const PortalGrimoire = ({
                     </div>
                 </motion.div>
 
-                {/* Itako's Voice Display */}
                 <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-80 text-center pointer-events-none">
                     <AnimatePresence mode="wait">
                         {turningSlot !== null ? (
@@ -248,33 +283,33 @@ const PortalGrimoire = ({
                             </motion.p>
                         ) : (
                             <motion.p key="void" initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} className="text-[10px] text-white/40 tracking-widest uppercase">
-                                鍵穴をクリックして、鍵を差し込んでください。
+                                SILENCE AS A LANGUAGE...
                             </motion.p>
                         )}
                     </AnimatePresence>
                 </div>
             </div>
 
-            {/* Ritual Actions */}
-            <div className="w-full max-w-sm flex flex-col gap-4">
-                <AnimatePresence>
-                    {isResonating && (
-                        <motion.button
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0 }}
-                            onClick={handleConsecrate}
-                            className="w-full py-4 rounded-full bg-[#f15a24] text-white font-black text-xs tracking-[0.3em] uppercase shadow-[0_0_30px_rgba(241,90,36,0.5)] font-oswald"
-                        >
-                            自動検知した鍵を奉納する
-                        </motion.button>
-                    )}
-                </AnimatePresence>
-
+            <div className="mt-12 flex items-center gap-6">
+                {[
+                    { label: 'Detection', active: isResonating },
+                    { label: 'Validation', active: isValidatingApi },
+                    { label: 'Emission', active: apiConnectionStatus === 'success' }
+                ].map(function renderPhase(p, i) {
+                    return (
+                        <div key={i} className="flex items-center gap-2">
+                            <div className={`w-1 h-1 rounded-full ${p.active ? 'bg-[#f15a24] shadow-[0_0_8px_#f15a24]' : 'bg-white/10'}`} />
+                            <span className={`text-[8px] font-black uppercase tracking-widest ${p.active ? 'text-white' : 'text-white/20'}`}>{p.label}</span>
+                        </div>
+                    );
+                })}
+            </div>
+            
+            <div className="mt-8 flex flex-col items-center gap-2">
                 <button 
                     onClick={handleValidateApi} 
                     disabled={isValidatingApi || !geminiKey}
-                    className={`w-full py-4 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald border
+                    className={`px-12 py-3 rounded-full font-bold text-[10px] tracking-widest uppercase transition-all duration-500 font-oswald border
                                 ${apiConnectionStatus === 'success' 
                                     ? 'bg-transparent border-emerald-500/50 text-emerald-400' 
                                     : geminiKey && !isValidatingApi ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-transparent text-white/10 border-white/5 opacity-50 cursor-not-allowed'}`}
@@ -282,34 +317,7 @@ const PortalGrimoire = ({
                     {isValidatingApi ? '回路を安定させています...' : 
                      apiConnectionStatus === 'success' ? '回路は完全に開通しました' : '回路を安定化させる (Stabilize)'}
                 </button>
-
-                {geminiKey && (
-                    <button onClick={handleClearKeys} className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em] hover:text-red-400 transition-colors py-2">
-                        すべての鍵を引き抜く
-                    </button>
-                )}
-            </div>
-
-            {/* Instructions for the User */}
-            <div className="flex flex-col items-center gap-4 text-center max-w-xs">
-                <div className="flex items-center gap-2 text-white/20">
-                    <AlertCircle size={12} />
-                    <span className="text-[8px] font-bold uppercase tracking-widest">Ritual Guidance</span>
-                </div>
-                <p className="text-[10px] text-white/30 leading-relaxed italic font-serif">
-                    Google AI Studio 等で取得した鍵（API Key）をコピーして、この広場へ戻ってください。本が新たな鍵を見つけ出し、語りかけてくるはずです。
-                </p>
-                <a 
-                    href="https://aistudio.google.com/app/apikey" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-[9px] font-bold text-[#f15a24] hover:text-white transition-colors underline decoration-[#f15a24]/30 underline-offset-4"
-                >
-                    鍵を授かりに行く（取得先へ）
-                </a>
             </div>
         </div>
     );
-};
-
-export default PortalGrimoire;
+}

@@ -6,33 +6,39 @@ import PortalGrimoire from './PortalGrimoire';
 import { loginWithGoogle, loginAnonymously } from '../firebase';
 import { validateGeminiApiKey } from '../gemini';
 
-export default function LandingPage({ onLoginComplete, user, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi }) {
+export default function LandingPage({ 
+    onLoginComplete, 
+    user, 
+    geminiKey, 
+    setGeminiKey, 
+    isValidatingApi, 
+    apiConnectionStatus, 
+    handleValidateApi 
+}) {
     const [step, setStep] = useState('gate'); // 'gate', 'ritual'
 
-    // Automatically transition to ritual if logged in but no key
-    useEffect(() => {
-        if (user && step === 'gate') {
-            const envKey = import.meta.env.VITE_GEMINI_API_KEY;
-            const localKey = localStorage.getItem('itako_gemini_key');
-            const keyToUse = envKey || localKey;
+    useEffect(function handleAutoTransition() {
+        if (!user || step !== 'gate') return;
 
-            if (keyToUse) {
-                onLoginComplete(keyToUse);
-            } else {
-                setStep('ritual');
-            }
-        }
-    }, [user, step, onLoginComplete]);
+        const envKey = import.meta.env.VITE_GEMINI_API_KEY;
+        const localKey = localStorage.getItem('itako_gemini_key');
+        const keyToUse = envKey || localKey;
 
-    const handleEnterGate = async () => {
-        // Force login or proceed
-        if (!user) {
-            const u = await loginAnonymously();
-            if (u) setStep('ritual');
+        if (keyToUse) {
+            onLoginComplete(keyToUse);
         } else {
             setStep('ritual');
         }
-    };
+    }, [user, step, onLoginComplete]);
+
+    async function handleEnterGate() {
+        if (!user) {
+            const newUser = await loginAnonymously();
+            if (newUser) setStep('ritual');
+            return;
+        }
+        setStep('ritual');
+    }
 
     return (
         <div className="fixed inset-0 z-[200] bg-[#050505] flex items-center justify-center overflow-hidden">
@@ -70,26 +76,24 @@ export default function LandingPage({ onLoginComplete, user, geminiKey, setGemin
                                 
                                 {/* Three Glowing Keyholes (Positioned to the left side) */}
                                 <div className="absolute inset-0 flex flex-col items-start justify-center space-y-16 pl-12">
-                                    {[0, 1, 2].map(i => (
-                                        <div key={i} className="relative">
-                                            {/* The Keyhole Glow */}
-                                            <motion.div 
-                                                animate={{ 
-                                                    scale: [1, 1.5, 1],
-                                                    opacity: [0.3, 0.8, 0.3],
-                                                    boxShadow: [
-                                                        "0 0 5px #fff",
-                                                        "0 0 15px #fff",
-                                                        "0 0 5px #fff"
-                                                    ]
-                                                }}
-                                                transition={{ duration: 3, delay: i * 0.5, repeat: Infinity }}
-                                                className="w-1.5 h-3 bg-white rounded-full blur-[1px]"
-                                            />
-                                            {/* Ray of light */}
-                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white/10 rounded-full blur-xl pointer-events-none" />
-                                        </div>
-                                    ))}
+                                    {[0, 1, 2].map(function renderKeyhole(i) {
+                                        return (
+                                            <div key={i} className="relative">
+                                                {/* The Keyhole Glow */}
+                                                <motion.div 
+                                                    animate={{ 
+                                                        scale: [1, 1.5, 1],
+                                                        opacity: [0.3, 0.8, 0.3],
+                                                        boxShadow: ["0 0 5px #fff", "0 0 15px #fff", "0 0 5px #fff"]
+                                                    }}
+                                                    transition={{ duration: 3, delay: i * 0.5, repeat: Infinity }}
+                                                    className="w-1.5 h-3 bg-white rounded-full blur-[1px]"
+                                                />
+                                                {/* Ray of light */}
+                                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white/10 rounded-full blur-xl pointer-events-none" />
+                                            </div>
+                                        );
+                                    })}
                                 </div>
 
                                 {/* Logo as a subtle emblem */}
@@ -167,12 +171,7 @@ export default function LandingPage({ onLoginComplete, user, geminiKey, setGemin
                                 setGeminiKey={setGeminiKey}
                                 isValidatingApi={isValidatingApi}
                                 apiConnectionStatus={apiConnectionStatus}
-                                handleValidateApi={() => {
-                                    handleValidateApi().then(() => {
-                                        // The validation success is handled in App.jsx via isAppReady
-                                        // But we can add local UI hints here if needed
-                                    });
-                                }}
+                                handleValidateApi={handleValidateApi}
                             />
                         </div>
 
@@ -181,7 +180,7 @@ export default function LandingPage({ onLoginComplete, user, geminiKey, setGemin
                                 「鍵を三つ揃えることで、回路が安定し、冥界の霧が晴れます。鍵を探しに行きなさい。」
                             </p>
                             <button 
-                                onClick={() => setStep('gate')}
+                                onClick={function returnToGate() { setStep('gate'); }}
                                 className="text-[8px] font-black text-white/10 uppercase tracking-[0.3em] hover:text-white transition-colors"
                             >
                                 門の外へ戻る
