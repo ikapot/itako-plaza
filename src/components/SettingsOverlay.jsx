@@ -1,6 +1,6 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import SpectralResonator from './SpectralResonator';
 
 const SettingsOverlay = React.memo(({ 
     showSettings, 
@@ -58,7 +58,16 @@ const SettingsOverlay = React.memo(({
                                 <label className="block text-xs text-white/60 mb-1 uppercase tracking-widest">
                                     霊的周波数 / Spiritual Frequency (Gemini or OpenRouter API Key)
                                 </label>
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-col items-center gap-6">
+                                    <div className="flex gap-4">
+                                        {[0, 1, 2].map(idx => (
+                                            <SpectralResonator 
+                                                key={idx} 
+                                                status={geminiKey.split(',')[idx] ? (isValidatingApi ? 'validating' : apiConnectionStatus) : 'idle'} 
+                                                delay={idx * 0.1}
+                                            />
+                                        ))}
+                                    </div>
                                     <input
                                         type="password"
                                         value={geminiKey}
@@ -68,13 +77,8 @@ const SettingsOverlay = React.memo(({
                                             localStorage.setItem('itako_gemini_key', val);
                                         }}
                                         placeholder="sk-or-v1-..."
-                                        className="flex-1 bg-black/40 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-white/50 transition-colors"
+                                        className="w-full bg-black/40 border border-white/20 rounded-[20px] px-4 py-3 text-white text-xs font-mono outline-none focus:border-[#f15a24]/50 transition-colors text-center"
                                     />
-                                    <div className="flex gap-1.5 px-1">
-                                        <div className={`spectral-node ${apiConnectionStatus === 'success' ? 'spectral-node-active' : apiConnectionStatus === 'error' ? 'spectral-node-error' : isValidatingApi ? 'spectral-node-validating' : ''}`} />
-                                        <div className={`spectral-node hidden md:block ${apiConnectionStatus === 'success' ? 'spectral-node-active' : ''}`} style={{ transitionDelay: '0.1s' }} />
-                                        <div className={`spectral-node hidden md:block ${apiConnectionStatus === 'success' ? 'spectral-node-active' : ''}`} style={{ transitionDelay: '0.2s' }} />
-                                    </div>
                                 </div>
                                 <p className="mt-2 text-[10px] text-white/40 leading-relaxed">
                                     ※ Google AI Studio または OpenRouter のキーを入力してください。<br/>

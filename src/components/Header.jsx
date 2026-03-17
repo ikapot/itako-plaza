@@ -9,7 +9,8 @@ export default function Header({
     onSlotClick,
     activeManagerTab,
     setActiveManagerTab,
-    globalSentiment = 'neutral'
+    globalSentiment = 'neutral',
+    apiStatus = 'idle'
 }) {
     const navItems = [
         { id: 0, icon: <TrendingUp size={20} />, color: '#98a436', label: 'News' },
@@ -34,7 +35,7 @@ export default function Header({
                     <Menu size={26} strokeWidth={2.5} />
                 </button>
                 <div className="hidden lg:flex items-center gap-4">
-                    <Logo />
+                    <Logo apiStatus={apiStatus} />
                     {globalSentiment !== 'neutral' && (
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.8 }}
