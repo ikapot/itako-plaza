@@ -37,6 +37,20 @@ const ManagerContent = React.memo(({
     preferredModel,
     setPreferredModel
 }) => {
+    const stats = useMemo(() => [
+        { label: 'Bookmarks', val: bookmarks?.length || 0, icon: <Bookmark size={14} /> },
+        { label: 'Manifestations', val: messages.filter(m => m.role === 'user').length || 0, icon: <MessageCircle size={14} /> },
+        { label: 'Deepest Bond', val: (() => {
+            const counts = messages.filter(m => m.role === 'ai' && m.charId).reduce((acc, m) => {
+                acc[m.charId] = (acc[m.charId] || 0) + 1;
+                return acc;
+            }, {});
+            const topCharId = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+            return characters.find(c => c.id === topCharId)?.name || 'None';
+        })(), icon: <User size={14} /> },
+        { label: 'Energy Sync', val: `${Object.values(locationEnergies).reduce((a, b) => a + b, 0)} pts`, icon: <Activity size={14} /> },
+    ], [bookmarks, messages, characters, locationEnergies]);
+
     return (
         <div className="space-y-12">
             <AnimatePresence mode="wait">
@@ -171,19 +185,7 @@ const ManagerContent = React.memo(({
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {useMemo(() => [
-                                { label: 'Bookmarks', val: bookmarks?.length || 0, icon: <Bookmark size={14} /> },
-                                { label: 'Manifestations', val: messages.filter(m => m.role === 'user').length || 0, icon: <MessageCircle size={14} /> },
-                                { label: 'Deepest Bond', val: (() => {
-                                    const counts = messages.filter(m => m.role === 'ai' && m.charId).reduce((acc, m) => {
-                                        acc[m.charId] = (acc[m.charId] || 0) + 1;
-                                        return acc;
-                                    }, {});
-                                    const topCharId = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
-                                    return characters.find(c => c.id === topCharId)?.name || 'None';
-                                })(), icon: <User size={14} /> },
-                                { label: 'Energy Sync', val: `${Object.values(locationEnergies).reduce((a, b) => a + b, 0)} pts`, icon: <Activity size={14} /> },
-                            ], [bookmarks, messages, characters, locationEnergies]).map((s, i) => (
+                            {stats.map((s, i) => (
                                 <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-3xl">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{s.label}</span>
