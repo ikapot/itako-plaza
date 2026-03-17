@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Activity } from 'lucide-react';
 import ThreeDMap from './ThreeDMap';

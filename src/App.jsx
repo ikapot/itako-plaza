@@ -370,6 +370,9 @@ export default function App() {
     }
   }, [notebookInput, geminiKey]);
 
+  const currentLocation = useMemo(() => INITIAL_LOCATIONS.find(l => l.id === selectedLocationId), [selectedLocationId]);
+  const ambient = useMemo(() => AMBIENT_COLORS[globalSentiment] || AMBIENT_COLORS.neutral, [globalSentiment]);
+
   if (!isAppReady || !user) {
     const prepareSession = (key) => {
       if (!key) return;
@@ -391,9 +394,6 @@ export default function App() {
       />
     );
   }
-
-  const currentLocation = useMemo(() => INITIAL_LOCATIONS.find(l => l.id === selectedLocationId), [selectedLocationId]);
-  const ambient = useMemo(() => AMBIENT_COLORS[globalSentiment] || AMBIENT_COLORS.neutral, [globalSentiment]);
 
   return (
     <div className={`h-[100dvh] w-full overflow-hidden flex flex-col font-sans selection:bg-white/30 relative
