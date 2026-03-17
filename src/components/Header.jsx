@@ -29,7 +29,7 @@ const Header = React.memo(({
     ];
 
     return (
-        <header className="pt-safe flex items-center justify-between px-6 border-b border-white/10 bg-[#050505]/85 backdrop-blur-3xl z-50 shrink-0 shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all duration-300">
+        <header className="pt-safe flex items-center justify-between px-3 md:px-6 border-b border-white/10 bg-[#050505]/85 backdrop-blur-3xl z-50 shrink-0 shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all duration-300">
             <div className="h-16 flex items-center gap-6">
                 <button
                     onClick={openDrawer}
@@ -58,7 +58,7 @@ const Header = React.memo(({
             </div>
 
             {/* NEW: Mode Tabs in Header Center */}
-            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 scale-90 sm:scale-100">
+            <div className="flex items-center gap-0.5 sm:gap-1 bg-white/5 p-1 rounded-full border border-white/5 scale-90 sm:scale-100 max-w-full overflow-x-auto itako-scrollbar-none">
                 {modeTabs.map(tab => {
                     const isActive = activeManagerTab === tab.id;
                     return (
@@ -70,7 +70,7 @@ const Header = React.memo(({
                                 color: isActive ? '#000' : 'rgba(255,255,255,0.3)',
                                 boxShadow: isActive ? `0 4px 15px ${tab.color}44` : 'none'
                             }}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase transition-all duration-300 active:scale-95 border ${isActive ? 'border-white/20' : 'border-transparent'}`}
+                            className={`flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase transition-all duration-300 active:scale-95 border ${isActive ? 'border-white/20' : 'border-transparent'}`}
                         >
                             {tab.icon}
                             <span className="hidden sm:inline">{tab.label}</span>
@@ -80,13 +80,13 @@ const Header = React.memo(({
             </div>
 
             {/* Timeline Buttons moved to Header */}
-            <div className="flex items-center gap-1 sm:gap-4 h-16">
+            <div className="flex items-center gap-0 sm:gap-4 h-16 shrink-0">
                 {navItems.map(item => (
                     <button
                         key={item.id}
                         onClick={() => onSlotClick(item.id)}
                         style={{ color: activeSlot === item.id ? item.color : 'rgba(255,255,255,0.2)' }}
-                        className={`w-12 h-12 relative flex items-center justify-center rounded-full transition-all duration-300 hover:text-white/60 hover:bg-white/5 active:scale-90 touch-manipulation`}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 relative flex items-center justify-center rounded-full transition-all duration-300 hover:text-white/60 hover:bg-white/5 active:scale-90 touch-manipulation`}
                         title={item.label}
                     >
                         {item.icon}

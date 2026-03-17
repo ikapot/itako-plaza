@@ -79,6 +79,14 @@ body {
   border-radius: 10px;
 }
 
+.itako-scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.itako-scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 .timeline-container {
   scroll-snap-type: x mandatory;
   display: flex !important;
@@ -91,6 +99,7 @@ body {
 
 .timeline-slot {
   scroll-snap-align: start;
+  position: relative;
   flex-shrink: 0;
   width: 100vw;
   height: 100%;
