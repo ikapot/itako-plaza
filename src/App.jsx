@@ -21,9 +21,7 @@ import { X, Activity } from 'lucide-react';
 
 function cleanKey(key) {
   if (typeof key !== 'string') return key;
-  const trimmed = key.trim();
-  const match = trimmed.match(/^[A-Z0-9_]+=(.*)$/);
-  return match ? match[1].trim() : trimmed;
+  return key.trim();
 }
 
 const APP_CHARACTERS = INITIAL_CHARACTERS.map(c => ({
@@ -451,7 +449,7 @@ export default function App() {
       </AnimatePresence>
 
       <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
-      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, validateGeminiApiKey, setIsAppReady, preferredModel, setPreferredModel: handleSetPreferredModel }} />
+      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, setIsAppReady, preferredModel, setPreferredModel: handleSetPreferredModel }} />
       <SpiritNoiseOverlay 
         error={spiritualError} 
         onRetry={() => { setSpiritualError(null); handleSendMessage(); }} 

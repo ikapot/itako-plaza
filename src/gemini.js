@@ -1,13 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
-// --- Commercial Grade Configuration ---
-
-const FALLBACK_MODELS = [
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-1.5-pro"
-];
+// --- OpenRouter Protocol ---
 
 export const OPENROUTER_MODELS = [
   { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fastest)" },
@@ -239,9 +232,11 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
 }
 
 /**
- * OpenRouter専用の呼び出しロジック
+ * 霊的知能への統一アクセスポイント (OpenRouter)
  */
-async function invokeOpenRouter(apiKey, prompt, sysPrompt, config, isJson) {
+export async function invokeGemini(apiKey, prompt, sysPrompt = "", config = {}, isJson = false) {
+  if (!apiKey) throw new Error(SPIRITUAL_ERRORS.AUTH_FAILED);
+
   const targetModel = config.model || preferredOpenRouterModel;
   const messages = [{ role: "user", content: sysPrompt ? `${sysPrompt}\n\n${prompt}` : prompt }];
   
@@ -252,7 +247,7 @@ async function invokeOpenRouter(apiKey, prompt, sysPrompt, config, isJson) {
     try {
       finalData = JSON.parse(extractJson(res));
     } catch (e) {
-      throw new Error(`Invalid JSON response from spirit (OpenRouter): ${res.substring(0, 100)}`);
+      throw new Error(`Invalid JSON response (OpenRouter): ${res.substring(0, 100)}`);
     }
   }
 
@@ -261,61 +256,6 @@ async function invokeOpenRouter(apiKey, prompt, sysPrompt, config, isJson) {
     model: `OpenRouter/${targetModel.split('/').pop()}`, 
     keyIndex: 1 
   });
-}
-
-/**
- * Google Gemini専用の呼び出しロジック（キーローテーションとフォールバック付）
- */
-async function invokeGeminiDirect(keys, prompt, sysPrompt, config, isJson) {
-  let lastError = null;
-
-  for (const modelName of FALLBACK_MODELS) {
-    for (let kIdx = 0; kIdx < keys.length; kIdx++) {
-      try {
-        const genAI = new GoogleGenerativeAI(keys[kIdx]);
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: isJson ? { ...config, responseMimeType: "application/json" } : config,
-          systemInstruction: sysPrompt || undefined,
-          safetySettings: SAFETY_SETTINGS
-        });
-
-        emitDebug({ type: 'attempt', model: modelName, keyIndex: kIdx + 1 });
-        const result = await model.generateContent(prompt || "...");
-        const response = await result.response;
-        const text = response.text();
-        
-        let finalData = text;
-        if (isJson) {
-          finalData = JSON.parse(extractJson(text));
-        }
-
-        emitDebug({ type: 'success', model: modelName, keyIndex: kIdx + 1 });
-        return new SpiritualResponse({ data: finalData, model: modelName, keyIndex: kIdx + 1 });
-      } catch (error) {
-        lastError = error;
-        emitDebug({ type: 'error', model: modelName, keyIndex: kIdx + 1, error: error.message });
-        if (error.status === 404) break; // モデルが存在しない場合はスキップ
-      }
-    }
-  }
-  throw lastError;
-}
-
-/**
- * 霊的知能への統一アクセスポイント
- */
-export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config = {}, isJson = false) {
-  const keys = apiKeyString.split(',').map(k => k.trim()).filter(Boolean);
-  if (keys.length === 0) throw new Error(SPIRITUAL_ERRORS.AUTH_FAILED);
-
-  const isOpenRouter = keys[0].startsWith("sk-or-");
-  
-  if (isOpenRouter) {
-    return invokeOpenRouter(keys[0], prompt, sysPrompt, config, isJson);
-  } else {
-    return invokeGeminiDirect(keys, prompt, sysPrompt, config, isJson);
-  }
 }
 
 /**
@@ -376,53 +316,22 @@ export async function streamSpiritualDialogue({
     return;
   }
 
-  const keys = apiKey.split(',').map(k => k.trim()).filter(Boolean);
-  const firstKey = keys[0];
-
-  if (firstKey.startsWith("sk-or-")) {
-    const targetModel = charConfig.model || preferredOpenRouterModel;
-    try {
-      emitDebug({ type: 'stream_start', model: "OpenRouter", keyIndex: 1 });
-      const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: message }];
-      const fullText = await fetchOpenRouter(firstKey, messages, targetModel, charConfig.generationConfig || {}, true, (text) => {
-        onChunk(text.replace(/^\[.*?\]\s*/, ""), { model: targetModel, keyIndex: 1, sentiment: extractSentiment(text) });
-      });
-      await storeEcho(systemPrompt, message, fullText);
-      return;
-    } catch (e) {
-      console.error("OpenRouter Stream Error:", e);
-      throw {
-        code: SPIRITUAL_ERRORS.OPENROUTER_ERROR,
-        model: targetModel,
-        originalError: e
-      };
-    }
-  }
-
-  for (const modelName of FALLBACK_MODELS) {
-    for (let kIdx = 0; kIdx < keys.length; kIdx++) {
-      try {
-        const genAI = new GoogleGenerativeAI(keys[kIdx]);
-        const model = genAI.getGenerativeModel({ 
-          model: modelName, 
-          generationConfig: charConfig.generationConfig || {}, 
-          systemInstruction: systemPrompt, 
-          safetySettings: SAFETY_SETTINGS 
-        });
-        emitDebug({ type: 'stream_start', model: modelName, keyIndex: kIdx + 1 });
-        const result = await model.generateContentStream(message);
-        let fullText = "";
-        for await (const chunk of result.stream) {
-          fullText += chunk.text();
-          onChunk(fullText.replace(/^\[.*?\]\s*/, ""), { model: modelName, keyIndex: kIdx + 1, sentiment: extractSentiment(fullText) });
-        }
-        await storeEcho(systemPrompt, message, fullText);
-        return;
-      } catch (error) {
-        if (error.status === 404) break;
-        continue;
-      }
-    }
+  const targetModel = charConfig.model || preferredOpenRouterModel;
+  try {
+    emitDebug({ type: 'stream_start', model: "OpenRouter", keyIndex: 1 });
+    const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: message }];
+    const fullText = await fetchOpenRouter(apiKey, messages, targetModel, charConfig.generationConfig || {}, true, (text) => {
+      onChunk(text.replace(/^\[.*?\]\s*/, ""), { model: targetModel, keyIndex: 1, sentiment: extractSentiment(text) });
+    });
+    await storeEcho(systemPrompt, message, fullText);
+    return;
+  } catch (e) {
+    console.error("OpenRouter Stream Error:", e);
+    throw {
+      code: SPIRITUAL_ERRORS.OPENROUTER_ERROR,
+      model: targetModel,
+      originalError: e
+    };
   }
 }
 
