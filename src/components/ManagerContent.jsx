@@ -112,8 +112,8 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
                  <div className="w-full h-32 md:h-48 bg-[#4A3525] rounded-b-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-t-[8px] border-[#3A2515] flex items-center justify-center relative overflow-hidden">
                      <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80 pointer-events-none" />
                      {/* Label */}
-                     <div className="bg-[#EAE0D5] px-8 py-3 shadow-inner transform -rotate-1 border border-black/30 relative z-10 w-56 text-center flex items-center justify-center">
-                         <span className="font-serif text-[#3C2A21] text-xl font-bold tracking-widest">ITAKO_FILES</span>
+                     <div className="bg-[#EAE0D5] px-8 py-3 shadow-inner transform -rotate-1 border border-black/30 relative z-10 w-64 text-center flex items-center justify-center">
+                         <span className="font-hina text-[#3C2A21] text-2xl font-bold tracking-widest">ITAKO_FILES</span>
                          <div className="absolute top-1 left-1 w-1 h-1 rounded-full bg-black/40" />
                          <div className="absolute top-1 right-1 w-1 h-1 rounded-full bg-black/40" />
                          <div className="absolute bottom-1 left-1 w-1 h-1 rounded-full bg-black/40" />
