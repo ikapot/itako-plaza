@@ -3,16 +3,30 @@ import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 // --- OpenRouter Protocol ---
 
 export const OPENROUTER_MODELS = [
+  { id: "auto", name: "Auto (Intelligent Routing)" },
   { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fastest)" },
   { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet (Best Drama)" },
   { id: "anthropic/claude-3-haiku", name: "Claude 3 Haiku (Cost Effective)" },
-  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
-  { id: "deepseek/deepseek-chat", name: "DeepSeek V3" },
+  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini (Ultra Cheap)" },
+  { id: "deepseek/deepseek-chat", name: "DeepSeek V3 (Reasoning)" },
   { id: "meta-llama/llama-3.1-70b-instruct", name: "Llama 3.1 70B" },
-  { id: "liquid/lfm-40b", name: "Liquid LFM 40B" }
 ];
 
-let preferredOpenRouterModel = localStorage.getItem('itako_preferred_model') || "google/gemini-2.0-flash-001";
+const TASK_MODELS = {
+  DIALOGUE: "anthropic/claude-3.5-sonnet",
+  UTILITY: "google/gemini-2.0-flash-001",
+  JSON: "openai/gpt-4o-mini",
+  SUMMARY: "google/gemini-2.0-flash-001",
+  CRITICAL: "anthropic/claude-3.5-sonnet",
+  CHEAP: "openai/gpt-4o-mini"
+};
+
+const routeModel = (taskType, preferredModel) => {
+  if (preferredModel && preferredModel !== 'auto') return preferredModel;
+  return TASK_MODELS[taskType] || "google/gemini-2.0-flash-001";
+};
+
+let preferredOpenRouterModel = localStorage.getItem('itako_preferred_model') || "auto";
 
 export const setPreferredModel = (modelId) => {
   preferredOpenRouterModel = modelId;
@@ -239,7 +253,7 @@ export async function invokeGemini(apiKey, prompt, sysPrompt = "", config = {}, 
     throw new Error(SPIRITUAL_ERRORS.AUTH_FAILED);
   }
 
-  const targetModel = config.model || preferredOpenRouterModel;
+  const targetModel = routeModel(config.taskType || 'UTILITY', preferredOpenRouterModel);
   const messages = [{ role: "user", content: sysPrompt ? `${sysPrompt}\n\n${prompt}` : prompt }];
   
   const res = await fetchOpenRouter(apiKey, messages, targetModel, config);
@@ -318,7 +332,7 @@ export async function streamSpiritualDialogue({
     return;
   }
 
-  const targetModel = charConfig.model || preferredOpenRouterModel;
+  const targetModel = charConfig.model || routeModel('DIALOGUE', preferredOpenRouterModel);
   try {
     emitDebug({ type: 'stream_start', model: "OpenRouter", keyIndex: 1 });
     const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: message }];
@@ -343,14 +357,14 @@ export async function evaluateFutureSelf(bookmarks, apiKey) {
   if (!apiKey || bookmarks.length === 0) return "まだ、言葉が足りないようです。";
   const logs = bookmarks.map(b => `[${b.charId}] 私: "${b.userMsg}" -> 相手: "${b.aiMsg}"`).join('\n');
   const prompt = `2036年のあなたとしてアドバイスせよ:\n${logs}`;
-  const res = await invokeGemini(apiKey, prompt, CHARACTER_CONFIGS.future_self.systemPrompt);
+  const res = await invokeGemini(apiKey, prompt, CHARACTER_CONFIGS.future_self.systemPrompt, { taskType: 'CRITICAL' });
   return res.data;
 }
 
 export async function validateGeminiApiKey(key) {
   if (!key) return false;
   try {
-    const res = await invokeGemini(key, "ping", "pong", { maxOutputTokens: 1 });
+    const res = await invokeGemini(key, "ping", "pong", { maxOutputTokens: 1, taskType: 'CHEAP' });
     return res.isSuccess;
   } catch (e) { return e.status === 429; }
 }
@@ -358,14 +372,14 @@ export async function validateGeminiApiKey(key) {
 export async function extractTrendsFromNotebook(text, apiKey) {
   if (!apiKey || !text) return null;
   const prompt = `以下を要約せよ:\n${text.substring(0, 3000)}\n出力形式: { "summary": "...", "keywords": [...] }`;
-  const res = await invokeGemini(apiKey, prompt, "あなたは解析者。純粋なJSONのみ出力せよ。", {}, true);
+  const res = await invokeGemini(apiKey, prompt, "あなたは解析者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   return res.data;
 }
 
 export async function generateWorldEvent(apiKey, trends) {
   if (!apiKey) return null;
   const prompt = `今の潮流「${trends?.summary || '静寂'}」に呼応する事変を1つ生成せよ。\n出力形式: { "type": "...", "content": "..." }`;
-  const res = await invokeGemini(apiKey, prompt, "事象の観測者。純粋なJSONのみ出力せよ。", {}, true);
+  const res = await invokeGemini(apiKey, prompt, "事象の観測者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   return res.data;
 }
 
@@ -373,7 +387,7 @@ export async function generateLocationDialogueWithEvent(apiKey, chars, loc, even
   if (!apiKey || chars.length === 0) return [];
   const charContext = chars.map(c => `${c.name}: ${c.description}`).join('\n');
   const prompt = `場所: ${loc.name}\n事変: ${event?.content || '平穏'}\n登場人物:\n${charContext}\n3-5往復の対話をJSONで紡げ。 [ {"charId": "...", "content": "...", "sentiment": "..."} ]`;
-  const res = await invokeGemini(apiKey, prompt, "口寄せ。純粋なJSONのみ出力せよ。", {}, true);
+  const res = await invokeGemini(apiKey, prompt, "口寄せ。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   return res.data;
 }
 
@@ -384,7 +398,7 @@ export async function distillSpiritualAlaya(messages, apiKey) {
   const prompt = `以下の魂の交流を、阿頼耶識（潜在意識の記憶）として150文字程度で要約せよ。これまでの関係性や重要な出来事を重点的に記すこと:\n\n${thread}`;
   
   try {
-    const res = await invokeGemini(apiKey, prompt, "あなたは「阿頼耶識」の記録者。これまでの対話の核心のみを抽出せよ。");
+    const res = await invokeGemini(apiKey, prompt, "あなたは「阿頼耶識」の記録者。これまでの対話の核心のみを抽出せよ。", { taskType: 'SUMMARY' });
     return res.data;
   } catch (e) {
     console.error("Alaya distillation failed:", e);
