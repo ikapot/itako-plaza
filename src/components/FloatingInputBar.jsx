@@ -37,14 +37,14 @@ const FloatingInputBar = React.memo(({
                             : 'bg-white/5 border-white/10 text-white/30'}
                     `}
                 >
-                    {input.trim() && (
+                    {input.trim() ? (
                         <motion.div 
                             layoutId="btn-glow"
                             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
                             animate={{ x: ['-200%', '200%'] }}
                             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                         />
-                    )}
+                    ) : null}
                     <span className="font-oswald font-black text-[10px] tracking-[0.2em] relative z-10">
                         {loading ? 'SYNCING...' : 'MANIFEST'}
                     </span>

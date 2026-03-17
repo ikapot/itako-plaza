@@ -1,3 +1,4 @@
+import React from 'react';
 import { User, Menu, Settings, TrendingUp, MessageSquare, Ghost, Globe, Cpu, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Logo from './Logo';

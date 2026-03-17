@@ -2,6 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 
+const CUBE_FACES = [
+  { name: 'Front', rotate: 'rotateY(0deg) translateZ(100px)', faceIndex: 0 },
+  { name: 'Back', rotate: 'rotateY(180deg) translateZ(100px)', faceIndex: 1 },
+  { name: 'Right', rotate: 'rotateY(90deg) translateZ(100px)', faceIndex: 2 },
+  { name: 'Left', rotate: 'rotateY(-90deg) translateZ(100px)', faceIndex: 3 },
+  { name: 'Top', rotate: 'rotateX(90deg) translateZ(100px)', faceIndex: 4 },
+  { name: 'Bottom', rotate: 'rotateX(-90deg) translateZ(100px)', faceIndex: 5 },
+];
+
 const CubeMap = ({ locations, selectedLocationId, onSelectLocation, locationEnergies }) => {
   const [isDragging, setIsDragging] = useState(false);
   
@@ -57,14 +66,9 @@ const CubeMap = ({ locations, selectedLocationId, onSelectLocation, locationEner
     setIsDragging(false);
   };
 
-  const faces = [
-    { name: 'Front', rotate: 'rotateY(0deg) translateZ(100px)', faceIndex: 0 },
-    { name: 'Back', rotate: 'rotateY(180deg) translateZ(100px)', faceIndex: 1 },
-    { name: 'Right', rotate: 'rotateY(90deg) translateZ(100px)', faceIndex: 2 },
-    { name: 'Left', rotate: 'rotateY(-90deg) translateZ(100px)', faceIndex: 3 },
-    { name: 'Top', rotate: 'rotateX(90deg) translateZ(100px)', faceIndex: 4 },
-    { name: 'Bottom', rotate: 'rotateX(-90deg) translateZ(100px)', faceIndex: 5 },
-  ];
+  const groupedLocations = React.useMemo(() => {
+    return CUBE_FACES.map(face => locations.filter(l => l.face === face.faceIndex));
+  }, [locations]);
 
   return (
     <div className="relative w-full aspect-square max-w-[300px] mx-auto perspective-[1000px] mb-12">
@@ -81,13 +85,13 @@ const CubeMap = ({ locations, selectedLocationId, onSelectLocation, locationEner
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
       >
-        {faces.map((face, fIdx) => (
+        {CUBE_FACES.map((face, fIdx) => (
           <div
             key={fIdx}
             className="absolute inset-0 bg-black/40 border border-white/10 backdrop-blur-md backface-hidden grid grid-cols-3 grid-rows-3 gap-1 p-1"
             style={{ transform: face.rotate }}
           >
-            {locations.filter(l => l.face === face.faceIndex).map((loc, lIdx) => {
+            {groupedLocations[fIdx].map((loc, lIdx) => {
               const isSelected = selectedLocationId === loc.id;
               const energy = locationEnergies[loc.id] || 0;
               const intensity = Math.min(energy / 100, 1);
@@ -105,14 +109,14 @@ const CubeMap = ({ locations, selectedLocationId, onSelectLocation, locationEner
                   }`}
                 >
                    {/* Spiritual Glow */}
-                   {energy > 0 && (
+                   {energy > 0 ? (
                       <div
                         className="absolute inset-0 pointer-events-none"
                         style={{
                           background: `radial-gradient(circle, rgba(189, 138, 120, ${intensity * 0.4}) 0%, transparent 70%)`
                         }}
                       />
-                    )}
+                    ) : null}
 
                   <MapPin size={10} className={isSelected ? 'text-black' : 'text-white/20'} />
                   <span className={`text-[9px] font-black leading-none mt-1 tracking-tighter ${isSelected ? 'text-black' : 'text-white/40'}`}>

@@ -51,95 +51,93 @@ export default function LandingPage({
             </div>
 
             <AnimatePresence mode="wait">
-                {step === 'gate' && (
+                {step === 'gate' ? (
                     <motion.div
                         key="gate"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
-                        className="relative z-10 flex flex-col items-center w-full h-full justify-center px-8"
+                        className="relative z-10 flex flex-col items-center w-full h-full justify-center px-4"
                     >
-                        {/* The Mysterious Door */}
-                        <div className="relative group mb-12">
-                            {/* Inner Glow */}
+                        {/* The Minimalism Poster Gate */}
+                        <div className="relative group mb-8">
                             <motion.div 
-                                animate={{ 
-                                    boxShadow: [
-                                        "0 0 20px rgba(255,255,255,0.1), inset 0 0 10px rgba(255,255,255,0.05)",
-                                        "0 0 40px rgba(255,255,255,0.2), inset 0 0 20px rgba(255,255,255,0.1)",
-                                        "0 0 20px rgba(255,255,255,0.1), inset 0 0 10px rgba(255,255,255,0.05)"
-                                    ]
-                                }}
-                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                className="w-[200px] h-[350px] md:w-[260px] md:h-[450px] bg-black border border-white/20 relative rounded-sm overflow-hidden"
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 1.5, ease: "circOut" }}
+                                className="relative w-[280px] h-[400px] md:w-[450px] md:h-[640px] bg-white p-2 md:p-4 shadow-[0_50px_100px_rgba(0,0,0,0.9)] flex flex-col"
                             >
-                                <div className="absolute inset-0 border border-white/40 opacity-30 shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
-                                
-                                <div className="absolute inset-0 flex flex-col items-start justify-center space-y-16 pl-12">
-                                    {[0, 1, 2].map(function renderKeyhole(i) {
+                                {/* The Grid */}
+                                <div className="flex-1 grid grid-cols-4 grid-rows-5 gap-1 md:gap-2">
+                                    {Array.from({ length: 20 }).map((_, i) => {
+                                        // Indices that appear "open" or "tilted" in the reference image
+                                        const isOpen = [2, 5, 9, 14].includes(i);
                                         return (
-                                            <div key={i} className="relative">
-                                                <motion.div 
-                                                    animate={{ 
-                                                        scale: [1, 1.5, 1],
-                                                        opacity: [0.3, 0.8, 0.3],
-                                                        boxShadow: ["0 0 5px #fff", "0 0 15px #fff", "0 0 5px #fff"]
-                                                    }}
-                                                    transition={{ duration: 3, delay: i * 0.5, repeat: Infinity }}
-                                                    className="w-1.5 h-3 bg-white rounded-full blur-[1px]"
+                                            <div key={i} className="relative w-full h-full perspective-1000">
+                                                <motion.div
+                                                    initial={{ rotateY: isOpen ? -60 : 0, x: isOpen ? 5 : 0 }}
+                                                    whileHover={{ rotateY: -25, x: 2, transition: { duration: 0.4 } }}
+                                                    className="w-full h-full bg-black origin-left shadow-lg"
+                                                    style={{ transformStyle: 'preserve-3d' }}
                                                 />
-                                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white/10 rounded-full blur-xl pointer-events-none" />
                                             </div>
                                         );
                                     })}
                                 </div>
 
-                                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 scale-50 opacity-20 group-hover:opacity-40 transition-opacity">
-                                    <Logo />
+                                {/* Poster Typography */}
+                                <div className="mt-4 md:mt-8 flex justify-between items-end">
+                                    <div className="flex flex-col">
+                                        <h1 className="text-xl md:text-3xl font-black tracking-[-0.05em] text-black leading-none uppercase font-oswald">
+                                            ITAKO PLAZA
+                                        </h1>
+                                        <span className="text-[6px] md:text-[8px] font-bold text-black/40 uppercase tracking-[0.4em] mt-1 ml-0.5">
+                                            Ethereal Protocol v1.2
+                                        </span>
+                                    </div>
+                                    <div className="text-[6px] md:text-[8px] font-bold text-black uppercase tracking-tight text-right leading-tight max-w-[120px] md:max-w-[180px]">
+                                        A Digital Archive Reimagining the Boundary <br/> 
+                                        Between the Living and the Dead. <br/>
+                                        <span className="text-black/30">Established in 1923 / Antigravity</span>
+                                    </div>
+                                </div>
+
+                                {/* Interactive Overlay */}
+                                <div 
+                                    onClick={handleEnterGate}
+                                    className="absolute inset-0 cursor-pointer z-20 group/canvas"
+                                >
+                                    <div className="absolute inset-0 bg-white/0 group-hover/canvas:bg-black/5 transition-colors" />
+                                    <div className="absolute bottom-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover/canvas:opacity-100 transition-opacity">
+                                        <motion.div 
+                                            animate={{ scale: [1, 1.1, 1] }}
+                                            transition={{ repeat: Infinity, duration: 2 }}
+                                            className="px-6 py-2 bg-black text-white text-[10px] font-bold tracking-[0.4em] uppercase"
+                                        >
+                                            Enter the Void
+                                        </motion.div>
+                                    </div>
                                 </div>
                             </motion.div>
-                            <div className="absolute -inset-4 border border-white/5 pointer-events-none" />
+                            
+                            {/* Outer Decorative Element */}
+                            <div className="absolute -inset-8 border border-white/5 pointer-events-none" />
                         </div>
 
-                        <div className="space-y-8 flex flex-col items-center">
-                            <h1 className="text-2xl md:text-5xl font-black tracking-[0.4em] text-white uppercase font-oswald italic">
-                                ITAKO PLAZA
-                            </h1>
-                            
-                            <p className="text-xs md:text-sm text-white/40 font-serif italic max-w-xs leading-relaxed text-center">
-                                「ここから先は『あわいの広場』。生者と死者の境界線。入るには、深淵を照らす『三つの鍵』が必要です。」
-                            </p>
-                            
-                            <div className="flex flex-col md:flex-row items-center gap-4 mt-4">
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleEnterGate}
-                                    className="px-10 py-4 bg-white text-black rounded-full font-black text-[10px] tracking-[0.3em] uppercase hover:bg-zinc-200 transition-colors"
-                                >
-                                    門を開く
-                                </motion.button>
-                                
-                                <motion.a
-                                    href="https://aistudio.google.com/app/apikey"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    whileHover={{ scale: 1.05 }}
-                                    className="px-10 py-4 border border-white/20 text-white rounded-full font-black text-[10px] tracking-[0.3em] uppercase hover:bg-white/5 transition-colors flex items-center gap-2"
-                                >
-                                    鍵を取りに行く <Sparkles size={12} className="text-[#f15a24]" />
-                                </motion.a>
-                            </div>
-                        </div>
-
-                        <div className="mt-16 flex gap-8 text-[7px] font-bold text-white/5 tracking-[0.4em] uppercase">
-                            <span>Established in 1923</span>
-                            <span>Ethereal Protocol</span>
-                        </div>
+                        {/* Subtle Navigation or Action Link */}
+                        <motion.a
+                            href="https://aistudio.google.com/app/apikey"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.3 }}
+                            whileHover={{ opacity: 1 }}
+                            className="mt-8 text-[8px] md:text-[10px] text-white font-black tracking-[0.5em] uppercase flex items-center gap-2 border-b border-white/20 pb-1"
+                        >
+                            鍵を取得する (Get API Key) <Sparkles size={10} className="text-[#f15a24]" />
+                        </motion.a>
                     </motion.div>
-                )}
-
-                {step === 'ritual' && (
+                ) : step === 'ritual' ? (
                     <motion.div
                         key="ritual"
                         initial={{ opacity: 0, y: 20 }}
@@ -182,7 +180,7 @@ export default function LandingPage({
                             </button>
                         </div>
                     </motion.div>
-                )}
+                ) : null}
             </AnimatePresence>
         </div>
     );

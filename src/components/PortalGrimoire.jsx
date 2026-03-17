@@ -20,6 +20,7 @@ export default function PortalGrimoire({
     const [isResonating, setIsResonating] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [turningSlot, setTurningSlot] = useState(null); 
+    const [editingSlot, setEditingSlot] = useState(null);
     const [showModelList, setShowModelList] = useState(false);
     const [customModel, setCustomModel] = useState('');
 
@@ -133,7 +134,7 @@ export default function PortalGrimoire({
                                 </p>
 
                                 <AnimatePresence mode="wait">
-                                    {isResonating && (
+                                    {isResonating ? (
                                         <motion.div 
                                             key="action"
                                             initial={{ opacity: 0, x: -20 }}
@@ -148,7 +149,7 @@ export default function PortalGrimoire({
                                                 </div>
                                                 <p className="text-[8px] text-white/30 truncate mb-4 font-mono">{detectedKey}</p>
                                                 
-                                                {detectedKey.startsWith('sk-or-') && (
+                                                {detectedKey.startsWith('sk-or-') ? (
                                                     <div className="mb-4 p-3 bg-black/40 rounded-xl border border-white/5">
                                                         <div className="flex items-center justify-between mb-2">
                                                             <span className="text-[7px] text-white/30 uppercase tracking-widest">Selected Model</span>
@@ -163,7 +164,7 @@ export default function PortalGrimoire({
                                                         </button>
                                                         
                                                         <AnimatePresence>
-                                                            {showModelList && (
+                                                            {showModelList ? (
                                                                 <motion.div 
                                                                     initial={{ height: 0, opacity: 0 }}
                                                                     animate={{ height: 'auto', opacity: 1 }}
@@ -193,10 +194,10 @@ export default function PortalGrimoire({
                                                                         />
                                                                     </div>
                                                                 </motion.div>
-                                                            )}
+                                                            ) : null}
                                                         </AnimatePresence>
                                                     </div>
-                                                )}
+                                                ) : null}
 
                                                 <button 
                                                     onClick={handleConsecrate}
@@ -207,19 +208,19 @@ export default function PortalGrimoire({
                                                 </button>
                                             </div>
                                         </motion.div>
-                                    )}
+                                    ) : null}
                                 </AnimatePresence>
                             </div>
                         </div>
 
-                        {(apiConnectionStatus === 'error' || currentKeys.filter(Boolean).length > 0) && (
+                        {(apiConnectionStatus === 'error' || currentKeys.filter(Boolean).length > 0) ? (
                             <button 
                                 onClick={handleClearKeys}
                                 className="mt-8 text-[8px] font-black text-white/10 tracking-[0.3em] uppercase hover:text-[#f15a24] transition-colors self-start"
                             >
                                 Reset Ritual
                             </button>
-                        )}
+                        ) : null}
                     </div>
 
                     <div className="w-full md:w-1/2 h-full flex flex-col items-center justify-center p-8 bg-black/20">
@@ -233,13 +234,13 @@ export default function PortalGrimoire({
                                 return (
                                     <div key={idx} className="relative flex items-center group/slot">
                                         <AnimatePresence>
-                                            {isTurning && (
+                                            {isTurning ? (
                                                 <motion.div 
                                                     initial={{ scale: 0, opacity: 1 }}
                                                     animate={{ scale: 3, opacity: 0 }}
                                                     className="absolute inset-0 border border-[#f15a24] rounded-full pointer-events-none"
                                                 />
-                                            )}
+                                            ) : null}
                                         </AnimatePresence>
 
                                         <motion.div 
@@ -299,7 +300,7 @@ export default function PortalGrimoire({
                                         </div>
 
                                         <AnimatePresence>
-                                            {isEditing && errorMessage && (
+                                            {isEditing && errorMessage ? (
                                                 <motion.div 
                                                     initial={{ opacity: 0, x: -10 }}
                                                     animate={{ opacity: 1, x: 0 }}
@@ -308,7 +309,7 @@ export default function PortalGrimoire({
                                                 >
                                                     {errorMessage}
                                                 </motion.div>
-                                            )}
+                                            ) : null}
                                         </AnimatePresence>
                                     </div>
                                 );

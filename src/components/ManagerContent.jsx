@@ -171,7 +171,7 @@ const ManagerContent = React.memo(({
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {[
+                            {useMemo(() => [
                                 { label: 'Bookmarks', val: bookmarks?.length || 0, icon: <Bookmark size={14} /> },
                                 { label: 'Manifestations', val: messages.filter(m => m.role === 'user').length || 0, icon: <MessageCircle size={14} /> },
                                 { label: 'Deepest Bond', val: (() => {
@@ -183,7 +183,7 @@ const ManagerContent = React.memo(({
                                     return characters.find(c => c.id === topCharId)?.name || 'None';
                                 })(), icon: <User size={14} /> },
                                 { label: 'Energy Sync', val: `${Object.values(locationEnergies).reduce((a, b) => a + b, 0)} pts`, icon: <Activity size={14} /> },
-                            ].map((s, i) => (
+                            ], [bookmarks, messages, characters, locationEnergies]).map((s, i) => (
                                 <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-3xl">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{s.label}</span>
@@ -197,18 +197,21 @@ const ManagerContent = React.memo(({
                         <div className="space-y-6">
                             <h2 className="text-sm font-bold text-white/40 tracking-[0.3em] uppercase px-4 border-l-2 border-[#bd8a78]">Echo Bookmarks (栞)</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {(bookmarks || []).map((b, i) => (
-                                    <div key={i} className="p-6 bg-black/40 border border-white/10 rounded-[30px] space-y-4 hover:border-white/20 transition-all">
-                                        <div className="flex items-center gap-3">
-                                            <WarholAvatar src={characters.find(c=>c.id === b.charId)?.avatar} colorClass={characters.find(c=>c.id === b.charId)?.color} size="w-6 h-6" isSelected />
-                                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{characters.find(c=>c.id === b.charId)?.name}</span>
+                                {(bookmarks || []).map((b, i) => {
+                                    const char = characters.find(c => c.id === b.charId);
+                                    return (
+                                        <div key={i} className="p-6 bg-black/40 border border-white/10 rounded-[30px] space-y-4 hover:border-white/20 transition-all">
+                                            <div className="flex items-center gap-3">
+                                                <WarholAvatar src={char?.avatar} colorClass={char?.color} size="w-6 h-6" isSelected />
+                                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{char?.name}</span>
+                                            </div>
+                                            <p className="text-sm text-white/80 leading-relaxed italic line-clamp-3">"{b.aiMsg}"</p>
                                         </div>
-                                        <p className="text-sm text-white/80 leading-relaxed italic line-clamp-3">"{b.aiMsg}"</p>
-                                    </div>
-                                ))}
-                                {(!bookmarks || bookmarks.length === 0) && (
+                                    );
+                                })}
+                                {(!bookmarks || bookmarks.length === 0) ? (
                                     <p className="text-xs text-white/10 tracking-widest uppercase italic px-6">囁きはまだ記録されていません。</p>
-                                )}
+                                ) : null}
                             </div>
                         </div>
 

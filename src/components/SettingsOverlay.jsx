@@ -19,7 +19,7 @@ const SettingsOverlay = React.memo(({
     const [showModelList, setShowModelList] = React.useState(false);
     return (
         <AnimatePresence>
-            {showSettings && (
+            {showSettings ? (
                 <>
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -84,7 +84,7 @@ const SettingsOverlay = React.memo(({
                                         placeholder="sk-or-v1-..."
                                     />
                                     
-                                    {geminiKey.startsWith('sk-or-') && (
+                                    {geminiKey.startsWith('sk-or-') ? (
                                         <div className="w-full mt-4 p-4 bg-black/40 rounded-2xl border border-white/5 space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-[8px] font-bold text-white/30 uppercase tracking-[0.2em]">Active Model</span>
@@ -99,7 +99,7 @@ const SettingsOverlay = React.memo(({
                                             </button>
                                             
                                             <AnimatePresence>
-                                                {showModelList && (
+                                                {showModelList ? (
                                                     <motion.div 
                                                         initial={{ height: 0, opacity: 0 }}
                                                         animate={{ height: 'auto', opacity: 1 }}
@@ -129,10 +129,10 @@ const SettingsOverlay = React.memo(({
                                                             />
                                                         </div>
                                                     </motion.div>
-                                                )}
+                                                ) : null}
                                             </AnimatePresence>
                                         </div>
-                                    )}
+                                    ) : null}
                                 </div>
                                 <p className="mt-2 text-[10px] text-white/40 leading-relaxed">
                                     ※ Google AI Studio または OpenRouter のキーを入力してください。<br/>
@@ -156,16 +156,16 @@ const SettingsOverlay = React.memo(({
                                 >
                                     {isValidatingApi ? 'Synchronizing...' : apiConnectionStatus === 'error' ? 'Circuit Failure / Retry' : '回路を安定化させる (Stabilize)'}
                                 </button>
-                                {apiConnectionStatus === 'error' && (
+                                {apiConnectionStatus === 'error' ? (
                                     <p className="text-[8px] font-bold text-red-500 uppercase tracking-widest text-center animate-pulse">
                                         Connection Failed.
                                     </p>
-                                )}
-                                 {!geminiKey && (
+                                ) : null}
+                                 {!geminiKey ? (
                                     <p className="text-[8px] font-bold text-[#fdb913]/50 uppercase tracking-widest text-center animate-pulse">
                                         Waiting for spiritual key...
                                     </p>
-                                )}
+                                ) : null}
                             </div>
 
 
@@ -177,7 +177,7 @@ const SettingsOverlay = React.memo(({
                         </div>
                     </motion.div>
                 </>
-            )}
+            ) : null}
         </AnimatePresence>
     );
 });

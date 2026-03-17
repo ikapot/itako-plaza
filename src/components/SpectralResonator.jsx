@@ -39,13 +39,13 @@ const SpectralResonator = ({ status, delay = 0 }) => {
                 />
 
                 {/* Spectral Gas / Glow Inside */}
-                {isActive && (
+                {isActive ? (
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 0.3 }}
                         className="absolute inset-0 bg-gradient-to-t from-[#f15a24] to-transparent blur-md"
                     />
-                )}
+                ) : null}
 
                 {/* Reflection on Glass */}
                 <div className="absolute top-2 left-2 w-2 h-6 bg-white/10 rounded-full blur-[1px]" />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -8,11 +8,11 @@ const CharacterOverlay = React.memo(({
     characters,
     handleTalkTo,
 }) => {
-    const c = characters.find(char => char.id === enlargedCharId);
+    const c = useMemo(() => characters.find(char => char.id === enlargedCharId), [characters, enlargedCharId]);
 
     return (
         <AnimatePresence>
-            {enlargedCharId && c && (
+            {enlargedCharId && c ? (
                 <>
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -63,7 +63,7 @@ const CharacterOverlay = React.memo(({
                         </div>
                     </motion.div>
                 </>
-            )}
+            ) : null}
         </AnimatePresence>
     );
 });

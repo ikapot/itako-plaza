@@ -353,7 +353,7 @@ export default function App() {
     }
   };
 
-  async function handleSyncNotebook() {
+  const handleSyncNotebook = useCallback(async () => {
     if (!notebookInput.trim() || !geminiKey) return;
     setSyncingNotebook(true);
     try {
@@ -367,14 +367,14 @@ export default function App() {
     } finally {
       setSyncingNotebook(false);
     }
-  }
+  }, [notebookInput, geminiKey]);
 
   if (!isAppReady || !user) {
-    function prepareSession(key) {
+    const prepareSession = (key) => {
       if (!key) return;
       setGeminiKey(key);
       setIsAppReady(true);
-    }
+    };
 
     return (
       <LandingPage 
@@ -391,8 +391,8 @@ export default function App() {
     );
   }
 
-  const currentLocation = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
-  const ambient = AMBIENT_COLORS[globalSentiment] || AMBIENT_COLORS.neutral;
+  const currentLocation = useMemo(() => INITIAL_LOCATIONS.find(l => l.id === selectedLocationId), [selectedLocationId]);
+  const ambient = useMemo(() => AMBIENT_COLORS[globalSentiment] || AMBIENT_COLORS.neutral, [globalSentiment]);
 
   return (
     <div className={`h-[100dvh] w-full overflow-hidden flex flex-col font-sans selection:bg-white/30 relative
@@ -495,14 +495,14 @@ export default function App() {
                           <span className="text-[7px] text-white/10">{log.time}</span>
                         </div>
                         <p className="text-[9px] font-medium text-white/60 truncate">{log.model}</p>
-                        {log.error && (
+                        {log.error ? (
                           <p className="text-[7px] text-red-500/60 leading-tight mt-1 break-words line-clamp-2">{log.error}</p>
-                        )}
+                        ) : null}
                       </div>
                     ))}
-                    {apiLogs.length === 0 && (
+                    {apiLogs.length === 0 ? (
                       <p className="text-[9px] text-white/10 italic text-center py-10 tracking-widest uppercase font-oswald">Silence as a language...</p>
-                    )}
+                    ) : null}
                   </div>
                 </div>
 
