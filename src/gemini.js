@@ -129,14 +129,22 @@ const emitDebug = (data) => { if (debugCallback) debugCallback(data); };
 
 const semanticCache = new Map();
 
-async function findEcho(systemPrompt, userMsg) {
-  const key = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
-  if (semanticCache.has(key)) return semanticCache.get(key);
-  const remote = await findEchoInFirestore(systemPrompt, userMsg);
-  if (remote) {
-    semanticCache.set(key, remote);
-    return remote;
+/**
+ * 過去の対話から「エコー（キャッシュ）」を検索する
+ */
+async function findSpiritualEcho(systemPrompt, userMsg) {
+  const cacheKey = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
+  
+  if (semanticCache.has(cacheKey)) {
+    return semanticCache.get(cacheKey);
   }
+
+  const firestoreEcho = await findEchoInFirestore(systemPrompt, userMsg);
+  if (firestoreEcho) {
+    semanticCache.set(cacheKey, firestoreEcho);
+    return firestoreEcho;
+  }
+  
   return null;
 }
 
@@ -230,38 +238,37 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
   return data.choices[0]?.message?.content || "";
 }
 
-export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config = {}, isJson = false) {
-  const keys = apiKeyString.split(',').map(k => k.trim()).filter(Boolean);
-  if (keys.length === 0) throw new Error(SPIRITUAL_ERRORS.AUTH_FAILED);
+/**
+ * OpenRouter専用の呼び出しロジック
+ */
+async function invokeOpenRouter(apiKey, prompt, sysPrompt, config, isJson) {
+  const targetModel = config.model || preferredOpenRouterModel;
+  const messages = [{ role: "user", content: sysPrompt ? `${sysPrompt}\n\n${prompt}` : prompt }];
+  
+  const res = await fetchOpenRouter(apiKey, messages, targetModel, config);
+  let finalData = res;
 
-  const firstKey = keys[0];
-  const isOpenRouter = firstKey.startsWith("sk-or-");
-
-  if (isOpenRouter) {
-    emitDebug({ type: 'attempt', model: "OpenRouter/Single", keyIndex: 1 });
+  if (isJson) {
     try {
-      const targetModel = config.model || preferredOpenRouterModel;
-      const messages = [{ role: "user", content: sysPrompt ? `${sysPrompt}\n\n${prompt}` : prompt }];
-      const res = await fetchOpenRouter(firstKey, messages, targetModel, config);
-      let finalData = res;
-      if (isJson) {
-        try {
-          const cleanJson = extractJson(res);
-          finalData = JSON.parse(cleanJson);
-        } catch (e) {
-          console.error("OpenRouter JSON Parse Error", res);
-          throw new Error("Invalid JSON response from spirit (OpenRouter)");
-        }
-      }
-      emitDebug({ type: 'success', model: "OpenRouter", keyIndex: 1 });
-      return new SpiritualResponse({ data: finalData, model: `OpenRouter/${targetModel.split('/').pop()}`, keyIndex: 1 });
+      finalData = JSON.parse(extractJson(res));
     } catch (e) {
-      emitDebug({ type: 'error', model: "OpenRouter", error: e.message });
-      throw e;
+      throw new Error(`Invalid JSON response from spirit (OpenRouter): ${res.substring(0, 100)}`);
     }
   }
 
+  return new SpiritualResponse({ 
+    data: finalData, 
+    model: `OpenRouter/${targetModel.split('/').pop()}`, 
+    keyIndex: 1 
+  });
+}
+
+/**
+ * Google Gemini専用の呼び出しロジック（キーローテーションとフォールバック付）
+ */
+async function invokeGeminiDirect(keys, prompt, sysPrompt, config, isJson) {
   let lastError = null;
+
   for (const modelName of FALLBACK_MODELS) {
     for (let kIdx = 0; kIdx < keys.length; kIdx++) {
       try {
@@ -272,31 +279,68 @@ export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config 
           systemInstruction: sysPrompt || undefined,
           safetySettings: SAFETY_SETTINGS
         });
+
         emitDebug({ type: 'attempt', model: modelName, keyIndex: kIdx + 1 });
         const result = await model.generateContent(prompt || "...");
         const response = await result.response;
         const text = response.text();
+        
         let finalData = text;
         if (isJson) {
-          try {
-            const cleanJson = extractJson(text);
-            finalData = JSON.parse(cleanJson);
-          } catch (e) { 
-            console.error("JSON Parse Error", text); 
-            throw new Error("Invalid JSON response from spirit");
-          }
+          finalData = JSON.parse(extractJson(text));
         }
+
         emitDebug({ type: 'success', model: modelName, keyIndex: kIdx + 1 });
         return new SpiritualResponse({ data: finalData, model: modelName, keyIndex: kIdx + 1 });
       } catch (error) {
         lastError = error;
         emitDebug({ type: 'error', model: modelName, keyIndex: kIdx + 1, error: error.message });
-        if (error.status === 404) break;
-        continue;
+        if (error.status === 404) break; // モデルが存在しない場合はスキップ
       }
     }
   }
   throw lastError;
+}
+
+/**
+ * 霊的知能への統一アクセスポイント
+ */
+export async function invokeGemini(apiKeyString, prompt, sysPrompt = "", config = {}, isJson = false) {
+  const keys = apiKeyString.split(',').map(k => k.trim()).filter(Boolean);
+  if (keys.length === 0) throw new Error(SPIRITUAL_ERRORS.AUTH_FAILED);
+
+  const isOpenRouter = keys[0].startsWith("sk-or-");
+  
+  if (isOpenRouter) {
+    return invokeOpenRouter(keys[0], prompt, sysPrompt, config, isJson);
+  } else {
+    return invokeGeminiDirect(keys, prompt, sysPrompt, config, isJson);
+  }
+}
+
+/**
+ * キャラクターやコンテキストに基づいたシステムプロンプトを構築する
+ */
+function buildSystemPrompt({ character, options, others }) {
+  const { isUnderground, externalContext, location, alaya } = options;
+  const config = CHARACTER_CONFIGS[character.id] || { systemPrompt: character.systemPrompt };
+  
+  let prompt = config.systemPrompt || character.systemPrompt || "";
+  
+  if (isUnderground) prompt += "\n【深層意識】建前を捨て、本音と欲望を語ってください。";
+  if (externalContext) prompt += `\n【外部状況】${externalContext}`;
+  if (location) prompt += `\n【現在地】"${location.name}" (${location.description})`;
+  if (alaya) prompt += `\n【阿頼耶識（これまでのあらすじ）】${alaya}`;
+  
+  const allPresentIds = [character.id, ...others.map(o => o.id)];
+  SPIRIT_INTERACTIONS.forEach(interaction => {
+    if (interaction.ids.every(id => allPresentIds.includes(id))) {
+      prompt += `\n${interaction.prompt}`;
+    }
+  });
+
+  prompt += "\n【義務】発言の冒頭に心情タグ [serene, agitated, melancholic, joyful, chaotic, neutral] を必ず付与してください。";
+  return prompt;
 }
 
 /**
@@ -314,27 +358,19 @@ export async function streamSpiritualDialogue({
     return;
   }
 
-  const { isUnderground = false, externalContext = "", location = null, others = [], alaya = "" } = options;
-  const config = CHARACTER_CONFIGS[character.id] || { systemPrompt: character.systemPrompt, generationConfig: { temperature: 0.7 } };
-  
-  let systemPrompt = config.systemPrompt || character.systemPrompt || "";
-  if (isUnderground) systemPrompt += "\n【深層意識】建前を捨て、本音と欲望を語ってください。";
-  if (externalContext) systemPrompt += `\n【外部状況】${externalContext}`;
-  if (location) systemPrompt += `\n【現在地】"${location.name}" (${location.description})`;
-  if (alaya) systemPrompt += `\n【阿頼耶識（これまでのあらすじ）】${alaya}`;
-  
-  const allPresent = [character.id, ...others.map(o => o.id)];
-  SPIRIT_INTERACTIONS.filter(int => int.ids.every(id => allPresent.includes(id)))
-    .forEach(int => systemPrompt += `\n${int.prompt}`);
+  const charConfig = CHARACTER_CONFIGS[character.id] || {};
+  const systemPrompt = buildSystemPrompt({ character, options, others: options.others || [] });
+  const echo = await findSpiritualEcho(systemPrompt, message);
 
-  systemPrompt += "\n【義務】発言の冒頭に心情タグ [serene, agitated, melancholic, joyful, chaotic, neutral] を必ず付与してください。";
-
-  const echo = await findEcho(systemPrompt, message);
   if (echo) {
-    let current = "";
+    let streamingText = "";
     for (const char of echo) {
-      current += char;
-      onChunk(current, { model: 'echo-cache', keyIndex: '-', sentiment: extractSentiment(current) });
+      streamingText += char;
+      onChunk(streamingText.replace(/^\[.*?\]\s*/, ""), { 
+        model: 'echo-cache', 
+        keyIndex: '-', 
+        sentiment: extractSentiment(streamingText) 
+      });
       await sleep(2);
     }
     return;
@@ -344,11 +380,11 @@ export async function streamSpiritualDialogue({
   const firstKey = keys[0];
 
   if (firstKey.startsWith("sk-or-")) {
+    const targetModel = charConfig.model || preferredOpenRouterModel;
     try {
       emitDebug({ type: 'stream_start', model: "OpenRouter", keyIndex: 1 });
-      const targetModel = config.model || preferredOpenRouterModel;
       const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: message }];
-      const fullText = await fetchOpenRouter(firstKey, messages, targetModel, config.generationConfig, true, (text) => {
+      const fullText = await fetchOpenRouter(firstKey, messages, targetModel, charConfig.generationConfig || {}, true, (text) => {
         onChunk(text.replace(/^\[.*?\]\s*/, ""), { model: targetModel, keyIndex: 1, sentiment: extractSentiment(text) });
       });
       await storeEcho(systemPrompt, message, fullText);
@@ -367,7 +403,12 @@ export async function streamSpiritualDialogue({
     for (let kIdx = 0; kIdx < keys.length; kIdx++) {
       try {
         const genAI = new GoogleGenerativeAI(keys[kIdx]);
-        const model = genAI.getGenerativeModel({ model: modelName, generationConfig: config.generationConfig, systemInstruction: systemPrompt, safetySettings: SAFETY_SETTINGS });
+        const model = genAI.getGenerativeModel({ 
+          model: modelName, 
+          generationConfig: charConfig.generationConfig || {}, 
+          systemInstruction: systemPrompt, 
+          safetySettings: SAFETY_SETTINGS 
+        });
         emitDebug({ type: 'stream_start', model: modelName, keyIndex: kIdx + 1 });
         const result = await model.generateContentStream(message);
         let fullText = "";

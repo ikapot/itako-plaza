@@ -1,8 +1,8 @@
-import { User, Menu, Settings, TrendingUp, MessageSquare, Ghost, Globe, Cpu } from 'lucide-react';
+import { User, Menu, Settings, TrendingUp, MessageSquare, Ghost, Globe, Cpu, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Logo from './Logo';
 
-export default function Header({
+const Header = React.memo(({
     userName,
     openDrawer,
     openSettings,
@@ -12,7 +12,7 @@ export default function Header({
     setActiveManagerTab,
     globalSentiment = 'neutral',
     apiStatus = 'idle'
-}) {
+}) => {
     const navItems = [
         { id: 0, icon: <TrendingUp size={20} />, color: '#98a436', label: 'News' },
         { id: 1, icon: <MessageSquare size={20} />, color: '#fdb913', label: 'Dialog' },
@@ -23,6 +23,7 @@ export default function Header({
         { id: 'map', icon: <Globe size={14} />, label: 'RANDAMNI', color: '#fdb913' },
         { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
         { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
+        { id: 'grimoire', icon: <BookOpen size={14} />, label: 'Manual', color: '#bd8a78' },
         { id: 'account', icon: <Settings size={14} />, label: 'Account', color: '#bd8a78' },
     ];
 
@@ -37,7 +38,7 @@ export default function Header({
                 </button>
                 <div className="hidden lg:flex items-center gap-4">
                     <Logo apiStatus={apiStatus} />
-                    {globalSentiment !== 'neutral' && (
+                    {globalSentiment !== 'neutral' ? (
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -51,7 +52,7 @@ export default function Header({
                                                           globalSentiment === 'chaotic' ? '#d946ef' : '#fff' }} />
                             <span className="text-[8px] font-black tracking-[0.2em] uppercase text-white/40 font-oswald">{globalSentiment}</span>
                         </motion.div>
-                    )}
+                    ) : null}
                 </div>
             </div>
 
@@ -88,12 +89,15 @@ export default function Header({
                         title={item.label}
                     >
                         {item.icon}
-                        {activeSlot === item.id && (
+                        {activeSlot === item.id ? (
                             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current shadow-[0_0_8px_current]" />
-                        )}
+                        ) : null}
                     </button>
                 ))}
             </div>
         </header>
     );
-}
+});
+
+Header.displayName = 'Header';
+export default Header;

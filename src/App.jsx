@@ -32,44 +32,55 @@ const APP_CHARACTERS = INITIAL_CHARACTERS.map(c => ({
 }));
 
 export default function App() {
+  // --- 1. Identity & Auth States ---
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState(() => localStorage.getItem('itako_user_name') || '無名の参列者');
   const [geminiKey, setGeminiKey] = useState(() => cleanKey(localStorage.getItem('itako_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || ''));
   const [isAppReady, setIsAppReady] = useState(false);
+  const [isValidatingApi, setIsValidatingApi] = useState(false);
+  const [apiConnectionStatus, setApiConnectionStatus] = useState('idle');
+
+  // --- 2. Navigation & UI States ---
   const [activeSlot, setActiveSlot] = useState(0);
+  const [activeManagerTab, setActiveManagerTab] = useState('map');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [enlargedCharId, setEnlargedCharId] = useState(null);
+  const [showNotebookModal, setShowNotebookModal] = useState(false);
+  const [isUnderground, setIsUnderground] = useState(false);
+  const [isEventShaking, setIsEventShaking] = useState(false);
+
+  // --- 3. Dialogue & Knowledge States ---
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [alaya, setAlaya] = useState(() => localStorage.getItem('itako_alaya') || "");
+  const [bookmarks, setBookmarks] = useState([]);
+  const [spiritSharedKnowledge, setSpiritSharedKnowledge] = useState('');
+  const [archives, setArchives] = useState([]);
+  const [futureSelfCritique, setFutureSelfCritique] = useState('');
+  
+  // --- 4. World & Character States ---
   const [selectedCharIds, setSelectedCharIds] = useState(['soseki']);
   const [selectedLocationId, setSelectedLocationId] = useState('cafe');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [activeManagerTab, setActiveManagerTab] = useState('map');
-  const [isUnderground, setIsUnderground] = useState(false);
-  const [news, setNews] = useState([]);
-  const [archives, setArchives] = useState([]);
-  const [showSettings, setShowSettings] = useState(false);
-  const [bookmarks, setBookmarks] = useState([]);
-  const [futureSelfCritique, setFutureSelfCritique] = useState('');
-  const [spiritSharedKnowledge, setSpiritSharedKnowledge] = useState('');
-  const [notebookInput, setNotebookInput] = useState('');
-  const [syncingNotebook, setSyncingNotebook] = useState(false);
-  const [isValidatingApi, setIsValidatingApi] = useState(false);
-  const [apiConnectionStatus, setApiConnectionStatus] = useState('idle');
-  const [apiLogs, setApiLogs] = useState([]); // New state for API logs
   const [locationEnergies, setLocationEnergies] = useState({});
-  const [enlargedCharId, setEnlargedCharId] = useState(null);
-  const [showNotebookModal, setShowNotebookModal] = useState(false);
   const [currentWorldEvent, setCurrentWorldEvent] = useState(null);
   const [globalTrends, setGlobalTrends] = useState(() => {
     const cached = localStorage.getItem('itako_global_trends');
     return cached ? JSON.parse(cached) : null;
   });
-  const [isEventShaking, setIsEventShaking] = useState(false);
-  const isMeltingDown = useMemo(() => Object.values(locationEnergies).some(e => e > 85), [locationEnergies]);
   const [globalSentiment, setGlobalSentiment] = useState('neutral');
+  
+  // --- 5. System & Meta States ---
+  const [apiLogs, setApiLogs] = useState([]);
   const [preferredModel, setPreferredModel] = useState(() => getPreferredModel());
   const [spiritualError, setSpiritualError] = useState(null);
-  const [alaya, setAlaya] = useState(() => localStorage.getItem('itako_alaya') || "");
+  const [syncingNotebook, setSyncingNotebook] = useState(false);
+  const [notebookInput, setNotebookInput] = useState('');
+
+  // Derived Values
+  const isMeltingDown = useMemo(() => Object.values(locationEnergies).some(e => e > 85), [locationEnergies]);
+  const [news, setNews] = useState([]);
 
   const scrollRef = useRef(null);
   const lastLocationRef = useRef(null);
@@ -269,45 +280,62 @@ export default function App() {
     }
     triggerLocationConversation();
   }, [selectedLocationId, selectedCharIds, geminiKey, currentWorldEvent, APP_CHARACTERS, isAppReady, spiritSharedKnowledge]);
+  /**
+   * 対話の外部コンテキストを構築する
+   */
+  const buildDialogueOptions = useCallback((charId) => {
+    const context = [
+      spiritSharedKnowledge,
+      globalTrends?.summary ? `【トレンド】: ${globalTrends.summary}` : ''
+    ].filter(Boolean).join('\n\n');
+
+    const interactionDepth = Math.min(Math.floor(messages.filter(m => m.charId === charId).length / 2), 2);
+    const location = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
+    const others = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id) && c.id !== charId);
+
+    return {
+      isUnderground,
+      externalContext: context,
+      interactionDepth,
+      location,
+      others,
+      alaya
+    };
+  }, [spiritSharedKnowledge, globalTrends, messages, selectedLocationId, selectedCharIds, isUnderground, alaya]);
 
   const handleSendMessage = async () => {
     if (!input.trim() || loading) return;
+    
     const userMsg = input;
+    const charId = selectedCharIds[0];
+    const currentChar = APP_CHARACTERS.find(c => c.id === charId);
+
+    // 1. UI状態の即時更新
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setLoading(true);
 
-    const charId = selectedCharIds[0];
-    const currentChar = APP_CHARACTERS.find(c => c.id === charId);
-    
-    searchNDLArchive(userMsg).then(res => res?.length && setArchives(prev => [...res, ...prev].slice(0, 5)));
+    // 2. 外部アーカイブ検索（非同期）
+    searchNDLArchive(userMsg).then(res => {
+      if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 5));
+    });
 
+    // 3. AI応答用プレースホルダー挿入
     setMessages(prev => [...prev, { role: 'ai', content: '', charId }]);
 
     try {
-      const depth = Math.min(Math.floor(messages.filter(m => m.charId === charId).length / 2), 2);
-      const context = [spiritSharedKnowledge, globalTrends?.summary ? `【トレンド】: ${globalTrends.summary}` : ''].filter(Boolean).join('\n\n');
-
-      const location = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
-      const otherChars = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id) && c.id !== charId);
+      const options = buildDialogueOptions(charId);
 
       await streamSpiritualDialogue({
         character: currentChar,
         message: userMsg,
         apiKey: geminiKey,
-        options: {
-          isUnderground,
-          externalContext: context,
-          interactionDepth: depth,
-          location,
-          others: otherChars,
-          alaya 
-        },
+        options,
         onChunk: (chunk, meta) => {
           setMessages(prev => {
             const next = [...prev];
             const lastIdx = next.length - 1;
-            if (next[lastIdx] && next[lastIdx].charId === charId) {
+            if (next[lastIdx]?.charId === charId) {
               next[lastIdx] = { ...next[lastIdx], content: chunk, sentiment: meta.sentiment };
             }
             return next;
@@ -316,8 +344,7 @@ export default function App() {
         }
       });
     
-      // Automatically switch to Dialog tab
-      handleSlotChange(1);
+      handleSlotChange(1); // 自動的に対話スロットへ切替
     } catch (error) {
       console.error("Spiritual Dialogue Failed:", error);
       setSpiritualError(error);
@@ -396,7 +423,7 @@ export default function App() {
         
         {/* Sentiment Glow Overlay */}
         <AnimatePresence>
-          {globalSentiment !== 'neutral' && (
+          {globalSentiment !== 'neutral' ? (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.15 }}
@@ -407,12 +434,12 @@ export default function App() {
                 filter: 'blur(100px)',
               }}
             />
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
 
       <AnimatePresence>
-        {isDrawerOpen && (
+        {isDrawerOpen ? (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden" />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-black/40 backdrop-blur-3xl border-r border-white/10 z-[70] p-6 overflow-y-auto md:hidden shadow-3xl">
@@ -420,7 +447,7 @@ export default function App() {
               <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, handleGo, globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
             </motion.div>
           </>
-        )}
+        ) : null}
       </AnimatePresence>
 
       <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
@@ -432,7 +459,7 @@ export default function App() {
       />
 
       <div className="flex-1 flex overflow-hidden relative z-10">
-        <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies }} />
+        <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, setActiveManagerTab }} />
         
         {/* Main Timeline View */}
         <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark, globalTrends, setShowNotebookModal, futureSelfCritique, archives, globalSentiment }} />
@@ -507,15 +534,17 @@ export default function App() {
       <FloatingInputBar {...{ input, setInput, handleSendMessage, loading }} />
       <CharacterOverlay {...{ enlargedCharId, setEnlargedCharId, characters: APP_CHARACTERS, handleTalkTo }} />
       {/* Sync Modal Simplified */}
-      <AnimatePresence>{showNotebookModal && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="w-full max-w-lg bg-[#111] border border-white/10 rounded-3xl p-8">
-            <h3 className="text-2xl font-bold font-oswald text-white mb-6">Sync Thought</h3>
-            <textarea value={notebookInput} onChange={(e) => setNotebookInput(e.target.value)} className="w-full h-40 bg-black border border-white/30 rounded-2xl p-4 text-white mb-6 resize-none" />
-            <div className="flex justify-end gap-4"><button onClick={handleSyncNotebook} className="bg-white text-black px-6 py-2 rounded-full font-bold uppercase">{syncingNotebook ? 'Syncing...' : 'Inject'}</button></div>
+      <AnimatePresence>
+        {showNotebookModal ? (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="w-full max-w-lg bg-[#111] border border-white/10 rounded-3xl p-8">
+              <h3 className="text-2xl font-bold font-oswald text-white mb-6">Sync Thought</h3>
+              <textarea value={notebookInput} onChange={(e) => setNotebookInput(e.target.value)} className="w-full h-40 bg-black border border-white/30 rounded-2xl p-4 text-white mb-6 resize-none" />
+              <div className="flex justify-end gap-4"><button onClick={handleSyncNotebook} className="bg-white text-black px-6 py-2 rounded-full font-bold uppercase">{syncingNotebook ? 'Syncing...' : 'Inject'}</button></div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}</AnimatePresence>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

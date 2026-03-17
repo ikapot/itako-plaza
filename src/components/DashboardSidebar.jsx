@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, Settings, Ghost, Globe, MapPin } from 'lucide-react';
+import { User, Settings, Ghost, Globe, MapPin, BookOpen } from 'lucide-react';
 import WarholAvatar from './WarholAvatar';
 
 const DashboardSidebar = React.memo(({
@@ -14,6 +14,7 @@ const DashboardSidebar = React.memo(({
     selectedLocationId,
     setSelectedLocationId,
     locationEnergies,
+    setActiveManagerTab
 }) => {
     return (
         <div className="hidden md:flex flex-col gap-3 z-[110] absolute top-1/2 -translate-y-1/2 left-0 pl-6 pointer-events-none items-start">
@@ -63,7 +64,7 @@ const DashboardSidebar = React.memo(({
 
             {/* 3. Soul Echo Frequency */}
             <div className="pointer-events-auto glass-spectral rounded-2xl p-3 flex flex-col gap-1 border-white/5">
-                <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.5em] font-oswald">Echo Frequency</span>
+                <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.5em] font-oswald text-left">Echo Frequency</span>
                 <div className="flex items-end gap-0.5 h-4">
                     {[0.3, 0.7, 0.4, 0.8, 0.5, 0.9, 0.6].map((h, i) => (
                         <motion.div 
@@ -75,6 +76,22 @@ const DashboardSidebar = React.memo(({
                     ))}
                 </div>
             </div>
+
+            {/* 4. Concept Grimoire Button */}
+            <motion.button
+                whileHover={{ scale: 1.05, x: 5 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveManagerTab('grimoire')}
+                className="pointer-events-auto flex items-center gap-4 p-3 pr-6 glass-spectral rounded-3xl border border-white/5 hover:border-[#bd8a78]/50 transition-all group/manual"
+            >
+                <div className="w-10 h-10 rounded-xl bg-[#bd8a78]/10 flex items-center justify-center border border-[#bd8a78]/20 group-hover/manual:bg-[#bd8a78]/20 transition-all">
+                    <BookOpen size={16} className="text-[#bd8a78]" />
+                </div>
+                <div className="flex flex-col items-start">
+                    <span className="text-xs font-black tracking-widest text-[#bd8a78] uppercase font-oswald">Concept</span>
+                    <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.4em] font-oswald">理念の断片</span>
+                </div>
+            </motion.button>
         </div>
     );
 });

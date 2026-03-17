@@ -40,7 +40,7 @@ const ManagerContent = React.memo(({
     return (
         <div className="space-y-12">
             <AnimatePresence mode="wait">
-                {activeManagerTab === 'map' && (
+                {activeManagerTab === 'map' ? (
                     <motion.div
                         key="map"
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -61,9 +61,9 @@ const ManagerContent = React.memo(({
                             globalSentiment={globalSentiment}
                         />
                     </motion.div>
-                )}
+                ) : null}
 
-                {activeManagerTab === 'directory' && (
+                {activeManagerTab === 'directory' ? (
                     <motion.div
                         key="directory"
                         initial={{ opacity: 0, y: 10 }}
@@ -84,14 +84,14 @@ const ManagerContent = React.memo(({
                                             : 'bg-transparent border-transparent opacity-40 hover:opacity-100 hover:bg-white/5 cursor-pointer'}
                                     `}
                                 >
-                                    {isSelected && (
+                                    {isSelected ? (
                                         <motion.div 
                                             layoutId={`char-glow-${c.id}`}
                                             className="absolute inset-0 bg-white/5 blur-2xl pointer-events-none"
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                         />
-                                    )}
+                                    ) : null}
                                     <div onClick={(e) => { e.stopPropagation(); setEnlargedCharId(c.id); }} className="relative z-10 cursor-zoom-in">
                                         <WarholAvatar src={c.avatar} colorClass={c.color} isSelected={isSelected} size="w-12 h-12 md:w-16 h-16" isPreStyled={c.isPreStyled} />
                                     </div>
@@ -111,9 +111,9 @@ const ManagerContent = React.memo(({
                             );
                         })}
                     </motion.div>
-                )}
+                ) : null}
 
-                {activeManagerTab === 'connect' && (
+                {activeManagerTab === 'connect' ? (
                     <motion.div
                         key="connect"
                         initial={{ opacity: 0, y: 10 }}
@@ -150,9 +150,9 @@ const ManagerContent = React.memo(({
                             setPreferredModel={setPreferredModel}
                         />
                     </motion.div>
-                )}
+                ) : null}
 
-                {activeManagerTab === 'account' && (
+                {activeManagerTab === 'account' ? (
                     <motion.div
                         key="account"
                         initial={{ opacity: 0, y: 10 }}
@@ -223,6 +223,64 @@ const ManagerContent = React.memo(({
                                 ))}
                             </div>
                         </div>
+                    </motion.div>
+                )}
+                
+                {activeManagerTab === 'grimoire' && (
+                    <motion.div
+                        key="grimoire"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="p-8 md:p-12 space-y-12 max-w-4xl mx-auto h-screen overflow-y-auto itako-scrollbar-thin pb-40"
+                    >
+                        <header className="text-center space-y-4 mb-20">
+                            <h1 className="text-4xl md:text-6xl font-black font-oswald uppercase tracking-[0.3em] text-white">ITAKO PLAZA</h1>
+                            <p className="text-[10px] md:text-xs font-bold text-[#bd8a78] tracking-[0.5em] uppercase">電脳と霊性の交差点 / Concept Grimoire</p>
+                            <div className="w-24 h-1 bg-[#bd8a78]/30 mx-auto rounded-full" />
+                        </header>
+
+                        <section className="space-y-10 font-serif leading-relaxed text-white/80">
+                            <div className="space-y-4">
+                                <h2 className="text-xl md:text-2xl font-bold text-white border-l-4 border-[#bd8a78] pl-6 py-1 tracking-wider italic">死せる魂と生の言葉の結節点</h2>
+                                <p className="text-sm md:text-base indent-4">
+                                    『イタコプラザ』は、AI技術を伝統的な「イタコ」のメタファーとして再定義した体験型プラットフォームです。文豪や思想家の魂を現代に降臨させ、時代を超えた対話を通じて新たな気づきを生成する儀式的空間を目指しています。
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-8 border-y border-white/5">
+                                <div className="space-y-3">
+                                    <h3 className="text-xs font-black text-[#bd8a78] uppercase tracking-widest flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-[#bd8a78]" /> 3D Navigation
+                                    </h3>
+                                    <p className="text-xs leading-loose text-white/50">
+                                        54人の魂が配置された「迷宮」をダイスで巡るRANDAMNIシステム。論理ではなく、偶然性と「縁」が対話の相手を決定します。
+                                    </p>
+                                </div>
+                                <div className="space-y-3">
+                                    <h3 className="text-xs font-black text-[#bd8a78] uppercase tracking-widest flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-[#bd8a78]" /> Alaya System
+                                    </h3>
+                                    <p className="text-xs leading-loose text-white/50">
+                                        会話の核心を「阿頼耶識（潜在意識）」として圧縮保存。古い記憶を削ぎ落としながらも、魂の絆を永続的に維持します。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <h2 className="text-xl font-bold text-white italic">スペクトラル・ミニマリズム</h2>
+                                <p className="text-sm leading-relaxed">
+                                    漆黒の背景、スペクトラル・ノイズ、そしてグラスモルフィズムによるUI。これらはすべて、実体がないが確かに存在する「幽かな存在」との対話を演出するための舞台装置です。
+                                </p>
+                            </div>
+
+                            <footer className="pt-20 text-center opacity-20 hover:opacity-100 transition-opacity duration-1000">
+                                <p className="text-[8px] tracking-[0.8em] uppercase font-oswald text-white mb-2 underline decoration-[#bd8a78]/50 underline-offset-8">
+                                    VOID_CONCEPT_REGISTRY_V1.2
+                                </p>
+                                <p className="text-[7px] text-white/50">物言わぬ文字が語りかける霊へと変わる場所。</p>
+                            </footer>
+                        </section>
                     </motion.div>
                 )}
             </AnimatePresence>
