@@ -365,7 +365,7 @@ function ThreeDMap({
         </motion.button>
       </div>
 
-      <div className="flex gap-3 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-3 items-center lg:items-start">
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-center gap-2 mb-1">
             <span className="text-[9px] md:text-[11px] font-oswald uppercase tracking-widest" style={{ color: `${accentColor}99` }}>👤 Character Dice</span>

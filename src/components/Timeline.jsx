@@ -76,9 +76,9 @@ const MemoizedNewsItem = React.memo(function NewsItem({ n, charMap }) {
                             <div className={`p-6 md:p-8 rounded-[35px] border shadow-2xl max-w-[85%] glass-ethereal spiritual-float ${dIdx % 2 === 0 ? 'border-white/10' : 'border-white/5'}`}>
                                 <div className="flex items-center gap-3 mb-3">
                                     {char ? <WarholAvatar src={char.avatar} size="w-6 h-6" isSelected isPreStyled={char.isPreStyled} colorClass={char.color} /> : null}
-                                    <span className="text-[9px] font-bold tracking-[0.3em] text-white/40 uppercase">{char?.name || d.charId}</span>
+                                    <span className="text-[9px] font-bold tracking-[0.3em] text-white/60 uppercase">{char?.name || d.charId}</span>
                                 </div>
-                                <p className="text-sm md:text-base leading-relaxed text-white/90 font-serif italic">「{d.comment}」</p>
+                                <p className="text-sm md:text-base leading-relaxed text-white font-serif italic">「{d.comment}」</p>
                             </div>
                         </motion.div>
                     );
@@ -100,11 +100,11 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
                     <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
                         <div className="flex items-center gap-3">
                             {charObj ? <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected isPreStyled={charObj.isPreStyled} /> : null}
-                            <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/30">{charObj?.name || m.charId}</span>
+                            <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50">{charObj?.name || m.charId}</span>
                         </div>
                     </div>
                 ) : null}
-                <p className={`text-base md:text-lg leading-relaxed text-white/70 ${!isUser ? 'font-serif' : 'font-sans'}`}>
+                <p className={`text-base md:text-lg leading-relaxed text-white/90 ${!isUser ? 'font-serif' : 'font-sans'}`}>
                     {m.content}
                 </p>
                 {!isUser ? (
@@ -177,7 +177,7 @@ const Timeline = React.memo(function Timeline({
                     </header>
 
                     <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
-                        <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.4em] font-oswald">DRIPPING NOISE ({news.length})</span>
+                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.4em] font-oswald">DRIPPING NOISE ({news.length})</span>
                     </div>
 
                     {news.map(function renderNews(n) {
@@ -242,7 +242,7 @@ const Timeline = React.memo(function Timeline({
                             })}
                             
                             {loading ? (
-                                <div className="flex items-center gap-4 text-white/20 text-[10px] font-bold tracking-[0.4em] uppercase px-4 animate-pulse">
+                                <div className="flex items-center gap-4 text-white/40 text-[10px] font-bold tracking-[0.4em] uppercase px-4 animate-pulse">
                                     Channeling spirit...
                                 </div>
                             ) : null}

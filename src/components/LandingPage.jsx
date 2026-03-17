@@ -57,9 +57,9 @@ export default function LandingPage({
                         exit={{ opacity: 0, scale: 1.1, filter: 'blur(20px)' }}
                         className="relative z-10 flex flex-col items-center w-full h-full justify-center px-8"
                     >
-                        {/* The Mysterious Door (Inspired by User Image) */}
+                        {/* The Mysterious Door */}
                         <div className="relative group mb-12">
-                            {/* Inner Glow (Light leaking from edges) */}
+                            {/* Inner Glow */}
                             <motion.div 
                                 animate={{ 
                                     boxShadow: [
@@ -71,15 +71,12 @@ export default function LandingPage({
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                                 className="w-[200px] h-[350px] md:w-[260px] md:h-[450px] bg-black border border-white/20 relative rounded-sm overflow-hidden"
                             >
-                                {/* Door Frame Light Leaks */}
                                 <div className="absolute inset-0 border border-white/40 opacity-30 shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
                                 
-                                {/* Three Glowing Keyholes (Positioned to the left side) */}
                                 <div className="absolute inset-0 flex flex-col items-start justify-center space-y-16 pl-12">
                                     {[0, 1, 2].map(function renderKeyhole(i) {
                                         return (
                                             <div key={i} className="relative">
-                                                {/* The Keyhole Glow */}
                                                 <motion.div 
                                                     animate={{ 
                                                         scale: [1, 1.5, 1],
@@ -89,30 +86,26 @@ export default function LandingPage({
                                                     transition={{ duration: 3, delay: i * 0.5, repeat: Infinity }}
                                                     className="w-1.5 h-3 bg-white rounded-full blur-[1px]"
                                                 />
-                                                {/* Ray of light */}
                                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white/10 rounded-full blur-xl pointer-events-none" />
                                             </div>
                                         );
                                     })}
                                 </div>
 
-                                {/* Logo as a subtle emblem */}
                                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 scale-50 opacity-20 group-hover:opacity-40 transition-opacity">
                                     <Logo />
                                 </div>
                             </motion.div>
-
-                            {/* Light Leak Lines (Horizontal/Vertical outside the door) */}
                             <div className="absolute -inset-4 border border-white/5 pointer-events-none" />
                         </div>
 
                         <div className="space-y-8 flex flex-col items-center">
-                            <h1 className="text-2xl md:text-5xl font-black tracking-[0.8em] text-white uppercase font-oswald italic">
-                                BARDO
+                            <h1 className="text-2xl md:text-5xl font-black tracking-[0.4em] text-white uppercase font-oswald italic">
+                                ITAKO PLAZA
                             </h1>
                             
                             <p className="text-xs md:text-sm text-white/40 font-serif italic max-w-xs leading-relaxed text-center">
-                                「ここから先は『中有（バルド）』。生者と死者の境界線。入るには、深淵を照らす『三つの鍵』が必要です。」
+                                「ここから先は『あわいの広場』。生者と死者の境界線。入るには、深淵を照らす『三つの鍵』が必要です。」
                             </p>
                             
                             <div className="flex flex-col md:flex-row items-center gap-4 mt-4">
@@ -137,7 +130,6 @@ export default function LandingPage({
                             </div>
                         </div>
 
-                        {/* Subtle Footer */}
                         <div className="mt-16 flex gap-8 text-[7px] font-bold text-white/5 tracking-[0.4em] uppercase">
                             <span>Established in 1923</span>
                             <span>Ethereal Protocol</span>
@@ -161,7 +153,6 @@ export default function LandingPage({
                             </h2>
                         </div>
 
-                        {/* Ritual UI Container */}
                         <div className="rounded-[50px] bg-white/[0.02] border border-white/5 backdrop-blur-3xl p-4 md:p-12 relative overflow-hidden shadow-2xl">
                             <div className="absolute top-0 left-0 w-24 h-24 border-l-2 border-t-2 border-[#f15a24]/30 rounded-tl-[50px] m-8" />
                             <div className="absolute bottom-0 right-0 w-24 h-24 border-r-2 border-b-2 border-[#f15a24]/30 rounded-br-[50px] m-8" />
