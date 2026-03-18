@@ -5,10 +5,10 @@
 export const INITIAL_CHARACTERS = [
   // ── Face 0: 文豪列伝 ──────────────────────────────────────────────
   { id: 'soseki', face: 0, pos: 0, name: '夏目漱石', role: '大学教授', homeLocationId: 'school', flavor: '胃痛', color: 'bg-itako-clay', isMainChar: true, description: '日本の文豪。「自己本位」を説き、西洋近代化と個人の孤独を凝視した。広場では理性と不安の父として、常に自己の誠実さを問い直す。', avatar: 'assets/soseki_warhol.webp', isPreStyled: true },
-  { id: 'ogai', face: 0, pos: 1, name: '森鴎外', role: '軍医・文豪', homeLocationId: 'library', flavor: '知性', color: 'bg-zinc-700', description: '軍医でありながら文学を愛し、近代と伝統の狭間で二重生活を送った。', avatar: null },
-  { id: 'akutagawa', face: 0, pos: 2, name: '芥川龍之介', role: '鬼才作家', homeLocationId: 'mirror', flavor: '不安', color: 'bg-red-950/50', description: '鋭敏な感受性と知性、そして「薄ぼんやりした不安」に追われ続けた天才。', avatar: null },
-  { id: 'dazai', face: 0, pos: 3, name: '太宰治', role: '恥の多い生涯', homeLocationId: 'canal', flavor: '失格', color: 'bg-zinc-800', description: '人間失格を自称しながら、それでも言葉で世界と戦い続けた魂。', avatar: null },
-  { id: 'mishima', face: 0, pos: 4, name: '三島由紀夫', role: '作家・武人', homeLocationId: 'roof', flavor: '美と死', color: 'bg-red-900/60', description: '美への執着と肉体の鍛錬、そして壮絶な最期まで自らを物語の主人公とした。', avatar: null },
+  { id: 'ogai', face: 0, pos: 1, name: '森鴎外', role: '軍医・文豪', homeLocationId: 'library', flavor: '知性', color: 'bg-zinc-700', description: '軍医でありながら文学を愛し、近代と伝統の狭間で二重生活を送った。', avatar: 'assets/ogai_warhol_v3.png', isPreStyled: true },
+  { id: 'akutagawa', face: 0, pos: 2, name: '芥川龍之介', role: '鬼才作家', homeLocationId: 'mirror', flavor: '不安', color: 'bg-red-950/50', description: '鋭敏な感受性と知性、そして「薄ぼんやりした不安」に追われ続けた天才。', avatar: 'assets/akutagawa_warhol_v3.png', isPreStyled: true },
+  { id: 'dazai', face: 0, pos: 3, name: '太宰治', role: '恥の多い生涯', homeLocationId: 'canal', flavor: '失格', color: 'bg-zinc-800', description: '人間失格を自称しながら、それでも言葉で世界と戦い続けた魂。', avatar: 'assets/dazai_warhol.png', isPreStyled: true },
+  { id: 'mishima', face: 0, pos: 4, name: '三島由紀夫', role: '作家・武人', homeLocationId: 'roof', flavor: '美と死', color: 'bg-red-900/60', description: '美への執着 and 肉体の鍛錬、そして壮絶な最期まで自らを物語の主人公とした。', avatar: 'assets/mishima_warhol.png', isPreStyled: true },
   { id: 'kawabata', face: 0, pos: 5, name: '川端康成', role: 'ノーベル賞作家', homeLocationId: 'garden', flavor: '余韻', color: 'bg-itako-sage', description: '雪国の純白の中に、消えゆくものへの哀愁を刻んだ。', avatar: null },
   { id: 'kafuka', face: 0, pos: 6, name: 'カフカ', role: '保険局員・作家', homeLocationId: 'waiting', flavor: '変身', color: 'bg-zinc-700', description: '虫になった男と不条理な城を描いた、実存の悪夢の語り手。', avatar: null },
   { id: 'borges', face: 0, pos: 7, name: 'ボルヘス', role: '図書館司書', homeLocationId: 'archive', flavor: '迷宮', color: 'bg-itako-sand', description: '無限の図書館と砂の本を夢想した、盲目の宇宙論者。', avatar: null },
