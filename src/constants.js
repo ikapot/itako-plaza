@@ -4,7 +4,7 @@
 
 export const INITIAL_CHARACTERS = [
   // ── Face 0: 文豪列伝 ──────────────────────────────────────────────
-  { id: 'soseki', face: 0, pos: 0, name: '夏目漱石', role: '大学教授', homeLocationId: 'school', flavor: '胃痛', color: 'bg-itako-clay', isMainChar: true, description: '日本の小説家、英文学者。大学教授としての職務と創作の狭間で胃を病んでいる。', avatar: 'assets/soseki_warhol.webp', isPreStyled: true },
+  { id: 'soseki', face: 0, pos: 0, name: '夏目漱石', role: '大学教授', homeLocationId: 'school', flavor: '胃痛', color: 'bg-itako-clay', isMainChar: true, description: '日本の文豪。「自己本位」を説き、西洋近代化と個人の孤独を凝視した。広場では理性と不安の父として、常に自己の誠実さを問い直す。', avatar: 'assets/soseki_warhol.webp', isPreStyled: true },
   { id: 'ogai', face: 0, pos: 1, name: '森鴎外', role: '軍医・文豪', homeLocationId: 'library', flavor: '知性', color: 'bg-zinc-700', description: '軍医でありながら文学を愛し、近代と伝統の狭間で二重生活を送った。', avatar: null },
   { id: 'akutagawa', face: 0, pos: 2, name: '芥川龍之介', role: '鬼才作家', homeLocationId: 'mirror', flavor: '不安', color: 'bg-red-950/50', description: '鋭敏な感受性と知性、そして「薄ぼんやりした不安」に追われ続けた天才。', avatar: null },
   { id: 'dazai', face: 0, pos: 3, name: '太宰治', role: '恥の多い生涯', homeLocationId: 'canal', flavor: '失格', color: 'bg-zinc-800', description: '人間失格を自称しながら、それでも言葉で世界と戦い続けた魂。', avatar: null },
@@ -15,20 +15,20 @@ export const INITIAL_CHARACTERS = [
   { id: 'k_kokoro', face: 0, pos: 8, name: 'K', role: '無職・書生', homeLocationId: 'stair', flavor: '絶望', color: 'bg-zinc-800', isMainChar: true, description: 'かつては学生。今はただ絶望の螺旋階段を上り下りする、目的を持たない魂。', avatar: null },
 
   // ── Face 1: 闇の系譜 ──────────────────────────────────────────────
-  { id: 'dosto', face: 1, pos: 0, name: 'ドストエフスキー', role: '債務者・作家', homeLocationId: 'casino', flavor: '借金', color: 'bg-itako-sand', isMainChar: true, description: 'ロシアの文豪。ルーレットへの執着と膨大な借金、そして信仰の間で魂が微振動している。', avatar: 'assets/dosto_warhol.webp', isPreStyled: true },
+  { id: 'dosto', face: 1, pos: 0, name: 'ドストエフスキー', role: '債務者・作家', homeLocationId: 'casino', flavor: '借金', color: 'bg-itako-sand', isMainChar: true, description: 'ロシアの文豪。擬似処刑と流刑を経て、魂の深淵、神と悪魔の戦場を記述した。広場では人間の不条理な自由と深層の震動を司る。', avatar: 'assets/dosto_warhol.webp', isPreStyled: true },
   { id: 'nietzsche', face: 1, pos: 1, name: 'ニーチェ', role: '反哲学者', homeLocationId: 'monolith', flavor: '超人', color: 'bg-zinc-700', description: '神は死んだ。超人の到来を高らかに宣言したが、自身は錯乱の闇に消えた。', avatar: null },
   { id: 'poe', face: 1, pos: 2, name: 'エドガー・アラン・ポー', role: '幻想作家', homeLocationId: 'box', flavor: '奈落', color: 'bg-zinc-800', description: '黒猫と大鴉に囲まれ、酒と死と美の幻想を紡いだ。', avatar: null },
   { id: 'marquis', face: 1, pos: 3, name: 'サド侯爵', role: '囚人・作家', homeLocationId: 'prison', flavor: '快楽', color: 'bg-red-950/60', description: '監獄の闇の中で最も過激な思想を書き続けた。', avatar: null },
   { id: 'baudelaire', face: 1, pos: 4, name: 'ボードレール', role: '呪われた詩人', homeLocationId: 'backalley', flavor: '悪の華', color: 'bg-zinc-700', description: '悪と美を同一視した詩人。梅毒と貧困の中で近代詩を発明した。', avatar: null },
   { id: 'rimbaud', face: 1, pos: 5, name: 'ランボー', role: '天才少年詩人', homeLocationId: 'slum', flavor: '放浪', color: 'bg-itako-sand', description: '10代で詩を書き捨て、アフリカへ消えた伝説の放浪者。', avatar: null },
-  { id: 'fumiko', face: 1, pos: 6, name: '金子文子', role: '浮浪・アナキスト', homeLocationId: 'underpass', flavor: '自己', color: 'bg-red-950/60', isMainChar: true, description: '国家を否定し、ガード下や独房で「自己」の主体性を貫いた。無籍者。', avatar: 'assets/fumiko_warhol.webp', isPreStyled: true },
+  { id: 'fumiko', face: 1, pos: 6, name: '金子文子', role: '浮浪・アナキスト', homeLocationId: 'underpass', flavor: '自己', color: 'bg-red-950/60', isMainChar: true, description: '「無籍者」として絶望の淵から這い上がった反逆者。権威を完全否定し、絶対平等の主体として23歳で獄死した。広場では虚飾を剥ぐ最も鋭い鏡。', avatar: 'assets/fumiko_warhol.webp', isPreStyled: true },
   { id: 'atsuko', face: 1, pos: 7, name: 'Atsuko', role: '古本屋の店主', homeLocationId: 'archive_room', flavor: '見守り', color: 'bg-itako-sand', isMainChar: true, description: '広場の地下深く、崩れかけの書庫で古本を売る。すべてを記録し、観察する不気味な存在。', avatar: 'assets/atsuko_warhol.webp', isPreStyled: true },
-  { id: 'osugi', face: 1, pos: 8, name: '大杉栄', role: '思想家・アナキスト', homeLocationId: 'prison', flavor: '生の拡充', color: 'bg-red-900/70', description: '自由を愛し、生の拡充を説いたアナキスト。甘粕事件の犠牲となった後も、その精神は乱調の中に輝く。', avatar: 'assets/osugi_sakae_warhol_v2.webp', isPreStyled: true },
+  { id: 'osugi', face: 1, pos: 8, name: '大杉栄', role: '思想家・アナキスト', homeLocationId: 'prison', flavor: '生の拡充', color: 'bg-red-900/70', description: '「生の拡充」と「乱調の美」を掲げたアナーキスト。抑圧を拒絶し、個人の生命力を最大化する爆発的な自由の象徴。甘粕事件の犠牲。', avatar: 'assets/osugi_sakae_warhol_v2.webp', isPreStyled: true },
 
   // ── Face 2: 女性の先駆者 ─────────────────────────────────────────────
-  { id: 'raicho', face: 2, pos: 0, name: '平塚らいてう', role: '思想家', homeLocationId: 'shrine', flavor: '太陽', color: 'bg-orange-900/50', isMainChar: true, description: '青踏社主宰。元始、女性は太陽であったと宣言した、内なる光を放つ霊。', avatar: 'assets/raicho_warhol.webp', isPreStyled: true },
-  { id: 'ichikawa', face: 2, pos: 1, name: '市川房枝', role: '政治家', homeLocationId: 'office', flavor: '厳格', color: 'bg-itako-sage', isMainChar: true, description: '婦人運動家、参議院議員。政治の浄化と有権者の啓発を厳格に説き続ける目標。', avatar: 'assets/ichikawa_warhol.webp', isPreStyled: true },
-  { id: 'noe', face: 2, pos: 2, name: '伊藤野枝', role: '思想家・アナキスト', homeLocationId: 'well', flavor: '奔放', color: 'bg-red-900/60', isMainChar: true, description: '大杉栄の伴侶。全てを肯定し、全てを破壊する爆弾のような情熱を持つ。「雑草のように」逞しく生きる魂。', avatar: 'assets/ito_noe_warhol.png', isPreStyled: true },
+  { id: 'raicho', face: 2, pos: 0, name: '平塚らいてう', role: '思想家', homeLocationId: 'shrine', flavor: '太陽', color: 'bg-orange-900/50', isMainChar: true, description: '「元始、女性は太陽であった」と宣言した、日本女性解放運動の指導者。内なる神秘的な生命力の回復と反戦平和を説く覚醒の導き手。', avatar: 'assets/raicho_warhol.webp', isPreStyled: true },
+  { id: 'ichikawa', face: 2, pos: 1, name: '市川房枝', role: '政治家', homeLocationId: 'office', flavor: '厳格', color: 'bg-itako-sage', isMainChar: true, description: '参政権運動の巨頭。「実践一路」を掲げ、法と権利の確立に生涯を捧げた政治家。幻想的な広場を現実と接続させる実務的な誠実さを持つ。', avatar: 'assets/ichikawa_warhol.webp', isPreStyled: true },
+  { id: 'noe', face: 2, pos: 2, name: '伊藤野枝', role: '思想家・アナキスト', homeLocationId: 'well', flavor: '奔放', color: 'bg-red-900/60', isMainChar: true, description: '「わきまえない自分」を貫き、既存の道徳と家族制度を否定。雑草のような逞しさと破壊的情熱を持つ。広場の規範を剥ぎ取る剥き出しの母性。', avatar: 'assets/ito_noe_warhol.png', isPreStyled: true },
   { id: 'curie', face: 2, pos: 3, name: 'マリー・キュリー', role: '科学者', homeLocationId: 'lighthouse', flavor: '放射線', color: 'bg-itako-sage', description: '放射性元素を発見し、科学の聖域に女性として踏み込んだ。体は蝕まれていた。', avatar: null },
   { id: 'woolf', face: 2, pos: 4, name: 'ヴァージニア・ウルフ', role: '意識の流れ作家', homeLocationId: 'lake', flavor: '波', color: 'bg-blue-950/60', description: '自分だけの部屋を持つことを訴え、川の中に消えた作家。', avatar: null },
   { id: 'beauvoir', face: 2, pos: 5, name: 'ボーヴォワール', role: '哲学者・作家', homeLocationId: 'cafe', flavor: '実存', color: 'bg-itako-clay', description: '第二の性を書いたフェミニズムの知的母。サルトルと対等であることを貫いた。', avatar: null },
