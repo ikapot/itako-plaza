@@ -23,7 +23,10 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             <div className={`flex w-full ${alignment} px-4 md:px-12 pointer-events-none`}>
                 <button 
                     onClick={() => onToggleExpand(isExpanded ? null : c.id)}
-                    className={`${bgColor} ${textColor} px-5 md:px-8 py-2 md:py-3 rounded-t-xl md:rounded-t-2xl shadow-md text-[10px] md:text-sm font-bold tracking-widest uppercase border-b-0 pointer-events-auto border border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-biz-mincho`}
+                    className={`${bgColor} ${textColor} px-10 md:px-14 py-2 md:py-3 shadow-md text-[10px] md:text-sm font-bold tracking-widest uppercase border-b-0 pointer-events-auto border border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-biz-mincho`}
+                    style={{
+                        clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)'
+                    }}
                 >
                     <span className={isExpanded ? "font-black" : ""}>{c.name}</span>
                 </button>
