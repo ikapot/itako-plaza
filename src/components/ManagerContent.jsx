@@ -51,10 +51,7 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
                                  <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-8 cursor-default' : 'max-h-[3.5rem] md:max-h-[4rem] opacity-80 p-0 flex items-center px-6 hover:bg-black/5 hover:opacity-100'}`}>
                                      
                                      {!isExpanded ? (
-                                         <div className="w-full flex items-center justify-between pointer-events-none py-4">
-                                             <span className="text-sm md:text-base font-black uppercase tracking-[0.2em] line-clamp-1 flex-1 font-oswald">{c.name}</span>
-                                             <span className="text-[9px] font-bold opacity-50 uppercase tracking-widest hidden sm:block font-sans">{c.flavor}</span>
-                                         </div>
+                                         <div className="w-full h-8 flex items-center justify-between pointer-events-none" />
                                      ) : (
                                          <div className="space-y-6 md:space-y-8" onClick={e => e.stopPropagation()}>
                                              <div className="flex flex-col sm:flex-row items-start gap-6 md:gap-8">
@@ -67,7 +64,7 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
                                                  </div>
                                                  <div className="flex-1 space-y-4 md:space-y-6 w-full">
                                                      <div>
-                                                         <h3 className="text-3xl md:text-4xl font-black font-oswald tracking-widest border-b border-current/20 pb-2 mb-2 md:mb-4">{c.name}</h3>
+                                                         <h3 className="text-3xl md:text-4xl font-black font-biz-mincho tracking-widest border-b border-current/20 pb-2 mb-2 md:mb-4">{c.name}</h3>
                                                          <div className="flex flex-wrap gap-2">
                                                             <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-biz-mincho">{c.role}</span>
                                                             <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-biz-mincho">{c.flavor}</span>
