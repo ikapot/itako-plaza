@@ -5,6 +5,91 @@ import ThreeDMap from './ThreeDMap';
 import WarholAvatar from './WarholAvatar';
 import PortalGrimoire from './PortalGrimoire';
 
+const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected, onToggleChar }) => {
+    const isLight = i % 2 !== 0;
+    const bgColor = isLight ? 'bg-[#EAE0D5]' : 'bg-[#5C4033]';
+    const textColor = isLight ? 'text-[#3C2A21]' : 'text-[#EAE0D5]';
+    const alignment = i % 3 === 0 ? 'justify-start' : i % 3 === 1 ? 'justify-center' : 'justify-end';
+
+    return (
+        <div 
+            className={`relative transition-all duration-700 ease-in-out w-full font-serif`}
+            style={{
+                marginTop: i === 0 ? '0' : '-3rem',
+                zIndex: isExpanded ? 60 : i
+            }}
+        >
+            {/* Tab */}
+            <div className={`flex w-full ${alignment} px-4 md:px-12 pointer-events-none`}>
+                <button 
+                    onClick={() => onToggleExpand(isExpanded ? null : c.id)}
+                    className={`${bgColor} ${textColor} px-5 md:px-8 py-2 md:py-3 rounded-t-xl md:rounded-t-2xl shadow-md text-[10px] md:text-sm font-bold tracking-widest uppercase border-b-0 pointer-events-auto border border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-biz-mincho`}
+                >
+                    <span className={isExpanded ? "font-black" : ""}>{c.name}</span>
+                </button>
+            </div>
+            
+            {/* Folder Body */}
+            <div 
+                onClick={() => !isExpanded && onToggleExpand(c.id)}
+                className={`w-full rounded-2xl ${bgColor} ${textColor} shadow-[0_-5px_25px_rgba(0,0,0,0.5)] border border-black/20 overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10`}
+            >
+                <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"/>
+                
+                <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-8 cursor-default' : 'max-h-[3.5rem] md:max-h-[4rem] opacity-80 p-0 flex items-center px-6 hover:bg-black/5 hover:opacity-100'}`}>
+                    
+                    {!isExpanded ? (
+                        <div className="w-full h-8 flex items-center justify-between pointer-events-none" />
+                    ) : (
+                        <div className="space-y-6 md:space-y-8" onClick={e => e.stopPropagation()}>
+                            <div className="flex flex-col sm:flex-row items-start gap-6 md:gap-8">
+                                <div className="w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-lg overflow-hidden border-2 border-current/20 bg-white/10 relative shadow-inner">
+                                    {c.avatar ? (
+                                        <img src={c.avatar} alt={c.name} className="w-full h-full object-cover mix-blend-multiply grayscale contrast-125 brightness-110" />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-30 text-6xl font-serif">?</div>
+                                    )}
+                                </div>
+                                <div className="flex-1 space-y-4 md:space-y-6 w-full">
+                                    <div>
+                                        <h3 className="text-3xl md:text-4xl font-black font-biz-mincho tracking-widest border-b border-current/20 pb-2 mb-2 md:mb-4">{c.name}</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-biz-mincho">{c.role}</span>
+                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-biz-mincho">{c.flavor}</span>
+                                        </div>
+                                    </div>
+                                    <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-90 break-words">
+                                        {c.description}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4 border-t border-current/20 font-sans">
+                                <button
+                                    onClick={() => onToggleChar(c.id)}
+                                    className={`w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-xs md:text-sm uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3
+                                        ${isSelected 
+                                            ? 'bg-red-950 text-white border-red-900 border hover:bg-red-900'
+                                            : isLight 
+                                                ? 'bg-[#3C2A21] text-[#EAE0D5] border hover:bg-black' 
+                                                : 'bg-[#EAE0D5] text-[#3C2A21] border hover:bg-white'}
+                                    `}
+                                >
+                                    {isSelected ? (
+                                        <span className="font-biz-mincho">同行中：離脱させる</span>
+                                    ) : (
+                                        <><span className="font-biz-mincho">このキャラクターと対話する</span><span className="text-lg">→</span></>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+});
+
 const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleToggleChar }) => {
     const [expandedId, setExpandedId] = useState(null);
     const containerRef = useRef(null);
@@ -12,95 +97,17 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
     return (
         <div ref={containerRef} className="max-w-2xl mx-auto w-full pb-32 pt-12 px-4 relative mt-12 bg-black/20 rounded-3xl backdrop-blur-sm border border-white/5">
              <div className="flex flex-col relative z-10 w-full mb-[-2rem]">
-                 {characters.map((c, i) => {
-                     const isExpanded = expandedId === c.id;
-                     const isLight = i % 2 !== 0;
-                     const bgColor = isLight ? 'bg-[#EAE0D5]' : 'bg-[#5C4033]';
-                     const textColor = isLight ? 'text-[#3C2A21]' : 'text-[#EAE0D5]';
-                     
-                     const alignment = i % 3 === 0 ? 'justify-start' : i % 3 === 1 ? 'justify-center' : 'justify-end';
-                     const isSelected = selectedCharIds.includes(c.id);
-                     const prvtIndex = (i + 1).toString().padStart(2, '0');
-                     
-                     return (
-                         <div 
-                             key={c.id}
-                             className={`relative transition-all duration-700 ease-in-out w-full font-serif`}
-                             style={{
-                                 marginTop: i === 0 ? '0' : (expandedId === characters[i-1]?.id ? '2rem' : '-3rem'),
-                                 zIndex: isExpanded ? 60 : i
-                             }}
-                         >
-                             {/* Tab */}
-                             <div className={`flex w-full ${alignment} px-4 md:px-12 pointer-events-none`}>
-                                 <button 
-                                     onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                                     className={`${bgColor} ${textColor} px-5 md:px-8 py-2 md:py-3 rounded-t-xl md:rounded-t-2xl shadow-md text-[10px] md:text-sm font-bold tracking-widest uppercase border-b-0 pointer-events-auto border border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-biz-mincho`}
-                                 >
-                                     <span className={isExpanded ? "font-black" : ""}>{c.name}</span>
-                                 </button>
-                             </div>
-                             
-                             {/* Folder Body */}
-                             <div 
-                                onClick={() => !isExpanded && setExpandedId(c.id)}
-                                className={`w-full rounded-2xl ${bgColor} ${textColor} shadow-[0_-5px_25px_rgba(0,0,0,0.5)] border border-black/20 overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10`}
-                             >
-                                 <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"/>
-                                 
-                                 <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-8 cursor-default' : 'max-h-[3.5rem] md:max-h-[4rem] opacity-80 p-0 flex items-center px-6 hover:bg-black/5 hover:opacity-100'}`}>
-                                     
-                                     {!isExpanded ? (
-                                         <div className="w-full h-8 flex items-center justify-between pointer-events-none" />
-                                     ) : (
-                                         <div className="space-y-6 md:space-y-8" onClick={e => e.stopPropagation()}>
-                                             <div className="flex flex-col sm:flex-row items-start gap-6 md:gap-8">
-                                                 <div className="w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-lg overflow-hidden border-2 border-current/20 bg-white/10 relative shadow-inner">
-                                                     {c.avatar ? (
-                                                         <img src={c.avatar} alt={c.name} className="w-full h-full object-cover mix-blend-multiply grayscale contrast-125 brightness-110" />
-                                                     ) : (
-                                                         <div className="absolute inset-0 flex items-center justify-center opacity-30 text-6xl font-serif">?</div>
-                                                     )}
-                                                 </div>
-                                                 <div className="flex-1 space-y-4 md:space-y-6 w-full">
-                                                     <div>
-                                                         <h3 className="text-3xl md:text-4xl font-black font-biz-mincho tracking-widest border-b border-current/20 pb-2 mb-2 md:mb-4">{c.name}</h3>
-                                                         <div className="flex flex-wrap gap-2">
-                                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-biz-mincho">{c.role}</span>
-                                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-biz-mincho">{c.flavor}</span>
-                                                         </div>
-                                                     </div>
-                                                     <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-90 break-words">
-                                                         {c.description}
-                                                     </p>
-                                                 </div>
-                                             </div>
-                                             
-                                             <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4 border-t border-current/20 font-sans">
-                                                 <button
-                                                     onClick={() => handleToggleChar(c.id)}
-                                                     className={`w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-xs md:text-sm uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3
-                                                         ${isSelected 
-                                                             ? 'bg-red-950 text-white border-red-900 border hover:bg-red-900'
-                                                             : isLight 
-                                                                 ? 'bg-[#3C2A21] text-[#EAE0D5] border hover:bg-black' 
-                                                                 : 'bg-[#EAE0D5] text-[#3C2A21] border hover:bg-white'}
-                                                     `}
-                                                 >
-                                                     {isSelected ? (
-                                                         <span className="font-biz-mincho">同行中：離脱させる</span>
-                                                     ) : (
-                                                         <><span className="font-biz-mincho">このキャラクターと対話する</span><span className="text-lg">→</span></>
-                                                     )}
-                                                 </button>
-                                             </div>
-                                         </div>
-                                     )}
-                                 </div>
-                             </div>
-                         </div>
-                     );
-                 })}
+                 {characters.map((c, i) => (
+                     <CabinetDrawer 
+                        key={c.id}
+                        c={c}
+                        i={i}
+                        isExpanded={expandedId === c.id}
+                        onToggleExpand={setExpandedId}
+                        isSelected={selectedCharIds.includes(c.id)}
+                        onToggleChar={handleToggleChar}
+                     />
+                 ))}
              </div>
 
              {/* The Box Front Bottom */}
