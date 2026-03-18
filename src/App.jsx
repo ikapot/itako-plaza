@@ -246,14 +246,18 @@ export default function App() {
     if (!geminiKey) return;
     
     const timeout = setTimeout(async () => {
-      const newsData = await fetchFictionalizedNews(geminiKey);
-      setNews(newsData);
-      
-      // ニュースからトレンドを抽出して反映
-      const trends = await extractTrendsFromNews(newsData, geminiKey);
-      if (trends) {
-        setGlobalTrends(trends);
-        localStorage.setItem('itako_global_trends', JSON.stringify(trends));
+      try {
+        const newsData = await fetchFictionalizedNews(geminiKey);
+        setNews(newsData);
+        
+        // ニュースからトレンドを抽出して反映
+        const trends = await extractTrendsFromNews(newsData, geminiKey);
+        if (trends) {
+          setGlobalTrends(trends);
+          localStorage.setItem('itako_global_trends', JSON.stringify(trends));
+        }
+      } catch (err) {
+        console.error("News or Trend Fetching ERROR:", err);
       }
     }, 2000);
     

@@ -204,6 +204,10 @@ function extractJson(text) {
 // --- API Execution ---
 
 async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = false, onChunk = null) {
+  // Debug log to verify key (redacted)
+  const keySnippet = apiKey ? `${apiKey.trim().substring(0, 10)}...` : 'NONE';
+  console.log(`[API Request] Model: ${model || "google/gemini-2.0-flash-001"}, Key: ${keySnippet}, Length: ${apiKey?.trim().length}`);
+
   const body = {
     model: model || "google/gemini-2.0-flash-001",
     messages,
@@ -215,7 +219,7 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
   const response = await fetch(OPENROUTER_ENDPOINT, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${apiKey}`,
+      "Authorization": `Bearer ${apiKey.trim()}`,
       "HTTP-Referer": OPENROUTER_REFERER,
       "X-Title": OPENROUTER_TITLE,
       "Content-Type": "application/json"
@@ -225,10 +229,13 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
 
   if (!response.ok) {
     const errorData = await response.json();
+    const isAuthError = response.status === 401;
     throw { 
       status: response.status, 
       code: SPIRITUAL_ERRORS.OPENROUTER_ERROR,
-      message: errorData.error?.message || "Spectral connection lost (OpenRouter)" 
+      message: isAuthError 
+        ? `Authentication Failed: ${errorData.error?.message || "Invalid API Key"}. Please check your OpenRouter key and credits.`
+        : errorData.error?.message || "Spectral connection lost (OpenRouter)" 
     };
   }
 
