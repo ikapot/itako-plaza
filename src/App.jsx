@@ -133,6 +133,11 @@ export default function App() {
     setGeminiPreferredModel(modelId);
   }, []);
 
+  const handleSetGeminiKey = useCallback((rawKey) => {
+    const cleaned = cleanKey(rawKey);
+    setGeminiKey(cleaned);
+  }, []);
+
   const handleSlotChange = useCallback(async (index) => {
     setActiveSlot(index);
     if (index === 2 && geminiKey) {
@@ -173,13 +178,16 @@ export default function App() {
     updateAlaya();
   }, [messages.length, geminiKey]);
 
-  const handleValidateApi = useCallback(async () => {
-    if (!geminiKey || isValidatingApi) return;
+  const handleValidateApi = useCallback(async (providedKey) => {
+    const keyToValidate = providedKey ? cleanKey(providedKey) : geminiKey;
+    if (!keyToValidate || isValidatingApi) return;
     
     setIsValidatingApi(true);
-    const isValid = await validateGeminiApiKey(geminiKey);
+    const isValid = await validateGeminiApiKey(keyToValidate);
     
     if (isValid) {
+      setGeminiKey(keyToValidate);
+      localStorage.setItem('itako_gemini_key', keyToValidate);
       setApiConnectionStatus('success');
       setIsAppReady(true);
       setIsDrawerOpen(false);
@@ -455,12 +463,12 @@ export default function App() {
     return (
       <LandingPage 
         user={user} 
-        onLoginComplete={prepareSession}
+        onLoginComplete={(key) => handleValidateApi(key)}
         geminiKey={geminiKey}
-        setGeminiKey={setGeminiKey}
+        setGeminiKey={handleSetGeminiKey}
         isValidatingApi={isValidatingApi}
         apiConnectionStatus={apiConnectionStatus}
-        handleValidateApi={handleValidateApi}
+        handleValidateApi={() => handleValidateApi()}
       />
     );
   }
@@ -515,14 +523,14 @@ export default function App() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden" />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-black/40 backdrop-blur-3xl border-r border-white/10 z-[70] p-6 overflow-y-auto md:hidden shadow-3xl">
               <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
-              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, handleGo, globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
+              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), handleGo, globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
             </motion.div>
           </>
         ) : null}
       </AnimatePresence>
 
       <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
-      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, setIsAppReady }} />
+      <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, setIsAppReady }} />
       <SpiritNoiseOverlay 
         error={spiritualError} 
         onRetry={() => { setSpiritualError(null); handleSendMessage(); }} 
@@ -593,7 +601,7 @@ export default function App() {
                     </button>
                   </div>
                   <div className="flex-1 overflow-y-auto itako-scrollbar-thin">
-                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, handleGo, globalSentiment, bookmarks, messages, userName }} />
+                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), handleGo, globalSentiment, bookmarks, messages, userName }} />
                   </div>
                 </motion.div>
               </div>

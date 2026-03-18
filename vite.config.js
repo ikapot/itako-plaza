@@ -68,9 +68,74 @@ const aozoraPlugin = () => ({
     });
   }
 })
+const ndlPlugin = () => ({
+  name: 'ndl-api',
+  configureServer(server) {
+    server.middlewares.use('/api/ndl', async (req, res, next) => {
+      // Decode URL and handle parameters manually as Vite uses node:http
+      if (!req.url.startsWith('/api/ndl')) return next();
+      
+      const searchParams = new URLSearchParams(req.url.split('?')[1] || "");
+      const keyword = searchParams.get('keyword');
+      if (!keyword) return next();
+
+      try {
+        const baseUrl = "https://iss.ndl.go.jp/api/opensearch";
+        const query = `?cnt=5&mediatype=1&title=${encodeURIComponent(keyword)}`;
+        
+        const response = await fetch(baseUrl + query);
+        if (!response.ok) throw new Error("NDL Access Failed");
+        
+        const xmlData = await response.text();
+        const items = [];
+        const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+        let match;
+
+        while ((match = itemRegex.exec(xmlData)) !== null) {
+          const itemContent = match[1];
+          const titleMatch = itemContent.match(/<title>([\s\S]*?)<\/title>/);
+          const authorMatch = itemContent.match(/<author>([\s\S]*?)<\/author>/) || itemContent.match(/<dc:creator>([\s\S]*?)<\/dc:creator>/);
+          const linkMatch = itemContent.match(/<link>([\s\S]*?)<\/link>/);
+          const descriptionMatch = itemContent.match(/<description>([\s\S]*?)<\/description>/);
+          const dateMatch = itemContent.match(/<dc:date>([\s\S]*?)<\/dc:date>/);
+
+          if (titleMatch) {
+            items.push({
+              id: `ndl-${Math.random().toString(36).substr(2, 9)}`,
+              title: titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, ""),
+              author: authorMatch ? authorMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "") : "Unknown Author",
+              quote: descriptionMatch ? descriptionMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").substring(0, 100) + "..." : "時を経て、この記述があなたの言葉に呼応しています。",
+              link: linkMatch ? linkMatch[1] : "#",
+              year: dateMatch ? dateMatch[1] : ""
+            });
+          }
+        }
+
+        if (items.length === 0) {
+          items.push({
+            id: 'ndl-fallback',
+            title: "沈黙する書架",
+            author: "Archives of Silence",
+            quote: `「${keyword}」についての記録は、まだこの書庫には見当たりません。`,
+            link: "#"
+          });
+        }
+
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.statusCode = 200;
+        res.end(JSON.stringify(items));
+      } catch (e) {
+        console.error("NDL Proxy Error:", e);
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+  }
+});
 
 // https://vite.dev/config/
 export default defineConfig({
   base: './',
-  plugins: [react(), aozoraPlugin()],
+  plugins: [react(), aozoraPlugin(), ndlPlugin()],
 })

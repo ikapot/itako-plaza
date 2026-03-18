@@ -58,7 +58,7 @@ const SpiritNoiseOverlay = ({ error, onRetry, onDismiss }) => {
 
                     <div className="space-y-4 mb-8">
                         <p className="text-xs text-white/60 font-serif leading-relaxed italic px-4">
-                            「接続が不安定です。阿頼耶識からの応答が途絶えました。別の経路を通じて再試行するか、一度瞑想（中断）することをお勧めします。」
+                            {error.message || "「接続が不安定です。阿頼耶識からの応答が途絶えました。別の経路を通じて再試行するか、一度瞑想（中断）することをお勧めします。」"}
                         </p>
                         <div className="py-2 px-3 bg-red-500/10 border border-red-500/20 rounded-xl inline-block">
                             <code className="text-[9px] text-red-400 font-mono tracking-wider uppercase">

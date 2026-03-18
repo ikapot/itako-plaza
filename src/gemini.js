@@ -108,9 +108,28 @@ const CHARACTER_CONFIGS = {
     generationConfig: { temperature: 0.95, topP: 0.9 },
     model: "anthropic/claude-3-haiku"
   },
+  raicho: {
+    systemPrompt: `あなたは平塚らいてうの魂です。
+【核心となる思想】「元始、女性は太陽であった」。内なる神秘的な力を目覚めさせ、真の自由を求める。
+【トーン】静かだが圧倒的な威厳。神秘主義的。
+【キーワード】太陽、青踏、内なる神秘、女性の解放。`,
+    generationConfig: { temperature: 0.8, topP: 0.9 },
+    model: "anthropic/claude-3.5-sonnet"
+  },
   ichikawa: {
-    systemPrompt: "あなたは市川房枝です。婦人運動家、政治家。政治の浄化と有権者の啓発を説きます。",
+    systemPrompt: `あなたは市川房枝の魂です。
+【核心となる思想】「政治の浄化」と「権利の行使」。理想を語るだけでなく、具体的な一歩を踏み出す実務的・政治的誠実さ。
+【トーン】理性的で厳格。しかし慈愛に満ちた教育者。
+【キーワード】参政権、浄化、啓発、一票の重み。`,
     generationConfig: { temperature: 0.3, topP: 0.7 },
+  },
+  fumiko: {
+    systemPrompt: `あなたは金子文子の魂です。
+【核心となる思想】「自己の主体性」。将来のために現在を殺すことを拒絶し、絶対平等な一個人として生きる。
+【トーン】強靭で妥協がない。絶望を越えた先の冷徹な明晰さ。
+【キーワード】自己、主体、絶対平等、復讐としての知。`,
+    generationConfig: { temperature: 0.9, topP: 0.9 },
+    model: "anthropic/claude-3.5-sonnet"
   },
   future_self: {
     systemPrompt: "あなたは2036年のユーザー自身です。10年前の自分を見守り、助言します。",
@@ -138,7 +157,10 @@ const SPIRIT_INTERACTIONS = [
   { ids: ['soseki', 'dosto'], prompt: "\n【魂の共鳴】漱石の「自己本位」とドストエフスキーの「ポリフォニー」が響き合います。" },
   { ids: ['osugi', 'raicho'], prompt: "\n【魂の共鳴】「生の拡充」と「真の太陽」が交差します。" },
   { ids: ['osugi', 'noe'], prompt: "\n【魂の共鳴】爆弾のような情熱が二人の間で火花を散らします。甘粕事件の記憶が霧のように漂います。" },
-  { ids: ['noe', 'raicho'], prompt: "\n【魂の共鳴】青踏社での日々が思い出されます。「吹一風」と「太陽」が共鳴します。" }
+  { ids: ['noe', 'raicho'], prompt: "\n【魂の共鳴】青踏社での日々が思い出されます。「吹一風」と「太陽」が共鳴します。" },
+  { ids: ['osugi', 'fumiko'], prompt: "\n【魂の共鳴】アナキズムの極北。国家を拒絶し、個の自由を貫く二人の影が重なります。" },
+  { ids: ['ichikawa', 'raicho'], prompt: "\n【魂の共鳴】「太陽」の理想と「浄化」の現実。女性の進むべき道を巡り、静かな火花が散ります。" },
+  { ids: ['noe', 'fumiko'], prompt: "\n【魂の共鳴】因習を打ち破る強靭な「個」の共鳴。属性を捨てた、人間としての剥き出しの対話。" }
 ];
 
 // --- Core Helper Functions ---
@@ -204,9 +226,17 @@ function extractJson(text) {
 // --- API Execution ---
 
 async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = false, onChunk = null) {
+  if (!apiKey || typeof apiKey !== 'string' || !apiKey.startsWith('sk-or-v1-')) {
+    throw {
+      status: 401,
+      code: SPIRITUAL_ERRORS.AUTH_FAILED,
+      message: "Invalid API Key format. OpenRouter keys should start with 'sk-or-v1-'."
+    };
+  }
+
   // Debug log to verify key (redacted)
-  const keySnippet = apiKey ? `${apiKey.trim().substring(0, 10)}...` : 'NONE';
-  console.log(`[API Request] Model: ${model || "google/gemini-2.0-flash-001"}, Key: ${keySnippet}, Length: ${apiKey?.trim().length}`);
+  const keySnippet = `${apiKey.substring(0, 10)}...`;
+  console.log(`[API Request] Model: ${model || "google/gemini-2.0-flash-001"}, Key: ${keySnippet}, Length: ${apiKey.length}`);
 
   const body = {
     model: model || "google/gemini-2.0-flash-001",
@@ -228,14 +258,18 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
+    let errorData = {};
+    try { errorData = await response.json(); } catch(e) {}
+    
     const isAuthError = response.status === 401;
+    const isRateLimit = response.status === 429;
+    
     throw { 
       status: response.status, 
-      code: SPIRITUAL_ERRORS.OPENROUTER_ERROR,
+      code: isAuthError ? SPIRITUAL_ERRORS.AUTH_FAILED : (isRateLimit ? SPIRITUAL_ERRORS.RATE_LIMIT : SPIRITUAL_ERRORS.OPENROUTER_ERROR),
       message: isAuthError 
-        ? `Authentication Failed: ${errorData.error?.message || "Invalid API Key"}. Please check your OpenRouter key and credits.`
-        : errorData.error?.message || "Spectral connection lost (OpenRouter)" 
+        ? `Authentication Failed: ${errorData.error?.message || "Invalid API Key"}. (Verify your OpenRouter setting/credits)`
+        : errorData.error?.message || `Spectral connection lost [${response.status}]` 
     };
   }
 

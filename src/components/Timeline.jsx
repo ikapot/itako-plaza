@@ -234,7 +234,7 @@ const Timeline = React.memo(function Timeline({
                 <div className="max-w-2xl mx-auto w-full pb-80 md:pb-96">
                     <header className="flex flex-col gap-2 mb-16 md:mb-20 px-2 md:px-4">
                         <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-[1.1] py-4 font-oswald uppercase" style={{ color: '#2a2a2a' }}>News</h2>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-hina -mt-2">霊感ニュース</p>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-biz-mincho -mt-2">霊感ニュース</p>
                     </header>
 
                     <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
@@ -284,7 +284,7 @@ const Timeline = React.memo(function Timeline({
                                 {isUnderground ? 'Surface' : 'Deep Trace'}
                             </button>
                         </div>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-hina truncate -mt-2">{userName} /Speaking</p>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-biz-mincho truncate -mt-2">{userName} /Speaking</p>
                     </header>
 
                     <div className="flex-1 flex flex-col gap-8 mt-4">
@@ -329,7 +329,7 @@ const Timeline = React.memo(function Timeline({
                                 </button>
                             </div>
                         </div>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-hina -mt-2">思考と記録の書架</p>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-biz-mincho -mt-2">思考と記録の書架</p>
                     </header>
 
                     <div className="space-y-16">

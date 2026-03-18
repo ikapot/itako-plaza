@@ -89,7 +89,7 @@ const DashboardSidebar = React.memo(({
                 </div>
                 <div className="flex flex-col items-start">
                     <span className="text-xs font-black tracking-widest text-[#bd8a78] uppercase font-oswald">Concept</span>
-                    <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.4em] font-hina">理念の断片</span>
+                    <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.4em] font-biz-mincho">理念の断片</span>
                 </div>
             </motion.button>
         </div>

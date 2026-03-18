@@ -43,7 +43,7 @@ export default function NamePromptModal({ isOpen, onSubmit }) {
                         >
                             {/* 案内人のシルエット */}
                             <div className="w-24 h-24 rounded-full border border-white/20 flex items-center justify-center overflow-hidden bg-white/5 shadow-[0_0_30px_rgba(255,255,255,0.1)] relative">
-                                <span className="text-3xl text-white/50 font-serif absolute shrink-0">?</span>
+                                <span className="text-3xl text-white/50 font-biz-mincho absolute shrink-0">?</span>
                                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80" />
                             </div>
                         </motion.div>
@@ -57,7 +57,7 @@ export default function NamePromptModal({ isOpen, onSubmit }) {
                             <p className="text-white/40 text-[10px] font-bold tracking-[0.5em] uppercase font-oswald mb-4">
                                 The Guide
                             </p>
-                            <h2 className="text-[#EAE0D5] font-serif text-xl md:text-2xl leading-loose tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
+                            <h2 className="text-[#EAE0D5] font-biz-mincho text-xl md:text-2xl leading-loose tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
                                 「此岸より来たりし者よ。<br />
                                 あなたの名は、何と呼ぼうか──」
                             </h2>
@@ -77,7 +77,7 @@ export default function NamePromptModal({ isOpen, onSubmit }) {
                                         onChange={(e) => setName(e.target.value)}
                                         onKeyDown={handleKeyDown}
                                         placeholder="入力してください（後から変更可能）"
-                                        className="w-full max-w-sm bg-black/40 border-b-2 border-white/20 pb-2 text-center text-white focus:outline-none focus:border-[#bd8a78] font-serif text-lg tracking-widest transition-colors shadow-2xl placeholder:text-white/20 placeholder:text-xs placeholder:tracking-normal"
+                                        className="w-full max-w-sm bg-black/40 border-b-2 border-white/20 pb-2 text-center text-white focus:outline-none focus:border-[#bd8a78] font-biz-mincho text-lg tracking-widest transition-colors shadow-2xl placeholder:text-white/20 placeholder:text-xs placeholder:tracking-normal"
                                     />
                                 </motion.div>
                             ) : null}
@@ -93,7 +93,7 @@ export default function NamePromptModal({ isOpen, onSubmit }) {
                                 >
                                     <button 
                                         onClick={() => onSubmit(name.trim())}
-                                        className="px-8 py-3 bg-white/5 border border-white/20 text-[#EAE0D5] hover:bg-white/10 hover:border-white/40 transition-all font-serif tracking-[0.3em] rounded-sm uppercase text-xs"
+                                        className="px-8 py-3 bg-white/5 border border-white/20 text-[#EAE0D5] hover:bg-white/10 hover:border-white/40 transition-all font-biz-mincho tracking-[0.3em] rounded-sm uppercase text-xs"
                                     >
                                         名乗る
                                     </button>
