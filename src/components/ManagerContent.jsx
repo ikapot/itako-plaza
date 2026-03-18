@@ -23,9 +23,9 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             <div className={`flex w-full ${alignment} px-4 md:px-12 pointer-events-none`}>
                 <button 
                     onClick={() => onToggleExpand(isExpanded ? null : c.id)}
-                    className={`${bgColor} ${textColor} px-10 md:px-14 py-2 md:py-3 shadow-md text-[10px] md:text-sm font-bold tracking-widest uppercase border-b-0 pointer-events-auto border border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-biz-mincho`}
+                    className={`${bgColor} ${textColor} px-10 md:px-14 py-2 md:py-3 shadow-md text-[10px] md:text-sm font-bold tracking-widest uppercase border-b-2 border-black/10 pointer-events-auto border-x border-t border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-biz-mincho`}
                     style={{
-                        clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)'
+                        clipPath: 'polygon(5% 0, 95% 0, 100% 100%, 0% 100%)'
                     }}
                 >
                     <span className={isExpanded ? "font-black" : ""}>{c.name}</span>
@@ -35,7 +35,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             {/* Folder Body */}
             <div 
                 onClick={() => !isExpanded && onToggleExpand(c.id)}
-                className={`w-full rounded-2xl ${bgColor} ${textColor} shadow-[0_-5px_25px_rgba(0,0,0,0.5)] border border-black/20 overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10`}
+                className={`w-full rounded-sm ${bgColor} ${textColor} shadow-[0_-5px_25px_rgba(0,0,0,0.5)] border border-black/20 overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10`}
             >
                 <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"/>
                 
