@@ -112,11 +112,11 @@ const CharTile = React.memo(function CharTile({ char, isSelected, isRolling, onT
             {char.avatar ? (
               <img src={char.avatar} alt={char.name} className="w-8 h-8 object-cover rounded-full opacity-90 mb-1 border border-white/20" loading="lazy" />
             ) : (
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black mb-1 border border-white/10 ${char.color || 'bg-zinc-800/80'} text-white`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold mb-1 border border-white/10 ${char.color || 'bg-zinc-800/80'} text-white font-hina`}>
                 {char.name.slice(0, 1)}
               </div>
             )}
-            <span className={`text-[8px] font-oswald uppercase tracking-wider text-center leading-tight px-1 text-white`}>
+            <span className={`text-[8px] font-hina font-bold uppercase tracking-wider text-center leading-tight px-1 text-white`}>
               {char.name}
             </span>
             {isMain && <span className="text-[5px] mt-0.5 text-[#f15a24]">◆</span>}
@@ -179,7 +179,7 @@ const LocTile = React.memo(function LocTile({ loc, isSelected, isRolling, energy
             animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
             className="flex flex-col items-center justify-center p-1 w-full h-full"
           >
-            <span className={`text-[9px] font-oswald uppercase tracking-widest text-center leading-tight text-white`}>
+            <span className={`text-[9px] font-hina font-bold uppercase tracking-widest text-center leading-tight text-white`}>
               {loc.name}
             </span>
             <div className={`mt-1.5 h-0.5 bg-white/40 rounded-full transition-all`} style={{ width: `${Math.min(100, energy)}%` }} />
@@ -434,7 +434,7 @@ function ThreeDMap({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-center gap-2 mb-1">
             <span className="text-[9px] md:text-[11px] font-oswald uppercase tracking-widest" style={{ color: `${accentColor}99` }}>👤 Character Dice</span>
-            <span className="text-[8px] md:text-[10px] text-white/20">{CHAR_THEME[charFaceIdx]}</span>
+            <span className="text-[8px] md:text-[10px] text-white/20 font-hina">{CHAR_THEME[charFaceIdx]}</span>
             <span className="text-[7px] text-[#f15a24]/30">{(selectedCharIds?.length || 0)}/3 selected</span>
           </div>
           <Cube cubeRef={charCubeRef} faceItems={charFaces} renderTile={renderCharTile} faceIdx={charFaceIdx} onJumpToFace={jumpCharFace} isRolling={isRolling} faceLabels={FACE_LABELS} accentColor={accentColor} energy={selectedCharIds.length * 15} selectedChars={selectedChars} />
@@ -443,7 +443,7 @@ function ThreeDMap({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-center gap-2 mb-1">
             <span className="text-[9px] md:text-[11px] font-oswald uppercase tracking-widest text-white/50">📍 Location Dice</span>
-            <span className="text-[8px] md:text-[10px] text-white/25">{LOC_THEME[locFaceIdx]}</span>
+            <span className="text-[8px] md:text-[10px] text-white/25 font-hina">{LOC_THEME[locFaceIdx]}</span>
           </div>
           <Cube cubeRef={locCubeRef} faceItems={locFaces} renderTile={renderLocTile} faceIdx={locFaceIdx} onJumpToFace={jumpLocFace} isRolling={isRolling} faceLabels={FACE_LABELS} accentColor="#ffffff" energy={locationEnergies[selectedLocationId] || 10} />
         </div>
@@ -451,14 +451,14 @@ function ThreeDMap({
 
       <div className="mx-0.5 py-3 px-4 bg-white/5 border border-white/10 rounded-xl">
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-[9px] md:text-[11px] text-white/30 uppercase tracking-widest font-oswald shrink-0">召喚：</span>
+          <span className="text-[9px] md:text-[11px] text-white/30 uppercase tracking-widest font-hina shrink-0">召喚：</span>
           {selectedChars.length > 0 ? selectedChars.map(function render(c) {
               return (
-                <span key={c.id} className={`text-[9px] md:text-[11px] px-2.5 py-1 rounded border transition-all font-bold ${c.isMainChar ? 'text-[#f15a24] bg-[#f15a24]/10 border-[#f15a24]/30' : 'text-white/80 bg-white/5 border-white/10'}`}>
+                <span key={c.id} className={`text-[9px] md:text-[11px] px-2.5 py-1 rounded border transition-all font-bold font-hina ${c.isMainChar ? 'text-[#f15a24] bg-[#f15a24]/10 border-[#f15a24]/30' : 'text-white/80 bg-white/5 border-white/10'}`}>
                     {c.name}
                 </span>
               );
-          }) : <span className="text-[9px] md:text-[11px] text-white/15 italic">未選択（最大3人）</span>}
+          }) : <span className="text-[9px] md:text-[11px] text-white/15 italic font-hina">未選択（最大3人）</span>}
           {selectedLoc ? (
             <>
               <span className="text-[9px] md:text-[11px] text-white/20 mx-0.5">@</span>
@@ -473,7 +473,7 @@ function ThreeDMap({
             whileTap={{ scale: 0.95 }}
             onClick={onGo}
             disabled={isRolling || selectedCharIds.length === 0}
-            className={`px-8 py-2 rounded-full font-black font-oswald text-[10px] tracking-[0.3em] uppercase transition-all shadow-lg border ${
+            className={`px-8 py-2 rounded-full font-bold font-hina text-[10px] tracking-[0.3em] uppercase transition-all shadow-lg border ${
               isRolling || selectedCharIds.length === 0
                 ? 'bg-white/5 border-white/5 text-white/10 cursor-not-allowed'
                 : 'bg-[#f15a24] border-[#f15a24]/50 text-white hover:bg-[#ff6a3a] shadow-[0_0_20px_rgba(241,90,36,0.4)]'

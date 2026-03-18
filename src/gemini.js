@@ -395,6 +395,14 @@ export async function extractTrendsFromNotebook(text, apiKey) {
   return res.data;
 }
 
+export async function extractTrendsFromNews(newsArray, apiKey) {
+  if (!apiKey || !newsArray || newsArray.length === 0) return null;
+  const titles = newsArray.map(n => n.title).join('\n');
+  const prompt = `以下のニュースから、現在の世界の「歪み」や「潮流」を抽出し、不穏な要約を作成してください。\n${titles}\n出力形式: { "summary": "...", "keywords": [...] }`;
+  const res = await invokeGemini(apiKey, prompt, "歴史の観測者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
+  return res.data;
+}
+
 export async function generateWorldEvent(apiKey, trends) {
   if (!apiKey) return null;
   const prompt = `あなたは歴史の闇を観測するAIです。

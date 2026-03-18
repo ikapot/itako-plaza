@@ -21,7 +21,7 @@ const MemoizedEchoItem = React.memo(function EchoItem({ e, accentColor }) {
                 delay: e.delay,
                 ease: "linear"
             }}
-            className="absolute text-[8px] md:text-[10px] font-serif italic tracking-widest whitespace-nowrap"
+            className="absolute text-[8px] md:text-[10px] font-serif italic tracking-widest whitespace-nowrap pr-2"
             style={{ left: `${e.x}%`, top: `${e.y}%`, color: accentColor }}
         >
             {e.text}
@@ -133,7 +133,7 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
             >
                 <div className="max-w-xl mx-auto flex flex-col items-center gap-4">
                     <div className="w-12 h-[1px] bg-[#bd8a78]/30" />
-                    <p className="text-sm md:text-base leading-relaxed text-[#bd8a78]/90 font-serif italic tracking-[0.2em] whitespace-pre-wrap pt-1">
+                    <p className="text-sm md:text-base leading-relaxed text-[#bd8a78]/90 font-serif italic tracking-[0.2em] whitespace-pre-wrap py-2">
                         {m.content.replace(/^\[narration\]\s*/i, '').replace(/^【ナレーション】\s*/i, '')}
                     </p>
                     <div className="w-12 h-[1px] bg-[#bd8a78]/30" />
@@ -232,9 +232,9 @@ const Timeline = React.memo(function Timeline({
             {/* Slot 1: News */}
             <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-24 md:pt-32">
                 <div className="max-w-2xl mx-auto w-full pb-80 md:pb-96">
-                    <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4">
-                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-tight py-1 font-oswald uppercase" style={{ color: '#2a2a2a' }}>News</h2>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-oswald">霊感ニュース</p>
+                    <header className="flex flex-col gap-2 mb-16 md:mb-20 px-2 md:px-4">
+                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-[1.1] py-4 font-oswald uppercase" style={{ color: '#2a2a2a' }}>News</h2>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-hina -mt-2">霊感ニュース</p>
                     </header>
 
                     <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
@@ -274,9 +274,9 @@ const Timeline = React.memo(function Timeline({
                         })() : null}
                     </AnimatePresence>
 
-                    <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-4 relative">
+                    <header className="flex flex-col gap-2 mb-16 md:mb-20 px-2 md:px-4 relative">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-tight py-1 font-oswald uppercase" style={{ color: '#2a2a2a' }}>Dialog</h2>
+                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-[1.1] py-4 font-oswald uppercase" style={{ color: '#2a2a2a' }}>Dialog</h2>
                             <button
                                 onClick={function toggleUnderground() { setIsUnderground(!isUnderground); }}
                                 className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
@@ -284,7 +284,7 @@ const Timeline = React.memo(function Timeline({
                                 {isUnderground ? 'Surface' : 'Deep Trace'}
                             </button>
                         </div>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-oswald truncate">{userName} /Speaking</p>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-hina truncate -mt-2">{userName} /Speaking</p>
                     </header>
 
                     <div className="flex-1 flex flex-col gap-8 mt-4">
@@ -317,19 +317,19 @@ const Timeline = React.memo(function Timeline({
             {/* Slot 3: Library (Archives) */}
             <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-24 md:pt-32">
                 <div className="max-w-2xl mx-auto w-full pb-80 md:pb-96">
-                    <header className="flex flex-col gap-2 mb-12 md:mb-16 px-2 md:px-0">
+                    <header className="flex flex-col gap-2 mb-16 md:mb-20 px-2 md:px-0">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-tight py-1 font-oswald uppercase break-all w-full pr-4" style={{ color: '#2a2a2a' }}>LIBRARY</h2>
+                            <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] py-4 font-oswald uppercase break-all w-full pr-4" style={{ color: '#2a2a2a' }}>LIBRARY</h2>
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={function sync() { setShowNotebookModal(true); }}
-                                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase hover:bg-white/10 transition-all"
+                                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase hover:bg-white/10 transition-all font-oswald"
                                 >
                                     /sync
                                 </button>
                             </div>
                         </div>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-oswald">思考と記録の書架</p>
+                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-hina -mt-2">思考と記録の書架</p>
                     </header>
 
                     <div className="space-y-16">

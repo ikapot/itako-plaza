@@ -53,7 +53,7 @@ const FloatingInputBar = React.memo(({
                             handleSendMessage();
                         }
                     }}
-                    className="flex-1 bg-transparent border-none focus:outline-none text-white/90 text-sm md:text-base py-2 md:py-4 resize-none h-10 md:h-14 leading-relaxed placeholder:text-white/10 font-sans tracking-wide"
+                    className="flex-1 bg-transparent border-none focus:outline-none text-white/90 text-sm md:text-base py-2 md:py-4 resize-none h-10 md:h-14 leading-relaxed placeholder:text-white/10 font-hina tracking-wide"
                 />
                 <button
                     onClick={handleSendMessage}
@@ -73,8 +73,8 @@ const FloatingInputBar = React.memo(({
                             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                         />
                     ) : null}
-                    <span className="font-oswald font-black text-[10px] tracking-[0.2em] relative z-10 hidden sm:inline">
-                        {loading ? 'SYNCING...' : 'MANIFEST'}
+                    <span className="font-hina font-bold text-[10px] tracking-[0.2em] relative z-10 hidden sm:inline">
+                        {loading ? '探求中...' : '宣明'}
                     </span>
                     <div className="relative z-10 text-base md:text-lg transition-transform group-hover/send:translate-x-1">→</div>
                 </button>

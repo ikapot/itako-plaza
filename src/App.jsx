@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useTransition, startTransition } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies, saveBookmark, logout } from './firebase';
-import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback, getPreferredModel, setPreferredModel as setGeminiPreferredModel, distillSpiritualAlaya } from './gemini';
+import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, extractTrendsFromNews, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback, getPreferredModel, setPreferredModel as setGeminiPreferredModel, distillSpiritualAlaya } from './gemini';
 import { fetchFictionalizedNews } from './news';
 import { searchNDLArchive } from './ndl';
 import { INITIAL_CHARACTERS, INITIAL_LOCATIONS, AMBIENT_COLORS } from './constants';
@@ -245,9 +245,16 @@ export default function App() {
   useEffect(() => {
     if (!geminiKey) return;
     
-    // 起動時のリクエストが重ならないようにずらす
-    const timeout = setTimeout(() => {
-      fetchFictionalizedNews(geminiKey).then(setNews);
+    const timeout = setTimeout(async () => {
+      const newsData = await fetchFictionalizedNews(geminiKey);
+      setNews(newsData);
+      
+      // ニュースからトレンドを抽出して反映
+      const trends = await extractTrendsFromNews(newsData, geminiKey);
+      if (trends) {
+        setGlobalTrends(trends);
+        localStorage.setItem('itako_global_trends', JSON.stringify(trends));
+      }
     }, 2000);
     
     const energyInterval = setInterval(async () => setLocationEnergies(await fetchLocationEnergies()), 10000);

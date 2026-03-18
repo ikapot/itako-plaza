@@ -35,7 +35,7 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
                              <div className={`flex w-full ${alignment} px-4 md:px-12 pointer-events-none`}>
                                  <button 
                                      onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                                     className={`${bgColor} ${textColor} px-5 md:px-8 py-2 md:py-3 rounded-t-xl md:rounded-t-2xl shadow-md text-[10px] md:text-xs font-bold tracking-widest uppercase border-b-0 pointer-events-auto border border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-sans`}
+                                     className={`${bgColor} ${textColor} px-5 md:px-8 py-2 md:py-3 rounded-t-xl md:rounded-t-2xl shadow-md text-[10px] md:text-xs font-bold tracking-widest uppercase border-b-0 pointer-events-auto border border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-hina`}
                                  >
                                      <span className="opacity-50 mr-2">Archivo {prvtIndex}</span>
                                      <span className={isExpanded ? "font-black" : ""}>{c.role.substring(0,6)}</span>
@@ -70,8 +70,8 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
                                                      <div>
                                                          <h3 className="text-3xl md:text-4xl font-black font-oswald tracking-widest border-b border-current/20 pb-2 mb-2 md:mb-4">{c.name}</h3>
                                                          <div className="flex flex-wrap gap-2">
-                                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-sans">{c.role}</span>
-                                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-sans">{c.flavor}</span>
+                                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-hina">{c.role}</span>
+                                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-hina">{c.flavor}</span>
                                                          </div>
                                                      </div>
                                                      <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-90 break-words">
@@ -92,9 +92,9 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
                                                      `}
                                                  >
                                                      {isSelected ? (
-                                                         <span>同行中：離脱させる</span>
+                                                         <span className="font-hina">同行中：離脱させる</span>
                                                      ) : (
-                                                         <><span>このキャラクターと対話する</span><span className="text-lg">→</span></>
+                                                         <><span className="font-hina">このキャラクターと対話する</span><span className="text-lg">→</span></>
                                                      )}
                                                  </button>
                                              </div>

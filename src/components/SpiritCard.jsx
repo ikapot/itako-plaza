@@ -21,7 +21,7 @@ export default function SpiritCard({ title, content, author, portraitUrl, flavor
           </div>
         ) : null}
         <div className="space-y-4">
-          <h3 className="text-2xl md:text-3xl font-bold tracking-tighter leading-tight pr-12 text-white">{title}</h3>
+          <h3 className="text-2xl md:text-3xl font-bold tracking-tighter leading-[1.3] py-1 pr-12 text-white">{title}</h3>
           <p className="text-sm md:text-base leading-relaxed text-white/85 font-medium whitespace-pre-wrap">{content}</p>
         </div>
 
