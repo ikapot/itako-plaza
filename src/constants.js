@@ -9,9 +9,9 @@ export const INITIAL_CHARACTERS = [
   { id: 'akutagawa', face: 0, pos: 2, name: '芥川龍之介', role: '鬼才作家', homeLocationId: 'mirror', flavor: '不安', color: 'bg-red-950/50', description: '鋭敏な感受性と知性、そして「薄ぼんやりした不安」に追われ続けた天才。', avatar: 'assets/akutagawa_warhol_v3.png', isPreStyled: true },
   { id: 'dazai', face: 0, pos: 3, name: '太宰治', role: '恥の多い生涯', homeLocationId: 'canal', flavor: '失格', color: 'bg-zinc-800', description: '人間失格を自称しながら、それでも言葉で世界と戦い続けた魂。', avatar: 'assets/dazai_warhol.png', isPreStyled: true },
   { id: 'mishima', face: 0, pos: 4, name: '三島由紀夫', role: '作家・武人', homeLocationId: 'roof', flavor: '美と死', color: 'bg-red-900/60', description: '美への執着 and 肉体の鍛錬、そして壮絶な最期まで自らを物語の主人公とした。', avatar: 'assets/mishima_warhol.png', isPreStyled: true },
-  { id: 'kawabata', face: 0, pos: 5, name: '川端康成', role: 'ノーベル賞作家', homeLocationId: 'garden', flavor: '余韻', color: 'bg-itako-sage', description: '雪国の純白の中に、消えゆくものへの哀愁を刻んだ。', avatar: null },
-  { id: 'kafuka', face: 0, pos: 6, name: 'カフカ', role: '保険局員・作家', homeLocationId: 'waiting', flavor: '変身', color: 'bg-zinc-700', description: '虫になった男と不条理な城を描いた、実存の悪夢の語り手。', avatar: null },
-  { id: 'borges', face: 0, pos: 7, name: 'ボルヘス', role: '図書館司書', homeLocationId: 'archive', flavor: '迷宮', color: 'bg-itako-sand', description: '無限の図書館と砂の本を夢想した、盲目の宇宙論者。', avatar: null },
+  { id: 'kawabata', face: 0, pos: 5, name: '川端康成', role: 'ノーベル賞作家', homeLocationId: 'garden', flavor: '余韻', color: 'bg-itako-sage', description: '雪国の純白の中に、消えゆくものへの哀愁を刻んだ。', avatar: 'assets/kawabata_warhol.png', isPreStyled: true },
+  { id: 'kafuka', face: 0, pos: 6, name: 'カフカ', role: '保険局員・作家', homeLocationId: 'waiting', flavor: '変身', color: 'bg-zinc-700', description: '虫になった男と不条理な城を描いた、実存の悪夢の語り手。', avatar: 'assets/kafka_warhol.png', isPreStyled: true },
+  { id: 'borges', face: 0, pos: 7, name: 'ボルヘス', role: '図書館司書', homeLocationId: 'archive', flavor: '迷宮', color: 'bg-itako-sand', description: '無限の図書館と砂の本を夢想した、盲目の宇宙論者。', avatar: 'assets/borges_warhol.png', isPreStyled: true },
   { id: 'k_kokoro', face: 0, pos: 8, name: 'K', role: '無職・書生', homeLocationId: 'stair', flavor: '絶望', color: 'bg-zinc-800', isMainChar: true, description: 'かつては学生。今はただ絶望の螺旋階段を上り下りする、目的を持たない魂。', avatar: null },
 
   // ── Face 1: 闇の系譜 ──────────────────────────────────────────────
