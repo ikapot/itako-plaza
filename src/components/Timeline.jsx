@@ -238,7 +238,7 @@ const Timeline = React.memo(function Timeline({
                     </header>
 
                     <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
-                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.4em] font-oswald">DRIPPING NOISE ({news.length})</span>
+                        <span className="text-[10px] font-bold text-white/50 uppercase tracking-[0.4em] font-oswald">DRIPPING NOISE ({news.length})</span>
                     </div>
 
                     {news.map(function renderNews(n) {
@@ -284,7 +284,7 @@ const Timeline = React.memo(function Timeline({
                                 {isUnderground ? 'Surface' : 'Deep Trace'}
                             </button>
                         </div>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-biz-mincho truncate -mt-2">{userName} /Speaking</p>
+                        <p className="text-xs md:text-sm font-bold text-zinc-500 pl-1 tracking-[0.5em] uppercase font-biz-mincho truncate -mt-2">{userName} /Speaking</p>
                     </header>
 
                     <div className="flex-1 flex flex-col gap-8 mt-4">
@@ -329,7 +329,7 @@ const Timeline = React.memo(function Timeline({
                                 </button>
                             </div>
                         </div>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-biz-mincho -mt-2">思考と記録の書架</p>
+                        <p className="text-xs md:text-sm font-bold text-zinc-500 pl-1 tracking-[0.5em] uppercase font-biz-mincho -mt-2">思考と記録の書架</p>
                     </header>
 
                     <div className="space-y-16">
@@ -354,7 +354,7 @@ const Timeline = React.memo(function Timeline({
                         
                         <div className="relative">
                             <div className="absolute -left-6 top-0 bottom-0 w-px bg-white/5" />
-                            <h3 className="text-[10px] font-black tracking-[0.5em] text-white/20 uppercase mb-8 pl-4">Archives curated from NDL</h3>
+                            <h3 className="text-[10px] font-black tracking-[0.5em] text-white/40 uppercase mb-8 pl-4">Archives curated from NDL</h3>
                             
                             <div className="grid grid-cols-1 gap-6 pl-4">
                                 {archives.map(function renderArchive(c, idx) {
@@ -406,7 +406,7 @@ const Timeline = React.memo(function Timeline({
                                 })}
                                 {archives.length === 0 && (
                                     <div className="py-20 text-center border border-dashed border-white/5 rounded-[40px]">
-                                        <p className="text-[10px] text-white/20 italic tracking-widest uppercase">書架は静寂に包まれています。</p>
+                                        <p className="text-[10px] text-white/40 italic tracking-widest uppercase">書架は静寂に包まれています。</p>
                                     </div>
                                 )}
                             </div>

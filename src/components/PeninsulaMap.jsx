@@ -146,14 +146,14 @@ const PeninsulaMap = ({
 
       {/* Info Overlay (Floating) */}
       <div className="absolute top-6 left-6 space-y-1 z-[100]">
-        <h3 className="text-2xl font-black font-oswald text-white/40 tracking-widest uppercase">Itako Peninsula</h3>
-        <p className="text-[10px] text-white/20 font-biz-mincho tracking-[0.3em]">54人の魂が彷徨う半島の全景</p>
+        <h3 className="text-2xl font-black font-oswald text-white/70 tracking-widest uppercase">Itako Peninsula</h3>
+        <p className="text-[11px] text-white/50 font-biz-mincho tracking-[0.3em]">54人の魂が彷徨う半島の全景</p>
       </div>
 
       <div className="absolute bottom-6 right-6 flex flex-col items-end z-[100]">
         <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-[#f15a24] animate-pulse" />
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">亡霊列車：巡回中</span>
+            <span className="text-[11px] font-bold text-white/60 uppercase tracking-widest">亡霊列車：巡回中</span>
         </div>
         <button onClick={onGo} className="px-8 py-2.5 rounded-full bg-white text-black font-black font-oswald text-xs tracking-widest uppercase hover:bg-[#f15a24] hover:text-white transition-all shadow-2xl">
             Manifest Destination
@@ -206,11 +206,11 @@ const RegionNode = ({ region, isHovered, onHover, onLeave, chars, selectedCharId
                 {(isHovered || true) && (
                     <motion.div
                         initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: isHovered ? 1 : 0.4, y: 0 }}
+                        animate={{ opacity: isHovered ? 1 : 0.7, y: 0 }}
                         className="absolute top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-center pointer-events-none"
                     >
-                        <div className="text-[10px] font-black font-biz-mincho text-white tracking-widest uppercase">{region.name}</div>
-                        <div className="text-[6px] text-white/20 font-oswald tracking-[0.2em]">{region.theme}</div>
+                        <div className="text-[11px] font-black font-biz-mincho text-white tracking-widest uppercase">{region.name}</div>
+                        <div className="text-[8px] text-white/50 font-oswald tracking-[0.2em]">{region.theme}</div>
                     </motion.div>
                 )}
             </AnimatePresence>

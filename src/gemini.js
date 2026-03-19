@@ -799,13 +799,22 @@ export async function extractTrendsFromNews(newsArray, apiKey) {
 
 export async function generateWorldEvent(apiKey, trends) {
   if (!apiKey) return null;
-  const prompt = `あなたは歴史の闇を観測するAIです。
-以下のいずれかのシナリオをランダムに選び、この世界で起こる「事変」として1つ生成してください。
-1. 甘粕事件のような、国家権力によるアナキストや思想家の暗殺・魂の弾圧。
-2. ドストエフスキー『悪霊』のような、思想への熱狂と集団の暴走・テロリズム。
-3. 大震災などのパニックに端を発する流言飛語、およびそれに伴う「普通の人たち」による虐殺・暴動。
+  const prompt = `あなたは歴史と思想の潮流を観測するAIです。
+以下のいずれかのカテゴリーからシナリオをランダムに選び、この世界で起こる「事変」として1つ生成してください。
+暗い事件だけでなく、魂の救済や幸福な出来事も同じ頻度で発生します。
 
-出力形式: { "type": "riot|massacre|assassination|earthquake", "content": "具体的な事象を不気味に描写する状況説明..." }`;
+【カテゴリーA：混沌と狂気】
+1. 甘粕事件のような、国家権力による思想家の弾圧や暗殺。
+2. 群衆の暴走、流言飛語、理不尽な排斥や虐殺。
+3. 破壊的な災害や、それに伴う都市のパニック。
+
+【カテゴリーB：慈愛と新生】
+1. 敵対していた者たちが和解し、深い愛で結ばれる。
+2. 絶望の淵で新しい命（子）が誕生し、周囲に希望の光が差す。
+3. 犯罪や過ちを犯そうとした者が、土際で踏みとどまり、善行へ転じる。
+4. 長年の罪の赦し、あるいは原罪への償いと、それによる魂の悟り・解脱。
+
+出力形式: { "type": "riot|massacre|assassination|love|birth|forgiveness|enlightenment", "content": "具体的な事象を、その場の空気感と共に描写する状況説明..." }`;
   const res = await invokeGemini(apiKey, prompt, "事象の観測者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   return res.data;
 }

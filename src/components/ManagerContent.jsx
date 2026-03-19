@@ -192,16 +192,19 @@ const ManagerContent = React.memo(({
                         className="space-y-6"
                     >
                         <div className="flex items-center justify-between px-6 pt-4">
+                            <h2 className="text-sm font-bold text-white/70 tracking-[0.3em] uppercase">
+                                Spatial Navigation
+                            </h2>
                             <div className="flex bg-white/5 p-1 rounded-full border border-white/10">
                                 <button 
                                     onClick={() => setMapView('cube')}
-                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${mapView === 'cube' ? 'bg-white text-black shadow-lg' : 'text-white/40 hover:text-white'}`}
+                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${mapView === 'cube' ? 'bg-white text-black shadow-lg' : 'text-white/60 hover:text-white'}`}
                                 >
                                     Cube Dice
                                 </button>
                                 <button 
                                     onClick={() => setMapView('peninsula')}
-                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${mapView === 'peninsula' ? 'bg-[#f15a24] text-white shadow-lg' : 'text-white/40 hover:text-white'}`}
+                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${mapView === 'peninsula' ? 'bg-[#f15a24] text-white shadow-lg' : 'text-white/60 hover:text-white'}`}
                                 >
                                     Peninsula Map
                                 </button>
@@ -309,10 +312,10 @@ const ManagerContent = React.memo(({
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {stats.map((s, i) => (
-                                <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-3xl">
+                                <div key={i} className="p-4 bg-white/5 border border-white/10 rounded-3xl">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{s.label}</span>
-                                        <div className="text-white/10">{s.icon}</div>
+                                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{s.label}</span>
+                                        <div className="text-white/20">{s.icon}</div>
                                     </div>
                                     <span className="text-xl font-black text-white font-oswald">{s.val}</span>
                                 </div>
