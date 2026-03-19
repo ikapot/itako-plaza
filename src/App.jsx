@@ -610,7 +610,9 @@ export default function App() {
         </AnimatePresence>
       </div>
 
-      <FloatingInputBar {...{ input, setInput, handleSendMessage, loading, replyTo, onCancelReply: handleCancelReply }} />
+      {!activeManagerTab && (
+        <FloatingInputBar {...{ input, setInput, handleSendMessage, loading, replyTo, onCancelReply: handleCancelReply }} />
+      )}
       <CharacterOverlay {...{ enlargedCharId, setEnlargedCharId, characters: APP_CHARACTERS, handleTalkTo }} />
       {/* Sync Modal Simplified */}
       <AnimatePresence>
