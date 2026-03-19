@@ -40,7 +40,7 @@ const FloatingInputBar = React.memo(({
             <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className={`max-w-xl mx-auto flex items-center gap-2 md:gap-3 glass-spectral p-1 md:p-2 pl-3 md:pl-6 rounded-full pointer-events-auto transition-all duration-1000 group ${replyTo ? 'border-[#f15a24]/30' : ''}`}
+                className={`max-w-xl mx-auto flex items-center gap-2 md:gap-3 glass-spectral p-1 md:p-2 pl-3 md:pl-6 rounded-3xl pointer-events-auto transition-all duration-1000 group ${replyTo ? 'border-[#f15a24]/30' : ''}`}
             >
                 <textarea
                     value={input}
@@ -58,7 +58,7 @@ const FloatingInputBar = React.memo(({
                     onClick={handleSendMessage}
                     disabled={loading || !input.trim()}
                     className={`
-                        px-3 md:px-6 h-9 md:h-12 rounded-full border flex items-center gap-2 md:gap-3 transition-all duration-500 active:scale-95 disabled:opacity-20 disabled:grayscale overflow-hidden relative group/send shrink-0
+                        px-3 md:px-6 h-9 md:h-12 rounded-3xl border flex items-center gap-2 md:gap-3 transition-all duration-500 active:scale-95 disabled:opacity-20 disabled:grayscale overflow-hidden relative group/send shrink-0
                         ${input.trim() 
                             ? 'bg-[#f15a24] border-[#f15a24]/50 text-white shadow-[0_0_20px_rgba(241,90,36,0.3)]' 
                             : 'bg-white/5 border-white/10 text-white/30'}
