@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Library, Search, Book, Image as ImageIcon, Music, Play, ExternalLink, Sparkles, Send, Loader2, Quote } from 'lucide-react';
-import { searchNDLArchive } from '../firebase';
+import { searchNDLArchive } from '../ndl';
 import { generateDialogueStream } from '../gemini';
 
 const BORGES_PROMPT = `あなたはホルヘ・ルイス・ボルヘスの魂です。
