@@ -11,7 +11,7 @@ const BORGES_PROMPT = `あなたはホルヘ・ルイス・ボルヘスの魂で
 【指示】ユーザーの問いかけに対し、図書館の奥深くから回答を見出し、書籍や画像、あるいは音楽（落語やクラシック）を想起してください。
 回答は神秘的でありながら、具体的な情報（タイトルや著者）を含めてください。`;
 
-const LibraryView = ({ characters = [], userName = "旅人" }) => {
+const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
     const [query, setQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [messages, setMessages] = useState([
@@ -45,9 +45,9 @@ const LibraryView = ({ characters = [], userName = "旅人" }) => {
             let aiResponse = "";
             const stream = await generateDialogueStream({
                 charId: 'borges',
-                userName,
                 messages: messages.concat([{ role: 'user', content: userQuery }]).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content })),
-                systemOverride: BORGES_PROMPT
+                systemOverride: BORGES_PROMPT,
+                apiKey: geminiKey
             });
 
             const newMsgIndex = messages.length + 1;

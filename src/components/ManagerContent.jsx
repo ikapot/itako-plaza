@@ -265,7 +265,7 @@ const ManagerContent = React.memo(({
                                 THE LIBRARY OF BABEL / バベルの図書館
                             </h2>
                         </div>
-                        <LibraryView characters={characters} userName={userName} />
+                        <LibraryView characters={characters} userName={userName} geminiKey={geminiKey} />
                     </motion.div>
                 ) : null}
 
