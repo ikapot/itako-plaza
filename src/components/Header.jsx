@@ -21,7 +21,8 @@ const Header = React.memo(({
     ];
 
     const modeTabs = [
-        { id: 'map', icon: <Globe size={14} />, label: 'RANDAMNI', color: '#fdb913' },
+        { id: 'map', icon: <MapPin size={14} />, label: 'WORLD MAP', color: '#bd8a78' },
+        { id: 'dice', icon: <Globe size={14} />, label: 'RANDAMNI', color: '#fdb913' },
         { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
         { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
         { id: 'grimoire', icon: <BookOpen size={14} />, label: 'Manual', color: '#bd8a78' },

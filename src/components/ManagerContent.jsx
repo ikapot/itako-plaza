@@ -175,7 +175,6 @@ const ManagerContent = React.memo(({
     messages,
     userName
 }) => {
-    const [mapView, setMapView] = useState('peninsula'); // Default to the new demo view
     const stats = useMemo(() => [
         { label: 'Bookmarks', val: bookmarks?.length || 0, icon: <Bookmark size={14} /> },
         { label: 'Manifestations', val: messages.filter(m => m.role === 'user').length || 0, icon: <MessageCircle size={14} /> },
@@ -193,6 +192,36 @@ const ManagerContent = React.memo(({
     return (
         <div className="space-y-12">
             <AnimatePresence mode="wait">
+                {activeManagerTab === 'dice' ? (
+                    <motion.div
+                        key="dice"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="space-y-6"
+                    >
+                        <div className="flex items-center justify-between px-6 pt-4">
+                            <h2 className="text-sm font-bold text-[#fdb913] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
+                                <Globe size={18} />
+                                RANDAMNI / 霊的偶発性
+                            </h2>
+                        </div>
+
+                        <ThreeDMap 
+                            locations={locations} 
+                            selectedLocationId={selectedLocationId} 
+                            setSelectedLocationId={setSelectedLocationId}
+                            selectedCharIds={selectedCharIds}
+                            locationEnergies={locationEnergies}
+                            characters={characters}
+                            handleToggleChar={handleToggleChar}
+                            onSetChars={handleSetChars}
+                            onGo={handleGo}
+                            globalSentiment={globalSentiment}
+                        />
+                    </motion.div>
+                ) : null}
+
                 {activeManagerTab === 'map' ? (
                     <motion.div
                         key="map"
@@ -202,50 +231,22 @@ const ManagerContent = React.memo(({
                         className="space-y-6"
                     >
                         <div className="flex items-center justify-between px-6 pt-4">
-                            <h2 className="text-sm font-bold text-white/70 tracking-[0.3em] uppercase">
-                                Spatial Navigation
+                            <h2 className="text-sm font-bold text-[#bd8a78] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
+                                <MapPin size={18} />
+                                WORLD MAP / イタコ半島全図
                             </h2>
-                            <div className="flex bg-white/5 p-1 rounded-full border border-white/10">
-                                <button 
-                                    onClick={() => setMapView('cube')}
-                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${mapView === 'cube' ? 'bg-white text-black shadow-lg' : 'text-white/60 hover:text-white'}`}
-                                >
-                                    Cube Dice
-                                </button>
-                                <button 
-                                    onClick={() => setMapView('peninsula')}
-                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${mapView === 'peninsula' ? 'bg-[#f15a24] text-white shadow-lg' : 'text-white/60 hover:text-white'}`}
-                                >
-                                    Peninsula Map
-                                </button>
-                            </div>
                         </div>
 
-                        {mapView === 'cube' ? (
-                            <ThreeDMap 
-                                locations={locations} 
-                                selectedLocationId={selectedLocationId} 
-                                setSelectedLocationId={setSelectedLocationId}
-                                selectedCharIds={selectedCharIds}
-                                locationEnergies={locationEnergies}
-                                characters={characters}
-                                handleToggleChar={handleToggleChar}
-                                onSetChars={handleSetChars}
-                                onGo={handleGo}
-                                globalSentiment={globalSentiment}
-                            />
-                        ) : (
-                            <PeninsulaMap 
-                                locations={locations} 
-                                selectedLocationId={selectedLocationId} 
-                                setSelectedLocationId={setSelectedLocationId}
-                                selectedCharIds={selectedCharIds}
-                                characters={characters}
-                                handleToggleChar={handleToggleChar}
-                                onGo={handleGo}
-                                globalSentiment={globalSentiment}
-                            />
-                        )}
+                        <PeninsulaMap 
+                            locations={locations} 
+                            selectedLocationId={selectedLocationId} 
+                            setSelectedLocationId={setSelectedLocationId}
+                            selectedCharIds={selectedCharIds}
+                            characters={characters}
+                            handleToggleChar={handleToggleChar}
+                            onGo={handleGo}
+                            globalSentiment={globalSentiment}
+                        />
                     </motion.div>
                 ) : null}
 
