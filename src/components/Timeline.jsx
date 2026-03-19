@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bookmark, ChevronRight, Reply } from 'lucide-react';
+import { Bookmark, ChevronRight, Reply, Repeat, TrendingUp, MessageSquare, Info } from 'lucide-react';
 import SpiritCard from './SpiritCard';
 import WarholAvatar from './WarholAvatar';
 
