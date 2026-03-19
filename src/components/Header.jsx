@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Menu, Settings, TrendingUp, MessageSquare, Ghost, Globe, Cpu, BookOpen, MapPin } from 'lucide-react';
+import { User, Menu, Settings, TrendingUp, MessageSquare, Ghost, Globe, Cpu, BookOpen, MapPin, Library } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Logo from './Logo';
 
@@ -23,6 +23,7 @@ const Header = React.memo(({
     const modeTabs = [
         { id: 'map', icon: <MapPin size={14} />, label: 'WORLD MAP', color: '#bd8a78' },
         { id: 'dice', icon: <Globe size={14} />, label: 'RANDAMNI', color: '#fdb913' },
+        { id: 'library', icon: <Library size={14} />, label: 'LIBRARY', color: '#6366f1' },
         { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
         { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
         { id: 'grimoire', icon: <BookOpen size={14} />, label: 'Manual', color: '#bd8a78' },

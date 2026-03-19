@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Activity } from 'lucide-react';
+import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Activity, Library } from 'lucide-react';
 import ThreeDMap from './ThreeDMap';
 import PeninsulaMap from './PeninsulaMap';
+import LibraryView from './Library';
 import WarholAvatar from './WarholAvatar';
 import PortalGrimoire from './PortalGrimoire';
 
@@ -247,6 +248,24 @@ const ManagerContent = React.memo(({
                             onGo={handleGo}
                             globalSentiment={globalSentiment}
                         />
+                    </motion.div>
+                ) : null}
+
+                {activeManagerTab === 'library' ? (
+                    <motion.div
+                        key="library"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="space-y-6"
+                    >
+                        <div className="flex items-center justify-between px-6 pt-4">
+                            <h2 className="text-sm font-bold text-[#6366f1] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
+                                <Library size={18} />
+                                THE LIBRARY OF BABEL / バベルの図書館
+                            </h2>
+                        </div>
+                        <LibraryView characters={characters} userName={userName} />
                     </motion.div>
                 ) : null}
 
