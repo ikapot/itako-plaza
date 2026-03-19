@@ -655,6 +655,72 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
 }
 
 /**
+ * 汎用ストリーム再生用ジェネレーター (Library等で使用)
+ */
+export async function* generateDialogueStream({ charId, messages, systemOverride, apiKey }) {
+  if (!apiKey || apiKey === 'undefined' || apiKey === 'null') {
+    yield "【霊的周波数が未設定です】";
+    return;
+  }
+
+  const charConfig = CHARACTER_CONFIGS[charId] || {};
+  const targetModel = charConfig.model || "google/gemini-2.0-flash-001";
+  
+  const fullMessages = [
+    { role: "system", content: systemOverride || charConfig.systemPrompt || "あなたは博識な司書です。" },
+    ...messages
+  ];
+
+  const body = {
+    model: targetModel,
+    messages: fullMessages,
+    temperature: 0.7,
+    stream: true
+  };
+
+  const response = await fetch(OPENROUTER_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey.trim()}`,
+      "HTTP-Referer": OPENROUTER_REFERER,
+      "X-Title": OPENROUTER_TITLE,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    yield "【通信エラーが発生しました】";
+    return;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let fullText = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    
+    const chunk = decoder.decode(value);
+    const lines = chunk.split('\n');
+    
+    for (const line of lines) {
+      if (!line.trim() || line.includes('[DONE]')) continue;
+      if (line.startsWith('data: ')) {
+        try {
+          const data = JSON.parse(line.slice(6));
+          const text = data.choices[0]?.delta?.content || "";
+          if (text) {
+            yield text;
+          }
+        } catch (e) {}
+      }
+    }
+  }
+}
+
+/**
  * 霊的知能への統一アクセスポイント (OpenRouter)
  */
 export async function invokeGemini(apiKey, prompt, sysPrompt = "", config = {}, isJson = false) {
