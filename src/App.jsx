@@ -598,8 +598,9 @@ export default function App() {
                   className="w-full h-full glass-spectral rounded-[40px] border border-white/10 shadow-3xl overflow-hidden flex flex-col relative"
                 >
                   <div className="flex justify-between items-center p-6 border-b border-white/5">
-                    <h2 className="text-2xl font-black font-oswald uppercase tracking-widest text-white/40">
-                      System / {activeManagerTab}
+                    <h2 className="text-xl md:text-2xl font-black font-oswald uppercase tracking-[0.2em] text-[#f15a24] flex items-center gap-4">
+                      <span className="opacity-20 text-white">ITKO_SYS_01_</span>
+                      {activeManagerTab === 'directory' ? 'SPIRIT_INDEX' : activeManagerTab?.toUpperCase()}
                     </h2>
                     <button 
                       onClick={() => setActiveManagerTab(null)}

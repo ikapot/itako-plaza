@@ -7,27 +7,46 @@ import LibraryView from './Library';
 import WarholAvatar from './WarholAvatar';
 import PortalGrimoire from './PortalGrimoire';
 
-const getGenreColors = (face) => {
-    switch(face) {
-        case 0: return { bgColor: 'bg-[#f15a24]', textColor: 'text-black', borderColor: 'border-black' }; // 作家 (Amber/Orange)
-        case 1: 
-        case 3: return { bgColor: 'bg-[#3f3f46]', textColor: 'text-[#EAE0D5]', borderColor: 'border-black' }; // 思想家 (Grey)
-        case 4: return { bgColor: 'bg-[#EAE0D5]', textColor: 'text-black', borderColor: 'border-black' }; // 芸術家 (Cream)
-        case 2: return { bgColor: 'bg-[#b45309]', textColor: 'text-white', borderColor: 'border-black' }; // 先駆者 (Deep Amber)
-        case 5: return { bgColor: 'bg-[#1a1a1a]', textColor: 'text-[#f15a24]', borderColor: 'border-black' }; // 異界 (Dark)
-        default: return { bgColor: 'bg-[#2a2a2a]', textColor: 'text-[#EAE0D5]', borderColor: 'border-black' };
+const getGenreColors = (char, i) => {
+    // Alternating between Orange and Black "paper" for a diverse cabinet look
+    const isOrangePaper = i % 2 === 0;
+    
+    if (isOrangePaper) {
+        return {
+            bgColor: 'bg-[#f15a24]', // Orange Paper
+            textColor: 'text-black',
+            subTextColor: 'text-black/60',
+            tabColor: 'bg-zinc-950', 
+            tabTextColor: 'text-[#f15a24]',
+            tagBg: 'bg-black/10',
+            tagText: 'text-black',
+            borderColor: 'border-black/10',
+            btnBg: 'bg-black text-white'
+        };
+    } else {
+        return {
+            bgColor: 'bg-zinc-950', // Black Paper
+            textColor: 'text-white/90',
+            subTextColor: 'text-white/40',
+            tabColor: 'bg-[#f15a24]',
+            tabTextColor: 'text-black',
+            tagBg: 'bg-[#f15a24]/10',
+            tagText: 'text-[#f15a24]',
+            borderColor: 'border-[#f15a24]/20',
+            btnBg: 'bg-[#f15a24] text-black'
+        };
     }
 };
 
 const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected, onToggleChar }) => {
-    const { bgColor, textColor } = getGenreColors(c.face);
+    const { bgColor, textColor, subTextColor, tabColor, tabTextColor, tagBg, tagText, borderColor, btnBg } = getGenreColors(c, i);
     const alignment = i % 3 === 0 ? 'justify-start' : i % 3 === 1 ? 'justify-center' : 'justify-end';
 
     return (
         <div 
-            className={`relative transition-all duration-700 ease-in-out w-full font-serif`}
+            className={`relative transition-all duration-700 ease-in-out w-full font-sans`}
             style={{
-                marginTop: i === 0 ? '0' : '-3rem',
+                marginTop: i === 0 ? '0' : '-3.5rem',
                 zIndex: isExpanded ? 60 : i
             }}
         >
@@ -35,66 +54,65 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             <div className={`flex w-full ${alignment} px-4 md:px-12 pointer-events-none`}>
                 <button 
                     onClick={() => onToggleExpand(isExpanded ? null : c.id)}
-                    className={`${bgColor} ${textColor} px-10 md:px-14 py-2 md:py-3 text-[10px] md:text-sm font-black tracking-[0.2em] uppercase border-x-2 border-t-2 border-black pointer-events-auto origin-bottom transition-all relative z-20 font-oswald`}
+                    className={`${tabColor} ${tabTextColor} px-10 md:px-14 py-2 md:py-3 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase border-x border-t border-black/40 pointer-events-auto origin-bottom transition-all relative z-20 font-oswald shadow-2xl`}
                     style={{
-                        clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)'
+                        clipPath: 'polygon(0 0, 95% 0, 100% 100%, 0% 100%)'
                     }}
                 >
                     <span className="flex items-center gap-4">
-                        <span className="opacity-40">{c.name.substring(0, 3)}</span>
+                        <span className="opacity-40">#{String(i + 1).padStart(2, '0')}</span>
                         {c.name}
                     </span>
+                    {isExpanded && <motion.div layoutId="tab-active" className={`absolute bottom-0 left-0 right-0 h-1 ${i % 2 === 0 ? 'bg-[#f15a24]' : 'bg-white'}`} />}
                 </button>
             </div>
             
             {/* Folder Body */}
             <div 
                 onClick={() => !isExpanded && onToggleExpand(c.id)}
-                className={`w-full rounded-none ${bgColor} ${textColor} border-2 border-black overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10`}
+                className={`w-full rounded-none ${bgColor} ${textColor} border ${borderColor} overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10 shadow-3xl shadow-black/80`}
             >
-                <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-8 cursor-default' : 'max-h-[1.5rem] opacity-90 p-0 flex items-center px-6 hover:bg-black/10'}`}>
+                <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-12 cursor-default' : 'max-h-[2.5rem] opacity-40 p-0 flex items-center px-8 hover:opacity-100 hover:bg-black/5'}`}>
                     
                     {!isExpanded ? (
                         <div className="w-full h-8 flex items-center justify-between pointer-events-none" />
                     ) : (
                         <div className="space-y-6 md:space-y-8" onClick={e => e.stopPropagation()}>
                             <div className="flex flex-col sm:flex-row items-start gap-6 md:gap-8">
-                                <div className="w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-lg overflow-hidden border-2 border-current/20 bg-white/10 relative shadow-inner">
+                                <div className="w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-none overflow-hidden border border-[#f15a24]/30 bg-black relative shadow-2xl">
                                     {c.avatar ? (
-                                        <img src={c.avatar} alt={c.name} className="w-full h-full object-cover mix-blend-multiply grayscale contrast-125 brightness-110" />
+                                        <img src={c.avatar} alt={c.name} className="w-full h-full object-cover grayscale contrast-125 brightness-110 opacity-80 group-hover:opacity-100 transition-opacity" />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center opacity-30 text-6xl font-serif">?</div>
                                     )}
                                 </div>
                                 <div className="flex-1 space-y-4 md:space-y-6 w-full">
                                     <div>
-                                        <h3 className="text-3xl md:text-4xl font-black font-biz-mincho tracking-widest border-b border-current/20 pb-2 mb-2 md:mb-4">{c.name}</h3>
+                                        <h3 className={`text-3xl md:text-4xl font-black font-oswald tracking-widest border-b ${i%2===0 ? 'border-black/20':'border-[#f15a24]/20'} pb-2 mb-2 md:mb-4 uppercase`}>{c.name}</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-biz-mincho">{c.role}</span>
-                                            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] bg-current/10 px-3 py-1 rounded-full font-biz-mincho">{c.flavor}</span>
+                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${tagBg} ${tagText} px-3 py-1 rounded-sm border ${i%2===0 ? 'border-black/10':'border-[#f15a24]/20'} font-oswald`}>{c.role}</span>
+                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${i%2===0 ? 'bg-black/5 text-black/40 border-black/10':'bg-white/5 text-white/40 border-white/10'} px-3 py-1 rounded-sm border font-oswald`}>{c.flavor}</span>
                                         </div>
                                     </div>
-                                    <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-90 break-words">
+                                    <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-90 break-words font-medium">
                                         {c.description}
                                     </p>
                                 </div>
                             </div>
                             
-                            <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4 border-t border-current/20 font-sans">
+                            <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-black/5 font-oswald">
                                 <button
                                     onClick={() => onToggleChar(c.id)}
-                                    className={`w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-xs md:text-sm uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3
+                                    className={`w-full sm:w-auto px-10 py-4 rounded-none font-black text-xs md:text-sm uppercase tracking-[0.4em] transition-all active:scale-95 flex items-center justify-center gap-3 border
                                         ${isSelected 
-                                            ? 'bg-red-950 text-white border-red-900 border hover:bg-red-900'
-                                            : (c.face === 4) // Artists (Light)
-                                                ? 'bg-[#3C2A21] text-[#EAE0D5] border hover:bg-black' 
-                                                : 'bg-white/20 text-white border hover:bg-white/30'}
+                                            ? (i%2===0 ? 'bg-black text-white border-black shadow-xl':'bg-[#f15a24] text-black border-[#f15a24] shadow-[0_0_30px_rgba(241,90,36,0.2)]')
+                                            : (i%2===0 ? 'bg-transparent text-black border-black/30 hover:bg-black hover:text-white' : 'bg-transparent text-[#f15a24] border-[#f15a24]/50 hover:bg-[#f15a24] hover:text-black')}
                                     `}
                                 >
                                     {isSelected ? (
-                                        <span className="font-biz-mincho">同行中：離脱させる</span>
+                                        <span>Summond / 同行中</span>
                                     ) : (
-                                        <><span className="font-biz-mincho">このキャラクターと対話する</span><span className="text-lg">→</span></>
+                                        <><span>Manifest Soul / 対話する</span><span className="text-lg">→</span></>
                                     )}
                                 </button>
                             </div>
@@ -127,12 +145,13 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
              </div>
 
              {/* The Box Front Bottom */}
-             <div className="relative z-[100] w-[110%] -ml-[5%] mt-4 drop-shadow-2xl pointer-events-none">
-                 <div className="w-full h-32 md:h-48 bg-[#4A3525] rounded-b-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] border-t-[8px] border-[#3A2515] flex items-center justify-center relative overflow-hidden">
-                     <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80 pointer-events-none" />
+             <div className="relative z-[100] w-[110%] -ml-[5%] mt-8 drop-shadow-3xl pointer-events-none">
+                 <div className="w-full h-32 md:h-48 bg-zinc-900 rounded-b-[40px] shadow-[0_40px_100px_rgba(0,0,0,0.9)] border-t-[8px] border-[#f15a24] flex items-center justify-center relative overflow-hidden">
+                     <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black/80 pointer-events-none opacity-60" />
                      {/* Label */}
-                     <div className="bg-[#EAE0D5] px-8 py-3 shadow-inner transform -rotate-1 border border-black/30 relative z-10 w-64 text-center flex items-center justify-center">
-                         <span className="font-biz-mincho text-[#3C2A21] text-2xl font-bold tracking-widest">ITAKO_FILES</span>
+                     <div className="bg-[#f15a24] px-12 py-3 shadow-[0_10px_30px_rgba(241,90,36,0.3)] border border-black/20 relative z-10 w-80 text-center flex flex-col items-center justify-center">
+                         <span className="font-oswald text-black text-2xl md:text-3xl font-black tracking-[0.3em] uppercase">Spirit Index</span>
+                         <span className="text-[10px] text-black/50 font-bold uppercase tracking-[0.5em]">Soul Configuration V2</span>
                          <div className="absolute top-1 left-1 w-1 h-1 rounded-full bg-black/40" />
                          <div className="absolute top-1 right-1 w-1 h-1 rounded-full bg-black/40" />
                          <div className="absolute bottom-1 left-1 w-1 h-1 rounded-full bg-black/40" />
@@ -140,8 +159,8 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
                      </div>
                  </div>
                  {/* Trapeze sides trick using CSS borders */}
-                 <div className="absolute top-0 -left-6 border-t-[0px] border-b-[8rem] md:border-b-[12rem] border-b-[#4A3525] border-l-[1.5rem] border-l-transparent hidden md:block" />
-                 <div className="absolute top-0 -right-6 border-t-[0px] border-b-[8rem] md:border-b-[12rem] border-b-[#4A3525] border-r-[1.5rem] border-r-transparent hidden md:block" />
+                 <div className="absolute top-0 -left-6 border-t-[0px] border-b-[8rem] md:border-b-[12rem] border-b-zinc-900 border-l-[1.5rem] border-l-transparent hidden md:block" />
+                 <div className="absolute top-0 -right-6 border-t-[0px] border-b-[8rem] md:border-b-[12rem] border-b-zinc-900 border-r-[1.5rem] border-r-transparent hidden md:block" />
              </div>
         </div>
     );
@@ -230,8 +249,8 @@ const ManagerContent = React.memo(({
                         exit={{ opacity: 0, scale: 0.9 }}
                         className="space-y-6"
                     >
-                        <div className="flex items-center justify-between px-6 pt-4">
-                            <h2 className="text-sm font-bold text-[#bd8a78] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
+                        <div className="flex items-center justify-between px-6 mb-2">
+                            <h2 className="text-sm font-bold text-[#f15a24] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
                                 <MapPin size={18} />
                                 WORLD MAP / イタコ半島全図
                             </h2>
@@ -258,8 +277,8 @@ const ManagerContent = React.memo(({
                         exit={{ opacity: 0, y: -20 }}
                         className="space-y-6"
                     >
-                        <div className="flex items-center justify-between px-6 pt-4">
-                            <h2 className="text-sm font-bold text-[#6366f1] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
+                        <div className="flex items-center justify-between px-6 mb-2">
+                            <h2 className="text-sm font-bold text-[#f15a24] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
                                 <Library size={18} />
                                 THE LIBRARY OF BABEL / バベルの図書館
                             </h2>
