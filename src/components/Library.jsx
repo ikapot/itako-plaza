@@ -104,8 +104,8 @@ const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
                             )}
                         </div>
                         <div>
-                            <div className="text-xs font-black text-white uppercase tracking-widest">{borges.name}</div>
-                            <div className="text-[9px] text-white/50 uppercase tracking-widest">Library Keeper of Babel</div>
+                            <div className="text-xs font-black text-[#63e9ff] uppercase tracking-[.2em]">{borges.name}</div>
+                            <div className="text-[9px] text-[#63e9ff]/50 uppercase tracking-[.3em]">Library Keeper of Babel</div>
                         </div>
                     </div>
                 </div>
@@ -118,10 +118,10 @@ const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
                             animate={{ opacity: 1, y: 0 }}
                             className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div className={`max-w-[85%] p-4 rounded-2xl text-[13px] leading-relaxed font-biz-mincho
+                            <div className={`max-w-[85%] p-4 rounded-2xl text-[13px] leading-relaxed font-biz-mincho shadow-lg backdrop-blur-sm
                                 ${m.role === 'user' 
-                                    ? 'bg-[#f15a24] text-white rounded-tr-none' 
-                                    : 'bg-white/5 text-white/90 border border-white/10 rounded-tl-none font-serif italic'}
+                                    ? 'bg-[#00707a] text-white rounded-tr-none border border-[#00f0ff]/30' 
+                                    : 'bg-white/5 text-[#d0f5ff] border border-white/10 rounded-tl-none font-serif italic'}
                             `}>
                                 {m.content}
                             </div>
