@@ -91,9 +91,9 @@ const LibraryView = ({ characters = [], userName = "旅人" }) => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[700px] overflow-hidden">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 h-full lg:h-[700px] overflow-hidden">
             {/* Borges Dialogue Section */}
-            <div className="flex flex-col bg-black/40 rounded-[32px] border border-white/10 overflow-hidden">
+            <div className="flex-1 min-h-[400px] lg:min-h-0 flex flex-col bg-black/40 rounded-[32px] border border-white/10 overflow-hidden">
                 <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-itako-sand flex items-center justify-center overflow-hidden border border-white/20">
@@ -149,7 +149,7 @@ const LibraryView = ({ characters = [], userName = "旅人" }) => {
             </div>
 
             {/* Shelves / Results Section */}
-            <div className="flex flex-col gap-6 overflow-y-auto pr-2 scrollbar-hide">
+            <div className="flex-1 lg:flex flex-col gap-6 overflow-y-auto pr-2 scrollbar-hide pb-20 lg:pb-0">
                 {/* Media Section (Rakugo, Music, etc) */}
                 <AnimatePresence>
                     {mediaResults.length > 0 && (

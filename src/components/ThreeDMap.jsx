@@ -473,7 +473,7 @@ function ThreeDMap({
             whileTap={{ scale: 0.95 }}
             onClick={onGo}
             disabled={isRolling || selectedCharIds.length === 0}
-            className={`px-8 py-2 rounded-full font-bold font-biz-mincho text-[10px] tracking-[0.3em] uppercase transition-all shadow-lg border ${
+            className={`px-4 sm:px-8 py-2 rounded-full font-bold font-biz-mincho text-[9px] sm:text-[10px] tracking-[0.1em] sm:tracking-[0.3em] uppercase transition-all shadow-lg border shrink-0 ${
               isRolling || selectedCharIds.length === 0
                 ? 'bg-white/5 border-white/5 text-white/10 cursor-not-allowed'
                 : 'bg-[#f15a24] border-[#f15a24]/50 text-white hover:bg-[#ff6a3a] shadow-[0_0_20px_rgba(241,90,36,0.4)]'
