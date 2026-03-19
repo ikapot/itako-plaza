@@ -68,10 +68,10 @@ const Header = React.memo(({
                             onClick={() => setActiveManagerTab(tab.id)}
                             style={{
                                 backgroundColor: isActive ? tab.color : 'transparent',
-                                color: isActive ? '#000' : 'rgba(255,255,255,0.3)',
+                                color: isActive ? '#000' : 'rgba(255,255,255,0.7)',
                                 boxShadow: isActive ? `0 4px 15px ${tab.color}44` : 'none'
                             }}
-                            className={`flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase transition-all duration-300 active:scale-95 border ${isActive ? 'border-white/20' : 'border-transparent'}`}
+                            className={`flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase transition-all duration-300 active:scale-95 border ${isActive ? 'border-white/40' : 'border-transparent'}`}
                         >
                             {tab.icon}
                             <span className="hidden sm:inline">{tab.label}</span>

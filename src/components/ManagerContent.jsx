@@ -284,7 +284,7 @@ const ManagerContent = React.memo(({
                                 <span className="text-[11px] font-black text-[#f15a24] tracking-widest uppercase mb-1 font-oswald">
                                     {geminiKey ? `Active Spiritual Conduits (${geminiKey.split(',').filter(k=>k.trim()).length}/3)` : 'Connection Severed'}
                                 </span>
-                                <p className="text-[10px] text-white/40 leading-relaxed font-serif italic">
+                                <p className="text-[10px] text-white/80 leading-relaxed font-serif italic">
                                     {geminiKey ? '複数の霊的回路が同期しています。並列処理により制限を超越します。' : '対話を開始するにはAPIキーを接続してください。3つの鍵が推奨されます。'}
                                 </p>
                             </div>
@@ -315,9 +315,9 @@ const ManagerContent = React.memo(({
                             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bd8a78] to-[#f15a24] flex items-center justify-center text-4xl shadow-2xl">
                                 {userName?.[0] || '魂'}
                             </div>
-                            <div className="flex flex-col">
+                             <div className="flex flex-col">
                                 <h1 className="text-3xl font-black font-oswald uppercase tracking-widest text-white">{userName}</h1>
-                                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.4em]">Spirit Registry: Active</p>
+                                <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.4em]">Spirit Registry: Active</p>
                             </div>
                         </div>
 
@@ -325,8 +325,8 @@ const ManagerContent = React.memo(({
                             {stats.map((s, i) => (
                                 <div key={i} className="p-4 bg-white/5 border border-white/10 rounded-3xl">
                                     <div className="flex items-center justify-between mb-2">
-                                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{s.label}</span>
-                                        <div className="text-white/20">{s.icon}</div>
+                                        <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{s.label}</span>
+                                        <div className="text-white/50">{s.icon}</div>
                                     </div>
                                     <span className="text-xl font-black text-white font-oswald">{s.val}</span>
                                 </div>
