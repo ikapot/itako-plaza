@@ -20,22 +20,22 @@ const getGenreColors = (char) => {
         return {
             bgColor: 'bg-[#f15a24]', // Orange Paper
             textColor: 'text-black',
-            subTextColor: 'text-black/60',
-            tabColor: 'bg-[#f15a24]', // Same as body
+            subTextColor: 'text-black/50',
+            tabColor: 'bg-[#f15a24]', 
             tabTextColor: 'text-black',
-            tagBg: 'bg-black/10',
+            tagBg: 'bg-black/20',
             tagText: 'text-black',
-            borderColor: 'border-black/10',
-            btnBg: 'bg-black text-white'
+            borderColor: 'border-black/20',
+            btnBg: 'bg-black text-[#f15a24]'
         };
     } else {
         return {
             bgColor: 'bg-zinc-950', // Black Paper
-            textColor: 'text-white/90',
-            subTextColor: 'text-white/40',
-            tabColor: 'bg-zinc-950', // Same as body
+            textColor: 'text-[#f15a24]',
+            subTextColor: 'text-[#f15a24]/40',
+            tabColor: 'bg-zinc-950', 
             tabTextColor: 'text-[#f15a24]',
-            tagBg: 'bg-[#f15a24]/10',
+            tagBg: 'bg-[#f15a24]/20',
             tagText: 'text-[#f15a24]',
             borderColor: 'border-[#f15a24]/30',
             btnBg: 'bg-[#f15a24] text-black'
@@ -85,34 +85,42 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                     ) : (
                         <div className="space-y-6 md:space-y-8" onClick={e => e.stopPropagation()}>
                             <div className="flex flex-col sm:flex-row items-start gap-6 md:gap-8">
-                                <div className="w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-none overflow-hidden border border-[#f15a24]/30 bg-black relative shadow-2xl">
+                                <div className={`w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-none overflow-hidden border ${isOrange ? 'border-black/10 bg-[#f15a24]' : 'border-[#f15a24]/30 bg-zinc-950'} relative shadow-2xl`}>
                                     {c.avatar ? (
-                                        <img src={c.avatar} alt={c.name} className="w-full h-full object-cover grayscale contrast-125 brightness-110 opacity-80 group-hover:opacity-100 transition-opacity" />
+                                        <>
+                                            {/* Layer to provide the color base for Black cards */}
+                                            {!isOrange && <div className="absolute inset-0 bg-[#f15a24]" />}
+                                            <img 
+                                                src={c.avatar} 
+                                                alt={c.name} 
+                                                className={`absolute inset-0 w-full h-full object-cover contrast-[4] grayscale brightness-[1.1] ${isOrange ? 'mix-blend-multiply opacity-80' : 'invert mix-blend-multiply opacity-100'}`} 
+                                            />
+                                        </>
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center opacity-30 text-6xl font-serif">?</div>
                                     )}
                                 </div>
                                 <div className="flex-1 space-y-4 md:space-y-6 w-full">
                                     <div>
-                                        <h3 className={`text-3xl md:text-4xl font-black font-oswald tracking-widest border-b ${isOrange ? 'border-black/20':'border-[#f15a24]/20'} pb-2 mb-2 md:mb-4 uppercase`}>{c.name}</h3>
+                                        <h3 className={`text-3xl md:text-4xl font-black font-oswald tracking-widest border-b ${isOrange ? 'border-black/20':'border-[#f15a24]/30'} pb-2 mb-2 md:mb-4 uppercase`}>{c.name}</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${tagBg} ${tagText} px-3 py-1 rounded-sm border ${isOrange ? 'border-black/20':'border-[#f15a24]/20'} font-oswald`}>{c.role}</span>
-                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${isOrange ? 'bg-black/5 text-black/40 border-black/10':'bg-white/5 text-white/40 border-white/10'} px-3 py-1 rounded-sm border font-oswald`}>{c.flavor}</span>
+                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${tagBg} ${tagText} px-3 py-1 rounded-sm border ${isOrange ? 'border-black/30':'border-[#f15a24]/40'} font-oswald`}>{c.role}</span>
+                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${isOrange ? 'bg-black/10 text-black/60 border-black/10':'bg-[#f15a24]/10 text-[#f15a24]/60 border-[#f15a24]/20'} px-3 py-1 rounded-sm border font-oswald`}>{c.flavor}</span>
                                         </div>
                                     </div>
-                                    <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-90 break-words font-medium">
+                                    <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-95 break-words font-medium">
                                         {c.description}
                                     </p>
                                 </div>
                             </div>
                             
-                            <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t ${isOrange ? 'border-black/10' : 'border-white/5'} font-oswald">
+                            <div className={`flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t ${isOrange ? 'border-black/10' : 'border-[#f15a24]/10'} font-oswald`}>
                                 <button
                                     onClick={() => onToggleChar(c.id)}
                                     className={`w-full sm:w-auto px-10 py-4 rounded-none font-black text-xs md:text-sm uppercase tracking-[0.4em] transition-all active:scale-95 flex items-center justify-center gap-3 border
                                         ${isSelected 
-                                            ? (isOrange ? 'bg-black text-white border-black shadow-xl':'bg-[#f15a24] text-black border-[#f15a24] shadow-[0_0_30px_rgba(241,90,36,0.2)]')
-                                            : (isOrange ? 'bg-transparent text-black border-black/30 hover:bg-black hover:text-white' : 'bg-transparent text-[#f15a24] border-[#f15a24]/50 hover:bg-[#f15a24] hover:text-black')}
+                                            ? (isOrange ? 'bg-black text-[#f15a24] border-black shadow-xl':'bg-[#f15a24] text-black border-[#f15a24] shadow-[0_0_30px_rgba(241,90,36,0.2)]')
+                                            : (isOrange ? 'bg-transparent text-black border-black/30 hover:bg-black hover:text-[#f15a24]' : 'bg-transparent text-[#f15a24] border-[#f15a24]/50 hover:bg-[#f15a24] hover:text-black')}
                                     `}
                                 >
                                     {isSelected ? (
