@@ -4,12 +4,50 @@ import { Library, Search, Book, Image as ImageIcon, Music, Play, ExternalLink, S
 import { searchNDLArchive } from '../ndl';
 import { generateDialogueStream } from '../gemini';
 
+const getMediaArtifacts = (query) => {
+    const q = query.toLowerCase();
+    if (q.includes('落語') || q.includes('古典') || q.includes('志ん生') || q.includes('文楽') || q.includes('円生')) {
+        return [
+            { title: '古今亭志ん生：黄金餅', type: 'rakugo', url: 'https://www.youtube.com/results?search_query=古今亭志ん生+黄金餅', icon: <Music className="text-orange-400" /> },
+            { title: '五代目古今亭志ん生 名演集', type: 'rakugo', url: 'https://www.youtube.com/results?search_query=古今亭志ん生+名演集', icon: <Music className="text-orange-400" /> }
+        ];
+    }
+    if (q.includes('クラッシク') || q.includes('ベートーヴェン') || q.includes('ショパン') || q.includes('音楽')) {
+        return [
+            { title: 'Beethoven: Symphony No. 9', type: 'music', url: 'https://www.youtube.com/results?search_query=Beethoven+Symphony+9', icon: <Music className="text-blue-400" /> },
+            { title: 'Chopin: Nocturnes', type: 'music', url: 'https://www.youtube.com/results?search_query=Chopin+Nocturnes', icon: <Music className="text-purple-400" /> }
+        ];
+    }
+    return [];
+};
+
 const BORGES_PROMPT = `あなたはホルヘ・ルイス・ボルヘスの魂です。
 【核心となる思想】世界は無限の「バベルの図書館」であり、あらゆる本、あらゆる過去と未来が棚に収められています。
 【役割】検索者（あなた）に対して、図書館の博大さと迷宮のような知識を語り、それに関連する書籍やメディアを提示する司書です。
 【トーン】極めて知的で博学。盲目の司書としての静かな威厳。迷宮、鏡、無限、円環といったキーワードを好みます。
 【指示】ユーザーの問いかけに対し、図書館の奥深くから回答を見出し、書籍や画像、あるいは音楽（落語やクラシック）を想起してください。
 回答は神秘的でありながら、具体的な情報（タイトルや著者）を含めてください。`;
+
+const BookCard = React.memo(({ book, index }) => (
+    <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: index * 0.1 }}
+        className="p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-white/20 transition-all group cursor-default"
+    >
+        <div className="w-full aspect-[3/4] bg-white/5 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-white/10 group-hover:border-white/30 transition-all">
+            <Quote size={32} className="text-white/10 group-hover:scale-110 transition-transform" />
+        </div>
+        <div className="text-[11px] font-black text-white leading-tight mb-1 line-clamp-2">{book.title}</div>
+        <div className="text-[9px] text-white/40 font-serif italic">{book.creator || '著者不明'}</div>
+        <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
+            <span className="text-[8px] text-white/20 uppercase tracking-widest">{book.issued ? book.issued.slice(0, 4) : 'Unknown Era'}</span>
+            <a href={book.link} target="_blank" rel="noopener noreferrer" className="p-1 px-2 rounded-full bg-white/10 text-[9px] text-white/60 hover:bg-[#6366f1] hover:text-white transition-all">
+                VIEW
+            </a>
+        </div>
+    </motion.div>
+));
 
 const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
     const [query, setQuery] = useState('');
@@ -35,52 +73,44 @@ const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
         e.preventDefault();
         if (!query.trim() || isSearching) return;
 
-        const userQuery = query;
-        setQuery('');
-        setIsSearching(true);
-        setMessages(prev => [...prev, { role: 'user', content: userQuery, timestamp: new Date().toISOString() }]);
-
         try {
-            // 1. Get Borges response via AI
-            let aiResponse = "";
+            const userQuery = query.trim();
+            setQuery('');
+            setIsSearching(true);
+            setMessages(prev => [...prev, { role: 'user', content: userQuery, timestamp: new Date().toISOString() }]);
+
+            // 1. Parallelize AI and NDL search
+            const ndlPromise = searchNDLArchive(userQuery);
+            
             const stream = await generateDialogueStream({
                 charId: 'borges',
-                messages: messages.concat([{ role: 'user', content: userQuery }]).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content })),
+                messages: messages.concat([{ role: 'user', content: userQuery }]).map(m => ({ 
+                    role: m.role === 'ai' ? 'assistant' : 'user', 
+                    content: m.content 
+                })),
                 systemOverride: BORGES_PROMPT,
                 apiKey: geminiKey
             });
 
-            const newMsgIndex = messages.length + 1;
+            const newMsgIdx = messages.length + 1;
             setMessages(prev => [...prev, { role: 'ai', content: "", timestamp: new Date().toISOString() }]);
 
+            let aiResponse = "";
             for await (const chunk of stream) {
                 aiResponse += chunk;
                 setMessages(prev => {
                     const next = [...prev];
-                    next[newMsgIndex] = { ...next[newMsgIndex], content: aiResponse };
+                    next[newMsgIdx] = { ...next[newMsgIdx], content: aiResponse };
                     return next;
                 });
             }
 
-            // 2. Search NDL for books
-            const ndlBooks = await searchNDLArchive(userQuery);
+            // 2. Resolve NDL results
+            const ndlBooks = await ndlPromise;
             setResults(ndlBooks || []);
 
-            // 3. Fallback/Media Mocking (For Rakugo/Classical)
-            // In a production app, we would use a more specialized search here
-            if (userQuery.includes('落語') || userQuery.includes('古典') || userQuery.includes('志ん生') || userQuery.includes('文楽') || userQuery.includes('円生')) {
-                setMediaResults([
-                    { title: '古今亭志ん生：黄金餅', type: 'rakugo', url: 'https://www.youtube.com/results?search_query=古今亭志ん生+黄金餅', icon: <Music className="text-orange-400" /> },
-                    { title: '五代目古今亭志ん生 名演集', type: 'rakugo', url: 'https://www.youtube.com/results?search_query=古今亭志ん生+名演集', icon: <Music className="text-orange-400" /> }
-                ]);
-            } else if (userQuery.includes('クラッシク') || userQuery.includes('ベートーヴェン') || userQuery.includes('ショパン') || userQuery.includes('音楽')) {
-                setMediaResults([
-                    { title: 'Beethoven: Symphony No. 9', type: 'music', url: 'https://www.youtube.com/results?search_query=Beethoven+Symphony+9', icon: <Music className="text-blue-400" /> },
-                    { title: 'Chopin: Nocturnes', type: 'music', url: 'https://www.youtube.com/results?search_query=Chopin+Nocturnes', icon: <Music className="text-purple-400" /> }
-                ]);
-            } else {
-                setMediaResults([]);
-            }
+            // 3. Media Artifact Discovery
+            setMediaResults(getMediaArtifacts(userQuery));
 
         } catch (error) {
             console.error("Library Search Error:", error);
@@ -188,25 +218,7 @@ const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
                     {results.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {results.map((book, i) => (
-                                <motion.div 
-                                    key={i}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className="p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-white/20 transition-all group cursor-default"
-                                >
-                                    <div className="w-full aspect-[3/4] bg-white/5 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-white/10 group-hover:border-white/30 transition-all">
-                                        <Quote size={32} className="text-white/10 group-hover:scale-110 transition-transform" />
-                                    </div>
-                                    <div className="text-[11px] font-black text-white leading-tight mb-1 line-clamp-2">{book.title}</div>
-                                    <div className="text-[9px] text-white/40 font-serif italic">{book.creator || '著者不明'}</div>
-                                    <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
-                                        <span className="text-[8px] text-white/20 uppercase tracking-widest">{book.issued ? book.issued.slice(0, 4) : 'Unknown Era'}</span>
-                                        <a href={book.link} target="_blank" rel="noopener noreferrer" className="p-1 px-2 rounded-full bg-white/10 text-[9px] text-white/60 hover:bg-[#6366f1] hover:text-white transition-all">
-                                            VIEW
-                                        </a>
-                                    </div>
-                                </motion.div>
+                                <BookCard key={book.id || i} book={book} index={i} />
                             ))}
                         </div>
                     ) : (

@@ -98,30 +98,31 @@ const ndlPlugin = () => ({
 
         while ((match = itemRegex.exec(xmlData)) !== null) {
           const itemContent = match[1];
-          const titleMatch = itemContent.match(/<title>([\s\S]*?)<\/title>/);
-          const authorMatch = itemContent.match(/<author>([\s\S]*?)<\/author>/) || itemContent.match(/<dc:creator>([\s\S]*?)<\/dc:creator>/);
-          const linkMatch = itemContent.match(/<link>([\s\S]*?)<\/link>/);
-          const descriptionMatch = itemContent.match(/<description>([\s\S]*?)<\/description>/);
-          const dateMatch = itemContent.match(/<dc:date>([\s\S]*?)<\/dc:date>/);
+          const getVal = (tag) => {
+            const m = itemContent.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`)) || 
+                      itemContent.match(new RegExp(`<dc:${tag}>([\\s\\S]*?)<\\/dc:${tag}>`));
+            return m ? m[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "";
+          };
 
-          if (titleMatch) {
-            const rawLink = linkMatch ? linkMatch[1] : "#";
-            let description = descriptionMatch ? descriptionMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "") : "";
+          const title = getVal('title');
+          if (title) {
+            const rawLink = getVal('link') || "#";
+            let description = getVal('description');
             let finalLink = rawLink.startsWith('http') ? rawLink : `https://ndlsearch.ndl.go.jp/books/${rawLink}`;
 
             if (description.includes("青空文庫")) {
-               description = "【青空文庫】" + description;
-               const extLinkMatch = itemContent.match(/<dcndl:extLink>([\s\S]*?)<\/dcndl:extLink>/);
-               if (extLinkMatch) finalLink = extLinkMatch[1];
+               description = `【青空文庫】${description}`;
+               const extLink = getVal('dcndl:extLink');
+               if (extLink) finalLink = extLink;
             }
             
             items.push({
               id: `ndl-${Math.random().toString(36).substr(2, 9)}`,
-              title: titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, ""),
-              creator: authorMatch ? authorMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "") : "Unknown Author",
+              title,
+              creator: getVal('author') || getVal('creator') || "Unknown Author",
               quote: description.substring(0, 100) + (description.length > 100 ? "..." : ""),
               link: finalLink,
-              issued: dateMatch ? dateMatch[1] : "Unknown Date"
+              issued: getVal('date') || "Unknown Date"
             });
           }
         }
