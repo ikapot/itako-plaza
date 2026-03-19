@@ -51,7 +51,7 @@ const DashboardSidebar = React.memo(({
             <div className="pointer-events-auto glass-spectral rounded-2xl p-3 flex flex-col gap-2 border-white/5">
                 <div className="flex items-center gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
-                    <span className="text-[8px] font-black text-white/40 tracking-[0.3em] uppercase font-oswald italic">Ritual Stability: 98%</span>
+                    <span className="text-[8px] font-black text-white/70 tracking-[0.3em] uppercase font-oswald italic">Ritual Stability: 98%</span>
                 </div>
                 <div className="w-32 h-[1px] bg-white/5 relative overflow-hidden">
                     <motion.div
@@ -64,7 +64,7 @@ const DashboardSidebar = React.memo(({
 
             {/* 3. Soul Echo Frequency */}
             <div className="pointer-events-auto glass-spectral rounded-2xl p-3 flex flex-col gap-1 border-white/5">
-                <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.5em] font-oswald text-left">Echo Frequency</span>
+                <span className="text-[7px] font-bold text-white/60 uppercase tracking-[0.5em] font-oswald text-left">Echo Frequency</span>
                 <div className="flex items-end gap-0.5 h-4">
                     {[0.3, 0.7, 0.4, 0.8, 0.5, 0.9, 0.6].map((h, i) => (
                         <motion.div
@@ -89,7 +89,7 @@ const DashboardSidebar = React.memo(({
                 </div>
                 <div className="flex flex-col items-start">
                     <span className="text-xs font-black tracking-widest text-[#bd8a78] uppercase font-oswald">Concept</span>
-                    <span className="text-[7px] font-bold text-white/20 uppercase tracking-[0.4em] font-biz-mincho">理念の断片</span>
+                    <span className="text-[7px] font-bold text-white/70 uppercase tracking-[0.4em] font-biz-mincho">理念の断片</span>
                 </div>
             </motion.button>
         </div>
