@@ -1,7 +1,6 @@
 # 🚨 秘密鍵（APIキーなど）は絶対にGitにアップしない！
-.env
-.env.local
-.env.production
+.env*
+! .env.sample
 
 # Logs
 logs

@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        const baseUrl = "https://iss.ndl.go.jp/api/opensearch";
+        const baseUrl = "https://ndlsearch.ndl.go.jp/api/opensearch";
         // mediatype=1 (books), cnt=5
         const query = `?cnt=5&mediatype=1&title=${encodeURIComponent(keyword)}`;
 

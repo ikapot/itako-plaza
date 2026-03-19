@@ -72,15 +72,17 @@ const ndlPlugin = () => ({
   name: 'ndl-api',
   configureServer(server) {
     server.middlewares.use('/api/ndl', async (req, res, next) => {
-      // Decode URL and handle parameters manually as Vite uses node:http
-      if (!req.url.startsWith('/api/ndl')) return next();
+      if (req.method !== 'GET') return next();
       
-      const searchParams = new URLSearchParams(req.url.split('?')[1] || "");
-      const keyword = searchParams.get('keyword');
-      if (!keyword) return next();
-
       try {
-        const baseUrl = "https://iss.ndl.go.jp/api/opensearch";
+        const searchParams = new URL(req.url, 'http://localhost').searchParams;
+        const keyword = searchParams.get('keyword');
+        if (!keyword) {
+            res.statusCode = 400;
+            return res.end(JSON.stringify({ error: 'Keyword is required' }));
+        }
+
+        const baseUrl = "https://ndlsearch.ndl.go.jp/api/opensearch";
         const query = `?cnt=5&mediatype=1&title=${encodeURIComponent(keyword)}`;
         
         const response = await fetch(baseUrl + query);
