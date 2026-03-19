@@ -170,18 +170,26 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
                 <p className="leading-relaxed whitespace-pre-wrap">
                     {m.content}
                 </p>
-                            <Reply size={10} className="group-hover/btn:fill-current" />
-                            返信する
-                        </button>
+
+                {/* Interaction Buttons (Subtle - only visible on hover or mobile) */}
+                <div className={`mt-4 pt-3 border-t border-black/10 flex items-center gap-4 opacity-40 hover:opacity-100 transition-opacity ${isUser ? 'justify-end' : 'justify-start'}`}>
+                    <button 
+                        onClick={() => handleBookmark?.(m)} 
+                        className="flex items-center gap-1.5 hover:text-amber-500 transition-colors"
+                    >
+                        <Bookmark size={10} />
+                        <span className="text-[7px] font-black uppercase tracking-tighter">Bookmark</span>
+                    </button>
+                    {!isUser && (
                         <button 
-                            onClick={function bookmark() { handleBookmark?.(i); }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-none bg-black border border-black text-[8px] font-bold text-[#EAE0D5] uppercase tracking-widest hover:bg-[#b45309] hover:text-white transition-all group/btn"
+                            onClick={() => handleReply?.(m)} 
+                            className="flex items-center gap-1.5 hover:text-[#f15a24] transition-colors"
                         >
-                            <Bookmark size={10} className="group-hover/btn:fill-current" />
-                            栞を挟む
+                            <Repeat size={10} />
+                            <span className="text-[7px] font-black uppercase tracking-tighter">Echo / Reply</span>
                         </button>
-                    </div>
-                ) : null}
+                    )}
+                </div>
             </div>
         </motion.div>
     );
