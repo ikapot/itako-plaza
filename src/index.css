@@ -6,16 +6,29 @@
 
 :root {
   --itako-bg: #000000;
-  --itako-panel: rgba(10, 10, 10, 0.4);
-  --itako-ethereal-glass: rgba(255, 255, 255, 0.03);
-  --itako-accent: #bd8a78;
-  --itako-text: rgba(255, 255, 255, 0.9);
-  --itako-ethereal-text: rgba(255, 255, 255, 0.4);
-  --itako-muted: rgba(255, 255, 255, 0.1);
-  --sentiment-accent: rgba(255, 255, 255, 0.02);
+  --itako-panel: #0a0a0a;
+  --itako-accent: #f15a24; /* Solid Orange (Amber) */
+  --itako-amber-deep: #b45309; /* Deep Amber */
+  --itako-text: #EAE0D5; /* Cream */
+  --itako-muted: rgba(234, 224, 213, 0.4);
+  --itako-cream-bg: #EAE0D5;
+  --status-success: #10b981; /* Connect Green */
   background-color: var(--itako-bg);
   color: var(--itako-text);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
+}
+
+.itako-outline {
+  border: 2px solid #000000;
+  box-shadow: none !important;
+}
+
+/* Glass without shadows */
+.glass-spectral {
+  background: var(--itako-panel);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(234, 224, 213, 0.1);
+  box-shadow: none !important;
 }
 
 /* Tactile Noise Overlay */

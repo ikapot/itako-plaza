@@ -21,17 +21,17 @@ const Header = React.memo(({
     ];
 
     const modeTabs = [
-        { id: 'map', icon: <MapPin size={14} />, label: 'WORLD MAP', color: '#bd8a78' },
-        { id: 'dice', icon: <Globe size={14} />, label: 'RANDAMNI', color: '#fdb913' },
-        { id: 'library', icon: <Library size={14} />, label: 'LIBRARY', color: '#6366f1' },
-        { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#98a436' },
-        { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: '#f15a24' },
-        { id: 'grimoire', icon: <BookOpen size={14} />, label: 'Manual', color: '#bd8a78' },
-        { id: 'account', icon: <Settings size={14} />, label: 'Account', color: '#bd8a78' },
+        { id: 'map', icon: <MapPin size={14} />, label: 'WORLD MAP', color: '#b45309' },
+        { id: 'dice', icon: <Globe size={14} />, label: 'RANDAMNI', color: '#f15a24' },
+        { id: 'library', icon: <Library size={14} />, label: 'LIBRARY', color: '#f15a24' },
+        { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#EAE0D5' },
+        { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: apiStatus === 'connected' ? '#10b981' : '#f15a24' },
+        { id: 'grimoire', icon: <BookOpen size={14} />, label: 'Manual', color: '#b45309' },
+        { id: 'account', icon: <Settings size={14} />, label: 'Account', color: '#b45309' },
     ];
 
     return (
-        <header className="pt-safe flex items-center justify-between px-3 md:px-6 border-b border-white/10 bg-[#050505]/85 backdrop-blur-3xl z-50 shrink-0 shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all duration-300">
+        <header className="pt-safe flex items-center justify-between px-3 md:px-6 border-b-2 border-black bg-black z-50 shrink-0 transition-all duration-300">
             <div className="h-16 flex items-center gap-6">
                 <button
                     onClick={openDrawer}

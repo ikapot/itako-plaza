@@ -6,12 +6,12 @@ import WarholAvatar from './WarholAvatar';
 
 // ── Performance-Critical Sub Components ────────────────────────
 
-const MemoizedEchoItem = React.memo(function EchoItem({ e, accentColor }) {
+const MemoizedEchoItem = React.memo(function EchoItem({ e }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 100 }}
             animate={{ 
-                opacity: [0, 0.08, 0],
+                opacity: [0, 0.1, 0],
                 y: [-100, -300],
                 scale: [0.9, 1.1]
             }}
@@ -22,7 +22,7 @@ const MemoizedEchoItem = React.memo(function EchoItem({ e, accentColor }) {
                 ease: "linear"
             }}
             className="absolute text-[8px] md:text-[10px] font-serif italic tracking-widest whitespace-nowrap pr-2"
-            style={{ left: `${e.x}%`, top: `${e.y}%`, color: accentColor }}
+            style={{ left: `${e.x}%`, top: `${e.y}%`, color: '#b45309' }}
         >
             {e.text}
         </motion.div>
@@ -95,7 +95,7 @@ const MemoizedNewsItem = React.memo(function NewsItem({ n, charMap }) {
                 portraitUrl="assets/soseki_warhol.png"
                 isPreStyled={true}
                 flavor="Narrator"
-                colorClass="bg-white/5 text-inherit border-white/10"
+                colorClass="bg-[#EAE0D5] text-black"
             />
             <div className="space-y-[-2rem] mt-[-2rem] relative z-20">
                 {n.discussion ? n.discussion.map(function renderComment(d, dIdx) {
@@ -108,12 +108,12 @@ const MemoizedNewsItem = React.memo(function NewsItem({ n, charMap }) {
                             viewport={{ once: true }}
                             className={`flex ${dIdx % 2 === 0 ? 'justify-end' : 'justify-start'} w-full`}
                         >
-                            <div className={`p-4 md:p-8 rounded-[25px] md:rounded-[35px] border shadow-2xl max-w-[90%] md:max-w-[85%] glass-ethereal spiritual-float ${dIdx % 2 === 0 ? 'border-white/10' : 'border-white/5'}`}>
+                            <div className={`p-4 md:p-8 rounded-none border-2 border-black max-w-[90%] md:max-w-[85%] bg-black/80 text-[#EAE0D5]`}>
                                 <div className="flex items-center gap-3 mb-3">
                                     {char ? <WarholAvatar src={char.avatar} size="w-6 h-6" isSelected isPreStyled={char.isPreStyled} colorClass={char.color} /> : null}
-                                    <span className="text-[9px] font-bold tracking-[0.3em] text-white/60 uppercase">{char?.name || d.charId}</span>
+                                    <span className="text-[9px] font-black tracking-[0.3em] text-[#f15a24] uppercase">{char?.name || d.charId}</span>
                                 </div>
-                                <p className="text-sm md:text-base leading-relaxed text-white font-serif italic">「{d.comment}」</p>
+                                <p className="text-sm md:text-base leading-relaxed font-serif italic">「{d.comment}」</p>
                             </div>
                         </motion.div>
                     );
@@ -148,30 +148,30 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
             animate={{ opacity: 1, y: 0, scale: 1 }}
             className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
         >
-            <div className={`group relative p-5 md:p-8 rounded-[25px] md:rounded-[35px] transition-all duration-1000 max-w-[95%] md:max-w-[85%] glass-ethereal ${isUser ? 'border-white/10' : 'border-white/5 spiritual-float'}`}>
+            <div className={`group relative p-5 md:p-8 rounded-none transition-all duration-300 max-w-[95%] md:max-w-[85%] ${isUser ? 'bg-[#f15a24] text-black border-2 border-black font-black' : 'bg-[#1a1a1a] text-[#EAE0D5] border-2 border-black font-serif italic'}`}>
                 {!isUser ? (
-                    <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+                    <div className="flex items-center justify-between mb-4 border-b border-[#f15a24]/20 pb-3">
                         <div className="flex items-center gap-3">
                             {charObj ? <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected isPreStyled={charObj.isPreStyled} /> : null}
-                            <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50">{charObj?.name || m.charId}</span>
+                            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#f15a24]">{charObj?.name || m.charId}</span>
                         </div>
                     </div>
                 ) : null}
-                <p className={`text-base md:text-lg leading-relaxed text-white/90 ${!isUser ? 'font-serif' : 'font-sans'}`}>
+                <p className={`text-base md:text-xl leading-relaxed ${isUser ? 'text-black' : 'text-[#EAE0D5]'}`}>
                     {m.content}
                 </p>
                 {!isUser ? (
                     <div className="mt-6 flex justify-end gap-3">
                         <button 
                             onClick={function reply() { handleReply?.(m); }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[8px] font-bold text-white/20 uppercase tracking-widest hover:bg-[#f15a24]/20 hover:text-[#f15a24] transition-all group/btn"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-none bg-black border border-black text-[8px] font-bold text-[#EAE0D5] uppercase tracking-widest hover:bg-[#f15a24] hover:text-black transition-all group/btn"
                         >
                             <Reply size={10} className="group-hover/btn:fill-current" />
                             返信する
                         </button>
                         <button 
                             onClick={function bookmark() { handleBookmark?.(i); }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[8px] font-bold text-white/20 uppercase tracking-widest hover:bg-[#bd8a78]/20 hover:text-[#bd8a78] transition-all group/btn"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-none bg-black border border-black text-[8px] font-bold text-[#EAE0D5] uppercase tracking-widest hover:bg-[#b45309] hover:text-white transition-all group/btn"
                         >
                             <Bookmark size={10} className="group-hover/btn:fill-current" />
                             栞を挟む

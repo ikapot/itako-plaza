@@ -55,8 +55,11 @@ const LetterZ = ({ color }) => (
 );
 
 export default function Logo({ apiStatus = 'idle' }) {
-    const isActive = apiStatus === 'success';
-    const logoColor = isActive ? '#f15a24' : 'white';
+    const isConnected = apiStatus === 'connected';
+    const isValidating = apiStatus === 'validating';
+    
+    // 通常時：クリーム, 接続成功：グリーン, 検証中/エラー：オレンジ
+    const logoColor = isConnected ? '#10b981' : (isValidating ? '#f15a24' : '#EAE0D5');
     
     return (
         <div className="flex items-center gap-4 select-none group cursor-pointer py-2">

@@ -117,8 +117,8 @@ const PeninsulaMap = ({
             <motion.path 
               d="M250,20 C350,20 450,150 480,250 C510,350 450,530 250,530 C50,530 -20,350 20,250 C50,150 150,20 250,20 Z"
               fill="rgba(255,255,255,0.02)"
-              stroke="white"
-              strokeWidth="0.5"
+              stroke="#b45309"
+              strokeWidth="1.5"
               strokeDasharray="4 2"
               strokeOpacity="0.2"
               initial={{ pathLength: 0 }}
@@ -128,10 +128,10 @@ const PeninsulaMap = ({
 
             {/* Regions Labels */}
             <g className="pointer-events-none opacity-60">
-                <text x="250" y="50" textAnchor="middle" className="text-[10px] fill-white font-oswald tracking-[0.5em] uppercase">Highlands</text>
-                <text x="250" y="520" textAnchor="middle" className="text-[10px] fill-white font-oswald tracking-[0.5em] uppercase">Abyssal Coast</text>
-                <text x="50" y="300" textAnchor="middle" transform="rotate(-90, 50, 300)" className="text-[8px] fill-white font-oswald tracking-[0.5em] uppercase">Industrial West</text>
-                <text x="450" y="300" textAnchor="middle" transform="rotate(90, 450, 300)" className="text-[8px] fill-white font-oswald tracking-[0.5em] uppercase">Traditional East</text>
+                <text x="250" y="50" textAnchor="middle" className="text-[10px] fill-[#EAE0D5] font-oswald tracking-[0.5em] uppercase">Highlands</text>
+                <text x="250" y="520" textAnchor="middle" className="text-[10px] fill-[#EAE0D5] font-oswald tracking-[0.5em] uppercase">Abyssal Coast</text>
+                <text x="50" y="300" textAnchor="middle" transform="rotate(-90, 50, 300)" className="text-[8px] fill-[#EAE0D5] font-oswald tracking-[0.5em] uppercase">Industrial West</text>
+                <text x="450" y="300" textAnchor="middle" transform="rotate(90, 450, 300)" className="text-[8px] fill-[#EAE0D5] font-oswald tracking-[0.5em] uppercase">Traditional East</text>
             </g>
 
             {/* Connection Lines (Subtle) */}

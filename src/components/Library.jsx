@@ -33,16 +33,16 @@ const BookCard = React.memo(({ book, index }) => (
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: index * 0.1 }}
-        className="p-4 bg-black/40 border border-white/5 rounded-2xl hover:border-white/20 transition-all group cursor-default"
+        className="p-4 bg-[#EAE0D5] border-2 border-black hover:bg-white transition-all group cursor-default"
     >
-        <div className="w-full aspect-[3/4] bg-white/5 rounded-lg mb-3 flex items-center justify-center overflow-hidden border border-white/10 group-hover:border-white/30 transition-all">
-            <Quote size={32} className="text-white/10 group-hover:scale-110 transition-transform" />
+        <div className="w-full aspect-[3/4] bg-black/10 rounded-none mb-3 flex items-center justify-center overflow-hidden border border-black/10 group-hover:border-black/30 transition-all">
+            <Quote size={32} className="text-black/10 group-hover:scale-110 transition-transform" />
         </div>
-        <div className="text-[11px] font-black text-white leading-tight mb-1 line-clamp-2">{book.title}</div>
-        <div className="text-[9px] text-white/40 font-serif italic">{book.creator || '著者不明'}</div>
-        <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
-            <span className="text-[8px] text-white/20 uppercase tracking-widest">{book.issued ? book.issued.slice(0, 4) : 'Unknown Era'}</span>
-            <a href={book.link} target="_blank" rel="noopener noreferrer" className="p-1 px-2 rounded-full bg-white/10 text-[9px] text-white/60 hover:bg-[#6366f1] hover:text-white transition-all">
+        <div className="text-[11px] font-black text-black leading-tight mb-1 line-clamp-2">{book.title}</div>
+        <div className="text-[9px] text-black/60 font-serif italic">{book.creator || '著者不明'}</div>
+        <div className="mt-3 pt-3 border-t border-black/10 flex items-center justify-between">
+            <span className="text-[8px] text-black/20 uppercase tracking-widest">{book.issued ? book.issued.slice(0, 4) : 'Unknown Era'}</span>
+            <a href={book.link} target="_blank" rel="noopener noreferrer" className="p-1 px-2 rounded-none border border-black bg-black text-[9px] text-[#EAE0D5] hover:bg-[#f15a24] hover:text-white transition-all">
                 VIEW
             </a>
         </div>
@@ -123,8 +123,8 @@ const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
     return (
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 h-full lg:h-[700px] overflow-hidden">
             {/* Borges Dialogue Section */}
-            <div className="flex-1 min-h-[400px] lg:min-h-0 flex flex-col bg-black/40 rounded-[32px] border border-white/10 overflow-hidden">
-                <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+            <div className="flex-1 min-h-[400px] lg:min-h-0 flex flex-col bg-black/80 rounded-none border-2 border-black overflow-hidden">
+                <div className="p-4 border-b-2 border-black bg-black/40 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-itako-sand flex items-center justify-center overflow-hidden border border-white/20">
                             {borges.avatar ? (
@@ -134,8 +134,8 @@ const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
                             )}
                         </div>
                         <div>
-                            <div className="text-xs font-black text-white uppercase tracking-widest">{borges.name}</div>
-                            <div className="text-[9px] text-white/50 uppercase tracking-widest">Library Keeper of Babel</div>
+                            <div className="text-xs font-black text-[#f15a24] uppercase tracking-widest">{borges.name}</div>
+                            <div className="text-[9px] text-[#EAE0D5]/40 uppercase tracking-widest leading-none">The Blind Librarian of Babel</div>
                         </div>
                     </div>
                 </div>
@@ -148,10 +148,10 @@ const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
                             animate={{ opacity: 1, y: 0 }}
                             className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div className={`max-w-[85%] p-4 rounded-2xl text-[14px] leading-relaxed font-biz-mincho shadow-xl backdrop-blur-md
+                            <div className={`max-w-[85%] p-4 rounded-none text-[15px] leading-relaxed border-2 border-black
                                 ${m.role === 'user' 
-                                    ? 'bg-[#f15a24] text-white rounded-tr-none border border-white/20' 
-                                    : 'bg-white/10 text-white border border-white/20 rounded-tl-none font-serif italic'}
+                                    ? 'bg-[#f15a24] text-black font-black' 
+                                    : 'bg-[#1a1a1a] text-[#EAE0D5] font-serif italic border-[#f15a24]/20'}
                             `}>
                                 {m.content}
                             </div>

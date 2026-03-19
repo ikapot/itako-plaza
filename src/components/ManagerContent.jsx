@@ -9,13 +9,13 @@ import PortalGrimoire from './PortalGrimoire';
 
 const getGenreColors = (face) => {
     switch(face) {
-        case 0: return { bgColor: 'bg-[#f15a24]', textColor: 'text-white' }; // 作家 (Orange)
+        case 0: return { bgColor: 'bg-[#f15a24]', textColor: 'text-black', borderColor: 'border-black' }; // 作家 (Amber/Orange)
         case 1: 
-        case 3: return { bgColor: 'bg-[#4b4b4b]', textColor: 'text-white' }; // 思想家 (Grey)
-        case 4: return { bgColor: 'bg-[#EAE0D5]', textColor: 'text-[#3C2A21]' }; // 芸術家 (Cream)
-        case 2: return { bgColor: 'bg-[#bd8a78]', textColor: 'text-white' }; // 先駆者 (Tan)
-        case 5: return { bgColor: 'bg-[#2a2a2a]', textColor: 'text-white/80' }; // 異界 (Dark)
-        default: return { bgColor: 'bg-[#5C4033]', textColor: 'text-[#EAE0D5]' };
+        case 3: return { bgColor: 'bg-[#3f3f46]', textColor: 'text-[#EAE0D5]', borderColor: 'border-black' }; // 思想家 (Grey)
+        case 4: return { bgColor: 'bg-[#EAE0D5]', textColor: 'text-black', borderColor: 'border-black' }; // 芸術家 (Cream)
+        case 2: return { bgColor: 'bg-[#b45309]', textColor: 'text-white', borderColor: 'border-black' }; // 先駆者 (Deep Amber)
+        case 5: return { bgColor: 'bg-[#1a1a1a]', textColor: 'text-[#f15a24]', borderColor: 'border-black' }; // 異界 (Dark)
+        default: return { bgColor: 'bg-[#2a2a2a]', textColor: 'text-[#EAE0D5]', borderColor: 'border-black' };
     }
 };
 
@@ -35,23 +35,24 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             <div className={`flex w-full ${alignment} px-4 md:px-12 pointer-events-none`}>
                 <button 
                     onClick={() => onToggleExpand(isExpanded ? null : c.id)}
-                    className={`${bgColor} ${textColor} px-10 md:px-14 py-2 md:py-3 shadow-md text-[10px] md:text-sm font-bold tracking-widest uppercase border-b-2 border-black/10 pointer-events-auto border-x border-t border-black/20 origin-bottom hover:-translate-y-1 transition-transform relative z-20 font-biz-mincho`}
+                    className={`${bgColor} ${textColor} px-10 md:px-14 py-2 md:py-3 text-[10px] md:text-sm font-black tracking-[0.2em] uppercase border-x-2 border-t-2 border-black pointer-events-auto origin-bottom transition-all relative z-20 font-oswald`}
                     style={{
-                        clipPath: 'polygon(5% 0, 95% 0, 100% 100%, 0% 100%)'
+                        clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)'
                     }}
                 >
-                    <span className={isExpanded ? "font-black" : ""}>{c.name}</span>
+                    <span className="flex items-center gap-4">
+                        <span className="opacity-40">{c.name.substring(0, 3)}</span>
+                        {c.name}
+                    </span>
                 </button>
             </div>
             
             {/* Folder Body */}
             <div 
                 onClick={() => !isExpanded && onToggleExpand(c.id)}
-                className={`w-full rounded-sm ${bgColor} ${textColor} shadow-[0_-5px_25px_rgba(0,0,0,0.5)] border border-black/20 overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10`}
+                className={`w-full rounded-none ${bgColor} ${textColor} border-2 border-black overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10`}
             >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"/>
-                
-                <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-8 cursor-default' : 'max-h-[3.5rem] md:max-h-[4rem] opacity-80 p-0 flex items-center px-6 hover:bg-black/5 hover:opacity-100'}`}>
+                <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-8 cursor-default' : 'max-h-[1.5rem] opacity-90 p-0 flex items-center px-6 hover:bg-black/10'}`}>
                     
                     {!isExpanded ? (
                         <div className="w-full h-8 flex items-center justify-between pointer-events-none" />
