@@ -3,14 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { INITIAL_CHARACTERS, INITIAL_LOCATIONS } from '../constants';
-import { Train, Mountain, City, Factory, Landmark, Waves, Ghost, Zap } from 'lucide-react';
+import { Train, Mountain, Building2, Factory, Landmark, Waves, Ghost, Zap } from 'lucide-react';
 
 gsap.registerPlugin(MotionPathPlugin);
 
 // --- Constants & Data ---
 const REGIONS = [
   { id: 'peaks', name: '虚無山', icon: <Mountain size={14} />, x: 250, y: 50, color: '#94a3b8', theme: '芸術家・詩人' },
-  { id: 'city', name: '中央都市', icon: <City size={14} />, x: 250, y: 150, color: '#f15a24', theme: '文豪列伝' },
+  { id: 'city', name: '中央都市', icon: <Building2 size={14} />, x: 250, y: 150, color: '#f15a24', theme: '文豪列伝' },
   { id: 'traditional', name: '東の隠里', icon: <Landmark size={14} />, x: 400, y: 200, color: '#bd8a78', theme: '女性先駆者' },
   { id: 'industrial', name: '西の工場', icon: <Factory size={14} />, x: 100, y: 200, color: '#4f46e5', theme: '西洋の魂' },
   { id: 'rivers', name: '運河・水脈', icon: <Waves size={14} />, x: 270, y: 250, color: '#06b6d4', theme: '水辺の場' },
