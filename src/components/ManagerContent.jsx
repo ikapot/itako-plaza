@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Activity, Library } from 'lucide-react';
-import ThreeDMap from './ThreeDMap';
+import SoulRainManifest from './SoulRainManifest';
 import PeninsulaMap from './PeninsulaMap';
 import LibraryView from './Library';
 import WarholAvatar from './WarholAvatar';
@@ -202,24 +202,22 @@ const ManagerContent = React.memo(({
                         exit={{ opacity: 0, scale: 0.9 }}
                         className="space-y-6"
                     >
-                        <div className="flex items-center justify-between px-6 pt-4">
-                            <h2 className="text-sm font-bold text-[#fdb913] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
-                                <Globe size={18} />
-                                RANDAMNI / 霊的偶発性
+                        <div className="flex items-center justify-between px-6 mb-2">
+                            <h2 className="text-sm font-bold text-[#f15a24] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
+                                <Sparkles size={18} />
+                                RITUAL OF SUMMONS / 霊的降臨
                             </h2>
                         </div>
 
-                        <ThreeDMap 
+                        <SoulRainManifest 
                             locations={locations} 
                             selectedLocationId={selectedLocationId} 
-                            setSelectedLocationId={setSelectedLocationId}
+                            onSetLocationId={setSelectedLocationId}
                             selectedCharIds={selectedCharIds}
-                            locationEnergies={locationEnergies}
                             characters={characters}
-                            handleToggleChar={handleToggleChar}
                             onSetChars={handleSetChars}
                             onGo={handleGo}
-                            globalSentiment={globalSentiment}
+                            accentColor="#f15a24"
                         />
                     </motion.div>
                 ) : null}
