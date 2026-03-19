@@ -141,31 +141,35 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
             </motion.div>
         );
     }
-
     return (
         <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+            initial={{ opacity: 0, x: isUser ? 20 : -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-2`}
         >
-            <div className={`group relative p-5 md:p-8 rounded-none transition-all duration-300 max-w-[95%] md:max-w-[85%] ${isUser ? 'bg-[#f15a24] text-black border-2 border-black font-black' : 'bg-[#1a1a1a] text-[#EAE0D5] border-2 border-black font-serif italic'}`}>
-                {!isUser ? (
-                    <div className="flex items-center justify-between mb-4 border-b border-[#f15a24]/20 pb-3">
-                        <div className="flex items-center gap-3">
-                            {charObj ? <WarholAvatar src={charObj.avatar} colorClass={charObj.color} size="w-6 h-6" isSelected isPreStyled={charObj.isPreStyled} /> : null}
-                            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#f15a24]">{charObj?.name || m.charId}</span>
-                        </div>
+            {/* Minimal Header */}
+            {!isUser && charObj && (
+                <div className="flex items-center gap-2 mb-1 px-1">
+                    <span className="text-[10px] font-black text-[#f15a24] uppercase tracking-widest">{charObj.name}</span>
+                    <span className="text-[8px] text-[#EAE0D5]/20 uppercase tracking-widest">/ {charObj.role || 'SPECTER'}</span>
+                </div>
+            )}
+
+            <div className={`relative p-4 md:p-6 border-2 border-black itako-outline transition-all duration-300 max-w-[90%] md:max-w-[80%] ${
+                isUser 
+                    ? 'bg-[#f15a24] text-black font-black text-sm md:text-base selection:bg-black selection:text-[#f15a24]' 
+                    : 'bg-[#1a1a1a] text-[#EAE0D5] font-serif italic text-sm md:text-base selection:bg-[#f15a24] selection:text-black border-l-4 border-l-[#f15a24]'
+            }`}>
+                {/* Sentiment Tag */}
+                {!isUser && m.sentiment && (
+                    <div className="absolute -top-3 left-4 px-2 py-0.5 bg-black border border-black text-[7px] font-black uppercase tracking-tighter text-[#f15a24]/60">
+                        ESTIMATED_STATE: {m.sentiment}
                     </div>
-                ) : null}
-                <p className={`text-base md:text-xl leading-relaxed ${isUser ? 'text-black' : 'text-[#EAE0D5]'}`}>
+                )}
+
+                <p className="leading-relaxed whitespace-pre-wrap">
                     {m.content}
                 </p>
-                {!isUser ? (
-                    <div className="mt-6 flex justify-end gap-3">
-                        <button 
-                            onClick={function reply() { handleReply?.(m); }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-none bg-black border border-black text-[8px] font-bold text-[#EAE0D5] uppercase tracking-widest hover:bg-[#f15a24] hover:text-black transition-all group/btn"
-                        >
                             <Reply size={10} className="group-hover/btn:fill-current" />
                             返信する
                         </button>
@@ -229,66 +233,79 @@ const Timeline = React.memo(function Timeline({
         >
             <DialogueEcho messages={messages} accentColor={accentColor} />
             
-            {/* Slot 1: News */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-24 md:pt-32">
-                <div className="max-w-2xl mx-auto w-full pb-80 md:pb-96">
-                    <header className="flex flex-col gap-2 mb-16 md:mb-20 px-2 md:px-4">
-                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-[1.1] py-4 font-oswald uppercase" style={{ color: '#2a2a2a' }}>News</h2>
-                        <p className="text-xs md:text-sm font-bold text-zinc-800/40 pl-1 tracking-[0.5em] uppercase font-biz-mincho -mt-2">霊感ニュース</p>
-                    </header>
+            {/* Slot 1: News Terminal */}
+            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-24 md:pt-32">
+                <div className="max-w-3xl mx-auto w-full pb-20">
+                    <div className="bg-black/80 border-2 border-black itako-outline overflow-hidden">
+                        {/* Terminal Header */}
+                        <div className="p-4 border-b-2 border-black bg-black/40 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <TrendingUp size={16} className="text-[#f15a24]" />
+                                <div>
+                                    <div className="text-[10px] font-black text-[#f15a24] uppercase tracking-widest leading-none">News Manifestation Feed</div>
+                                    <div className="text-[8px] text-[#EAE0D5]/40 uppercase tracking-widest mt-0.5">Station ID: ITAKO_P_NET_01</div>
+                                </div>
+                            </div>
+                            <div className="text-[8px] font-bold text-[#EAE0D5]/20 tracking-widest uppercase">{news.length} ENTRIES RECEIVED</div>
+                        </div>
 
-                    <div className="flex items-center justify-between mb-8 md:mb-12 px-2 border-b border-white/5 pb-4">
-                        <span className="text-[10px] font-bold text-white/50 uppercase tracking-[0.4em] font-oswald">DRIPPING NOISE ({news.length})</span>
+                        {/* Content */}
+                        <div className="p-4 md:p-10 space-y-12">
+                            {news.map(function renderNews(n) {
+                                return <MemoizedNewsItem key={n.id} n={n} charMap={charMap} />;
+                            })}
+                        </div>
                     </div>
-
-                    {news.map(function renderNews(n) {
-                        return <MemoizedNewsItem key={n.id} n={n} charMap={charMap} />;
-                    })}
                 </div>
             </section>
-
-            {/* Slot 2: Main Dialog */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-24 md:pt-32">
-                <div className="max-w-2xl mx-auto w-full min-h-full flex flex-col pb-80 md:pb-96">
+             {/* Slot 2: Main Dialog Terminal */}
+            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-10 md:pt-20">
+                <div className="max-w-3xl mx-auto w-full pb-80 md:pb-96">
+                    {/* Event Anomaly Floating Banner */}
                     <AnimatePresence>
                         {currentWorldEvent ? (function renderEvent() {
                             const eventConfig = {
                                 war: { bg: 'bg-red-950/40 text-red-100', dot: 'bg-red-500' },
                                 earthquake: { bg: 'bg-amber-950/40 text-amber-100', dot: 'bg-amber-500' }
                             };
-                            const config = eventConfig[currentWorldEvent.type] || { bg: 'bg-white/5 text-white/50', dot: 'bg-white/30' };
+                            const config = eventConfig[currentWorldEvent.type] || { bg: 'bg-black/90 text-white/50', dot: 'bg-white/30' };
                             return (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 1.1, y: -20 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 20 }}
-                                    className={`mb-6 p-4 rounded-xl backdrop-blur-xl border border-white/10 shadow-2xl flex items-center gap-3 transition-colors duration-1000 ${config.bg} sticky top-4 left-0 right-0 z-50`}
+                                    className={`mb-4 p-4 border-2 border-black flex items-center gap-3 ${config.bg} backdrop-blur-md sticky top-0 z-[60]`}
                                 >
-                                    <div className={`w-2 h-2 rounded-full animate-pulse flex-shrink-0 ${config.dot}`} />
-                                    <div className="flex flex-col overflow-hidden">
-                                        <span className="text-[8px] font-black tracking-[0.2em] uppercase opacity-40 mb-1">Anomaly Log / 歴史の震動</span>
-                                        <span className="text-xs md:text-sm font-medium tracking-wider">{currentWorldEvent.content}</span>
+                                    <div className={`w-2 h-2 rounded-none animate-pulse flex-shrink-0 ${config.dot}`} />
+                                    <div className="flex-1 flex flex-col">
+                                        <span className="text-[8px] font-black tracking-[0.2em] uppercase text-[#f15a24] mb-0.5">Anomaly Focus / 重要事変</span>
+                                        <span className="text-xs font-bold tracking-wider">{currentWorldEvent.content}</span>
                                     </div>
                                 </motion.div>
                             );
                         })() : null}
                     </AnimatePresence>
 
-                    <header className="flex flex-col gap-2 mb-16 md:mb-20 px-2 md:px-4 relative">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-5xl md:text-8xl font-black tracking-tighter leading-[1.1] py-4 font-oswald uppercase" style={{ color: '#2a2a2a' }}>Dialog</h2>
+                    <div className="bg-black/80 border-2 border-black itako-outline overflow-hidden min-h-[600px] flex flex-col">
+                        {/* Terminal Header */}
+                        <div className="p-4 border-b-2 border-black bg-black/40 flex items-center justify-between sticky top-0 bg-black/80 backdrop-blur-md z-50">
+                            <div className="flex items-center gap-3">
+                                <MessageSquare size={16} className="text-[#f15a24]" />
+                                <div>
+                                    <div className="text-[10px] font-black text-[#f15a24] uppercase tracking-widest leading-none">Synchronized Transcripts</div>
+                                    <div className="text-[8px] text-[#EAE0D5]/40 uppercase tracking-widest mt-0.5">Session: {userName || 'GUEST'} / TRACE_CONNECTED</div>
+                                </div>
+                            </div>
                             <button
                                 onClick={function toggleUnderground() { setIsUnderground(!isUnderground); }}
-                                className={`px-4 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-all border font-oswald ${isUnderground ? 'bg-white text-[#1a1a1a] border-white' : 'bg-transparent text-white/40 border-white/10 hover:border-white/20'}`}
+                                className={`px-4 py-1.5 border-2 border-black text-[9px] font-black tracking-widest uppercase transition-all font-oswald ${isUnderground ? 'bg-[#f15a24] text-black shadow-none' : 'bg-transparent text-[#EAE0D5]/40 hover:text-[#f15a24]'}`}
                             >
-                                {isUnderground ? 'Surface' : 'Deep Trace'}
+                                {isUnderground ? 'Surface Mode' : 'Deep Trace'}
                             </button>
                         </div>
-                        <p className="text-xs md:text-sm font-bold text-zinc-500 pl-1 tracking-[0.5em] uppercase font-biz-mincho truncate -mt-2">{userName} /Speaking</p>
-                    </header>
 
-                    <div className="flex-1 flex flex-col gap-8 mt-4">
-                        <div className="space-y-8 px-2 pb-80 md:pb-96">
+                        {/* Transcript Body */}
+                        <div className="flex-1 p-4 md:p-8 space-y-12">
                             {messages.map(function renderMessage(m, i) {
                                 return (
                                     <MemoizedMessageItem 
