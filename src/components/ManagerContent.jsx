@@ -6,10 +6,20 @@ import PeninsulaMap from './PeninsulaMap';
 import WarholAvatar from './WarholAvatar';
 import PortalGrimoire from './PortalGrimoire';
 
+const getGenreColors = (face) => {
+    switch(face) {
+        case 0: return { bgColor: 'bg-[#f15a24]', textColor: 'text-white' }; // 作家 (Orange)
+        case 1: 
+        case 3: return { bgColor: 'bg-[#4b4b4b]', textColor: 'text-white' }; // 思想家 (Grey)
+        case 4: return { bgColor: 'bg-[#EAE0D5]', textColor: 'text-[#3C2A21]' }; // 芸術家 (Cream)
+        case 2: return { bgColor: 'bg-[#bd8a78]', textColor: 'text-white' }; // 先駆者 (Tan)
+        case 5: return { bgColor: 'bg-[#2a2a2a]', textColor: 'text-white/80' }; // 異界 (Dark)
+        default: return { bgColor: 'bg-[#5C4033]', textColor: 'text-[#EAE0D5]' };
+    }
+};
+
 const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected, onToggleChar }) => {
-    const isLight = i % 2 !== 0;
-    const bgColor = isLight ? 'bg-[#EAE0D5]' : 'bg-[#5C4033]';
-    const textColor = isLight ? 'text-[#3C2A21]' : 'text-[#EAE0D5]';
+    const { bgColor, textColor } = getGenreColors(c.face);
     const alignment = i % 3 === 0 ? 'justify-start' : i % 3 === 1 ? 'justify-center' : 'justify-end';
 
     return (
@@ -74,9 +84,9 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                                     className={`w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-xs md:text-sm uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3
                                         ${isSelected 
                                             ? 'bg-red-950 text-white border-red-900 border hover:bg-red-900'
-                                            : isLight 
+                                            : (c.face === 4) // Artists (Light)
                                                 ? 'bg-[#3C2A21] text-[#EAE0D5] border hover:bg-black' 
-                                                : 'bg-[#EAE0D5] text-[#3C2A21] border hover:bg-white'}
+                                                : 'bg-white/20 text-white border hover:bg-white/30'}
                                     `}
                                 >
                                     {isSelected ? (
