@@ -83,12 +83,15 @@ const ndlPlugin = () => ({
         }
 
         const baseUrl = "https://ndlsearch.ndl.go.jp/api/opensearch";
-        const query = `?cnt=5&mediatype=1&title=${encodeURIComponent(keyword)}`;
+        const query = `?cnt=8&mediatype=1&title=${encodeURIComponent(keyword)}`;
+        const digitalQuery = `?cnt=5&mediatype=9&title=${encodeURIComponent(keyword)}`;
         
-        const response = await fetch(baseUrl + query);
-        if (!response.ok) throw new Error("NDL Access Failed");
+        const [res1, res2] = await Promise.all([
+           fetch(baseUrl + query),
+           fetch(baseUrl + digitalQuery)
+        ]);
         
-        const xmlData = await response.text();
+        const xmlData = (await res1.text()) + (await res2.text());
         const items = [];
         const itemRegex = /<item>([\s\S]*?)<\/item>/g;
         let match;
@@ -102,31 +105,36 @@ const ndlPlugin = () => ({
           const dateMatch = itemContent.match(/<dc:date>([\s\S]*?)<\/dc:date>/);
 
           if (titleMatch) {
+            const rawLink = linkMatch ? linkMatch[1] : "#";
+            let description = descriptionMatch ? descriptionMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "") : "";
+            let finalLink = rawLink.startsWith('http') ? rawLink : `https://ndlsearch.ndl.go.jp/books/${rawLink}`;
+
+            if (description.includes("青空文庫")) {
+               description = "【青空文庫】" + description;
+               const extLinkMatch = itemContent.match(/<dcndl:extLink>([\s\S]*?)<\/dcndl:extLink>/);
+               if (extLinkMatch) finalLink = extLinkMatch[1];
+            }
+            
             items.push({
               id: `ndl-${Math.random().toString(36).substr(2, 9)}`,
               title: titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, ""),
-              author: authorMatch ? authorMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "") : "Unknown Author",
-              quote: descriptionMatch ? descriptionMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").substring(0, 100) + "..." : "時を経て、この記述があなたの言葉に呼応しています。",
-              link: linkMatch ? linkMatch[1] : "#",
-              year: dateMatch ? dateMatch[1] : ""
+              creator: authorMatch ? authorMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "") : "Unknown Author",
+              quote: description.substring(0, 100) + (description.length > 100 ? "..." : ""),
+              link: finalLink,
+              issued: dateMatch ? dateMatch[1] : "Unknown Date"
             });
           }
         }
 
-        if (items.length === 0) {
-          items.push({
-            id: 'ndl-fallback',
-            title: "沈黙する書架",
-            author: "Archives of Silence",
-            quote: `「${keyword}」についての記録は、まだこの書庫には見当たりません。`,
-            link: "#"
-          });
-        }
+        const uniqueItems = items.reduce((acc, current) => {
+          if (!acc.find(item => item.title === current.title)) acc.push(current);
+          return acc;
+        }, []);
 
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.statusCode = 200;
-        res.end(JSON.stringify(items));
+        res.end(JSON.stringify(uniqueItems));
       } catch (e) {
         console.error("NDL Proxy Error:", e);
         res.statusCode = 500;

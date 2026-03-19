@@ -127,11 +127,11 @@ const PeninsulaMap = ({
             />
 
             {/* Regions Labels */}
-            <g className="pointer-events-none opacity-40">
-                <text x="250" y="50" textAnchor="middle" className="text-[10px] fill-[#63e9ff] font-oswald tracking-[0.5em] uppercase drop-shadow-[0_0_5px_rgba(99,233,255,0.4)]">Highlands</text>
-                <text x="250" y="520" textAnchor="middle" className="text-[10px] fill-[#63e9ff] font-oswald tracking-[0.5em] uppercase drop-shadow-[0_0_5px_rgba(99,233,255,0.4)]">Abyssal Coast</text>
-                <text x="50" y="300" textAnchor="middle" transform="rotate(-90, 50, 300)" className="text-[8px] fill-[#63e9ff] font-oswald tracking-[0.5em] uppercase drop-shadow-[0_0_5px_rgba(99,233,255,0.4)]">Industrial West</text>
-                <text x="450" y="300" textAnchor="middle" transform="rotate(90, 450, 300)" className="text-[8px] fill-[#63e9ff] font-oswald tracking-[0.5em] uppercase drop-shadow-[0_0_5px_rgba(99,233,255,0.4)]">Traditional East</text>
+            <g className="pointer-events-none opacity-60">
+                <text x="250" y="50" textAnchor="middle" className="text-[10px] fill-white font-oswald tracking-[0.5em] uppercase">Highlands</text>
+                <text x="250" y="520" textAnchor="middle" className="text-[10px] fill-white font-oswald tracking-[0.5em] uppercase">Abyssal Coast</text>
+                <text x="50" y="300" textAnchor="middle" transform="rotate(-90, 50, 300)" className="text-[8px] fill-white font-oswald tracking-[0.5em] uppercase">Industrial West</text>
+                <text x="450" y="300" textAnchor="middle" transform="rotate(90, 450, 300)" className="text-[8px] fill-white font-oswald tracking-[0.5em] uppercase">Traditional East</text>
             </g>
 
             {/* Connection Lines (Subtle) */}

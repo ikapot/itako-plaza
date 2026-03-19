@@ -56,13 +56,13 @@ const LetterZ = ({ color }) => (
 
 export default function Logo({ apiStatus = 'idle' }) {
     const isActive = apiStatus === 'success';
-    const logoColor = isActive ? '#00f0ff' : '#63e9ff';
+    const logoColor = isActive ? '#f15a24' : 'white';
     
     return (
-        <div className="flex items-center gap-4 select-none group cursor-pointer py-2 transform hover:scale-[1.02] transition-transform duration-500">
+        <div className="flex items-center gap-4 select-none group cursor-pointer py-2">
             <div className="flex items-end gap-1 sm:gap-1.5 opacity-90 group-hover:opacity-100 transition-all duration-500">
                 {/* ITAKO */}
-                <div className="flex items-center gap-1 drop-shadow-[0_0_8px_rgba(99,233,255,0.4)]">
+                <div className="flex items-center gap-1">
                     <LetterI color={logoColor} />
                     <LetterT color={logoColor} />
                     <LetterA color={logoColor} />
@@ -71,10 +71,10 @@ export default function Logo({ apiStatus = 'idle' }) {
                 </div>
                 
                 {/* Space */}
-                <div className="w-2 md:w-3" />
+                <div className="w-2 md:w-4" />
                 
                 {/* PLAZA */}
-                <div className="flex items-center gap-1 drop-shadow-[0_0_8px_rgba(99,233,255,0.4)]">
+                <div className="flex items-center gap-1">
                     <LetterP color={logoColor} />
                     <LetterL color={logoColor} />
                     <LetterA color={logoColor} />
@@ -82,15 +82,15 @@ export default function Logo({ apiStatus = 'idle' }) {
                     <LetterA color={logoColor} />
                 </div>
 
-                <div className="ml-1 text-[8px] font-black self-start text-[#63e9ff]/60 tracking-tighter">TM</div>
+                <div className="ml-1 text-[8px] font-black self-start text-white/40 tracking-tighter">TM</div>
             </div>
 
-            {/* Sub-text explicitly bright blue */}
-            <div className="hidden xl:flex flex-col border-l border-[#63e9ff]/20 pl-4 ml-2">
-                <span className="text-[7px] tracking-[0.4em] uppercase font-bold text-[#63e9ff]/50 group-hover:text-[#63e9ff] transition-all duration-700">
+            {/* Sub-text moved or hidden to keep the ALAKAZAM style's impact */}
+            <div className="hidden xl:flex flex-col border-l border-white/10 pl-4 ml-2">
+                <span className="text-[7px] tracking-[0.4em] uppercase font-bold text-white/30 group-hover:text-white/50 transition-all duration-700">
                     The Monolith Gate
                 </span>
-                <span className="text-[6px] text-[#63e9ff]/20 tracking-[0.2em] font-oswald uppercase">Spectral Matrix Active</span>
+                <span className="text-[6px] text-white/10 tracking-[0.2em] font-oswald uppercase">SYSTEM OVERRIDE v2.0</span>
             </div>
         </div>
     );
