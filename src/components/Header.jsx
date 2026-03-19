@@ -31,21 +31,21 @@ const Header = React.memo(({
     ];
 
     return (
-        <header className="pt-safe flex items-center justify-between px-3 md:px-6 border-b-2 border-black bg-black z-50 shrink-0 transition-all duration-300">
-            <div className="h-16 flex items-center gap-6">
+        <header className="pt-safe flex items-center justify-between px-2 md:px-6 border-b-2 border-black bg-black z-50 shrink-0 transition-all duration-300">
+            <div className="h-14 md:h-16 flex items-center gap-2 md:gap-6">
                 <button
                     onClick={openDrawer}
-                    className="p-2 -ml-2 text-white/40 hover:text-white transition-colors active:scale-90 md:hidden drop-shadow-md"
+                    className="p-2 -ml-1 text-white/40 hover:text-white transition-colors active:scale-90 md:hidden drop-shadow-md"
                 >
-                    <Menu size={26} strokeWidth={2.5} />
+                    <Menu size={24} strokeWidth={2.5} />
                 </button>
-                <div className="hidden lg:flex items-center gap-4">
+                <div className="hidden sm:flex items-center gap-4">
                     <Logo apiStatus={apiStatus} />
                     {globalSentiment !== 'neutral' ? (
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="px-3 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-2"
+                            className="hidden lg:flex px-3 py-1 rounded-full bg-white/5 border border-white/10 items-center gap-2"
                         >
                             <div className="w-1.5 h-1.5 rounded-full animate-pulse" 
                                  style={{ backgroundColor: globalSentiment === 'serene' ? '#00ffff' : 
@@ -59,41 +59,43 @@ const Header = React.memo(({
                 </div>
             </div>
 
-            {/* NEW: Mode Tabs in Header Center */}
-            <div className="flex items-center gap-0.5 sm:gap-1 bg-white/5 p-1 rounded-full border border-white/5 scale-90 sm:scale-100 max-w-full overflow-x-auto itako-scrollbar-none">
-                {modeTabs.map(tab => {
-                    const isActive = activeManagerTab === tab.id;
-                    return (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveManagerTab(tab.id)}
-                            style={{
-                                backgroundColor: isActive ? tab.color : 'transparent',
-                                color: isActive ? '#000' : 'rgba(255,255,255,0.7)',
-                                boxShadow: isActive ? `0 4px 15px ${tab.color}44` : 'none'
-                            }}
-                            className={`flex items-center gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase transition-all duration-300 active:scale-95 border ${isActive ? 'border-white/40' : 'border-transparent'}`}
-                        >
-                            {tab.icon}
-                            <span className="hidden sm:inline">{tab.label}</span>
-                        </button>
-                    );
-                })}
+            {/* NEW: Mode Tabs in Header Center - Optimized for Mobile */}
+            <div className="flex-1 flex justify-center px-2 overflow-hidden">
+                <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 max-w-full overflow-x-auto itako-scrollbar-none">
+                    {modeTabs.map(tab => {
+                        const isActive = activeManagerTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveManagerTab(tab.id)}
+                                style={{
+                                    backgroundColor: isActive ? tab.color : 'transparent',
+                                    color: isActive ? '#000' : 'rgba(255,255,255,0.7)',
+                                    boxShadow: isActive ? `0 4px 15px ${tab.color}44` : 'none'
+                                }}
+                                className={`flex items-center gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase transition-all duration-300 active:scale-95 border ${isActive ? 'border-white/40' : 'border-transparent'} shrink-0`}
+                            >
+                                <span className={isActive ? 'scale-110' : 'scale-100'}>{tab.icon}</span>
+                                <span className="hidden md:inline">{tab.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Timeline Buttons moved to Header */}
-            <div className="flex items-center gap-0 sm:gap-4 h-16 shrink-0">
+            <div className="flex items-center gap-0 md:gap-2 h-14 md:h-16 shrink-0">
                 {navItems.map(item => (
                     <button
                         key={item.id}
                         onClick={() => onSlotClick(item.id)}
                         style={{ color: activeSlot === item.id ? item.color : 'rgba(255,255,255,0.2)' }}
-                        className={`w-10 h-10 sm:w-12 sm:h-12 relative flex items-center justify-center rounded-full transition-all duration-300 hover:text-white/60 hover:bg-white/5 active:scale-90 touch-manipulation`}
+                        className={`w-9 h-9 md:w-12 md:h-12 relative flex items-center justify-center rounded-full transition-all duration-300 hover:text-white/60 hover:bg-white/5 active:scale-90 touch-manipulation`}
                         title={item.label}
                     >
                         {item.icon}
                         {activeSlot === item.id ? (
-                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current shadow-[0_0_8px_current]" />
+                            <div className="absolute bottom-1.5 md:bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current shadow-[0_0_8px_current]" />
                         ) : null}
                     </button>
                 ))}

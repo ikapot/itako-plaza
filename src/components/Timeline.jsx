@@ -242,11 +242,11 @@ const Timeline = React.memo(function Timeline({
             <DialogueEcho messages={messages} accentColor={accentColor} />
             
             {/* Slot 1: News Terminal */}
-            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-24 md:pt-32">
+            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-16 md:pt-32">
                 <div className="max-w-3xl mx-auto w-full pb-20">
                     <div className="bg-black/80 border-2 border-black itako-outline overflow-hidden">
                         {/* Terminal Header */}
-                        <div className="p-4 border-b-2 border-black bg-black/40 flex items-center justify-between">
+                        <div className="p-3 md:p-4 border-b-2 border-black bg-black/40 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <TrendingUp size={16} className="text-[#f15a24]" />
                                 <div>
@@ -258,7 +258,7 @@ const Timeline = React.memo(function Timeline({
                         </div>
 
                         {/* Content */}
-                        <div className="p-4 md:p-10 space-y-12">
+                        <div className="p-3 md:p-10 space-y-8 md:space-y-12">
                             {news.map(function renderNews(n) {
                                 return <MemoizedNewsItem key={n.id} n={n} charMap={charMap} />;
                             })}
@@ -267,8 +267,8 @@ const Timeline = React.memo(function Timeline({
                 </div>
             </section>
              {/* Slot 2: Main Dialog Terminal */}
-            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-10 md:pt-20">
-                <div className="max-w-3xl mx-auto w-full pb-80 md:pb-96">
+            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-14 md:pt-20">
+                <div className="max-w-3xl mx-auto w-full pb-64 md:pb-96">
                     {/* Event Anomaly Floating Banner */}
                     <AnimatePresence>
                         {currentWorldEvent ? (function renderEvent() {
@@ -296,12 +296,12 @@ const Timeline = React.memo(function Timeline({
 
                     <div className="bg-black/80 border-2 border-black itako-outline overflow-hidden min-h-[600px] flex flex-col">
                         {/* Terminal Header */}
-                        <div className="p-4 border-b-2 border-black bg-black/40 flex items-center justify-between sticky top-0 bg-black/80 backdrop-blur-md z-50">
-                            <div className="flex items-center gap-3">
+                        <div className="p-3 md:p-4 border-b-2 border-black bg-black/40 flex items-center justify-between sticky top-0 bg-black/80 backdrop-blur-md z-50">
+                            <div className="flex items-center gap-2 md:gap-3">
                                 <MessageSquare size={16} className="text-[#f15a24]" />
                                 <div>
-                                    <div className="text-[10px] font-black text-[#f15a24] uppercase tracking-widest leading-none">Synchronized Transcripts</div>
-                                    <div className="text-[8px] text-[#EAE0D5]/40 uppercase tracking-widest mt-0.5">Session: {userName || 'GUEST'} / TRACE_CONNECTED</div>
+                                    <div className="text-[9px] md:text-[10px] font-black text-[#f15a24] uppercase tracking-widest leading-none">Transcripts</div>
+                                    <div className="text-[7px] md:text-[8px] text-[#EAE0D5]/40 uppercase tracking-widest mt-0.5">Session: {userName || 'GUEST'}</div>
                                 </div>
                             </div>
                             <button
@@ -340,11 +340,11 @@ const Timeline = React.memo(function Timeline({
             </section>
 
             {/* Slot 3: Library (Archives) */}
-            <section className="timeline-slot p-6 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-24 md:pt-32">
-                <div className="max-w-2xl mx-auto w-full pb-80 md:pb-96">
-                    <header className="flex flex-col gap-2 mb-16 md:mb-20 px-2 md:px-0">
+            <section className="timeline-slot p-4 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-16 md:pt-32">
+                <div className="max-w-2xl mx-auto w-full pb-64 md:pb-96">
+                    <header className="flex flex-col gap-2 mb-8 md:mb-20 px-2 md:px-0">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] py-4 font-oswald uppercase break-all w-full pr-4" style={{ color: '#2a2a2a' }}>LIBRARY</h2>
+                            <h2 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] py-4 font-oswald uppercase break-all w-full pr-4" style={{ color: '#2a2a2a' }}>LIBRARY</h2>
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={function sync() { setShowNotebookModal(true); }}
