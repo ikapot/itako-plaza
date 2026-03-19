@@ -124,10 +124,10 @@ const CharTile = React.memo(function CharTile({ char, isSelected, isRolling, onT
         )}
       </AnimatePresence>
 
-      <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md px-2 py-1.5 rounded-lg text-[9px] text-white opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none border border-white/15 z-[300] text-center translate-y-2 group-hover:translate-y-0 shadow-2xl">
+      <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md px-2 py-1.5 rounded-lg text-[9px] text-white opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none border border-white/30 z-[300] text-center translate-y-2 group-hover:translate-y-0 shadow-2xl">
         <div className="font-bold tracking-widest">{char.name}</div>
-        <div className="text-white/40 text-[7.5px] uppercase">{char.flavor}</div>
-        {isMain && <div className="text-[6px] mt-1 text-[#f15a24]/80 tracking-widest">INITIATED</div>}
+        <div className="text-white/70 text-[7.5px] uppercase">{char.flavor}</div>
+        {isMain && <div className="text-[6px] mt-1 text-[#f15a24]/90 tracking-widest">INITIATED</div>}
       </div>
     </div>
   );
@@ -187,9 +187,9 @@ const LocTile = React.memo(function LocTile({ loc, isSelected, isRolling, energy
         )}
       </AnimatePresence>
 
-      <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md px-2 py-1.5 rounded-lg text-[9px] text-white opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none border border-white/15 z-[300] max-w-[120px] text-center leading-tight shadow-2xl translate-y-2 group-hover:translate-y-0">
+      <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-black/95 backdrop-blur-md px-2 py-1.5 rounded-lg text-[9px] text-white opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap pointer-events-none border border-white/30 z-[300] max-w-[120px] text-center leading-tight shadow-2xl translate-y-2 group-hover:translate-y-0">
         <div className="font-bold mb-1">{loc.name}</div>
-        <div className="text-[7.5px] text-white/50">{loc.description?.slice(0, 45)}...</div>
+        <div className="text-[7.5px] text-white/70">{loc.description?.slice(0, 45)}...</div>
       </div>
     </div>
   );
@@ -413,8 +413,8 @@ function ThreeDMap({
     <div className="relative w-full select-none space-y-3">
       <div className="flex items-center justify-between px-1">
         <div className="space-y-0.5">
-          <p className="text-[9px] text-white/30 font-mono tracking-widest">🎲 × {rollCount > 0 ? `rolled ${rollCount}x` : 'press to summon'}</p>
-          <p className="text-[7px] text-white/15 font-mono">{`${6 * 6} face-combos · ${charFaces[charFaceIdx]?.length || 0} souls visible`}</p>
+          <p className="text-[9px] text-white/70 font-mono tracking-widest">🎲 × {rollCount > 0 ? `rolled ${rollCount}x` : 'press to summon'}</p>
+          <p className="text-[7px] text-white/60 font-mono">{`${6 * 6} face-combos · ${charFaces[charFaceIdx]?.length || 0} souls visible`}</p>
         </div>
 
         <motion.button
