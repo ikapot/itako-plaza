@@ -666,8 +666,11 @@ export async function* generateDialogueStream({ charId, messages, systemOverride
   const charConfig = CHARACTER_CONFIGS[charId] || {};
   const targetModel = charConfig.model || "google/gemini-2.0-flash-001";
   
+  const baseSystem = systemOverride || charConfig.systemPrompt || "あなたは博識な司書です。";
+  const forbiddenStyle = "\n【文体規定】「〜だわ」「〜なのよ」等のステレオタイプな女言葉は使用せず、知的で自立した口調を徹底してください。";
+  
   const fullMessages = [
-    { role: "system", content: systemOverride || charConfig.systemPrompt || "あなたは博識な司書です。" },
+    { role: "system", content: baseSystem + forbiddenStyle },
     ...messages
   ];
 
@@ -775,6 +778,7 @@ function buildSystemPrompt({ character, options, others }) {
   });
 
   prompt += "\n【義務】発言の冒頭に心情タグ [serene, agitated, melancholic, joyful, chaotic, neutral] を必ず付与してください。";
+  prompt += "\n【文体規定】女性キャラクターであっても、「〜だわ」「〜なのよ」といったステレオタイプな「女言葉」は一切使用しないでください。知的で自立した、あるいは各々の歴史的背景に基づいた自然な口調（中性的・専門的・あるいは硬派な口調）を徹底してください。";
   return prompt;
 }
 

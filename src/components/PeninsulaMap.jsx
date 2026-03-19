@@ -1,58 +1,50 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { INITIAL_CHARACTERS, INITIAL_LOCATIONS } from '../constants';
-import { User, MapPin, Search, ZoomIn, Ghost, Sparkles, Navigation } from 'lucide-react';
+import { INITIAL_CHARACTERS } from '../constants';
+import { Navigation, Info } from 'lucide-react';
+
+const PENINSULA_PATH = "M250,50 C380,50 480,180 480,300 C480,420 380,550 250,550 C120,550 20,420 20,300 C20,180 120,50 250,50 Z";
+const CONTOUR_STEPS = 12;
 
 const PeninsulaMap = ({ 
-  selectedLocationId, 
-  setSelectedLocationId, 
-  characters = INITIAL_CHARACTERS,
   selectedCharIds = [],
+  characters = INITIAL_CHARACTERS,
   handleToggleChar,
   onGo,
   globalSentiment = 'neutral'
 }) => {
   const [hoveredChar, setHoveredChar] = useState(null);
-  const [activeFaceFilter, setActiveFaceFilter] = useState(null);
 
-  // 1. Core 54 Characters (6 faces * 9 positions)
+  // Core 54 Characters mapping
   const mapSouls = useMemo(() => {
-    // Collect 54 primary souls (Face 0-5, Pos 0-8)
     const souls = [];
     for (let f = 0; f <= 5; f++) {
       for (let p = 0; p <= 8; p++) {
         const char = characters.find(c => c.face === f && c.pos === p);
         if (char) {
-          // Calculate an organic position on the peninsula
-          // f=0 (Center), f=1 (West/Industrial), f=2 (East/Traditional), 
-          // f=3 (Deep West/Foreign), f=4 (North/Highlands), f=5 (South/Abyss)
+          // Calculate positions based on face (genre)
           let centerX = 250;
-          let centerY = 250;
-          let spread = 80;
+          let centerY = 300;
+          let spread = 120;
+          let height = 10 + (p * 8); // height for topographic pins
 
           switch(f) {
-            case 0: // 文豪 (Center)
-              centerX = 250; centerY = 200; spread = 60; break;
-            case 1: // 闇 (Slum - Southwest)
-              centerX = 150; centerY = 350; spread = 70; break;
-            case 2: // 先駆者 (Traditional - East)
-              centerX = 400; centerY = 280; spread = 60; break;
-            case 3: // 西洋 (Industrial - West)
-              centerX = 100; centerY = 220; spread = 70; break;
-            case 4: // 芸術 (Mountain - North)
-              centerX = 250; centerY = 80; spread = 80; break;
-            case 5: // 異界 (Abyss - South)
-              centerX = 250; centerY = 480; spread = 60; break;
+            case 0: centerX = 250; centerY = 280; spread = 60; break;
+            case 1: centerX = 160; centerY = 400; spread = 80; break;
+            case 2: centerX = 380; centerY = 320; spread = 70; break;
+            case 3: centerX = 120; centerY = 250; spread = 80; break;
+            case 4: centerX = 250; centerY = 120; spread = 90; break;
+            case 5: centerX = 250; centerY = 450; spread = 70; break;
           }
 
-          // Deterministic jitter based on pos
           const angle = (p / 9) * Math.PI * 2;
-          const dist = 30 + (Math.sin(p * 1.5) * 20);
+          const dist = 40 + (Math.sin(p * 2) * 15);
           
           souls.push({
             ...char,
             mapX: centerX + Math.cos(angle) * dist,
-            mapY: centerY + Math.sin(angle) * dist
+            mapY: centerY + Math.sin(angle) * dist,
+            height
           });
         }
       }
@@ -60,202 +52,152 @@ const PeninsulaMap = ({
     return souls;
   }, [characters]);
 
-  const FACE_LABELS = [
-    { name: '文豪列伝', color: '#f15a24' },
-    { name: '闇の系譜', color: '#4b4b4b' },
-    { name: '女性の先駆者', color: '#bd8a78' },
-    { name: '西洋の魂', color: '#6366f1' },
-    { name: '芸術家・詩人', color: '#EAE0D5' },
-    { name: '異界の存在', color: '#fdb913' }
-  ];
-
-  const filteredSouls = activeFaceFilter !== null 
-    ? mapSouls.filter(s => s.face === activeFaceFilter)
-    : mapSouls;
-
   return (
-    <div className="relative w-full h-[600px] flex flex-col bg-black/40 md:rounded-[40px] border border-white/5 overflow-hidden">
+    <div className="relative w-full h-[700px] flex flex-col bg-black overflow-hidden select-none itako-outline border-2 border-black">
       
-      {/* Map Header / Filters */}
-      <div className="p-4 bg-white/5 border-b border-white/5 flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
-        <div className="flex items-center gap-2 shrink-0">
-          <button 
-            onClick={() => setActiveFaceFilter(null)}
-            className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${activeFaceFilter === null ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
-          >
-            All Souls
-          </button>
-          {FACE_LABELS.map((f, i) => (
-            <button 
-              key={i}
-              onClick={() => setActiveFaceFilter(i)}
-              className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-all border ${activeFaceFilter === i ? 'border-transparent text-black' : 'border-white/10 text-white/40'}`}
-              style={{ backgroundColor: activeFaceFilter === i ? f.color : 'transparent' }}
-            >
-              {f.name}
-            </button>
-          ))}
-        </div>
-        <div className="text-[10px] text-white/20 font-oswald uppercase tracking-[0.3em]">54 Registered Manifestations</div>
+      {/* 1. Background Grid & Compass */}
+      <div className="absolute inset-0 pointer-events-none opacity-20">
+        <svg viewBox="0 0 500 600" className="w-full h-full">
+          <circle cx="250" cy="300" r="280" fill="none" stroke="#EAE0D5" strokeWidth="0.5" strokeDasharray="4 8" />
+          <circle cx="250" cy="300" r="180" fill="none" stroke="#EAE0D5" strokeWidth="0.3" strokeDasharray="2 4" />
+          <line x1="250" y1="20" x2="250" y2="580" stroke="#EAE0D5" strokeWidth="0.5" strokeOpacity="0.2" />
+          <line x1="20" y1="300" x2="480" y2="300" stroke="#EAE0D5" strokeWidth="0.5" strokeOpacity="0.2" />
+          
+          <g className="text-[9px] font-oswald fill-[#EAE0D5]/50 tracking-[0.5em] uppercase">
+            <text x="250" y="40" textAnchor="middle">North / High Registry</text>
+            <text x="250" y="580" textAnchor="middle">South / Abyss Gate</text>
+            <text x="40" y="300" textAnchor="middle" transform="rotate(-90, 40, 300)">West / Industrial</text>
+            <text x="460" y="300" textAnchor="middle" transform="rotate(90, 460, 300)">East / Traditional</text>
+          </g>
+        </svg>
       </div>
 
-      <div className="relative flex-1 cursor-crosshair">
-        {/* SVG Peninsula Boundary */}
-        <svg viewBox="0 0 500 550" className="absolute inset-0 w-full h-full p-8 overflow-visible">
-            <defs>
-                <filter id="mapGlow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="15" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-            </defs>
+      {/* 2. Topographic Contour Lines */}
+      <div className="relative flex-1">
+        <svg viewBox="0 0 500 600" className="absolute inset-0 w-full h-full overflow-visible">
+          {Array.from({ length: CONTOUR_STEPS }).map((_, i) => {
+            const scale = 1 - (i / CONTOUR_STEPS) * 0.8;
+            const opacity = 0.05 + ((CONTOUR_STEPS - i) / CONTOUR_STEPS) * 0.4;
+            const strokeColor = i % 3 === 0 ? "#f15a24" : "#b45309";
+            
+            return (
+              <motion.path
+                key={i}
+                d={PENINSULA_PATH}
+                stroke={strokeColor}
+                strokeWidth={i === 0 ? "1.5" : "0.5"}
+                fill="none"
+                strokeOpacity={opacity}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale }}
+                transition={{ duration: 1, delay: i * 0.05 }}
+                style={{ transformOrigin: 'center 300px' }}
+              />
+            );
+          })}
 
-            {/* Subliminal Grid */}
-            <path d="M 0,100 L 500,100 M 0,200 L 500,200 M 0,300 L 500,300 M 0,400 L 500,400 M 100,0 L 100,550 M 200,0 L 200,550 M 300,0 L 300,550 M 400,0 L 400,550" 
-                  fill="none" stroke="white" strokeWidth="0.2" strokeOpacity="0.1" />
+          {/* 3. Souls (Markers) */}
+          {mapSouls.map((s) => {
+            const isSelected = selectedCharIds.includes(s.id);
+            const isHovered = hoveredChar?.id === s.id;
+            const baseY = s.mapY;
+            const topY = s.mapY - s.height;
 
-            {/* Peninsula Outline - More organic shape */}
-            <motion.path 
-              d="M250,20 C350,20 450,150 480,250 C510,350 450,530 250,530 C50,530 -20,350 20,250 C50,150 150,20 250,20 Z"
-              fill="rgba(255,255,255,0.02)"
-              stroke="#b45309"
-              strokeWidth="1.5"
-              strokeDasharray="4 2"
-              strokeOpacity="0.2"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 3 }}
-            />
-
-            {/* Regions Labels */}
-            <g className="pointer-events-none opacity-60">
-                <text x="250" y="50" textAnchor="middle" className="text-[10px] fill-[#EAE0D5] font-oswald tracking-[0.5em] uppercase">Highlands</text>
-                <text x="250" y="520" textAnchor="middle" className="text-[10px] fill-[#EAE0D5] font-oswald tracking-[0.5em] uppercase">Abyssal Coast</text>
-                <text x="50" y="300" textAnchor="middle" transform="rotate(-90, 50, 300)" className="text-[8px] fill-[#EAE0D5] font-oswald tracking-[0.5em] uppercase">Industrial West</text>
-                <text x="450" y="300" textAnchor="middle" transform="rotate(90, 450, 300)" className="text-[8px] fill-[#EAE0D5] font-oswald tracking-[0.5em] uppercase">Traditional East</text>
-            </g>
-
-            {/* Connection Lines (Subtle) */}
-            {mapSouls.map((s, i) => {
-              if (i % 8 === 0) return null;
-              const next = mapSouls[i-1];
-              if (next.face !== s.face) return null;
-              return (
-                <line 
-                  key={`l-${i}`} 
-                  x1={s.mapX} y1={s.mapY} x2={next.mapX} y2={next.mapY} 
-                  stroke="white" strokeWidth="0.2" strokeOpacity="0.05" 
+            return (
+              <g 
+                key={s.id} 
+                className="cursor-pointer"
+                onMouseEnter={() => setHoveredChar(s)}
+                onMouseLeave={() => setHoveredChar(null)}
+                onClick={() => handleToggleChar(s.id)}
+              >
+                {/* Vertical Stem Line */}
+                <motion.line 
+                  x1={s.mapX} y1={baseY}
+                  x2={s.mapX} y2={topY}
+                  stroke={isSelected ? "#10b981" : "#EAE0D5"}
+                  strokeWidth={isSelected ? "2" : "1"}
+                  strokeOpacity={isSelected || isHovered ? "1" : "0.2"}
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
                 />
-              );
-            })}
 
-            {/* Dots for the 54 souls */}
-            {filteredSouls.map((s) => {
-              const isSelected = selectedCharIds.includes(s.id);
-              const isHovered = hoveredChar?.id === s.id;
-              
-              return (
-                <g 
-                  key={s.id} 
-                  onMouseEnter={() => setHoveredChar(s)}
-                  onMouseLeave={() => setHoveredChar(null)}
-                  onClick={() => handleToggleChar(s.id)}
-                  className="cursor-pointer group"
-                >
-                  <circle 
-                    cx={s.mapX} cy={s.mapY} 
-                    r={isSelected ? 5 : 3} 
-                    fill={isSelected ? s.color.replace('bg-', '') : (isHovered ? 'white' : 'rgba(255,255,255,0.3)')}
-                    className="transition-all duration-300"
-                    style={{ 
-                      filter: isSelected ? 'drop-shadow(0 0 8px currentColor)' : 'none',
-                      fill: isSelected ? FACE_LABELS[s.face].color : undefined
-                    }}
-                  />
-                  {isSelected && (
-                    <circle 
-                      cx={s.mapX} cy={s.mapY} 
-                      r={10} 
-                      fill="none" 
-                      stroke={FACE_LABELS[s.face].color} 
-                      strokeWidth="0.5" 
-                      strokeOpacity="0.5"
-                      className="animate-ping"
-                    />
-                  )}
-                  {isHovered && (
-                    <text 
-                      x={s.mapX} y={s.mapY - 12} 
-                      textAnchor="middle" 
-                      className="text-[9px] fill-white font-black tracking-widest uppercase pointer-events-none drop-shadow-lg"
-                    >
-                      {s.name}
-                    </text>
-                  )}
-                </g>
-              );
-            })}
+                {/* Ground Point */}
+                <circle cx={s.mapX} cy={baseY} r="1.5" fill={isSelected ? "#10b981" : "#b45309"} opacity="0.4" />
+
+                {/* Floating Head Pin */}
+                <motion.circle 
+                  cx={s.mapX} cy={topY} 
+                  r={isSelected ? 6 : (isHovered ? 5 : 3)} 
+                  fill={isSelected ? "#10b981" : (isHovered ? "white" : "black")} 
+                  stroke={isSelected ? "rgba(16, 185, 129, 0.5)" : "#EAE0D5"}
+                  strokeWidth={isSelected ? "6" : "1.5"}
+                  className="transition-all duration-300"
+                />
+
+                {/* Label if hovered or selected */}
+                {(isHovered || isSelected) && (
+                   <g>
+                      <rect x={s.mapX + 8} y={topY - 14} width={s.name.length * 8 + 20} height="24" fill="black" stroke={isSelected ? "#10b981" : "#f15a24"} strokeWidth="1" />
+                      <text x={s.mapX + 16} y={topY + 3} className={`text-[10px] font-black uppercase tracking-widest ${isSelected ? 'fill-[#10b981]' : 'fill-white'} font-oswald`}>
+                        {s.name}
+                      </text>
+                   </g>
+                )}
+              </g>
+            );
+          })}
         </svg>
 
-        {/* Floating Detail Panel (When Hovered) */}
+        {/* 4. Overlays & HUD */}
+        <div className="absolute top-10 right-10 flex flex-col items-end gap-1">
+          <div className="text-[10px] font-black text-[#f15a24] tracking-widest uppercase">Registry Density</div>
+          <div className="flex gap-0.5">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className={`w-3 h-1 ${i < 8 ? 'bg-[#f15a24]' : 'bg-[#EAE0D5]/10'}`} />
+            ))}
+          </div>
+        </div>
+
+        <div className="absolute bottom-10 left-10 p-5 bg-black border-2 border-black itako-outline max-w-[280px]">
+          <div className="flex items-center gap-2 mb-3">
+             <Info size={14} className="text-[#f15a24]" />
+             <span className="text-[11px] font-black text-[#f15a24] tracking-widest uppercase italic">System Overview</span>
+          </div>
+          <p className="text-[10px] text-[#EAE0D5]/60 font-biz-mincho leading-relaxed">
+             54名の超越的意識が「半島」のトポグラフィー上に展開されています。等高線の密度は情報の集積度を示します。
+          </p>
+          <div className="mt-4 flex items-center gap-4 border-t border-[#EAE0D5]/10 pt-3">
+             <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-none bg-[#10b981] shadow-[0_0_10px_#10b981]" />
+                <span className="text-[8px] font-bold text-[#EAE0D5]/40 uppercase tracking-widest">Active Focus</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-none bg-[#f15a24]" />
+                <span className="text-[8px] font-bold text-[#EAE0D5]/40 uppercase tracking-widest">Potential</span>
+             </div>
+          </div>
+        </div>
+
+        {/* Global Manifest Button */}
         <AnimatePresence>
-          {hoveredChar && (
+          {selectedCharIds.length > 0 && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 10 }}
-              className="absolute bottom-6 left-6 right-6 md:left-auto md:right-8 md:w-64 glass-spectral p-5 rounded-3xl border border-white/10 pointer-events-none"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              className="absolute bottom-10 right-10"
             >
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`w-2 h-8 rounded-full`} style={{ backgroundColor: FACE_LABELS[hoveredChar.face].color }} />
-                <div>
-                  <div className="text-[12px] font-black text-white tracking-widest uppercase">{hoveredChar.name}</div>
-                  <div className="text-[8px] text-white/30 uppercase tracking-[0.2em]">{hoveredChar.role}</div>
-                </div>
-              </div>
-              <p className="text-[10px] text-white/60 leading-relaxed font-serif italic mb-4 line-clamp-3">
-                {hoveredChar.flavor} — {hoveredChar.description.slice(0, 50)}...
-              </p>
-              <div className="flex items-center justify-between">
-                <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">{FACE_LABELS[hoveredChar.face].name}</span>
-                <span className="text-[8px] font-black text-white/40 flex items-center gap-1 group">
-                  <Navigation size={8} /> CLICK TO SUMMON
-                </span>
-              </div>
+              <button 
+                onClick={onGo}
+                className="px-12 py-4 bg-[#f15a24] text-black border-2 border-black font-black text-[12px] tracking-[0.5em] uppercase hover:bg-white transition-all flex items-center gap-4"
+              >
+                <Navigation size={18} className="fill-current" />
+                Manifest Target / 決定
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Global Action Button */}
-        {selectedCharIds.length > 0 && (
-          <motion.div 
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2"
-          >
-            <button 
-              onClick={onGo}
-              className="px-10 py-3 bg-[#f15a24] text-white rounded-full font-black text-[10px] tracking-[0.4em] uppercase shadow-[0_0_30px_rgba(241,90,36,0.6)] hover:scale-105 transition-all flex items-center gap-3"
-            >
-              <Navigation size={14} className="animate-pulse" />
-              Manifestation Focus / 召喚に集中
-            </button>
-          </motion.div>
-        )}
-      </div>
-
-      <div className="p-4 bg-white/5 border-t border-white/5 flex items-center justify-center gap-8">
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-          <span className="text-[8px] text-white/30 uppercase tracking-[0.3em]">Potential Point</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#f15a24]" />
-          <span className="text-[8px] text-white/30 uppercase tracking-[0.3em]">Active Spirit</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Sparkles size={8} className="text-white/40" />
-          <span className="text-[8px] text-white/30 uppercase tracking-[0.3em]">Synchro Point</span>
-        </div>
       </div>
     </div>
   );
