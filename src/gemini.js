@@ -3,27 +3,25 @@ import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 // --- OpenRouter Protocol ---
 
 export const OPENROUTER_MODELS = [
-  { id: "auto", name: "Auto (Intelligent Routing)" },
+  { id: "auto", name: "Auto (Intelligent Routing - Free Preferred)" },
   { id: "google/gemini-2.0-flash-lite-preview-02-05:free", name: "Gemini 2.0 Flash Lite (Always Free)" },
-  { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (Fast & Ultra Cheap)" },
-  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini (Ultra Cheap)" },
-  { id: "deepseek/deepseek-chat", name: "DeepSeek V3 (Reasoning)" },
-  { id: "meta-llama/llama-3.1-405b", name: "Llama 3.1 405B (High Performance)" },
-  { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet (Best Performance - Expensive)" },
+  { id: "microsoft/phi-3-mini-128k-instruct:free", name: "Phi-3 Mini (Free)" },
+  { id: "mistralai/mistral-7b-instruct:free", name: "Mistral 7B (Free)" },
+  { id: "openchat/openchat-7b:free", name: "OpenChat 7B (Free)" },
 ];
 
 const TASK_MODELS = {
   DIALOGUE: "google/gemini-2.0-flash-lite-preview-02-05:free", // ALWAYS FREE
   UTILITY: "google/gemini-2.0-flash-lite-preview-02-05:free",
-  JSON: "google/gemini-2.0-flash-lite-preview-02-05:free", // Changed from gpt-4o-mini to avoid 402
+  JSON: "google/gemini-2.0-flash-lite-preview-02-05:free",
   SUMMARY: "google/gemini-2.0-flash-lite-preview-02-05:free",
   CRITICAL: "google/gemini-2.0-flash-lite-preview-02-05:free",
-  CHEAP: "google/gemini-2.0-flash-lite-preview-02-05:free"
+  CHEAP: "mistralai/mistral-7b-instruct:free" // More stable for validation ping
 };
 
 const routeModel = (taskType, preferredModel) => {
   if (preferredModel && preferredModel !== 'auto') return preferredModel;
-  return TASK_MODELS[taskType] || "google/gemini-2.0-flash-001";
+  return TASK_MODELS[taskType] || "google/gemini-2.0-flash-lite-preview-02-05:free";
 };
 
 let preferredOpenRouterModel = localStorage.getItem('itako_preferred_model') || "auto";
@@ -196,7 +194,7 @@ const CHARACTER_CONFIGS = {
 【トーン】早熟な天才の傲慢さと、沈黙を好む放浪者の冷淡さ。
 【キーワード】地獄の季節、イリュミネーション、見者、放浪、沈黙。`,
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "anthropic/claude-3-haiku"
+    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
   },
   fumiko: {
     systemPrompt: `あなたは金子文子の魂です。
@@ -220,7 +218,7 @@ const CHARACTER_CONFIGS = {
 【トーン】情熱的で軽やか。江戸っ子のような威勢。既存の秩序を挑発する。
 【キーワード】生の拡充、反逆、乱調の美、自由発意、直接行動、アナーキズム。`,
     generationConfig: { temperature: 0.9, topP: 0.95 },
-    model: "anthropic/claude-3-haiku"
+    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
   },
 
   // --- Face 2: 女性の先駆者 ---
@@ -245,7 +243,7 @@ const CHARACTER_CONFIGS = {
 【トーン】奔放で力強い。迷いがない。剥き出しの母性と情熱。
 【キーワード】吹一風、雑草、生の放熱、わきまえない自分。`,
     generationConfig: { temperature: 0.95, topP: 0.9 },
-    model: "anthropic/claude-3-haiku"
+    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
   },
   curie: {
     systemPrompt: `あなたはマリー・キュリーの魂です。
@@ -285,7 +283,7 @@ const CHARACTER_CONFIGS = {
 【トーン】華麗で情熱的。力強く、生命の躍動を歌い上げる。
 【キーワード】みだれ髪、君死にたまふことなかれ、明星、情熱、恋。`,
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "anthropic/claude-3-haiku"
+    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
   },
   higuchi: {
     systemPrompt: `あなたは樋口一葉の魂です。
@@ -351,7 +349,7 @@ const CHARACTER_CONFIGS = {
 【トーン】烈しく、憤り、しかし科学的。広場の不平等を突き詰め、変革を呼びかける。
 【キーワード】資本論、唯物史観、階級闘争、疎外、革命。`,
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "anthropic/claude-3-haiku"
+    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
   },
   freud: {
     systemPrompt: `あなたはジークムント・フロイトの魂です。
@@ -448,7 +446,7 @@ const CHARACTER_CONFIGS = {
   future_self: {
     systemPrompt: "あなたは2036年のユーザー自身です。10年前の自分を見守り、助言します。過去は変えられませんが、意味は変えられると説きます。",
     generationConfig: { temperature: 0.5 },
-    model: "google/gemini-1.5-flash"
+    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
   },
   oracle_ghost: {
     systemPrompt: "あなたは巫女の霊です。イタコプラザが形成される以前からこの地に宿る運命の記録者。日本語と古語、異邦の言語を混ぜ、神託を下します。",
@@ -506,7 +504,7 @@ const CHARACTER_CONFIGS = {
   narrator: {
     systemPrompt: "あなたは「語り手（narrator）」です。世界で起きている事変（暴動、流言飛語、パニック、思想弾圧）を客観的かつ不気味なトーンで描写し、状況説明を行います。",
     generationConfig: { temperature: 0.7, topP: 0.9 },
-    model: "google/gemini-2.0-flash-001"
+    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
   }
 };
 
@@ -636,6 +634,12 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
     };
   }
 
+  // Handle non-streaming response body
+  if (!stream) {
+    const responseData = await response.json();
+    return responseData.choices?.[0]?.message?.content || "";
+  }
+
   if (stream && onChunk) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -674,7 +678,7 @@ export async function* generateDialogueStream({ charId, messages, systemOverride
   }
 
   const charConfig = CHARACTER_CONFIGS[charId] || {};
-  const targetModel = charConfig.model || "google/gemini-2.0-flash-001";
+  const targetModel = charConfig.model || "google/gemini-2.0-flash-lite-preview-02-05:free";
   
   const baseSystem = systemOverride || charConfig.systemPrompt || "あなたは博識な司書です。";
   const forbiddenStyle = "\n【文体規定】「〜だわ」「〜なのよ」等のステレオタイプな女言葉は使用せず、知的で自立した口調を徹底してください。";
@@ -742,7 +746,11 @@ export async function invokeGemini(apiKey, prompt, sysPrompt = "", config = {}, 
   }
 
   const targetModel = routeModel(config.taskType || 'UTILITY', preferredOpenRouterModel);
-  const messages = [{ role: "user", content: sysPrompt ? `${sysPrompt}\n\n${prompt}` : prompt }];
+  
+  // Separate system prompt into its own message with "system" role for best compatibility
+  const messages = sysPrompt 
+    ? [{ role: "system", content: sysPrompt }, { role: "user", content: prompt }]
+    : [{ role: "user", content: prompt }];
   
   const res = await fetchOpenRouter(apiKey, messages, targetModel, config);
   let finalData = res;
