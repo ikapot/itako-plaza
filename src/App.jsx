@@ -267,6 +267,7 @@ export default function App() {
         setNews(newsData);
         
         // ニュースからトレンドを抽出して反映
+        await new Promise(r => setTimeout(r, 6000)); // さらに遅延
         const trends = await extractTrendsFromNews(newsData, geminiKey);
         if (trends) {
           setGlobalTrends(trends);
@@ -275,9 +276,9 @@ export default function App() {
       } catch (err) {
         console.error("News or Trend Fetching ERROR:", err);
       }
-    }, 2000);
+    }, 8000); // 初期起動を遅らせる
     
-    const energyInterval = setInterval(async () => setLocationEnergies(await fetchLocationEnergies()), 10000);
+    const energyInterval = setInterval(async () => setLocationEnergies(await fetchLocationEnergies()), 20000); // 間隔を広げる
 
     return () => { 
       clearTimeout(timeout);
@@ -288,7 +289,7 @@ export default function App() {
   useEffect(() => {
     const updateEvent = async () => {
       try {
-        await new Promise(r => setTimeout(r, 4000)); // ニュース取得と重ならないようにさらに遅延
+        await new Promise(r => setTimeout(r, 15000)); // ニュース取得と重ならないように大幅に遅延
         const event = await generateWorldEvent(geminiKey, globalTrends);
         if (event) {
           setCurrentWorldEvent(event);

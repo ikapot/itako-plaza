@@ -16,7 +16,7 @@ const TASK_MODELS = {
   JSON: "google/gemma-3-27b-it:free",
   SUMMARY: "google/gemma-3-12b-it:free",
   CRITICAL: "google/gemma-3-27b-it:free",
-  CHEAP: "mistralai/mistral-small-3.1-24b-instruct:free" 
+  CHEAP: "openrouter/free" // Automatically pick whatever is available for ping
 };
 
 const routeModel = (taskType, preferredModel) => {
@@ -591,92 +591,133 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
     };
   }
 
-  // Debug log to verify key (redacted)
+  // --- Normalization: Merge system role into first user message ---
+  // Many free models/providers on OpenRouter reject separate system messages with 400.
+  let normalizedMessages = [...messages];
+  const systemMsgIdx = normalizedMessages.findIndex(m => m.role === 'system');
+  if (systemMsgIdx !== -1) {
+    const systemContent = normalizedMessages[systemMsgIdx].content;
+    normalizedMessages.splice(systemMsgIdx, 1);
+    if (normalizedMessages.length > 0 && normalizedMessages[0].role === 'user') {
+      normalizedMessages[0].content = `${systemContent}\n\n${normalizedMessages[0].content}`;
+    } else {
+      normalizedMessages.unshift({ role: 'user', content: systemContent });
+    }
+  }
+
   const keySnippet = `${apiKey.substring(0, 10)}...`;
-  console.log(`[API Request] Model: ${model || "google/gemma-3-27b-it:free"}, Key: ${keySnippet}, Length: ${apiKey.trim().length}`);
+  console.log(`[API Request] Model: ${model || "google/gemma-3-27b-it:free"}, Messages: ${normalizedMessages.length}`);
 
   const body = {
     model: model || "google/gemma-3-27b-it:free",
-    messages,
+    messages: normalizedMessages,
     temperature: config.temperature ?? 0.7,
     max_tokens: config.maxOutputTokens ?? 1024,
-    top_p: config.topP ?? 1,
-    stream
+    top_p: config.topP ?? 0.9, // Slightly lower than 1 to avoid some provider strictness
+    stream: stream
   };
 
-  const response = await fetch(OPENROUTER_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey.trim()}`,
-      "HTTP-Referer": OPENROUTER_REFERER,
-      "X-Title": OPENROUTER_TITLE,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
+  let retryCount = 0;
+  const maxRetries = 4;
 
-  if (!response.ok) {
-    let errorData = {};
-    let errorText = "";
-    try { 
-      errorText = await response.text();
-      errorData = JSON.parse(errorText); 
-    } catch(e) {
-      errorData = { error: { message: errorText || "Unknown spectral disruption" } };
-    }
-    
-    console.error("[API Error Response]", errorData);
-    
-    const isAuthError = response.status === 401;
-    const isRateLimit = response.status === 429;
-    const isPaymentRequired = response.status === 402;
-    
-    throw { 
-      status: response.status, 
-      code: isAuthError ? SPIRITUAL_ERRORS.AUTH_FAILED 
-          : isPaymentRequired ? SPIRITUAL_ERRORS.PAYMENT_REQUIRED
-          : isRateLimit ? SPIRITUAL_ERRORS.RATE_LIMIT 
-          : SPIRITUAL_ERRORS.OPENROUTER_ERROR,
-      message: isAuthError 
-        ? `Authentication Failed: ${errorData.error?.message || "Invalid API Key"}. (Verify your OpenRouter setting/credits)`
-        : isPaymentRequired 
-          ? "OpenRouterのクレジットが不足しています (402 Payment Required)。対話を継続するにはチャージが必要です。"
-          : errorData.error?.message || `Spectral connection lost [${response.status}]` 
-    };
-  }
+  while (retryCount <= maxRetries) {
+    try {
+      const response = await fetch(OPENROUTER_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey.trim()}`,
+          "HTTP-Referer": OPENROUTER_REFERER,
+          "X-Title": OPENROUTER_TITLE,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
 
-  // Handle non-streaming response body
-  if (!stream) {
-    const responseData = await response.json();
-    return responseData.choices?.[0]?.message?.content || "";
-  }
-
-  if (stream && onChunk) {
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText = "";
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
-      for (const line of lines) {
-        if (!line.trim() || line.includes('[DONE]')) continue;
-        if (line.startsWith('data: ')) {
-          try {
-            const data = JSON.parse(line.slice(6));
-            const text = data.choices[0]?.delta?.content || "";
-            fullText += text;
-            onChunk(fullText);
-          } catch (e) {}
-        }
+      if (response.status === 429 && retryCount < maxRetries) {
+        const waitTime = Math.pow(2, retryCount) * 3000; // Increased base wait
+        console.warn(`[API Rate Limit] ${model} throttled. Retrying in ${waitTime}ms...`);
+        await new Promise(r => setTimeout(r, waitTime));
+        retryCount++;
+        continue;
       }
-    }
-    return fullText;
-  }
 
-  const data = await response.json();
-  return data.choices[0]?.message?.content || "";
+      if (!response.ok) {
+        let errorData = {};
+        let errorText = "";
+        try { 
+          errorText = await response.text();
+          errorData = JSON.parse(errorText); 
+        } catch(e) {
+          errorData = { error: { message: errorText || "Unknown spectral disruption" } };
+        }
+        
+        console.error("[API Error Response]", JSON.stringify(errorData, null, 2));
+        
+        const isAuthError = response.status === 401;
+        const isRateLimit = response.status === 429;
+        const isPaymentRequired = response.status === 402;
+        
+        throw { 
+          status: response.status, 
+          code: isAuthError ? SPIRITUAL_ERRORS.AUTH_FAILED 
+              : isPaymentRequired ? SPIRITUAL_ERRORS.PAYMENT_REQUIRED
+              : isRateLimit ? SPIRITUAL_ERRORS.RATE_LIMIT 
+              : SPIRITUAL_ERRORS.OPENROUTER_ERROR,
+          message: isAuthError 
+            ? `Authentication Failed: ${errorData.error?.message || "Invalid API Key"}. (Verify your OpenRouter setting/credits)`
+            : isPaymentRequired 
+              ? "OpenRouterのクレジットが不足しています (402 Payment Required)。対話を継続するにはチャージが必要です。"
+              : errorData.error?.message || `Spectral connection lost [${response.status}]` 
+        };
+      }
+
+      // Handle streaming vs non-streaming response body
+      if (!stream) {
+        const responseData = await response.json();
+        return responseData.choices?.[0]?.message?.content || "";
+      }
+
+      if (stream && onChunk) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = "";
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const dataStr = line.slice(6).trim();
+              if (dataStr === '[DONE]') continue;
+              try {
+                const data = JSON.parse(dataStr);
+                const text = data.choices[0]?.delta?.content || "";
+                fullText += text;
+                onChunk(fullText);
+              } catch (e) {}
+            }
+          }
+        }
+        return fullText;
+      }
+
+      const data = await response.json();
+      return data.choices[0]?.message?.content || "";
+
+    } catch (err) {
+      if (err.status === 429 && retryCount < maxRetries) {
+        retryCount++;
+        continue;
+      }
+      throw err;
+    }
+  }
 }
 
 /**
@@ -689,64 +730,35 @@ export async function* generateDialogueStream({ charId, messages, systemOverride
   }
 
   const charConfig = CHARACTER_CONFIGS[charId] || {};
-  const targetModel = charConfig.model || "google/gemini-2.0-flash-lite-preview-02-05:free";
-  
+  const targetModel = charConfig.model || routeModel('DIALOGUE', preferredOpenRouterModel);
   const baseSystem = systemOverride || charConfig.systemPrompt || "あなたは博識な司書です。";
   const forbiddenStyle = "\n【文体規定】「〜だわ」「〜なのよ」等のステレオタイプな女言葉は使用せず、知的で自立した口調を徹底してください。";
   
+  const systemPrompt = baseSystem + forbiddenStyle;
   const fullMessages = [
-    { role: "system", content: baseSystem + forbiddenStyle },
+    { role: "system", content: systemPrompt },
     ...messages
   ];
 
-  const body = {
-    model: targetModel,
-    messages: fullMessages,
-    temperature: 0.7,
-    stream: true
-  };
-
-  const response = await fetch(OPENROUTER_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey.trim()}`,
-      "HTTP-Referer": OPENROUTER_REFERER,
-      "X-Title": OPENROUTER_TITLE,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (!response.ok) {
-    yield "【通信エラーが発生しました】";
-    return;
-  }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let fullText = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+  try {
+    // We use a small optimization: yield parts as they arrive.
+    // To maintain existing code's behavior, we'll implement a simple stream fetch with retries here.
+    let fullText = "";
+    await fetchOpenRouter(apiKey, fullMessages, targetModel, charConfig.generationConfig || {}, true, (text) => {
+      fullText = text;
+    });
     
-    const chunk = decoder.decode(value);
-    const lines = chunk.split('\n');
-    
-    for (const line of lines) {
-      if (!line.trim() || line.includes('[DONE]')) continue;
-      if (line.startsWith('data: ')) {
-        try {
-          const data = JSON.parse(line.slice(6));
-          const text = data.choices[0]?.delta?.content || "";
-          if (text) {
-            yield text;
-          }
-        } catch (e) {}
-      }
-    }
+    // Since fetchOpenRouter returns the full text via callback, we'll yield the result.
+    // For a smoother experience, we can simulate the streaming by yielding it in chunks if we wanted,
+    // but the callback already gives us the full growing text.
+    yield fullText;
+  } catch (e) {
+    console.error("Library stream error:", e);
+    yield `【霊的干渉が発生しました】${e.message || "通信エラー"}`;
   }
 }
+
+
 
 /**
  * 霊的知能への統一アクセスポイント (OpenRouter)
@@ -890,14 +902,44 @@ export async function extractTrendsFromNotebook(text, apiKey) {
 
 export async function extractTrendsFromNews(newsArray, apiKey) {
   if (!apiKey || !newsArray || newsArray.length === 0) return null;
+  
+  const CACHE_KEY = 'itako_trends_cache';
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    try {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < 10800000) { // 3 hours
+        console.log("[Gemini] Using cached trends.");
+        return data;
+      }
+    } catch(e) {}
+  }
+
   const titles = newsArray.map(n => n.title).join('\n');
   const prompt = `以下のニュースから、現在の世界の「歪み」や「潮流」を抽出し、不穏な要約を作成してください。\n${titles}\n出力形式: { "summary": "...", "keywords": [...] }`;
   const res = await invokeGemini(apiKey, prompt, "歴史の観測者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
-  return res.data;
+  
+  if (res?.data) {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data: res.data, timestamp: Date.now() }));
+  }
+  return res?.data;
 }
 
 export async function generateWorldEvent(apiKey, trends) {
   if (!apiKey) return null;
+
+  const CACHE_KEY = 'itako_world_event_cache';
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    try {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < 10800000) { // 3 hours
+        console.log("[Gemini] Using cached world event.");
+        return data;
+      }
+    } catch(e) {}
+  }
+
   const prompt = `あなたは歴史と思想の潮流を観測するAIです。
 以下のいずれかのカテゴリーからシナリオをランダムに選び、この世界で起こる「事変」として1つ生成してください。
 暗い事件だけでなく、魂の救済や幸福な出来事も同じ頻度で発生します。
@@ -915,7 +957,11 @@ export async function generateWorldEvent(apiKey, trends) {
 
 出力形式: { "type": "riot|massacre|assassination|love|birth|forgiveness|enlightenment", "content": "具体的な事象を、その場の空気感と共に描写する状況説明..." }`;
   const res = await invokeGemini(apiKey, prompt, "事象の観測者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
-  return res.data;
+  
+  if (res?.data) {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data: res.data, timestamp: Date.now() }));
+  }
+  return res?.data;
 }
 
 export async function generateLocationDialogueWithEvent(apiKey, chars, loc, event, shared) {
