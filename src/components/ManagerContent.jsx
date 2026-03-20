@@ -7,14 +7,8 @@ import LibraryView from './Library';
 import WarholAvatar from './WarholAvatar';
 import PortalGrimoire from './PortalGrimoire';
 
-const getGenreColors = (char) => {
-    // Generate stable "random" color based on char ID
-    let hash = 0;
-    for (let i = 0; i < char.id.length; i++) {
-        hash = ((hash << 5) - hash) + char.id.charCodeAt(i);
-        hash |= 0;
-    }
-    const isOrange = Math.abs(hash) % 2 === 0;
+const getGenreColors = (index) => {
+    const isOrange = index % 2 === 0;
     
     if (isOrange) {
         return {
@@ -44,7 +38,7 @@ const getGenreColors = (char) => {
 };
 
 const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected, onToggleChar }) => {
-    const { bgColor, textColor, subTextColor, tabColor, tabTextColor, tagBg, tagText, borderColor, btnBg } = getGenreColors(c);
+    const { bgColor, textColor, subTextColor, tabColor, tabTextColor, tagBg, tagText, borderColor, btnBg } = getGenreColors(i);
     const alignment = i % 2 === 0 ? 'justify-start' : 'justify-end';
     const isOrange = tabColor === 'bg-[#f15a24]';
 
@@ -57,21 +51,25 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             }}
         >
             {/* Tab */}
-            <div className={`flex w-full ${alignment} px-0 pointer-events-none`}>
+            <div className={`flex w-full ${alignment} px-0 pointer-events-none mb-[-1px]`}>
                 <button 
                     onClick={() => onToggleExpand(isExpanded ? null : c.id)}
-                    className={`${tabColor} ${tabTextColor} px-10 md:px-16 py-2 md:py-3 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase pointer-events-auto origin-bottom transition-all relative z-20 font-oswald shadow-2xl`}
-                    style={{
-                        clipPath: alignment === 'justify-start'
-                            ? 'polygon(0% 0%, 75% 0%, 100% 100%, 0% 100%)'
-                            : 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%)'
-                    }}
+                    className={`relative ${tabTextColor} px-10 md:px-16 py-2 md:py-3 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase pointer-events-auto origin-bottom transition-all z-20 font-oswald shadow-2xl overflow-hidden rounded-t-lg`}
                 >
-                    <span className="flex items-center gap-4">
+                    <div 
+                        className={`absolute inset-y-0 h-full ${tabColor} z-0 rounded-t-lg`} 
+                        style={{ 
+                            width: '150%', 
+                            left: '-25%',
+                            transform: alignment === 'justify-start' ? 'skewX(15deg)' : 'skewX(-15deg)',
+                            transformOrigin: 'bottom'
+                        }}
+                    />
+                    <span className="flex items-center gap-4 relative z-10">
                         <span className="opacity-40">#{String(i + 1).padStart(2, '0')}</span>
                         {c.name}
                     </span>
-                    {isExpanded && <motion.div layoutId="tab-active" className={`absolute bottom-0 left-0 right-0 h-1 ${isOrange ? 'bg-black' : 'bg-[#f15a24]'}`} />}
+                    {isExpanded && <motion.div layoutId="tab-active" className={`absolute bottom-0 left-0 right-0 h-1 ${isOrange ? 'bg-black' : 'bg-[#f15a24]'} z-20`} />}
                 </button>
             </div>
             
