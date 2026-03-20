@@ -99,28 +99,42 @@ const SoulRainManifest = ({
         setGhosts(newGhosts);
     }, []);
 
+    const summonTimerRef = useRef(null);
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            if (summonTimerRef.current) clearTimeout(summonTimerRef.current);
+        };
+    }, []);
+
     const handleSummon = useCallback(() => {
         if (isSummoning) return;
         
         setIsSummoning(true);
         setShowResult(false);
 
-        // 1. Pick results logic
-        const randomChars = [...characters]
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 3);
+        // 1. Pick results logic using Fisher-Yates shuffle (More reliable random)
+        const shuffled = [...characters];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        const randomChars = shuffled.slice(0, 3);
         const randomLoc = locations[Math.floor(Math.random() * locations.length)];
 
-        // 2. Clear current view immediately
+        // 2. Clear current view immediately to show "emptiness" during ritual
         onSetChars([]);
         
-        // 3. Animation Timing
-        setTimeout(() => {
+        // 3. Animation Timing with Cleanup
+        if (summonTimerRef.current) clearTimeout(summonTimerRef.current);
+        summonTimerRef.current = setTimeout(() => {
             onSetChars(randomChars.map(c => c.id));
             onSetLocationId(randomLoc.id);
             setShowResult(true);
             setIsSummoning(false);
-        }, 3000);
+            summonTimerRef.current = null;
+        }, 2200); // Slightly faster for better UX
     }, [characters, locations, isSummoning, onSetChars, onSetLocationId]);
 
     const resultChars = useMemo(() => 
@@ -132,7 +146,7 @@ const SoulRainManifest = ({
     [selectedLocationId, locations]);
 
     return (
-        <div className="relative w-full min-h-[500px] flex flex-col bg-black/40 rounded-[40px] border border-white/5 overflow-hidden p-6 md:p-10 select-none">
+        <div className="relative w-full min-h-[500px] flex flex-col bg-black/40 rounded-[40px] border border-white/5 overflow-hidden p-6 md:p-10 select-none shadow-inner">
             {/* Background Soul Rain */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {ghosts.map(g => (

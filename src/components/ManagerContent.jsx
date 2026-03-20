@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Activity, Library } from 'lucide-react';
+import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Activity, Library, Sparkles, RotateCw } from 'lucide-react';
 import SoulRainManifest from './SoulRainManifest';
 import PeninsulaMap from './PeninsulaMap';
 import LibraryView from './Library';
@@ -19,7 +19,7 @@ const getGenreColors = (index) => {
             tabTextColor: 'text-black',
             tagBg: 'bg-black/20',
             tagText: 'text-black',
-            borderColor: 'border-black/20',
+            borderColor: 'border-black', 
             btnBg: 'bg-black text-[#f15a24]'
         };
     } else {
@@ -31,7 +31,7 @@ const getGenreColors = (index) => {
             tabTextColor: 'text-[#f15a24]',
             tagBg: 'bg-[#f15a24]/20',
             tagText: 'text-[#f15a24]',
-            borderColor: 'border-[#f15a24]/30',
+            borderColor: 'border-[#f15a24]', 
             btnBg: 'bg-[#f15a24] text-black'
         };
     }
@@ -51,25 +51,24 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             }}
         >
             {/* Tab */}
-            <div className={`flex w-full ${alignment} px-0 pointer-events-none mb-[-1px]`}>
+            <div className={`flex w-full ${alignment} px-0 pointer-events-none mb-[-2px]`}>
                 <button 
                     onClick={() => onToggleExpand(isExpanded ? null : c.id)}
-                    className={`relative ${tabTextColor} px-10 md:px-16 py-2 md:py-3 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase pointer-events-auto origin-bottom transition-all z-20 font-oswald shadow-2xl overflow-hidden rounded-t-lg`}
+                    className={`relative ${tabTextColor} w-32 md:w-56 h-8 md:h-10 text-[9px] md:text-[11px] font-black tracking-[0.2em] md:tracking-[0.3em] uppercase pointer-events-auto origin-bottom transition-all z-20 font-oswald flex items-center group`}
                 >
+                    {/* Tab Shape Background */}
                     <div 
-                        className={`absolute inset-y-0 h-full ${tabColor} z-0 rounded-t-lg`} 
-                        style={{ 
-                            width: '150%', 
-                            left: '-25%',
-                            transform: alignment === 'justify-start' ? 'skewX(15deg)' : 'skewX(-15deg)',
-                            transformOrigin: 'bottom'
+                        className={`absolute inset-0 ${tabColor} border-t-2 border-x-2 ${borderColor} z-0 rounded-t-[4px] origin-bottom transition-transform duration-300 group-hover:scale-y-110`}
+                        style={{
+                            transform: 'perspective(100px) rotateX(25deg)',
                         }}
                     />
-                    <span className="flex items-center gap-4 relative z-10">
-                        <span className="opacity-40">#{String(i + 1).padStart(2, '0')}</span>
-                        {c.name}
+                    
+                    <span className="flex items-center gap-2 md:gap-4 px-6 md:px-8 w-full relative z-10">
+                        <span className="opacity-40 shrink-0">#{String(i + 1).padStart(2, '0')}</span>
+                        <span className="truncate">{c.name}</span>
                     </span>
-                    {isExpanded && <motion.div layoutId="tab-active" className={`absolute bottom-0 left-0 right-0 h-1 ${isOrange ? 'bg-black' : 'bg-[#f15a24]'} z-20`} />}
+                    {isExpanded && <motion.div layoutId="tab-active" className={`absolute bottom-0 left-[10%] right-[10%] h-1 ${isOrange ? 'bg-black' : 'bg-[#f15a24]'} z-20`} />}
                 </button>
             </div>
             
