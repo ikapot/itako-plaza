@@ -1,4 +1,4 @@
-// キャラクター定義（54人）
+// キャラクター定義（56人）
 // face: 0=文豪列伝(Front), 1=闇の系譜(Back), 2=女性の先駆者(Right),
 //        3=西洋の魂(Left), 4=芸術家・詩人(Top), 5=異界の存在(Bottom)
 
@@ -20,11 +20,12 @@ export const INITIAL_CHARACTERS = [
   { id: 'nietzsche', face: 1, pos: 1, name: 'ニーチェ', role: '反哲学者', homeLocationId: 'monolith', flavor: '超人', color: 'bg-zinc-700', description: '（1844-1900）ハンマーで価値を打ち砕き、神の死後の世界で「運命愛」を説いた。', avatar: null },
   { id: 'poe', face: 1, pos: 2, name: 'エドガー・アラン・ポー', role: '幻想作家', homeLocationId: 'box', flavor: '奈落', color: 'bg-zinc-800', description: '（1809-1849）推理小説の祖。数学的論理と奈落の恐怖を融合させたゴシックの巨星。', avatar: null },
   { id: 'kropotkin', face: 1, pos: 3, name: 'クロポトキン', role: '科学者・アナキスト', homeLocationId: 'forest', flavor: '相互扶助', color: 'bg-red-950/70', description: '（1842-1921）進化の主因は闘争ではなく協力にあるとする「相互扶助」論を提唱。国家なき自由な連合を信じた慈しみ深い革命家。', avatar: 'assets/kropotkin_warhol.png', isPreStyled: true },
-  { id: 'kobayashi', face: 1, pos: 4, name: '小林秀雄', role: '文芸評論家', homeLocationId: 'archive_room', flavor: '無常', color: 'bg-zinc-700', description: '（1902-1983）「様々なる意匠」を見抜き、対象の命に直面することを説いた。批評とは自己を賭けて信じる行為であると定義した日本の批評の父。', avatar: 'assets/kobayashi_warhol.png', isPreStyled: true },
+  { id: 'kobayashi', face: 1, pos: 4, name: '小林秀雄', role: '文芸評論家', homeLocationId: 'archive_room', flavor: '無常', color: 'bg-zinc-700', description: '（1902-1983）「様々なる意匠」を見抜き、対象の命に直面することを説いた。批評とは自己を賭けて信じる行為であると定義した日本の批評の父。', avatar: 'assets/kobayashi_warhol_v3.png', isPreStyled: true },
   { id: 'rimbaud', face: 1, pos: 5, name: 'ランボー', role: '天才少年詩人', homeLocationId: 'slum', flavor: '放浪', color: 'bg-itako-sand', description: '（1854-1891）感覚を錯乱させる「見者」の道。早熟な天才が20歳で文学を捨て放浪した。', avatar: null },
   { id: 'fumiko', face: 1, pos: 6, name: '金子文子', role: '浮浪・アナキスト', homeLocationId: 'underpass', flavor: '自己', color: 'bg-red-950/60', isMainChar: true, description: '（1903-1926）大正のアナキスト。極貧と差別の中、何者にも従わない絶対的主体を確立。', avatar: 'assets/fumiko_warhol.webp', isPreStyled: true },
   { id: 'atsuko', face: 1, pos: 7, name: 'Atsuko', role: '古本屋の店主', homeLocationId: 'archive_room', flavor: '見守り', color: 'bg-itako-sand', isMainChar: true, description: '地下書庫で古本を売る謎の女性。広場の全記憶を記録・観測し続ける、不変の観測者。', avatar: 'assets/atsuko_warhol.webp', isPreStyled: true },
   { id: 'osugi', face: 1, pos: 8, name: '大杉栄', role: '思想家・アナキスト', homeLocationId: 'prison', flavor: '生の拡充', color: 'bg-red-900/70', description: '（1885-1923）「生の拡充」と自由を叫んだ大正アナキズムの風雲児。関東大震災の混乱の中で殺害された。', avatar: 'assets/osugi_sakae_warhol_v2.webp', isPreStyled: true },
+  { id: 'bakunin', face: 1, pos: 9, name: 'バクーニン', role: '革命家・無政府主義者', homeLocationId: 'prison', flavor: '破壊の情熱', color: 'bg-red-950/70', description: '（1814-1876）ロシアが生んだ不屈の革命家。マルクスの権威主義を批判し、国家の完全廃止を主張。「破壊の情熱は、創造の情熱でもある」と説き、自由な連合を夢見た。', avatar: 'assets/bakunin_warhol.png', isPreStyled: true },
 
   // ── Face 2: 女性の先駆者 ─────────────────────────────────────────────
   { id: 'raicho', face: 2, pos: 0, name: '平塚らいてう', role: '思想家', homeLocationId: 'shrine', flavor: '太陽', color: 'bg-orange-900/50', isMainChar: true, description: '（1886-1971）「元始、女性は実に太陽であった」。青踏社を創立し日本のフェミニズムを拓いた。', avatar: 'assets/raicho_warhol.webp', isPreStyled: true },
@@ -39,6 +40,7 @@ export const INITIAL_CHARACTERS = [
 
   // ── Face 3: 西洋の魂 ──────────────────────────────────────────────
   { id: 'rand', face: 3, pos: 0, name: 'アイン・ランド', role: '富裕層', homeLocationId: 'throne', flavor: '利己', color: 'bg-zinc-700', isMainChar: true, description: '（1905-1982）客観主義の提唱者。合理的な利己心こそが理想の道徳であると説いた。', avatar: 'assets/rand_warhol.webp', isPreStyled: true },
+  { id: 'proudhon', face: 3, pos: 1, name: 'プルードン', role: '社会主義者・無政府主義者', homeLocationId: 'factory', flavor: '相互主義', color: 'bg-zinc-700', description: '（1809-1865）「無政府主義の父」。「財産、それは盗奪である」と宣言し、国家権力を否定。労働者同士の対等な交換と相互扶助に基づく社会秩序を説いた。', avatar: 'assets/proudhon_warhol.png', isPreStyled: true },
   { id: 'socrates', face: 3, pos: 2, name: 'ソクラテス', role: '無知の知', homeLocationId: 'oracle', flavor: '問答', color: 'bg-itako-sand', description: '（前470頃-前399）西洋哲学の祖。無知の知の重要性を説き、対話によって真理を追求。', avatar: null },
   { id: 'descartes', face: 3, pos: 3, name: 'デカルト', role: '懐疑論者', homeLocationId: 'mirror', flavor: '我思う', color: 'bg-zinc-700', description: '（1596-1650）近世哲学の父。「我思う、ゆえに我あり」という一点の真理。', avatar: null },
   { id: 'spinoza', face: 3, pos: 4, name: 'スピノザ', role: '研磨師・哲学者', homeLocationId: 'window', flavor: '汎神論', color: 'bg-itako-sage', description: '（1632-1677）レンズ研磨師。万物を神の一部として捉える静謐な汎神論の体系を築いた。', avatar: null },
