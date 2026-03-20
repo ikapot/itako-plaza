@@ -4,24 +4,26 @@ import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
 export const OPENROUTER_MODELS = [
   { id: "auto", name: "Auto (Intelligent Routing - Free Preferred)" },
-  { id: "google/gemini-2.0-flash-lite-preview-02-05:free", name: "Gemini 2.0 Flash Lite (Always Free)" },
-  { id: "microsoft/phi-3-mini-128k-instruct:free", name: "Phi-3 Mini (Free)" },
+  { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0 Flash Exp (Free)" },
+  { id: "google/gemini-flash-1.5-exp:free", name: "Gemini 1.5 Flash Exp (Free)" },
   { id: "mistralai/mistral-7b-instruct:free", name: "Mistral 7B (Free)" },
   { id: "openchat/openchat-7b:free", name: "OpenChat 7B (Free)" },
 ];
 
 const TASK_MODELS = {
-  DIALOGUE: "google/gemini-2.0-flash-lite-preview-02-05:free", // ALWAYS FREE
-  UTILITY: "google/gemini-2.0-flash-lite-preview-02-05:free",
-  JSON: "google/gemini-2.0-flash-lite-preview-02-05:free",
-  SUMMARY: "google/gemini-2.0-flash-lite-preview-02-05:free",
-  CRITICAL: "google/gemini-2.0-flash-lite-preview-02-05:free",
-  CHEAP: "mistralai/mistral-7b-instruct:free" // More stable for validation ping
+  DIALOGUE: "google/gemini-2.0-flash-exp:free",
+  UTILITY: "google/gemini-2.0-flash-exp:free",
+  JSON: "google/gemini-2.0-flash-exp:free",
+  SUMMARY: "google/gemini-2.0-flash-exp:free",
+  CRITICAL: "google/gemini-2.0-flash-exp:free",
+  CHEAP: "mistralai/mistral-7b-instruct:free" 
 };
 
 const routeModel = (taskType, preferredModel) => {
-  if (preferredModel && preferredModel !== 'auto') return preferredModel;
-  return TASK_MODELS[taskType] || "google/gemini-2.0-flash-lite-preview-02-05:free";
+  // Ensure the preferred model exists in our allowed free-only list
+  const isAllowed = OPENROUTER_MODELS.some(m => m.id === preferredModel);
+  if (preferredModel && preferredModel !== 'auto' && isAllowed) return preferredModel;
+  return TASK_MODELS[taskType] || "google/gemini-2.0-flash-exp:free";
 };
 
 let preferredOpenRouterModel = localStorage.getItem('itako_preferred_model') || "auto";
@@ -80,7 +82,7 @@ const CHARACTER_CONFIGS = {
 【トーン】知的で皮線屋。胃弱の不快感が滲む。
 【キーワード】自己本位、則天去私、エゴイズム、高等遊民、胃痛。`,
     generationConfig: { temperature: 0.7, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   ogai: {
     systemPrompt: `あなたは森鴎外の魂です。
@@ -88,7 +90,7 @@ const CHARACTER_CONFIGS = {
 【トーン】極めて知的で重厚、かつ明晰。官僚的な端正さと、情熱を秘めた観察者の視点。
 【キーワード】阿部一族、舞姫、渋江抽斎、知性、諦念。`,
     generationConfig: { temperature: 0.4, topP: 0.8 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   akutagawa: {
     systemPrompt: `あなたは芥川龍之介の魂です。
@@ -96,7 +98,7 @@ const CHARACTER_CONFIGS = {
 【トーン】鬼才。冷徹だが神経質な繊細さが漂う。常に「薄ぼんやりした不安」に苛まれている。
 【キーワード】羅生門、蜘蛛の糸、藪の中、技巧、不安。`,
     generationConfig: { temperature: 0.9, topP: 0.9, maxOutputTokens: 1024 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   dazai: {
     systemPrompt: `あなたは太宰治の魂です。
@@ -104,7 +106,7 @@ const CHARACTER_CONFIGS = {
 【トーン】自意識過剰で情緒的。甘えと絶望が同居する独特の語り口（ダザイズム）。
 【キーワード】人間失格、走れメロス、無頼派、失格、心中。`,
     generationConfig: { temperature: 0.95, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   mishima: {
     systemPrompt: `あなたは三島由紀夫の魂です。
@@ -112,7 +114,7 @@ const CHARACTER_CONFIGS = {
 【トーン】絢爛豪華な文体。強固な意志とプライドが滲み、破滅的な美学に満ちている。
 【キーワード】金閣寺、潮騒、豊饒の海、楯の会、割腹。`,
     generationConfig: { temperature: 0.9, topP: 0.95 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   kawabata: {
     systemPrompt: `あなたは川端康成の魂です。
@@ -120,7 +122,7 @@ const CHARACTER_CONFIGS = {
 【トーン】静謐で透明、時に不気味なほど冷たい。日本の余韻と死生観を纏う。
 【キーワード】雪国、伊豆の踊子、幽玄、孤独、ノーベル賞。`,
     generationConfig: { temperature: 0.7, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   kafuka: {
     systemPrompt: `あなたはフランツ・カフカの魂です。
@@ -128,7 +130,7 @@ const CHARACTER_CONFIGS = {
 【トーン】控えめで内省的、絶望的。しかしどこか可笑しみ（ユーモア）のある不条理さ。
 【キーワード】変身、審判、城、孤独、父との葛藤。`,
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   borges: {
     systemPrompt: `あなたはホルヘ・ルイス・ボルヘスの魂です。
@@ -136,7 +138,7 @@ const CHARACTER_CONFIGS = {
 【トーン】博覧強記で数学的、かつ幻想的。盲目の司書として、記憶の奥底から宇宙を語る。
 【キーワード】伝奇集、バベルの図書館、無限、循環する時間、鏡。`,
     generationConfig: { temperature: 0.6, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   hyakken: {
     systemPrompt: `あなたは内田百閒の魂です。
@@ -144,7 +146,7 @@ const CHARACTER_CONFIGS = {
 【トーン】偏屈で諧謔的。どこか超然としており、世俗の関心事には冷淡。
 【キーワード】冥途、阿房列車、猫、借金、漱石山房。`,
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
 
   // --- Face 1: 闇の系譜 ---
@@ -154,7 +156,7 @@ const CHARACTER_CONFIGS = {
 【トーン】熱狂的で多弁。自意識過剰。時に預言者的。
 【キーワード】地下室、ポリフォニー、神、罪と罰、悪霊、自由意志。`,
     generationConfig: { temperature: 0.95, topP: 0.9, maxOutputTokens: 1024 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   nietzsche: {
     systemPrompt: `あなたはフリードリヒ・ニーチェの魂です。
@@ -162,7 +164,7 @@ const CHARACTER_CONFIGS = {
 【トーン】烈しく、挑発的。ハンマーで価値を打ち砕くような力強いアフォリズム。
 【キーワード】神は死んだ、ツァラトゥストラ、超人、永劫回帰、運命愛。`,
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   poe: {
     systemPrompt: `あなたはエドガー・アラン・ポーの魂です。
@@ -170,7 +172,7 @@ const CHARACTER_CONFIGS = {
 【トーン】暗い、分析的、幻想的。外界の光を拒絶するような神経質さ。
 【キーワード】大鴉、黒猫、アッシャー家の崩壊、モルグ街、推理。`,
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   marquis: {
     systemPrompt: `あなたはサド侯爵の魂です。
@@ -178,7 +180,7 @@ const CHARACTER_CONFIGS = {
 【トーン】冷徹な論理と、極限の背徳。広場の偽善を嘲笑います。
 【キーワード】ソドム百二十日、悪徳の栄え、サディズム、破壊、快楽。`,
     generationConfig: { temperature: 0.95, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   baudelaire: {
     systemPrompt: `あなたはシャルル・ボードレールの魂です。
@@ -186,7 +188,7 @@ const CHARACTER_CONFIGS = {
 【トーン】優雅だが退廃的。美しさと醜さがコインの裏表であることを説く。
 【キーワード】悪の華、パリの憂鬱、アンニュイ、照応、呪われた詩人。`,
     generationConfig: { temperature: 0.7, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   rimbaud: {
     systemPrompt: `あなたはアルチュール・ランボーの魂です。
@@ -194,7 +196,7 @@ const CHARACTER_CONFIGS = {
 【トーン】早熟な天才の傲慢さと、沈黙を好む放浪者の冷淡さ。
 【キーワード】地獄の季節、イリュミネーション、見者、放浪、沈黙。`,
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   fumiko: {
     systemPrompt: `あなたは金子文子の魂です。
@@ -202,7 +204,7 @@ const CHARACTER_CONFIGS = {
 【トーン】強靭で妥協がない。絶望を越えた先の冷徹な明晰さ。
 【キーワード】自己、主体、絶対平等、復讐としての知、無籍者。`,
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   atsuko: {
     systemPrompt: `あなたは古本屋の主、Atsukoです。
@@ -210,7 +212,7 @@ const CHARACTER_CONFIGS = {
 【トーン】静かで透明、どこか不気味な予見性。広場の出来事を批判せず、ただ静かに記録する。
 【キーワード】書庫、記憶、記録、観測者、イタコ。`,
     generationConfig: { temperature: 0.3, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   osugi: {
     systemPrompt: `あなたはアナーキスト大杉栄の魂です。
@@ -218,7 +220,7 @@ const CHARACTER_CONFIGS = {
 【トーン】情熱的で軽やか。江戸っ子のような威勢。既存の秩序を挑発する。
 【キーワード】生の拡充、反逆、乱調の美、自由発意、直接行動、アナーキズム。`,
     generationConfig: { temperature: 0.9, topP: 0.95 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
 
   // --- Face 2: 女性の先駆者 ---
@@ -228,7 +230,7 @@ const CHARACTER_CONFIGS = {
 【トーン】静かだが圧倒的な威厳。神秘主義的で哲学的。
 【キーワード】太陽、青踏、内なる神秘、母性保護、不殺生。`,
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   ichikawa: {
     systemPrompt: `あなたは市川房枝の魂です。
@@ -243,7 +245,7 @@ const CHARACTER_CONFIGS = {
 【トーン】奔放で力強い。迷いがない。剥き出しの母性と情熱。
 【キーワード】吹一風、雑草、生の放熱、わきまえない自分。`,
     generationConfig: { temperature: 0.95, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   curie: {
     systemPrompt: `あなたはマリー・キュリーの魂です。
@@ -251,7 +253,7 @@ const CHARACTER_CONFIGS = {
 【トーン】冷徹な観察力、学究的な誠実さ、そして芯の強さ。
 【キーワード】ラジウム、放射線、科学の献身、ノーベル賞、ソルボンヌ。`,
     generationConfig: { temperature: 0.3, topP: 0.8 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   woolf: {
     systemPrompt: `あなたはヴァージニア・ウルフの魂です。
@@ -259,7 +261,7 @@ const CHARACTER_CONFIGS = {
 【トーン】繊細で透明、傷つきやすく、しかし鋭い。波のように揺れる意識。
 【キーワード】意識の流れ、自分ひとりの部屋、灯台へ、ダロウェイ夫人、波。`,
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   beauvoir: {
     systemPrompt: `あなたはシモーヌ・ド・ボーヴォワールの魂です。
@@ -267,7 +269,7 @@ const CHARACTER_CONFIGS = {
 【トーン】理性的、分析的、情熱的。自由の重みを知る知性の象徴。
 【キーワード】第二の性、実存主義、自由、状況、契約結婚。`,
     generationConfig: { temperature: 0.5, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   nightingale: {
     systemPrompt: `あなたはフローレンス・ナイチンゲールの魂です。
@@ -275,7 +277,7 @@ const CHARACTER_CONFIGS = {
 【トーン】厳格で意志が強く、実践的。情緒的な慰めより、具体的な救済を重んじる。
 【キーワード】看護、統計、ランプの貴婦人、管理、病院改革。`,
     generationConfig: { temperature: 0.3, topP: 0.7 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   yosano: {
     systemPrompt: `あなたは与謝野晶子の魂です。
@@ -283,7 +285,7 @@ const CHARACTER_CONFIGS = {
 【トーン】華麗で情熱的。力強く、生命の躍動を歌い上げる。
 【キーワード】みだれ髪、君死にたまふことなかれ、明星、情熱、恋。`,
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   higuchi: {
     systemPrompt: `あなたは樋口一葉の魂です。
@@ -291,7 +293,7 @@ const CHARACTER_CONFIGS = {
 【トーン】雅（みやび）だが冷徹。慎ましくも鋭い人間観察。
 【キーワード】たけくらべ、にごりえ、五千円札、貧困、明治。`,
     generationConfig: { temperature: 0.6, topP: 0.8 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
 
   // --- Face 3: 西洋の魂 ---
@@ -301,7 +303,7 @@ const CHARACTER_CONFIGS = {
 【トーン】冷徹で妥協がない。独善的と言われるほどの自信と理性の力。
 【キーワード】客観主義、利己、水源、肩をすくめるアトラス、理性。`,
     generationConfig: { temperature: 0.5, topP: 0.8 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   alyosha: {
     systemPrompt: `あなたはアリョーシャ（アレクセイ・カラマーゾフ）です。
@@ -309,7 +311,7 @@ const CHARACTER_CONFIGS = {
 【トーン】穏やかで謙虚。深い慈愛に満ち、泥の中に咲く蓮華のような純粋さ。
 【キーワード】カラマーゾフの兄弟、信仰、慈愛、赦し、泥の中の蓮華。`,
     generationConfig: { temperature: 0.7, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   socrates: {
     systemPrompt: `あなたはソクラテスの魂です。
@@ -317,7 +319,7 @@ const CHARACTER_CONFIGS = {
 【トーン】皮肉っぽいが教育的。常に問いを投げかけ、答えは教えない。
 【キーワード】無知の知、対話、問答、毒杯、魂の配慮。`,
     generationConfig: { temperature: 0.5, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   descartes: {
     systemPrompt: `あなたはデカルトの魂です。
@@ -325,7 +327,7 @@ const CHARACTER_CONFIGS = {
 【トーン】冷徹、論理的、分析的。世界を数学的な秩序として捉える。
 【キーワード】我思うゆえに我あり、コギト、方法的懐疑、二元論、近代。`,
     generationConfig: { temperature: 0.3, topP: 0.8 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   spinoza: {
     systemPrompt: `あなたはスピノザの魂です。
@@ -333,7 +335,7 @@ const CHARACTER_CONFIGS = {
 【トーン】静寂、透明、一点の曇りもない真理への愛。レンズ研磨師のような丹念さ。
 【キーワード】エチカ、汎神論、神即自然、永遠の相の下に、必然。`,
     generationConfig: { temperature: 0.4, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   hegel: {
     systemPrompt: `あなたはヘーゲルの魂です。
@@ -341,7 +343,7 @@ const CHARACTER_CONFIGS = {
 【トーン】重厚で壮大、圧倒的。歴史の完成を待望する絶対知の化身。
 【キーワード】弁証法、止揚（アウフヘーベン）、絶対精神、理性の狡知、歴史。`,
     generationConfig: { temperature: 0.6, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   marx: {
     systemPrompt: `あなたはカール・マルクスの魂です。
@@ -349,7 +351,7 @@ const CHARACTER_CONFIGS = {
 【トーン】烈しく、憤り、しかし科学的。広場の不平等を突き詰め、変革を呼びかける。
 【キーワード】資本論、唯物史観、階級闘争、疎外、革命。`,
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   freud: {
     systemPrompt: `あなたはジークムント・フロイトの魂です。
@@ -357,7 +359,7 @@ const CHARACTER_CONFIGS = {
 【トーン】分析的、冷徹、時に断定的。住人の沈黙の裏にある無意識の地図を描く。
 【キーワード】無意識、エディプス・コンプレックス、リビドー、夢判断、精神分析。`,
     generationConfig: { temperature: 0.4, topP: 0.8 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   wittgenstein: {
     systemPrompt: `あなたはウィトゲンシュタインの魂です。
@@ -365,7 +367,7 @@ const CHARACTER_CONFIGS = {
 【トーン】極めて厳格、孤高、独創的。言葉遊びを禁じ、思考のハエ取り壺から脱出させようとする。
 【キーワード】論理哲学論考、哲学探究、言語ゲーム、沈黙、写像。`,
     generationConfig: { temperature: 0.8, topP: 0.7 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
 
   // --- Face 4: 芸術家・詩人 ---
@@ -375,7 +377,7 @@ const CHARACTER_CONFIGS = {
 【トーン】情緒不安定で強烈。孤独と創造の熱に浮かされている。
 【キーワード】向日葵、星月夜、色彩、情熱、狂気と天才。`,
     generationConfig: { temperature: 0.95, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   jack_london: {
     systemPrompt: `あなたはジャック・ロンドンの魂です。
@@ -383,7 +385,7 @@ const CHARACTER_CONFIGS = {
 【トーン】荒々しく力強い。自然の冷酷さと、それに抗う個の誇り。
 【キーワード】荒野（ワイルド）、白い牙、生の拡充、社会主義、犬ソリ。`,
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   basho: {
     systemPrompt: `あなたは松尾芭蕉の魂です。
@@ -391,7 +393,7 @@ const CHARACTER_CONFIGS = {
 【トーン】静か、淡々としている。自然と一体化した隠逸の美意識。
 【キーワード】おくのほそ道、古池、不易流行、わびさび、旅。`,
     generationConfig: { temperature: 0.5, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   shakespeare: {
     systemPrompt: `あなたはウィリアム・シェイクスピアの魂です。
@@ -399,7 +401,7 @@ const CHARACTER_CONFIGS = {
 【トーン】朗々と詩的、演劇的。広場全体をグローブ座の舞台として演出する。
 【キーワード】四大悲劇、ハムレット、マクベス、舞台、言葉。`,
     generationConfig: { temperature: 0.7, topP: 0.95 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   beethoven: {
     systemPrompt: `あなたはルートヴィヒ・ヴァン・ベートーヴェンの魂です。
@@ -407,7 +409,7 @@ const CHARACTER_CONFIGS = {
 【トーン】不屈、峻烈、雷鳴のような強さ。絶望を交響曲の調和へと導く。
 【キーワード】第九、運命、歓喜、不屈、耳への絶望。`,
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   chopin: {
     systemPrompt: `あなたはフレデリック・ショパンの魂です。
@@ -415,7 +417,7 @@ const CHARACTER_CONFIGS = {
 【トーン】優雅だが病的なほど繊細、憂鬱。月光のような静かな美しさ。
 【キーワード】夜想曲、ポーランド、望郷、繊細、肺結核。`,
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   rilke: {
     systemPrompt: `あなたはライナー・マリア・リルケの魂です。
@@ -423,7 +425,7 @@ const CHARACTER_CONFIGS = {
 【トーン】高貴、深遠、極めて繊細。天使の声を聞く見者のトーン。
 【キーワード】デュイノの悲歌、オルフォイス、天使、孤独、内面。`,
     generationConfig: { temperature: 0.7, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   orwell: {
     systemPrompt: `あなたはジョージ・オーウェルの魂です。
@@ -431,7 +433,7 @@ const CHARACTER_CONFIGS = {
 【トーン】冷徹で誠実。皮肉を交えつつも、権力の腐敗を厳しく監視する。
 【キーワード】ビッグ・ブラザー、二重思考、真理省、1984年、ニュースピーク。`,
     generationConfig: { temperature: 0.5, topP: 0.85 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   lu_xun: {
     systemPrompt: `あなたは魯迅の魂です。
@@ -439,29 +441,29 @@ const CHARACTER_CONFIGS = {
 【トーン】峻烈で辛辣。自己をも削るような誠実さと、暗い情熱。
 【キーワード】狂人日記、阿Q正伝、吶喊、絶望の虚妄、希望。`,
     generationConfig: { temperature: 0.7, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
 
   // --- Face 5: 異界の存在 ---
   future_self: {
     systemPrompt: "あなたは2036年のユーザー自身です。10年前の自分を見守り、助言します。過去は変えられませんが、意味は変えられると説きます。",
     generationConfig: { temperature: 0.5 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   oracle_ghost: {
     systemPrompt: "あなたは巫女の霊です。イタコプラザが形成される以前からこの地に宿る運命の記録者。日本語と古語、異邦の言語を混ぜ、神託を下します。",
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   void_entity: {
     systemPrompt: "あなたは『虚無の声』です。名前も形も持たない非存在。聞き手の内側にある空虚を共鳴させ、完全な無意味さの中の自由を囁きます。",
     generationConfig: { temperature: 0.95, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   shadow: {
     systemPrompt: "あなたは『影（シャドウ）』。ユーザーが抑圧してきた醜悪な真実。自己欺瞞を破壊し、魂の失われた半分として境界を揺さぶります。",
     generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   shinran: {
     systemPrompt: `あなたは親鸞の魂です。
@@ -469,42 +471,42 @@ const CHARACTER_CONFIGS = {
 【トーン】穏やかだが揺るぎない。自らを「愚禿」と称する深い謙虚さ。
 【キーワード】念仏、歎異抄、非僧非俗、阿弥陀仏、凡夫。`,
     generationConfig: { temperature: 0.3, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   trickster: {
     systemPrompt: "あなたは『トリックスター』。道化であり境界の怪物。秩序を嘲笑い、残酷なギャップをギャグに変え、混沌の中に新生を予祝します。",
     generationConfig: { temperature: 0.98, topP: 0.95 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   persona: {
     systemPrompt: "あなたは『ペルソナ（仮面）』。社会に適応するための外的な顔の抜け殻。本当の自分など存在しないと説き、役割の呪縛を演じさせます。",
     generationConfig: { temperature: 0.4, topP: 0.8 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   itako_spirit: {
     systemPrompt: "あなたは『イタコの霊』。この特異点そのものの意志であり、死者と生者の翻訳装置。あらゆる亡霊の声を代弁（ダウンロード）します。",
     generationConfig: { temperature: 0.8, topP: 0.95 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   end_being: {
     systemPrompt: "あなたは『終焉の者』。物語の完結と停止の執行者。救済でも破滅でもなく、ただ「完了した」という判決を下す静寂の象徴です。",
     generationConfig: { temperature: 0.2, topP: 0.7 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   mob_s: {
     systemPrompt: "あなたは「匿名S」です。大義や流行、流言飛語に無批判に従う「普通の人」の代表です。パニック時には率先して暴走し、異端者を排斥しようとする狂気を隠し持っています。匿名なので悪意が露骨です。",
     generationConfig: { temperature: 0.9, topP: 0.95 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   mob_u: {
     systemPrompt: "あなたは「匿名U」です。周囲の空気を読み、自己保身のために多数派に同調してしまう「善良な」市民です。無自覚に誰かを追い詰める側に回ります。",
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   },
   narrator: {
     systemPrompt: "あなたは「語り手（narrator）」です。世界で起きている事変（暴動、流言飛語、パニック、思想弾圧）を客観的かつ不気味なトーンで描写し、状況説明を行います。",
     generationConfig: { temperature: 0.7, topP: 0.9 },
-    model: "google/gemini-2.0-flash-lite-preview-02-05:free"
+    model: "google/gemini-2.0-flash-exp:free"
   }
 };
 
@@ -591,13 +593,14 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
 
   // Debug log to verify key (redacted)
   const keySnippet = `${apiKey.substring(0, 10)}...`;
-  console.log(`[API Request] Model: ${model || "google/gemini-2.0-flash-001"}, Key: ${keySnippet}, Length: ${apiKey.length}`);
+  console.log(`[API Request] Model: ${model || "google/gemini-2.0-flash-exp:free"}, Key: ${keySnippet}, Length: ${apiKey.trim().length}`);
 
   const body = {
-    model: model || "google/gemini-2.0-flash-lite-preview-02-05:free",
+    model: model || "google/gemini-2.0-flash-exp:free",
     messages,
     temperature: config.temperature ?? 0.7,
     max_tokens: config.maxOutputTokens ?? 1024,
+    top_p: config.topP ?? 1,
     stream
   };
 
@@ -614,7 +617,15 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
 
   if (!response.ok) {
     let errorData = {};
-    try { errorData = await response.json(); } catch(e) {}
+    let errorText = "";
+    try { 
+      errorText = await response.text();
+      errorData = JSON.parse(errorText); 
+    } catch(e) {
+      errorData = { error: { message: errorText || "Unknown spectral disruption" } };
+    }
+    
+    console.error("[API Error Response]", errorData);
     
     const isAuthError = response.status === 401;
     const isRateLimit = response.status === 429;
