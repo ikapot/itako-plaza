@@ -141,6 +141,53 @@ export default function PortalGrimoire({
                     <RefreshCw size={12} className="animate-spin" /> 回路の同期中...
                 </div>
             )}
+
+            {/* Connection Guide Section */}
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="w-full max-w-2xl border-t border-white/5 pt-12 mt-12 space-y-8"
+            >
+                <h3 className="text-sm font-black text-[#f15a24] tracking-[0.3em] uppercase font-oswald text-center">
+                    霊的接続の手引き / Connection Guide
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[11px] leading-relaxed">
+                    <div className="space-y-4">
+                        <h4 className="text-white/60 font-bold uppercase tracking-widest border-l-2 border-[#f15a24] pl-3">1. 鍵（API KEY）の入手</h4>
+                        <p className="text-white/40 font-serif">
+                            対話を司る知能として<strong>OpenRouter</strong>を使用します。
+                            <a href="https://openrouter.ai/settings/credits" target="_blank" className="text-[#f15a24] underline ml-1">こちら</a>でクレジットをチャージし、
+                            `sk-or-v1-...` で始まる鍵を生成してください。
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="text-white/60 font-bold uppercase tracking-widest border-l-2 border-[#f15a24] pl-3">2. 回路の固定</h4>
+                        <p className="text-white/40 font-serif">
+                            上記の入力欄に鍵を貼り付け、「定着させる」を押してください。
+                            一度固定されると、ブラウザに安全に保存されます。
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="text-white/60 font-bold uppercase tracking-widest border-l-2 border-[#f15a24] pl-3">3. ローカルでの実行</h4>
+                        <p className="text-white/40 font-serif">
+                            自分のPCで動かす場合は、ターミナルでまずプロジェクト階層へ移動してください：<br/>
+                            <code className="block bg-black/50 p-2 mt-2 text-[#f15a24] rounded-sm font-mono">cd C:\Users\ikapo\Desktop\itako</code>
+                            その後、<code className="text-white/60">npm run dev</code> を実行します。
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h4 className="text-white/60 font-bold uppercase tracking-widest border-l-2 border-[#f15a24] pl-3">4. 接続エラー (402)</h4>
+                        <p className="text-white/40 font-serif">
+                            「エネルギー枯渇」エラーが出る場合は、OpenRouterの残高が不足している可能性があります。
+                            クレジットを補充し、数分待ってからお試しください。
+                        </p>
+                    </div>
+                </div>
+            </motion.div>
         </div>
     );
 }

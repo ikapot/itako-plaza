@@ -45,7 +45,7 @@ const getGenreColors = (char) => {
 
 const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected, onToggleChar }) => {
     const { bgColor, textColor, subTextColor, tabColor, tabTextColor, tagBg, tagText, borderColor, btnBg } = getGenreColors(c);
-    const alignment = i % 3 === 0 ? 'justify-start' : i % 3 === 1 ? 'justify-center' : 'justify-end';
+    const alignment = i % 2 === 0 ? 'justify-start' : 'justify-end';
     const isOrange = tabColor === 'bg-[#f15a24]';
 
     return (
@@ -57,12 +57,14 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             }}
         >
             {/* Tab */}
-            <div className={`flex w-full ${alignment} px-4 md:px-12 pointer-events-none`}>
+            <div className={`flex w-full ${alignment} px-0 pointer-events-none`}>
                 <button 
                     onClick={() => onToggleExpand(isExpanded ? null : c.id)}
-                    className={`${tabColor} ${tabTextColor} px-10 md:px-14 py-2 md:py-3 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase border-x border-t ${isOrange ? 'border-black/10' : 'border-[#f15a24]/30'} pointer-events-auto origin-bottom transition-all relative z-20 font-oswald shadow-2xl`}
+                    className={`${tabColor} ${tabTextColor} px-10 md:px-16 py-2 md:py-3 text-[10px] md:text-xs font-black tracking-[0.3em] uppercase pointer-events-auto origin-bottom transition-all relative z-20 font-oswald shadow-2xl`}
                     style={{
-                        clipPath: 'polygon(5% 0, 95% 0, 100% 100%, 0% 100%)'
+                        clipPath: alignment === 'justify-start'
+                            ? 'polygon(0% 0%, 75% 0%, 100% 100%, 0% 100%)'
+                            : 'polygon(25% 0%, 100% 0%, 100% 100%, 0% 100%)'
                     }}
                 >
                     <span className="flex items-center gap-4">
@@ -85,15 +87,14 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                     ) : (
                         <div className="space-y-6 md:space-y-8" onClick={e => e.stopPropagation()}>
                             <div className="flex flex-col sm:flex-row items-start gap-6 md:gap-8">
-                                <div className={`w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-none overflow-hidden border ${isOrange ? 'border-black/10 bg-[#f15a24]' : 'border-[#f15a24]/30 bg-zinc-950'} relative shadow-2xl`}>
+                                <div className={`w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-none overflow-hidden border ${isOrange ? 'border-black/20 bg-[#f15a24]' : 'border-[#f15a24]/30 bg-[#f15a24]'} relative shadow-2xl`}>
                                     {c.avatar ? (
                                         <>
-                                            {/* Layer to provide the color base for Black cards */}
-                                            {!isOrange && <div className="absolute inset-0 bg-[#f15a24]" />}
+                                            {/* We use an orange base for all portraits to keep a consistent 'positive print' aesthetic */}
                                             <img 
                                                 src={c.avatar} 
                                                 alt={c.name} 
-                                                className={`absolute inset-0 w-full h-full object-cover contrast-[4] grayscale brightness-[1.1] ${isOrange ? 'mix-blend-multiply opacity-80' : 'invert mix-blend-multiply opacity-100'}`} 
+                                                className="absolute inset-0 w-full h-full object-cover contrast-[15] grayscale mix-blend-multiply" 
                                             />
                                         </>
                                     ) : (
@@ -251,34 +252,6 @@ const ManagerContent = React.memo(({
                             onSetChars={handleSetChars}
                             onGo={handleGo}
                             accentColor="#f15a24"
-                        />
-                    </motion.div>
-                ) : null}
-
-                {activeManagerTab === 'map' ? (
-                    <motion.div
-                        key="map"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="space-y-6"
-                    >
-                        <div className="flex items-center justify-between px-6 mb-2">
-                            <h2 className="text-sm font-bold text-[#f15a24] tracking-[0.3em] uppercase font-oswald flex items-center gap-3">
-                                <MapPin size={18} />
-                                WORLD MAP / イタコ半島全図
-                            </h2>
-                        </div>
-
-                        <PeninsulaMap 
-                            locations={locations} 
-                            selectedLocationId={selectedLocationId} 
-                            setSelectedLocationId={setSelectedLocationId}
-                            selectedCharIds={selectedCharIds}
-                            characters={characters}
-                            handleToggleChar={handleToggleChar}
-                            onGo={handleGo}
-                            globalSentiment={globalSentiment}
                         />
                     </motion.div>
                 ) : null}

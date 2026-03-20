@@ -44,13 +44,21 @@ export default function App() {
 
   // --- 2. Navigation & UI States ---
   const [activeSlot, setActiveSlot] = useState(0);
-  const [activeManagerTab, setActiveManagerTab] = useState('map');
+  const [activeManagerTab, setActiveManagerTab] = useState('dice');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [enlargedCharId, setEnlargedCharId] = useState(null);
   const [showNotebookModal, setShowNotebookModal] = useState(false);
   const [isUnderground, setIsUnderground] = useState(false);
   const [isEventShaking, setIsEventShaking] = useState(false);
+
+  // 接続状況に応じたタブの自動切替
+  useEffect(() => {
+    const isPublicTab = activeManagerTab === 'grimoire' || activeManagerTab === 'account';
+    if (activeManagerTab && !isPublicTab && (apiConnectionStatus !== 'success' || !geminiKey)) {
+        setActiveManagerTab('connect');
+    }
+  }, [activeManagerTab, geminiKey, apiConnectionStatus]);
 
   // --- 3. Dialogue & Knowledge States ---
   const [input, setInput] = useState('');
@@ -279,17 +287,22 @@ export default function App() {
 
   useEffect(() => {
     const updateEvent = async () => {
-      await new Promise(r => setTimeout(r, 4000)); // ニュース取得と重ならないようにさらに遅延
-      const event = await generateWorldEvent(geminiKey, globalTrends);
-      if (event) {
-        setCurrentWorldEvent(event);
-        setIsEventShaking(true);
-        setTimeout(() => setIsEventShaking(false), 800);
-        
-        // 発生した事変に関連する本を検索
-        searchNDLArchive(event.content.substring(0, 10)).then(res => {
-          if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 10));
-        });
+      try {
+        await new Promise(r => setTimeout(r, 4000)); // ニュース取得と重ならないようにさらに遅延
+        const event = await generateWorldEvent(geminiKey, globalTrends);
+        if (event) {
+          setCurrentWorldEvent(event);
+          setIsEventShaking(true);
+          setTimeout(() => setIsEventShaking(false), 800);
+          
+          // 発生した事変に関連する本を検索
+          searchNDLArchive(event.content.substring(0, 10)).then(res => {
+            if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 10));
+          });
+        }
+      } catch (err) {
+        console.error("World Event Generation Failed:", err);
+        if (err.status === 402) setSpiritualError(err);
       }
     };
     if (geminiKey && isAppReady) {
@@ -323,27 +336,34 @@ export default function App() {
 
   useEffect(() => {
     async function triggerLocationConversation() {
-      if (!geminiKey || !isAppReady) return;
-      
-      const charTag = selectedCharIds.join(',');
-      if (lastLocationRef.current === (selectedLocationId + charTag)) return;
-      lastLocationRef.current = selectedLocationId + charTag;
-      // 他の初期化処理が落ち着くまで待機
-      await new Promise(r => setTimeout(r, 6000));
-      
-      setLoading(true);
-      updateLocationEnergy(selectedLocationId, 15);
+      try {
+        if (!geminiKey || !isAppReady) return;
+        
+        const charTag = selectedCharIds.join(',');
+        if (lastLocationRef.current === (selectedLocationId + charTag)) return;
+        lastLocationRef.current = selectedLocationId + charTag;
+        
+        // 他の初期化処理が落ち着くまで待機
+        await new Promise(r => setTimeout(r, 6000));
+        
+        setLoading(true);
+        updateLocationEnergy(selectedLocationId, 15);
 
-      const selectedChars = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id));
-      const loc = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
-      const dialogue = await generateLocationDialogueWithEvent(geminiKey, selectedChars, loc, currentWorldEvent, spiritSharedKnowledge);
-      
-      if (dialogue?.length) {
-        setMessages(prev => [...prev, ...dialogue.map(d => ({ role: 'ai', content: d.content, charId: d.charId, sentiment: d.sentiment }))]);
-        const lastSentiment = dialogue[dialogue.length - 1]?.sentiment;
-        if (lastSentiment) setGlobalSentiment(lastSentiment);
+        const selectedChars = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id));
+        const loc = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
+        const dialogue = await generateLocationDialogueWithEvent(geminiKey, selectedChars, loc, currentWorldEvent, spiritSharedKnowledge);
+        
+        if (dialogue?.length) {
+          setMessages(prev => [...prev, ...dialogue.map(d => ({ role: 'ai', content: d.content, charId: d.charId, sentiment: d.sentiment }))]);
+          const lastSentiment = dialogue[dialogue.length - 1]?.sentiment;
+          if (lastSentiment) setGlobalSentiment(lastSentiment);
+        }
+      } catch (err) {
+        console.error("Location Conversation Failed:", err);
+        if (err.status === 402) setSpiritualError(err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     triggerLocationConversation();
   }, [selectedLocationId, selectedCharIds, geminiKey, currentWorldEvent, APP_CHARACTERS, isAppReady, spiritSharedKnowledge]);
