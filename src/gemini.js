@@ -15,7 +15,7 @@ export const OPENROUTER_MODELS = [
 const TASK_MODELS = {
   DIALOGUE: "google/gemini-2.0-flash-lite-preview-02-05:free", // ALWAYS FREE
   UTILITY: "google/gemini-2.0-flash-lite-preview-02-05:free",
-  JSON: "openai/gpt-4o-mini", // Mini is extremely cheap, but you can change to free if needed
+  JSON: "google/gemini-2.0-flash-lite-preview-02-05:free", // Changed from gpt-4o-mini to avoid 402
   SUMMARY: "google/gemini-2.0-flash-lite-preview-02-05:free",
   CRITICAL: "google/gemini-2.0-flash-lite-preview-02-05:free",
   CHEAP: "google/gemini-2.0-flash-lite-preview-02-05:free"
@@ -596,7 +596,7 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
   console.log(`[API Request] Model: ${model || "google/gemini-2.0-flash-001"}, Key: ${keySnippet}, Length: ${apiKey.length}`);
 
   const body = {
-    model: model || "google/gemini-2.0-flash-001",
+    model: model || "google/gemini-2.0-flash-lite-preview-02-05:free",
     messages,
     temperature: config.temperature ?? 0.7,
     max_tokens: config.maxOutputTokens ?? 1024,
