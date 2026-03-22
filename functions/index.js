@@ -45,11 +45,11 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
       // APIリクエスト
       const payload = req.body;
       const FAILOVER_MODELS = [
-        payload.model || "google/gemini-2.0-flash-lite-preview-02-05:free",
-        "google/gemma-2-9b-it:free",
+        payload.model || "google/gemini-2.0-flash-exp:free",
         "meta-llama/llama-3.1-8b-instruct:free",
         "qwen/qwen-2.5-72b-instruct:free",
-        "mistralai/pixtral-12b:free"
+        "mistralai/pixtral-12b:free",
+        "google/gemma-2-9b-it:free"
       ];
 
       let lastError = null;
