@@ -116,7 +116,6 @@ export default function App() {
   }, []);
 
   // Derived Values
-  const isMeltingDown = useMemo(() => Object.values(locationEnergies).some(e => e > 85), [locationEnergies]);
   const [news, setNews] = useState([]);
 
   const scrollRef = useRef(null);
@@ -205,14 +204,12 @@ export default function App() {
       setUser(currentUser);
       if (currentUser) {
         setUserName(currentUser.displayName || '彷徨える魂');
-        const [savedBookMarks, data, energies] = await Promise.all([
+        const [savedBookMarks, data] = await Promise.all([
           fetchBookmarks(), 
-          fetchNotebookAccumulations(),
-          fetchLocationEnergies()
+          fetchNotebookAccumulations()
         ]);
         setBookmarks(savedBookMarks);
         setSpiritSharedKnowledge(data.map(acc => acc.content).join('\n---\n'));
-        setLocationEnergies(energies);
         
         // --- PHASE 2: Frictionless Onboarding ---
         // ユーザーが自前のAPIキーを持っていなければ、自動でProxyモードへ移行
@@ -267,35 +264,48 @@ export default function App() {
     setIsAppReady(false);
   };
 
+  const processWorldEvent = useCallback((event) => {
+    setCurrentWorldEvent(event);
+    setIsEventShaking(true);
+    setTimeout(() => setIsEventShaking(false), 800);
+    
+    searchNDLArchive(event.content.substring(0, 10)).then(res => {
+      if (res?.length) {
+        setArchives(prev => [...res, ...prev].slice(0, 10));
+      }
+    });
+  }, []);
+
   const manualRefreshSpiritWorld = useCallback(async () => {
     if (!geminiKey || loading) return;
     setLoading(true);
+    
     try {
+      // Phase 1: Refresh News
       const newsData = await fetchFictionalizedNews(geminiKey);
       setNews(newsData);
       
-      const trends = await extractTrendsFromNews(newsData, geminiKey);
+      // Phase 2: Update Spiritual Trends
+      const trends = await extractTrendsFromNews(newsData, geminiKey).catch(() => null);
       if (trends) {
         setGlobalTrends(trends);
         localStorage.setItem('itako_global_trends', JSON.stringify(trends));
       }
 
-      const event = await generateWorldEvent(geminiKey, trends || globalTrends);
+      // Phase 3: Manifest Global Anomaly
+      const event = await generateWorldEvent(geminiKey, trends || globalTrends).catch(() => null);
       if (event) {
-        setCurrentWorldEvent(event);
-        setIsEventShaking(true);
-        setTimeout(() => setIsEventShaking(false), 800);
-        searchNDLArchive(event.content.substring(0, 10)).then(res => {
-          if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 10));
-        });
+        processWorldEvent(event);
       }
     } catch (err) {
-      console.error("Spirit World Refresh Failed:", err);
-      if (err.status === 402 || err.status === 429) setSpiritualError(err);
+      console.error("Spiritual disturbance during refresh:", err);
+      if (err.status === 402 || err.status === 429) {
+        setSpiritualError(err);
+      }
     } finally {
       setLoading(false);
     }
-  }, [geminiKey, loading, globalTrends]);
+  }, [geminiKey, loading, globalTrends, processWorldEvent]);
 
 
 
@@ -327,9 +337,6 @@ export default function App() {
       isUnderground,
       externalContext: context,
       interactionDepth,
-      isUnderground,
-      externalContext: context,
-      interactionDepth,
       others,
       alaya,
       currentWorldEvent
@@ -340,10 +347,20 @@ export default function App() {
     setReplyTo(null);
   }, []);
 
+  const updateDialogueInMessages = useCallback((charId, chunk, sentiment) => {
+    setMessages(prev => {
+      const next = [...prev];
+      const lastIdx = next.length - 1;
+      if (next[lastIdx]?.charId === charId) {
+        next[lastIdx] = { ...next[lastIdx], content: chunk, sentiment };
+      }
+      return next;
+    });
+  }, []);
+
   const handleSendMessage = async () => {
-    if (!input.trim() || loading) return;
-    
-    // リプライ対象がある場合、メッセージに引用枠を付与する
+    if (!input.trim() || loading || !geminiKey) return;
+
     const userMsg = replyTo 
       ? `＞ ${replyTo.charId}: 「${replyTo.content}」\n\n${input}`
       : input;
@@ -351,19 +368,20 @@ export default function App() {
     const charId = selectedCharIds[0];
     const currentChar = APP_CHARACTERS.find(c => c.id === charId);
 
-    // 1. UI状態の即時更新
+    // Prepare UI state for dialogue
     setInput('');
-    setReplyTo(null); // 送信後にリプライ状態をリセット
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    setReplyTo(null);
+    setMessages(prev => [
+      ...prev, 
+      { role: 'user', content: userMsg },
+      { role: 'ai', content: '', charId }
+    ]);
     setLoading(true);
 
-    // 2. 外部アーカイブ検索（非同期）
+    // Background research in archives
     searchNDLArchive(userMsg).then(res => {
       if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 5));
     });
-
-    // 3. AI応答用プレースホルダー挿入
-    setMessages(prev => [...prev, { role: 'ai', content: '', charId }]);
 
     try {
       const options = buildDialogueOptions(charId);
@@ -374,14 +392,7 @@ export default function App() {
         apiKey: geminiKey,
         options,
         onChunk: (chunk, meta) => {
-          setMessages(prev => {
-            const next = [...prev];
-            const lastIdx = next.length - 1;
-            if (next[lastIdx]?.charId === charId) {
-              next[lastIdx] = { ...next[lastIdx], content: chunk, sentiment: meta.sentiment };
-            }
-            return next;
-          });
+          updateDialogueInMessages(charId, chunk, meta.sentiment);
           if (meta.sentiment) {
             startTransition(() => {
               setGlobalSentiment(meta.sentiment);
@@ -390,9 +401,9 @@ export default function App() {
         }
       });
     
-      handleSlotChange(1); // 自動的に対話スロットへ切替
+      handleSlotChange(1); // Auto-switch to dialog slot
     } catch (error) {
-      console.error("Spiritual Dialogue Failed:", error);
+      console.error("Spiritual Dialogue Break:", error);
       setSpiritualError(error);
     } finally {
       setLoading(false);
@@ -440,8 +451,7 @@ export default function App() {
 
   return (
     <div className={`h-[100dvh] w-full overflow-hidden flex flex-col font-sans selection:bg-white/30 relative
-                    ${isEventShaking ? 'spiritual-shake' : ''} 
-                    ${isMeltingDown ? 'ui-meltdown' : ''}`}
+                    ${isEventShaking ? 'spiritual-shake' : ''}`}
          data-api-status={apiConnectionStatus}
          style={{ '--sentiment-accent': globalSentiment === 'neutral' ? 'rgba(255,255,255,0.02)' : `${ambient.color}44` }}>
       
@@ -584,7 +594,7 @@ export default function App() {
         </AnimatePresence>
       </div>
 
-      {!activeManagerTab && (
+      {activeManagerTab ? null : (
         <FloatingInputBar {...{ input, setInput, handleSendMessage, loading, replyTo, onCancelReply: handleCancelReply }} />
       )}
       <CharacterOverlay {...{ enlargedCharId, setEnlargedCharId, characters: APP_CHARACTERS, handleTalkTo }} />

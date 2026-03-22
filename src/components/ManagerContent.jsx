@@ -70,7 +70,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                         <span className="opacity-40 shrink-0">#{String(i + 1).padStart(2, '0')}</span>
                         <span className="truncate">{c.name}</span>
                     </span>
-                    {isExpanded && <motion.div layoutId="tab-active" className={`absolute bottom-0 left-[10%] right-[10%] h-1 ${isOrange ? 'bg-black' : 'bg-[#f15a24]'} z-20`} />}
+                    {isExpanded ? <motion.div layoutId="tab-active" className={`absolute bottom-0 left-[10%] right-[10%] h-1 ${isOrange ? 'bg-black' : 'bg-[#f15a24]'} z-20`} /> : null}
                 </button>
             </div>
             

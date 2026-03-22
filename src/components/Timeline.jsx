@@ -150,12 +150,12 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
             className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-2`}
         >
             {/* Minimal Header */}
-            {!isUser && charObj && (
+            {(!isUser && charObj) ? (
                 <div className="flex items-center gap-2 mb-1 px-1">
                     <span className="text-[10px] font-black text-[#f15a24] uppercase tracking-widest">{charObj.name}</span>
                     <span className="text-[8px] text-[#EAE0D5]/20 uppercase tracking-widest">/ {charObj.role || 'SPECTER'}</span>
                 </div>
-            )}
+            ) : null}
 
             <div className={`relative p-4 md:p-6 border-2 border-black itako-outline transition-all duration-300 max-w-[90%] md:max-w-[80%] ${
                 isUser 
@@ -163,11 +163,11 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
                     : 'bg-[#1a1a1a] text-[#EAE0D5] font-serif italic text-sm md:text-base selection:bg-[#f15a24] selection:text-black border-l-4 border-l-[#f15a24]'
             }`}>
                 {/* Sentiment Tag */}
-                {!isUser && m.sentiment && (
+                {(!isUser && m.sentiment) ? (
                     <div className="absolute -top-3 left-4 px-2 py-0.5 bg-black border border-black text-[7px] font-black uppercase tracking-tighter text-[#f15a24]/60">
                         ESTIMATED_STATE: {m.sentiment}
                     </div>
-                )}
+                ) : null}
 
                 <p className="leading-relaxed whitespace-pre-wrap">
                     {m.content}
@@ -232,11 +232,12 @@ const Timeline = React.memo(function Timeline({
     };
     const accentColor = sentimentAccents[globalSentiment] || sentimentAccents.neutral;
 
-    const charMap = useMemo(function buildCharMap() {
-        return characters.reduce(function reducer(acc, char) {
-            acc[char.id] = char;
-            return acc;
-        }, {});
+    const charMap = useMemo(() => {
+        const map = {};
+        for (const char of characters) {
+            map[char.id] = char;
+        }
+        return map;
     }, [characters]);
 
     return (
