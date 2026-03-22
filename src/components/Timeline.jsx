@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bookmark, ChevronRight, Reply, Repeat, TrendingUp, MessageSquare, Info } from 'lucide-react';
 import SpiritCard from './SpiritCard';
@@ -253,12 +253,12 @@ const Timeline = React.memo(function Timeline({
         <main
             ref={scrollRef}
             onScroll={handleScroll}
-            className="timeline-container flex-1 itako-scrollbar"
+            className="timeline-container flex-1 itako-scrollbar snap-x snap-mandatory"
         >
             <DialogueEcho messages={messages} accentColor={accentColor} />
             
             {/* Slot 1: News Terminal */}
-            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-16 md:pt-32">
+            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-16 md:pt-32 snap-center">
                 <div className="max-w-3xl mx-auto w-full pb-20">
                     <div className="bg-black/80 border-2 border-black itako-outline overflow-hidden">
                         {/* Terminal Header */}
@@ -285,7 +285,7 @@ const Timeline = React.memo(function Timeline({
              {/* Slot 2: Main Dialog Terminal */}
             <section 
                 ref={transcriptScrollRef}
-                className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-14 md:pt-20 scroll-smooth"
+                className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-14 md:pt-20 scroll-smooth snap-center"
             >
                 <div className="max-w-3xl mx-auto w-full pb-64 md:pb-96">
                     {/* Event Anomaly Floating Banner */}
@@ -359,7 +359,7 @@ const Timeline = React.memo(function Timeline({
             </section>
 
             {/* Slot 3: Library (Archives) */}
-            <section className="timeline-slot p-4 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-16 md:pt-32">
+            <section className="timeline-slot p-4 md:p-12 overflow-y-auto bg-transparent editorial-grid flex flex-col items-start pt-16 md:pt-32 snap-center">
                 <div className="max-w-2xl mx-auto w-full pb-64 md:pb-96">
                     <header className="flex flex-col gap-2 mb-8 md:mb-20 px-2 md:px-0">
                         <div className="flex items-center justify-between">

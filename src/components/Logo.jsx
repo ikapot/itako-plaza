@@ -54,7 +54,7 @@ const LetterZ = ({ color }) => (
   </svg>
 );
 
-export default function Logo({ apiStatus = 'idle' }) {
+export default function Logo({ apiStatus = 'idle', onClick }) {
     const isConnected = apiStatus === 'connected';
     const isValidating = apiStatus === 'validating';
     
@@ -62,7 +62,11 @@ export default function Logo({ apiStatus = 'idle' }) {
     const logoColor = isConnected ? '#10b981' : (isValidating ? '#f15a24' : '#EAE0D5');
     
     return (
-        <div className="flex items-center gap-4 select-none group cursor-pointer py-2">
+        <motion.div 
+            onClick={onClick}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-4 select-none group cursor-pointer py-2"
+        >
             <div className="flex items-end gap-1 sm:gap-1.5 opacity-90 group-hover:opacity-100 transition-all duration-500">
                 {/* ITAKO */}
                 <div className="flex items-center gap-1">
@@ -95,6 +99,6 @@ export default function Logo({ apiStatus = 'idle' }) {
                 </span>
                 <span className="text-[6px] text-white/10 tracking-[0.2em] font-oswald uppercase">SYSTEM OVERRIDE v2.0</span>
             </div>
-        </div>
+        </motion.div>
     );
 }

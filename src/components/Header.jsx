@@ -36,8 +36,8 @@ const Header = React.memo(({
                 >
                     <Menu size={24} strokeWidth={2.5} />
                 </button>
-                <div className="hidden sm:flex items-center gap-4">
-                    <Logo apiStatus={apiStatus} />
+                <div className="flex items-center gap-4">
+                    <Logo apiStatus={apiStatus} onClick={() => onSlotClick(1)} />
                     {globalSentiment !== 'neutral' ? (
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.8 }}
