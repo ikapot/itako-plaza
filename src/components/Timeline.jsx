@@ -222,6 +222,15 @@ const Timeline = React.memo(function Timeline({
     archives,
     globalSentiment = 'neutral',
 }) {
+    const transcriptScrollRef = useRef(null);
+
+    // 会話更新時に最下部へスクロール
+    useEffect(() => {
+        if (transcriptScrollRef.current) {
+            transcriptScrollRef.current.scrollTop = transcriptScrollRef.current.scrollHeight;
+        }
+    }, [messages, loading]);
+
     const sentimentAccents = {
         neutral: 'rgba(255,255,255,0.4)',
         serene: 'rgba(0,255,255,0.4)',
@@ -274,7 +283,10 @@ const Timeline = React.memo(function Timeline({
                 </div>
             </section>
              {/* Slot 2: Main Dialog Terminal */}
-            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-14 md:pt-20">
+            <section 
+                ref={transcriptScrollRef}
+                className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-14 md:pt-20 scroll-smooth"
+            >
                 <div className="max-w-3xl mx-auto w-full pb-64 md:pb-96">
                     {/* Event Anomaly Floating Banner */}
                     <AnimatePresence>

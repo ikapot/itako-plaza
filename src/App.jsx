@@ -240,6 +240,14 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // --- 自動スクロール制御 ---
+  useEffect(() => {
+    if (scrollRef.current) {
+      // スクロール位置を最下部に固定
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]); // メッセージが更新（ストリーミング含む）されるたびに実行
+
   const handleBookmark = async (index) => {
     const msg = messages[index];
     if (!msg || msg.role === 'user') return;
