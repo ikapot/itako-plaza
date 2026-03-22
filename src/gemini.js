@@ -595,9 +595,25 @@ function extractJson(text) {
 
 // --- API Execution ---
 
+const FALLBACK_FREE_MODELS = [
+  "google/gemini-2.0-flash-lite-preview-02-05:free",
+  "google/gemma-3-27b-it:free",
+  "google/gemma-3-12b-it:free",
+  "mistralai/mistral-7b-instruct:free",
+  "qwen/qwen-2.5-72b-instruct:free",
+  "microsoft/phi-4:free",
+  "openchat/openchat-7b:free"
+];
+
+const PROXY_URL = import.meta.env.VITE_PROXY_URL || "https://us-central1-itako-plaza-kenji.cloudfunctions.net/streamChat";
+
+/**
+ * OpenRouterリクエストの実行（プロキシ対応・自動フォールバック機能付）
+ */
 async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = false, onChunk = null) {
-  // --- Normalization: Merge system role into first user message ---
-  // Many free models/providers on OpenRouter reject separate system messages with 400.
+  let currentModel = model || FALLBACK_FREE_MODELS[0];
+  const isFreeTarget = currentModel.endsWith(':free');
+
   let normalizedMessages = [...messages];
   const systemMsgIdx = normalizedMessages.findIndex(m => m.role === 'system');
   if (systemMsgIdx !== -1) {
@@ -610,236 +626,133 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
     }
   }
 
-  if (apiKey === 'PROXY_MODE') {
-    // === PROXY MODE: Call Firebase Cloud Function ===
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      throw {
-        status: 401,
-        code: SPIRITUAL_ERRORS.AUTH_FAILED,
-        message: "Proxy Authentication Failed: Please login with Google to access the free proxy."
-      };
-    }
-    
-    let idToken;
-    try {
-      idToken = await currentUser.getIdToken(true);
-    } catch (e) {
-      throw {
-        status: 401,
-        code: SPIRITUAL_ERRORS.AUTH_FAILED,
-        message: "Failed to retrieve authentication token. Please re-login."
-      };
-    }
-
-    const payload = {
-      model: model || "google/gemini-2.0-flash-lite-preview-02-05:free",
-      messages: normalizedMessages,
-      temperature: config.temperature ?? 0.7,
-      max_tokens: config.maxOutputTokens ?? 1000
-    };
-
-    const PROXY_URL = import.meta.env.VITE_PROXY_URL || "https://us-central1-itako-plaza-kenji.cloudfunctions.net/streamChat";
-    
-    try {
-      const response = await fetch(PROXY_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        let errorData = {};
-        try { errorData = await response.json(); } catch(e) {}
-        throw {
-          status: response.status,
-          code: response.status === 401 ? SPIRITUAL_ERRORS.AUTH_FAILED :
-                response.status === 402 ? SPIRITUAL_ERRORS.PAYMENT_REQUIRED :
-                response.status === 429 ? SPIRITUAL_ERRORS.RATE_LIMIT : SPIRITUAL_ERRORS.DEFAULT,
-          message: errorData.error || `Proxy connection failed [${response.status}]`
-        };
-      }
-      
-      if (stream && onChunk) {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let fullText = "";
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop(); // keep the last partial line
-
-          for (const line of lines) {
-            if (line.trim() === '') continue;
-            
-            try {
-              // The proxy simply pipes chunks from OpenRouter. Some might be OpenRouter's SSE format.
-              // We need to parse 'data: ...'
-              if (line.startsWith('data: ')) {
-                 const dataStr = line.slice(6).trim();
-                 if (dataStr === '[DONE]') continue;
-                 const data = JSON.parse(dataStr);
-                 const text = data.choices[0]?.delta?.content || "";
-                 fullText += text;
-                 onChunk(fullText);
-              } else {
-                 // Try to parse just in case it's valid JSON
-                 const data = JSON.parse(line);
-                 if (data.choices?.[0]?.delta?.content) {
-                    fullText += data.choices[0].delta.content;
-                    onChunk(fullText);
-                 }
-              }
-            } catch (e) {
-              // Ignore parse errors for incomplete chunks
-            }
-          }
-        }
-        return fullText;
-      }
-      
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content || "";
-      
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  // === DIRECT MODE: Standard OpenRouter Request ===
-  if (!apiKey || typeof apiKey !== 'string' || !apiKey.startsWith('sk-or-v1-')) {
-    throw {
-      status: 401,
-      code: SPIRITUAL_ERRORS.AUTH_FAILED,
-      message: "Invalid API Key format. OpenRouter keys should start with 'sk-or-v1-'."
-    };
-  }
-
-  const keySnippet = `${apiKey.substring(0, 10)}...`;
-  console.log(`[API Request] Model: ${model || "google/gemma-3-27b-it:free"}, Messages: ${normalizedMessages.length}`);
-
-  const body = {
-    model: model || "google/gemma-3-27b-it:free",
-    messages: normalizedMessages,
-    temperature: config.temperature ?? 0.7,
-    max_tokens: config.maxOutputTokens ?? 1024,
-    top_p: config.topP ?? 0.9, // Slightly lower than 1 to avoid some provider strictness
-    stream: stream
-  };
-
   let retryCount = 0;
   const maxRetries = 4;
 
   while (retryCount <= maxRetries) {
     try {
-      const response = await fetch(OPENROUTER_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey.trim()}`,
-          "HTTP-Referer": OPENROUTER_REFERER,
-          "X-Title": OPENROUTER_TITLE,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (response.status === 429 && retryCount < maxRetries) {
-        const waitTime = Math.pow(2, retryCount) * 3000; // Increased base wait
-        console.warn(`[API Rate Limit] ${model} throttled. Retrying in ${waitTime}ms...`);
-        await new Promise(r => setTimeout(r, waitTime));
-        retryCount++;
-        continue;
-      }
-
-      if (!response.ok) {
-        let errorData = {};
-        let errorText = "";
-        try { 
-          errorText = await response.text();
-          errorData = JSON.parse(errorText); 
-        } catch(e) {
-          errorData = { error: { message: errorText || "Unknown spectral disruption" } };
-        }
+      if (apiKey === 'PROXY_MODE') {
+        const currentUser = auth.currentUser;
+        if (!currentUser) throw { status: 401, code: SPIRITUAL_ERRORS.AUTH_FAILED, message: "Please login with Google." };
         
-        console.error("[API Error Response]", JSON.stringify(errorData, null, 2));
-        
-        const isAuthError = response.status === 401;
-        const isRateLimit = response.status === 429;
-        const isPaymentRequired = response.status === 402;
-        
-        throw { 
-          status: response.status, 
-          code: isRateLimit ? SPIRITUAL_ERRORS.RATE_LIMIT :
-                isAuthError ? SPIRITUAL_ERRORS.AUTH_FAILED :
-                isPaymentRequired ? SPIRITUAL_ERRORS.PAYMENT_REQUIRED :
-                SPIRITUAL_ERRORS.OPENROUTER_ERROR,
-          message: isRateLimit 
-            ? (errorData.error?.message?.includes("free-models-per-day") 
-                ? "OpenRouterの外部無料枠が上限（50回/日）に達しました。Googleアカウントでログインしてセキュア・プロキシ回路を使用するか、$5程度のチャージで自身のキーの枠を広げる（1,000回/日）か、明日まで待つ必要があります。" 
-                : (errorData.error?.message || "通信量制限により霊界が不安定です。"))
-            : isAuthError 
-              ? `接続失敗: ${errorData.error?.message || "Invalid Key"}`
-              : isPaymentRequired 
-                ? "OpenRouterのクレジットが不足しています (402 Payment Required)。"
-                : errorData.error?.message || `霊的接続エラー [${response.status}]`
+        const idToken = await currentUser.getIdToken(true);
+        const payload = {
+          model: currentModel,
+          messages: normalizedMessages,
+          temperature: config.temperature ?? 0.7,
+          max_tokens: config.maxOutputTokens ?? 1000
         };
-      }
 
-      // Handle streaming vs non-streaming response body
-      if (!stream) {
-        const responseData = await response.json();
-        return responseData.choices?.[0]?.message?.content || "";
-      }
+        const response = await fetch(PROXY_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${idToken}` },
+          body: JSON.stringify(payload)
+        });
 
-      if (stream && onChunk) {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let fullText = "";
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop();
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const dataStr = line.slice(6).trim();
-              if (dataStr === '[DONE]') continue;
-              try {
-                const data = JSON.parse(dataStr);
-                const text = data.choices[0]?.delta?.content || "";
-                fullText += text;
-                onChunk(fullText);
-              } catch (e) {}
-            }
-          }
+        if (!response.ok) {
+           const errText = await response.text();
+           let errData = {}; try { errData = JSON.parse(errText); } catch(e) {}
+           if (response.status === 429 && retryCount < maxRetries) throw { status: 429 };
+           throw { status: response.status, message: errData.error || errText || "Proxy error" };
         }
-        return fullText;
-      }
 
-      const data = await response.json();
-      return data.choices[0]?.message?.content || "";
+        return await handleOpenRouterStream(response, stream, onChunk);
+
+      } else {
+        if (!apiKey || !apiKey.startsWith('sk-or-v1-')) {
+          throw { status: 401, code: SPIRITUAL_ERRORS.AUTH_FAILED, message: "Invalid API Key." };
+        }
+
+        const body = {
+          model: currentModel,
+          messages: normalizedMessages,
+          temperature: config.temperature ?? 0.7,
+          max_tokens: config.maxOutputTokens ?? 1024,
+          top_p: config.topP ?? 0.9,
+          stream: stream
+        };
+
+        const response = await fetch(OPENROUTER_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey.trim()}`,
+            "HTTP-Referer": OPENROUTER_REFERER,
+            "X-Title": OPENROUTER_TITLE,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (response.status === 429 && retryCount < maxRetries) throw { status: 429 };
+
+        if (!response.ok) {
+          const errText = await response.text();
+          let errData = {}; try { errData = JSON.parse(errText); } catch(e) {}
+          throw { status: response.status, message: errData.error?.message || errText || "Direct error" };
+        }
+
+        return await handleOpenRouterStream(response, stream, onChunk);
+      }
 
     } catch (err) {
       if (err.status === 429 && retryCount < maxRetries) {
+        let nextModel = currentModel;
+        if (isFreeTarget) {
+          const currentIndex = FALLBACK_FREE_MODELS.indexOf(currentModel);
+          nextModel = FALLBACK_FREE_MODELS[(currentIndex + 1) % FALLBACK_FREE_MODELS.length];
+          console.warn(`[Spectral Congestion] ${currentModel} busy. Shifting to ${nextModel}...`);
+        }
+        const waitTime = Math.pow(2, retryCount) * 1000;
+        currentModel = nextModel;
+        await new Promise(r => setTimeout(r, waitTime));
         retryCount++;
         continue;
       }
       throw err;
     }
   }
+}
+
+/**
+ * OpenRouterストリーミング/JSONレスポンスの共通ハンドラ
+ */
+async function handleOpenRouterStream(response, stream, onChunk) {
+  if (!stream) {
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || "";
+  }
+
+  if (stream && onChunk) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let fullText = "";
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (line.trim() === '') continue;
+        if (line.startsWith('data: ')) {
+          const dataStr = line.slice(6).trim();
+          if (dataStr === '[DONE]') continue;
+          try {
+            const data = JSON.parse(dataStr);
+            const text = data.choices[0]?.delta?.content || "";
+            fullText += text;
+            onChunk(fullText);
+          } catch (e) {}
+        }
+      }
+    }
+    return fullText;
+  }
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || "";
 }
 
 /**
