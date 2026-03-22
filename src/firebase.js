@@ -45,6 +45,14 @@ if (isConfigValid) {
             dummyAuthCallbacks.add(cb);
             cb(dummyCurrentUser);
             return () => { dummyAuthCallbacks.delete(cb); };
+        },
+        // getIdToken をモックに追加（PROXY_MODEでのクラッシュ防止）
+        get currentUser() { 
+          if (!dummyCurrentUser) return null;
+          return {
+            ...dummyCurrentUser,
+            getIdToken: async () => "dummy-id-token"
+          };
         }
     };
     // db を空のオブジェクトではなく、Firestore のメソッド呼び出しに対してエラーを投げない Proxy にする
