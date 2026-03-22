@@ -886,6 +886,26 @@ export async function invokeGemini(apiKey, prompt, sysPrompt = "", config = {}, 
     throw new Error(SPIRITUAL_ERRORS.AUTH_FAILED);
   }
 
+  // 1. Semantic Caching Check: skip network call if we've seen this before
+  const echo = await findSpiritualEcho(sysPrompt, prompt);
+  if (echo) {
+    let cachedData = echo;
+    if (isJson) {
+      try { 
+        cachedData = JSON.parse(extractJson(echo)); 
+      } catch (e) {
+        // If cache is corrupted JSON, fallback to fresh call
+      }
+    }
+    if (!(isJson && typeof cachedData === 'string')) { // Only return if JSON parsing succeeded or not needed
+       return new SpiritualResponse({ 
+         data: cachedData, 
+         model: 'echo-cache', 
+         keyIndex: '-' 
+       });
+    }
+  }
+
   const targetModel = routeModel(config.taskType || 'UTILITY', preferredOpenRouterModel);
   
   // Separate system prompt into its own message with "system" role for best compatibility
@@ -893,7 +913,11 @@ export async function invokeGemini(apiKey, prompt, sysPrompt = "", config = {}, 
     ? [{ role: "system", content: sysPrompt }, { role: "user", content: prompt }]
     : [{ role: "user", content: prompt }];
   
-  const res = await fetchOpenRouter(apiKey, messages, targetModel, config);
+  const res = await fetchOpenRouter(apiKey, messages, targetModel, {
+    ...config,
+    maxOutputTokens: config.maxOutputTokens || (config.taskType === 'JSON' ? 1024 : 512) // Smaller defaults for utility
+  });
+  
   let finalData = res;
 
   if (isJson) {
@@ -903,6 +927,9 @@ export async function invokeGemini(apiKey, prompt, sysPrompt = "", config = {}, 
       throw new Error(`Invalid JSON response (OpenRouter): ${res.substring(0, 100)}`);
     }
   }
+
+  // 2. Store in cache for future use
+  await storeEcho(sysPrompt, prompt, res);
 
   return new SpiritualResponse({ 
     data: finalData, 
@@ -1099,14 +1126,25 @@ export async function generateLocationDialogueWithEvent(apiKey, chars, loc, even
 }
 
 export async function distillSpiritualAlaya(messages, apiKey) {
-  if (!apiKey || messages.length < 5) return null;
+  if (!apiKey || messages.length < 8) return null; // Increase threshold for summary
   
   const thread = messages.map(m => `[${m.charId}] ${m.userMsg ? '私: ' + m.userMsg : '相手: ' + m.aiMsg}`).join('\n');
+  
+  // Quick hash or length check to see if it's identical to last distilled content
+  const lastThread = localStorage.getItem('itako_last_distilled_thread');
+  if (lastThread === thread) {
+      return localStorage.getItem('itako_alaya');
+  }
+
   const prompt = `以下の魂の交流を、阿頼耶識（潜在意識の記憶）として150文字程度で要約せよ。これまでの関係性や重要な出来事を重点的に記すこと:\n\n${thread}`;
   
   try {
-    const res = await invokeGemini(apiKey, prompt, "あなたは「阿頼耶識」の記録者。これまでの対話の核心のみを抽出せよ。", { taskType: 'SUMMARY' });
-    return res.data;
+    const res = await invokeGemini(apiKey, prompt, "あなたは「阿頼耶識」の記録者。これまでの対話の核心のみを抽出せよ。", { taskType: 'SUMMARY', maxOutputTokens: 256 });
+    if (res.isSuccess) {
+       localStorage.setItem('itako_last_distilled_thread', thread);
+       return res.data;
+    }
+    return null;
   } catch (e) {
     console.error("Alaya distillation failed:", e);
     return null;
