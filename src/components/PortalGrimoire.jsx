@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, AlertCircle, Cpu, ShieldCheck, CheckCircle2, Key, RefreshCw } from 'lucide-react';
+import { Sparkles, AlertCircle, Cpu, ShieldCheck, CheckCircle2, Key, RefreshCw, LogIn } from 'lucide-react';
 
 /**
  * PortalGrimoire.jsx
@@ -11,7 +11,9 @@ export default function PortalGrimoire({
     setGeminiKey, 
     isValidatingApi, 
     apiConnectionStatus, 
-    handleValidateApi
+    handleValidateApi,
+    user,
+    loginWithGoogle
 }) {
     const [localKey, setLocalKey] = useState(geminiKey || '');
     const [isEditing, setIsEditing] = useState(!geminiKey);
@@ -132,6 +134,22 @@ export default function PortalGrimoire({
                             <p className="text-[9px] text-white/20 font-serif italic text-center">
                                 「深淵への鍵を入力し、回路を固定してください」
                             </p>
+                        )}
+
+                        {!user && (
+                            <div className="pt-6 border-t border-white/5 flex flex-col items-center gap-4">
+                                <p className="text-[9px] font-black text-[#f15a24] tracking-[0.3em] uppercase">または / or</p>
+                                <button 
+                                    onClick={loginWithGoogle}
+                                    className="w-full py-4 bg-white text-black text-xs font-black tracking-[0.4em] uppercase rounded-2xl hover:bg-zinc-200 transition-all flex items-center justify-center gap-3 shadow-xl"
+                                >
+                                    <LogIn size={14} /> Google Account Login / 直接入室
+                                </button>
+                                <p className="text-[8px] text-white/30 text-center leading-relaxed">
+                                    Google ログインを行うと、共用の無料プロキシ回路を利用できます。<br/>
+                                    個別の API キーを用意する必要はありません。
+                                </p>
+                            </div>
                         )}
                     </motion.div>
                 )}

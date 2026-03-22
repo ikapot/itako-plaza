@@ -272,71 +272,40 @@ export default function App() {
     setIsAppReady(false);
   };
 
-  useEffect(() => {
-    if (!geminiKey) return;
-    
-    const timeout = setTimeout(async () => {
-      try {
-        const newsData = await fetchFictionalizedNews(geminiKey);
-        setNews(newsData);
-        
-        // ニュースからトレンドを抽出して反映
-        await new Promise(r => setTimeout(r, 6000)); // さらに遅延
-        const trends = await extractTrendsFromNews(newsData, geminiKey);
-        if (trends) {
-          setGlobalTrends(trends);
-          localStorage.setItem('itako_global_trends', JSON.stringify(trends));
-        }
-      } catch (err) {
-        console.error("News or Trend Fetching ERROR:", err);
+  const manualRefreshSpiritWorld = useCallback(async () => {
+    if (!geminiKey || loading) return;
+    setLoading(true);
+    try {
+      const newsData = await fetchFictionalizedNews(geminiKey);
+      setNews(newsData);
+      
+      const trends = await extractTrendsFromNews(newsData, geminiKey);
+      if (trends) {
+        setGlobalTrends(trends);
+        localStorage.setItem('itako_global_trends', JSON.stringify(trends));
       }
-    }, 8000); // 初期起動を遅らせる
-    
-    const energyInterval = setInterval(async () => setLocationEnergies(await fetchLocationEnergies()), 20000); // 間隔を広げる
 
-    return () => { 
-      clearTimeout(timeout);
-      clearInterval(energyInterval); 
-    };
-  }, [geminiKey]);
-
-  useEffect(() => {
-    const updateEvent = async () => {
-      try {
-        await new Promise(r => setTimeout(r, 15000)); // ニュース取得と重ならないように大幅に遅延
-        const event = await generateWorldEvent(geminiKey, globalTrends);
-        if (event) {
-          setCurrentWorldEvent(event);
-          setIsEventShaking(true);
-          setTimeout(() => setIsEventShaking(false), 800);
-          
-          // 発生した事変に関連する本を検索
-          searchNDLArchive(event.content.substring(0, 10)).then(res => {
-            if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 10));
-          });
-        }
-      } catch (err) {
-        console.error("World Event Generation Failed:", err);
-        if (err.status === 402) setSpiritualError(err);
+      const event = await generateWorldEvent(geminiKey, trends || globalTrends);
+      if (event) {
+        setCurrentWorldEvent(event);
+        setIsEventShaking(true);
+        setTimeout(() => setIsEventShaking(false), 800);
+        searchNDLArchive(event.content.substring(0, 10)).then(res => {
+          if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 10));
+        });
       }
-    };
-    if (geminiKey && isAppReady) {
-      updateEvent();
-      const eventInterval = setInterval(updateEvent, 300000);
-      return () => clearInterval(eventInterval);
+    } catch (err) {
+      console.error("Spirit World Refresh Failed:", err);
+      if (err.status === 402 || err.status === 429) setSpiritualError(err);
+    } finally {
+      setLoading(false);
     }
-  }, [geminiKey, isAppReady, globalTrends]);
+  }, [geminiKey, loading, globalTrends]);
 
-  // ニュースに連動した書誌検索
   useEffect(() => {
-    if (news?.length > 0) {
-      const topNews = news[0];
-      const keyword = topNews.title.replace(/「|」|『|』/g, "").substring(0, 8);
-      searchNDLArchive(keyword).then(res => {
-        if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 10));
-      });
-    }
-  }, [news]);
+    const energyInterval = setInterval(async () => setLocationEnergies(await fetchLocationEnergies()), 60000); 
+    return () => clearInterval(energyInterval); 
+  }, []);
 
   useEffect(() => {
     setGeminiDebugCallback((log) => {
@@ -581,7 +550,7 @@ export default function App() {
       />
 
       <div className="flex-1 flex overflow-hidden relative z-10">
-        <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, setActiveManagerTab }} />
+        <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, setActiveManagerTab, manualRefreshSpiritWorld, isRefreshing: loading }} />
         
         {/* Main Timeline View */}
         <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark, handleReply: setReplyTo, globalTrends, setShowNotebookModal, futureSelfCritique, archives, globalSentiment }} />

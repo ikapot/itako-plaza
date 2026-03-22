@@ -196,6 +196,8 @@ function getConnectBtnStyle(status, key, loading) {
 const ManagerContent = React.memo(({
     activeManagerTab,
     setActiveManagerTab,
+    user,
+    loginWithGoogle,
     locations,
     selectedLocationId,
     setSelectedLocationId,
@@ -328,6 +330,8 @@ const ManagerContent = React.memo(({
                             isValidatingApi={isValidatingApi}
                             apiConnectionStatus={apiConnectionStatus}
                             handleValidateApi={handleValidateApi}
+                            user={user}
+                            loginWithGoogle={loginWithGoogle}
                         />
                     </motion.div>
                 ) : null}

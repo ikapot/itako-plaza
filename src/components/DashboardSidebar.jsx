@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, Settings, Ghost, Globe, MapPin, BookOpen } from 'lucide-react';
+import { User, Settings, Ghost, Globe, MapPin, BookOpen, RotateCw } from 'lucide-react';
 import WarholAvatar from './WarholAvatar';
 
 const DashboardSidebar = React.memo(({
@@ -14,7 +14,9 @@ const DashboardSidebar = React.memo(({
     selectedLocationId,
     setSelectedLocationId,
     locationEnergies,
-    setActiveManagerTab
+    setActiveManagerTab,
+    manualRefreshSpiritWorld,
+    isRefreshing
 }) => {
     return (
         <div className="hidden md:flex flex-col gap-3 z-[110] absolute top-1/2 -translate-y-1/2 left-0 pl-6 pointer-events-none items-start">
@@ -87,9 +89,26 @@ const DashboardSidebar = React.memo(({
                 <div className="w-10 h-10 rounded-xl bg-[#bd8a78]/10 flex items-center justify-center border border-[#bd8a78]/20 group-hover/manual:bg-[#bd8a78]/20 transition-all">
                     <BookOpen size={16} className="text-[#bd8a78]" />
                 </div>
-                <div className="flex flex-col items-start">
+                <div className="flex flex-col items-start text-left">
                     <span className="text-xs font-black tracking-widest text-[#bd8a78] uppercase font-oswald">Concept</span>
-                    <span className="text-[7px] font-bold text-white/70 uppercase tracking-[0.4em] font-biz-mincho">理念の断片</span>
+                    <span className="text-[7px] font-bold text-white/70 uppercase tracking-[0.4em] font-oswald">理念の断片</span>
+                </div>
+            </motion.button>
+
+            {/* 5. Manual Refresh Button */}
+            <motion.button
+                whileHover={{ scale: 1.05, x: 5 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={isRefreshing}
+                onClick={manualRefreshSpiritWorld}
+                className="pointer-events-auto flex items-center gap-4 p-3 pr-6 glass-spectral rounded-3xl border border-white/5 hover:border-[#f15a24]/50 transition-all group/sync"
+            >
+                <div className={`w-10 h-10 rounded-xl ${isRefreshing ? 'bg-zinc-800' : 'bg-[#f15a24]/10'} flex items-center justify-center border border-white/5 group-hover/sync:bg-[#f15a24]/20 transition-all`}>
+                    <RotateCw size={16} className={`text-[#f15a24] ${isRefreshing ? 'animate-spin' : ''}`} />
+                </div>
+                <div className="flex flex-col items-start text-left">
+                    <span className="text-xs font-black tracking-widest text-[#f15a24] uppercase font-oswald">{isRefreshing ? 'Syncing...' : 'Ritual Sync'}</span>
+                    <span className="text-[7px] font-bold text-white/70 uppercase tracking-[0.4em] font-oswald">霊界の刷新</span>
                 </div>
             </motion.button>
         </div>
