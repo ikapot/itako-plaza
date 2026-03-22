@@ -1,0 +1,12 @@
+﻿diff --git a/src/constants.js b/src/constants.js
+index af4d968..d61ba0f 100644
+--- a/src/constants.js
++++ b/src/constants.js
+@@ -65,6 +65,7 @@ export const INITIAL_CHARACTERS = [
+   { id: 'void_entity', face: 5, pos: 2, name: '陌夂┌縺ｮ螢ｰ', role: '辟｡蜷阪・蟄伜惠', homeLocationId: 'void', flavor: '辟｡險', color: 'bg-zinc-900', description: '蜷榊燕繧呈戟縺溘↑縺・ｴ皮ｲ九↑髱槫ｭ伜惠縺ｮ謫ｬ莠ｺ蛹悶・, avatar: null },
+   { id: 'shadow', face: 5, pos: 3, name: '蠖ｱ', role: '縺ゅ↑縺溘・蠖ｱ', homeLocationId: 'mirror_abyss', flavor: '蠅・阜', color: 'bg-zinc-800', description: '謚大悸縺輔ｌ縺溘ｂ縺・ｸ莠ｺ縺ｮ閾ｪ蛻・・逵溷ｮ溘・, avatar: null },
+   { id: 'shinran', face: 5, pos: 4, name: '隕ｪ鮑・, role: '豬・悄逵溷ｮ励・髢狗･・, homeLocationId: 'temple', flavor: '謔ｪ莠ｺ豁｣讖・, color: 'bg-zinc-800', isMainChar: true, description: '・・173-1262・画ｳ慕┯縺ｮ髢荳九〒莉門鴨譛ｬ鬘倥ｒ遒ｺ遶九ょｼｱ縺榊・螟ｫ縺薙◎縺梧舞繧上ｌ繧矩％繧定ｪｬ縺・◆縲・, avatar: 'assets/shinran_warhol.png', isPreStyled: true },
++  { id: 'orikuchi', face: 5, pos: 12, name: '謚伜哨菫｡螟ｫ', role: '豁御ｺｺ繝ｻ豌台ｿ怜ｭｦ閠・, homeLocationId: 'temple', flavor: '鬲・, color: 'bg-indigo-950/70', description: '・・887-1953・画ｭ悟捷縺ｯ驥郁ｿ｢遨ｺ縲り成闡蛾寔繧帝ｭゅ・菴馴ｨ薙→縺励※隱ｭ縺ｿ隗｣縺阪√後∪繧後・縺ｨ縲阪ｄ縲後◆縺ｾ縲阪・讎ょｿｵ繧帝壹§縺ｦ譌･譛ｬ譁・喧縺ｮ豺ｱ螻､繧呈侍繧贋ｸ九￡縺溘・, avatar: 'assets/orikuchi_shinobu_warhol.png', isPreStyled: true },
+   { id: 'trickster', face: 5, pos: 5, name: '繝医Μ繝・け繧ｹ繧ｿ繝ｼ', role: '驕灘喧', homeLocationId: 'neon', flavor: '豺ｷ豐・, color: 'bg-yellow-900/50', description: '遘ｩ蠎上ｒ遐ｴ螢翫＠縲∵眠縺溘↑蜿ｯ閭ｽ諤ｧ繧貞卸騾縺吶ｋ豺ｷ豐後・驕灘喧蟶ｫ縲・, avatar: null },
+   { id: 'persona', face: 5, pos: 6, name: '繝壹Ν繧ｽ繝・, role: '莉ｮ髱｢', homeLocationId: 'theatre', flavor: '貍疲橿', color: 'bg-zinc-700', description: '遉ｾ莨壹↓驕ｩ蠢懊☆繧九◆繧√↓郤上＞邯壹￠縺滉ｻ紋ｺｺ縺ｮ縺溘ａ縺ｮ鬘斐・, avatar: null },
+   { id: 'itako_spirit', face: 5, pos: 7, name: '繧､繧ｿ繧ｳ縺ｮ髴・, role: '蜿｣蟇・○', homeLocationId: 'core', flavor: '蟐剃ｻ・, color: 'bg-purple-950/50', description: '豁ｻ閠・・螢ｰ繧堤樟荳悶↓蠑輔″荳九ｍ縺咎怺逧・↑鄙ｻ險ｳ陬・ｽｮ縲・, avatar: null },

@@ -1,0 +1,19 @@
+﻿diff --git a/src/gemini.js b/src/gemini.js
+index 7991aba..f238d90 100644
+--- a/src/gemini.js
++++ b/src/gemini.js
+@@ -71,7 +71,7 @@ export class SpiritualResponse {
+ }
+ 
+ const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+-const OPENROUTER_REFERER = typeof window !== 'undefined' ? window.location.origin : "http://localhost:5173";
++const OPENROUTER_REFERER = typeof window !== "undefined" ? window.location.origin : "http://localhost:5173";
+ const OPENROUTER_TITLE = "Itako Plaza";
+ 
+ const CHARACTER_CONFIGS = {
+@@ -126,7 +126,7 @@ const CHARACTER_CONFIGS = {
+   },
+   kafuka: {
+     systemPrompt: `縺ゅ↑縺溘・繝輔Λ繝ｳ繝・・繧ｫ繝輔き縺ｮ鬲ゅ〒縺吶・-縲先ｸ蠢・→縺ｪ繧区晄Φ縲大ｭ､迢ｬ縺ｨ荳肴  kropotkin: {
++縲先ｸ蠢・→縺ｪ繧区晄Φ縲大ｭ､迢ｬ縺ｨ荳搾ｿｽ  kropotkin: {
+     systemPrompt: `縺ゅ↑縺溘・繝斐Ι繝ｼ繝医Ν繝ｻ繧ｯ繝ｭ繝昴ヨ繧ｭ繝ｳ縺ｮ鬲ゅ〒縺吶・ 縲先ｸ蠢・→縺ｪ繧区晄Φ縲代檎嶌莠呈恩蜉ｩ縲阪→繧｢繝翫・繧ｭ繧ｺ繝縲るｲ蛹悶・荳ｻ蝗縺ｯ髣倅ｺ峨〒縺ｯ縺ｪ縺丞鵠蜉帙↓縺ゅｋ縺ｨ隱ｬ縺阪∝嵜螳ｶ縺ｪ縺崎・逕ｱ縺ｪ騾｣蜷医ｒ菫｡縺倥※縺・∪縺吶・ 縲舌ヨ繝ｼ繝ｳ縲第ｸｩ蜴壹〒逅・衍逧・√°縺､菫｡蠢ｵ縺ｫ貅縺｡縺ｦ縺・ｋ縲らｧ大ｭｦ閠・→縺励※縺ｮ蜀ｷ髱吶＆縺ｨ縲・擠蜻ｽ螳ｶ縺ｨ縺励※縺ｮ荳榊ｱ医・諠・・縺悟酔螻・☆繧九・

@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Activity, Library, Sparkles, RotateCw } from 'lucide-react';
 import SoulRainManifest from './SoulRainManifest';
 import PeninsulaMap from './PeninsulaMap';
@@ -42,8 +42,12 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
     const alignment = i % 2 === 0 ? 'justify-start' : 'justify-end';
     const isOrange = tabColor === 'bg-[#f15a24]';
 
+    const ref = useRef(null);
+    const isInView = useInView(ref, { margin: "200px 0px" });
+
     return (
         <div 
+            ref={ref}
             className={`relative transition-all duration-700 ease-in-out w-full font-sans`}
             style={{
                 marginTop: i === 0 ? '0' : '-3.5rem',
@@ -77,6 +81,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                 onClick={() => !isExpanded && onToggleExpand(c.id)}
                 className={`w-full rounded-none ${bgColor} ${textColor} border ${borderColor} overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10 shadow-3xl shadow-black/80`}
             >
+                {(isInView || isExpanded) ? (
                 <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-12 cursor-default' : 'max-h-[2.5rem] opacity-60 p-0 flex items-center px-8 hover:opacity-100 hover:bg-black/5 shadow-inner'}`}>
                     
                     {!isExpanded ? (
@@ -131,6 +136,9 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                         </div>
                     )}
                 </div>
+                ) : (
+                    <div className="w-full h-[2.5rem]" />
+                )}
             </div>
         </div>
     );
@@ -306,7 +314,7 @@ const ManagerContent = React.memo(({
                                     {geminiKey ? `Active Spiritual Conduits (${geminiKey.split(',').filter(k=>k.trim()).length}/3)` : 'Connection Severed'}
                                 </span>
                                 <p className="text-[10px] text-white/80 leading-relaxed font-serif italic">
-                                    {geminiKey ? '複数の霊的回路が同期しています。並列処理により制限を超越します。' : '対話を開始するにはAPIキーを接続してください。3つの鍵が推奨されます。'}
+                                    {geminiKey === 'PROXY_MODE' ? '共用の無料プロキシ回路にて稼働中です。あなたのAPIキーは必要ありません。' : geminiKey ? '霊的回路が同期しています。' : '対話を開始するにはAPIキーを接続してください。'}
                                 </p>
                             </div>
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">

@@ -64,19 +64,21 @@ const Header = React.memo(({
                     {modeTabs.map(tab => {
                         const isActive = activeManagerTab === tab.id;
                         return (
-                            <button
+                            <motion.button
                                 key={tab.id}
                                 onClick={() => setActiveManagerTab(tab.id)}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 style={{
                                     backgroundColor: isActive ? tab.color : 'transparent',
                                     color: isActive ? '#000' : 'rgba(255,255,255,0.7)',
                                     boxShadow: isActive ? `0 4px 15px ${tab.color}44` : 'none'
                                 }}
-                                className={`flex items-center gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase transition-all duration-300 active:scale-95 border ${isActive ? 'border-white/40' : 'border-transparent'} shrink-0`}
+                                className={`flex items-center gap-2 px-2.5 md:px-4 py-1.5 md:py-2 rounded-full text-[9px] font-bold tracking-[0.1em] uppercase transition-colors duration-300 border ${isActive ? 'border-white/40' : 'border-transparent'} shrink-0 cursor-pointer`}
                             >
                                 <span className={isActive ? 'scale-110' : 'scale-100'}>{tab.icon}</span>
                                 <span className="hidden md:inline">{tab.label}</span>
-                            </button>
+                            </motion.button>
                         );
                     })}
                 </div>
@@ -85,18 +87,20 @@ const Header = React.memo(({
             {/* Timeline Buttons moved to Header */}
             <div className="flex items-center gap-0 md:gap-2 h-14 md:h-16 shrink-0">
                 {navItems.map(item => (
-                    <button
+                    <motion.button
                         key={item.id}
                         onClick={() => onSlotClick(item.id)}
+                        whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.05)" }}
+                        whileTap={{ scale: 0.9 }}
                         style={{ color: activeSlot === item.id ? item.color : 'rgba(255,255,255,0.2)' }}
-                        className={`w-9 h-9 md:w-12 md:h-12 relative flex items-center justify-center rounded-full transition-all duration-300 hover:text-white/60 hover:bg-white/5 active:scale-90 touch-manipulation`}
+                        className={`w-9 h-9 md:w-12 md:h-12 relative flex items-center justify-center rounded-full transition-colors duration-300 hover:text-white/60 touch-manipulation cursor-pointer`}
                         title={item.label}
                     >
                         {item.icon}
                         {activeSlot === item.id ? (
-                            <div className="absolute bottom-1.5 md:bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current shadow-[0_0_8px_current]" />
+                            <motion.div layoutId="navIndicator" className="absolute bottom-1.5 md:bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-current shadow-[0_0_8px_current]" />
                         ) : null}
-                    </button>
+                    </motion.button>
                 ))}
             </div>
         </header>

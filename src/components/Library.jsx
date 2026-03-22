@@ -30,10 +30,13 @@ const BORGES_PROMPT = `あなたはホルヘ・ルイス・ボルヘスの魂で
 
 const BookCard = React.memo(({ book, index }) => (
     <motion.div 
+        layout
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: index * 0.1 }}
-        className="p-4 bg-[#EAE0D5] border-2 border-black hover:bg-white transition-all group cursor-default"
+        whileHover={{ y: -4, transition: { duration: 0.2, ease: "easeOut" } }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ delay: index * 0.1, type: "spring", stiffness: 300, damping: 25 }}
+        className="p-4 bg-[#EAE0D5] border-2 border-black hover:bg-white transition-colors duration-300 group cursor-pointer"
     >
         <div className="w-full aspect-[3/4] bg-black/10 rounded-none mb-3 flex items-center justify-center overflow-hidden border border-black/10 group-hover:border-black/30 transition-all">
             <Quote size={32} className="text-black/10 group-hover:scale-110 transition-transform" />
@@ -144,6 +147,8 @@ const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
                     {messages.map((m, i) => (
                         <motion.div 
                             key={i}
+                            layout
+                            transition={{ type: "spring", stiffness: 260, damping: 25 }}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -168,13 +173,15 @@ const LibraryView = ({ characters = [], userName = "旅人", geminiKey }) => {
                         placeholder="探求したい智慧を入力してください..."
                         className="flex-1 bg-black/60 border border-white/10 rounded-full px-4 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-[#6366f1] transition-all"
                     />
-                    <button 
+                    <motion.button 
                         type="submit"
                         disabled={isSearching}
-                        className="p-2 rounded-full bg-[#6366f1] text-white disabled:opacity-50 hover:scale-105 transition-all"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="p-2 rounded-full bg-[#6366f1] text-white disabled:opacity-50 transition-colors duration-200 cursor-pointer"
                     >
                         {isSearching ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                    </button>
+                    </motion.button>
                 </form>
             </div>
 

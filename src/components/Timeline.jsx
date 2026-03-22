@@ -143,8 +143,10 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
     }
     return (
         <motion.div
+            layout
             initial={{ opacity: 0, x: isUser ? 20 : -20 }}
             animate={{ opacity: 1, x: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 25 }}
             className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-2`}
         >
             {/* Minimal Header */}
@@ -173,21 +175,25 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
 
                 {/* Interaction Buttons (Subtle - only visible on hover or mobile) */}
                 <div className={`mt-4 pt-3 border-t border-black/10 flex items-center gap-4 opacity-40 hover:opacity-100 transition-opacity ${isUser ? 'justify-end' : 'justify-start'}`}>
-                    <button 
+                    <motion.button 
                         onClick={() => handleBookmark?.(m)} 
-                        className="flex items-center gap-1.5 hover:text-amber-500 transition-colors"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center gap-1.5 hover:text-amber-500 transition-colors duration-200 cursor-pointer"
                     >
                         <Bookmark size={10} />
                         <span className="text-[7px] font-black uppercase tracking-tighter">Bookmark</span>
-                    </button>
+                    </motion.button>
                     {!isUser && (
-                        <button 
+                        <motion.button 
                             onClick={() => handleReply?.(m)} 
-                            className="flex items-center gap-1.5 hover:text-[#f15a24] transition-colors"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="flex items-center gap-1.5 hover:text-[#f15a24] transition-colors duration-200 cursor-pointer"
                         >
                             <Repeat size={10} />
                             <span className="text-[7px] font-black uppercase tracking-tighter">Echo / Reply</span>
-                        </button>
+                        </motion.button>
                     )}
                 </div>
             </div>
@@ -346,12 +352,14 @@ const Timeline = React.memo(function Timeline({
                         <div className="flex items-center justify-between">
                             <h2 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] py-4 font-oswald uppercase break-all w-full pr-4" style={{ color: '#2a2a2a' }}>LIBRARY</h2>
                             <div className="flex items-center gap-4">
-                                <button
+                                <motion.button
                                     onClick={function sync() { setShowNotebookModal(true); }}
-                                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase hover:bg-white/10 transition-all font-oswald"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold tracking-widest text-[#bd8a78] uppercase hover:bg-white/10 transition-colors duration-200 font-oswald cursor-pointer"
                                 >
                                     /sync
-                                </button>
+                                </motion.button>
                             </div>
                         </div>
                         <p className="text-xs md:text-sm font-bold text-zinc-500 pl-1 tracking-[0.5em] uppercase font-biz-mincho -mt-2">思考と記録の書架</p>

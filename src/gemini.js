@@ -1,4 +1,4 @@
-import { findEchoInFirestore, saveEchoToFirestore } from "./firebase";
+import { auth, findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
 // --- OpenRouter Protocol ---
 
@@ -596,14 +596,6 @@ function extractJson(text) {
 // --- API Execution ---
 
 async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = false, onChunk = null) {
-  if (!apiKey || typeof apiKey !== 'string' || !apiKey.startsWith('sk-or-v1-')) {
-    throw {
-      status: 401,
-      code: SPIRITUAL_ERRORS.AUTH_FAILED,
-      message: "Invalid API Key format. OpenRouter keys should start with 'sk-or-v1-'."
-    };
-  }
-
   // --- Normalization: Merge system role into first user message ---
   // Many free models/providers on OpenRouter reject separate system messages with 400.
   let normalizedMessages = [...messages];
@@ -616,6 +608,119 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
     } else {
       normalizedMessages.unshift({ role: 'user', content: systemContent });
     }
+  }
+
+  if (apiKey === 'PROXY_MODE') {
+    // === PROXY MODE: Call Firebase Cloud Function ===
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      throw {
+        status: 401,
+        code: SPIRITUAL_ERRORS.AUTH_FAILED,
+        message: "Proxy Authentication Failed: Please login with Google to access the free proxy."
+      };
+    }
+    
+    let idToken;
+    try {
+      idToken = await currentUser.getIdToken(true);
+    } catch (e) {
+      throw {
+        status: 401,
+        code: SPIRITUAL_ERRORS.AUTH_FAILED,
+        message: "Failed to retrieve authentication token. Please re-login."
+      };
+    }
+
+    const payload = {
+      model: model || "google/gemini-2.0-flash-lite-preview-02-05:free",
+      messages: normalizedMessages,
+      temperature: config.temperature ?? 0.7,
+      max_tokens: config.maxOutputTokens ?? 1000
+    };
+
+    const PROXY_URL = import.meta.env.VITE_PROXY_URL || "https://us-central1-itako-plaza-kenji.cloudfunctions.net/streamChat";
+    
+    try {
+      const response = await fetch(PROXY_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        let errorData = {};
+        try { errorData = await response.json(); } catch(e) {}
+        throw {
+          status: response.status,
+          code: response.status === 401 ? SPIRITUAL_ERRORS.AUTH_FAILED :
+                response.status === 402 ? SPIRITUAL_ERRORS.PAYMENT_REQUIRED :
+                response.status === 429 ? SPIRITUAL_ERRORS.RATE_LIMIT : SPIRITUAL_ERRORS.DEFAULT,
+          message: errorData.error || `Proxy connection failed [${response.status}]`
+        };
+      }
+      
+      if (stream && onChunk) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let fullText = "";
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // keep the last partial line
+
+          for (const line of lines) {
+            if (line.trim() === '') continue;
+            
+            try {
+              // The proxy simply pipes chunks from OpenRouter. Some might be OpenRouter's SSE format.
+              // We need to parse 'data: ...'
+              if (line.startsWith('data: ')) {
+                 const dataStr = line.slice(6).trim();
+                 if (dataStr === '[DONE]') continue;
+                 const data = JSON.parse(dataStr);
+                 const text = data.choices[0]?.delta?.content || "";
+                 fullText += text;
+                 onChunk(fullText);
+              } else {
+                 // Try to parse just in case it's valid JSON
+                 const data = JSON.parse(line);
+                 if (data.choices?.[0]?.delta?.content) {
+                    fullText += data.choices[0].delta.content;
+                    onChunk(fullText);
+                 }
+              }
+            } catch (e) {
+              // Ignore parse errors for incomplete chunks
+            }
+          }
+        }
+        return fullText;
+      }
+      
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || "";
+      
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  // === DIRECT MODE: Standard OpenRouter Request ===
+  if (!apiKey || typeof apiKey !== 'string' || !apiKey.startsWith('sk-or-v1-')) {
+    throw {
+      status: 401,
+      code: SPIRITUAL_ERRORS.AUTH_FAILED,
+      message: "Invalid API Key format. OpenRouter keys should start with 'sk-or-v1-'."
+    };
   }
 
   const keySnippet = `${apiKey.substring(0, 10)}...`;

@@ -87,7 +87,9 @@ export default function PortalGrimoire({
                         >
                             <div className="flex flex-col items-start gap-1">
                                 <span className="text-[8px] font-black tracking-[0.3em] uppercase text-white/20">Frequency Established</span>
-                                <span className="text-xs font-mono text-white/60 tracking-widest">{geminiKey.substring(0, 15)}•••••</span>
+                                <span className="text-xs font-mono text-white/60 tracking-widest">
+                                    {geminiKey === 'PROXY_MODE' ? '🟢 GHOST PROXY ACTIVE' : `${geminiKey.substring(0, 15)}•••••`}
+                                </span>
                             </div>
                             <RefreshCw size={16} className="text-white/20 group-hover:rotate-180 transition-transform duration-700" />
                         </motion.button>

@@ -104,12 +104,15 @@ const PeninsulaMap = ({
             const topY = s.mapY - s.height;
 
             return (
-              <g 
+              <motion.g 
                 key={s.id} 
                 className="cursor-pointer"
                 onMouseEnter={() => setHoveredChar(s)}
                 onMouseLeave={() => setHoveredChar(null)}
                 onClick={() => handleToggleChar(s.id)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{ transformOrigin: `${s.mapX}px ${baseY}px` }}
               >
                 {/* Vertical Stem Line */}
                 <motion.line 
@@ -144,7 +147,7 @@ const PeninsulaMap = ({
                       </text>
                    </g>
                 )}
-              </g>
+              </motion.g>
             );
           })}
         </svg>
@@ -188,13 +191,15 @@ const PeninsulaMap = ({
               exit={{ opacity: 0, y: 50 }}
               className="absolute bottom-10 right-10"
             >
-              <button 
+              <motion.button 
                 onClick={onGo}
-                className="px-12 py-4 bg-[#f15a24] text-black border-2 border-black font-black text-[12px] tracking-[0.5em] uppercase hover:bg-white transition-all flex items-center gap-4"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-12 py-4 bg-[#f15a24] text-black border-2 border-black font-black text-[12px] tracking-[0.5em] uppercase hover:bg-white transition-colors duration-300 flex items-center gap-4 cursor-pointer"
               >
                 <Navigation size={18} className="fill-current" />
                 Manifest Target / 決定
-              </button>
+              </motion.button>
             </motion.div>
           )}
         </AnimatePresence>

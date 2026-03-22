@@ -218,11 +218,25 @@ export default function App() {
         setBookmarks(savedBookMarks);
         setSpiritSharedKnowledge(data.map(acc => acc.content).join('\n---\n'));
         setLocationEnergies(energies);
-        if (geminiKey) setIsAppReady(true);
+        
+        // --- PHASE 2: Frictionless Onboarding ---
+        // ユーザーが自前のAPIキーを持っていなければ、自動でProxyモードへ移行
+        setGeminiKey(prevKey => {
+           if (!prevKey) {
+               setApiConnectionStatus('success');
+               setIsAppReady(true);
+               return 'PROXY_MODE';
+           }
+           setIsAppReady(true);
+           return prevKey;
+        });
+      } else {
+         setGeminiKey(prev => prev === 'PROXY_MODE' ? '' : prev);
       }
     });
+
     return () => unsubscribe();
-  }, [geminiKey]);
+  }, []);
 
   const handleBookmark = async (index) => {
     const msg = messages[index];
