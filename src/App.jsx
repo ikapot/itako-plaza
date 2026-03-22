@@ -394,11 +394,12 @@ export default function App() {
 
     try {
       const options = buildDialogueOptions(charId);
+      const effectiveKey = user ? 'PROXY_MODE' : geminiKey;
 
       await streamSpiritualDialogue({
         character: currentChar,
         message: userMsg,
-        apiKey: geminiKey,
+        apiKey: effectiveKey,
         options,
         onChunk: (chunk, meta) => {
           updateDialogueInMessages(charId, chunk, meta.sentiment);
