@@ -60,7 +60,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                 >
                     {/* Tab Shape Background */}
                     <div 
-                        className={`absolute inset-0 ${tabColor} z-0 rounded-t-[8px] origin-bottom transition-transform duration-300 group-hover:scale-y-110 border-t-2 border-l-2 border-r-2 ${borderColor}`}
+                        className={`absolute inset-0 ${tabColor} z-0 rounded-t-[8px] origin-bottom transition-transform duration-300 group-hover:scale-y-110 border-none md:border-t-2 md:border-l-2 md:border-r-2 md:${borderColor}`}
                         style={{
                             transform: 'perspective(100px) rotateX(25deg)',
                         }}
