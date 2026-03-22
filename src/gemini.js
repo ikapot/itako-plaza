@@ -645,7 +645,7 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
   }
 
   let retryCount = 0;
-  const maxRetries = 4;
+  const maxRetries = 10;
 
   while (retryCount <= maxRetries) {
     try {
