@@ -17,7 +17,7 @@ const getGenreColors = (index) => {
             tabTextColor: 'text-black',
             tagBg: 'bg-black/20',
             tagText: 'text-black',
-            borderColor: 'border-transparent', 
+            borderColor: 'border-black/10', 
             btnBg: 'bg-black text-[#f15a24]'
         };
     } else {
@@ -29,7 +29,7 @@ const getGenreColors = (index) => {
             tabTextColor: 'text-[#f15a24]',
             tagBg: 'bg-[#f15a24]/20',
             tagText: 'text-[#f15a24]',
-            borderColor: 'border-transparent', 
+            borderColor: 'border-[#f15a24]/10', 
             btnBg: 'bg-[#f15a24] text-black'
         };
     }
@@ -77,7 +77,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             {/* Folder Body */}
             <div 
                 onClick={() => !isExpanded && onToggleExpand(c.id)}
-                className={`w-full rounded-none ${bgColor} ${textColor} overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]`}
+                className={`w-full rounded-none ${bgColor} ${textColor} overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] border-t ${borderColor}`}
             >
                 {(isInView || isExpanded) ? (
                 <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-12 cursor-default' : 'max-h-[2.5rem] opacity-60 p-0 flex items-center px-8 hover:opacity-100 hover:bg-black/5 shadow-inner'}`}>
@@ -164,7 +164,7 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
 
              {/* The Box Front Bottom */}
              <div className="relative z-[100] w-full mt-8 drop-shadow-3xl pointer-events-none">
-                 <div className="w-full h-32 md:h-48 bg-zinc-950 rounded-b-[40px] shadow-[0_40px_100px_rgba(0,0,0,0.9)] border-t-[8px] border-[#f15a24] flex items-center justify-center relative overflow-hidden">
+                 <div className="w-full h-32 md:h-48 bg-zinc-950 flex items-center justify-center relative overflow-hidden border-b-2 border-black">
                      <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black/80 pointer-events-none opacity-60" />
                      {/* Label */}
                      <div className="bg-[#f15a24] px-8 md:px-12 py-3 shadow-[0_10px_30px_rgba(241,90,36,0.3)] border border-black/20 relative z-10 w-64 md:w-80 text-center flex flex-col items-center justify-center">

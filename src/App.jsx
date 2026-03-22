@@ -341,7 +341,7 @@ export default function App() {
       alaya,
       currentWorldEvent
     };
-  }, [spiritSharedKnowledge, globalTrends, messages, selectedLocationId, selectedCharIds, isUnderground, alaya, currentWorldEvent]);
+  }, [spiritSharedKnowledge, globalTrends, messages, selectedCharIds, isUnderground, alaya, currentWorldEvent]);
 
   const handleCancelReply = useCallback(() => {
     setReplyTo(null);
@@ -459,7 +459,7 @@ export default function App() {
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <AnimatePresence mode="popLayout">
           <motion.div
-            key={`${globalSentiment}-${selectedLocationId}`}
+            key={`${globalSentiment}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
