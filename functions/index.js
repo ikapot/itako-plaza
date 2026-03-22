@@ -44,16 +44,24 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
 
       // APIリクエスト
       const payload = req.body;
+      // 確実に存在するモデルリスト（429=存在するが混雑中、のもので構成）
       const FAILOVER_MODELS = [
-        payload.model || "google/gemini-2.0-flash-exp:free",
+        "google/gemma-3-27b-it:free",
+        "google/gemma-3-12b-it:free",
         "meta-llama/llama-3.1-8b-instruct:free",
         "qwen/qwen-2.5-72b-instruct:free",
-        "mistralai/pixtral-12b:free",
         "google/gemma-2-9b-it:free"
       ];
+      // リクエストで指定されたモデルがあれば先頭に追加
+      if (payload.model && !FAILOVER_MODELS.includes(payload.model)) {
+        FAILOVER_MODELS.unshift(payload.model);
+      }
+
+      const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
       let lastError = null;
-      for (const targetModel of FAILOVER_MODELS) {
+      for (let i = 0; i < FAILOVER_MODELS.length; i++) {
+        const targetModel = FAILOVER_MODELS[i];
         try {
           const openRouterPayload = {
             model: targetModel,
@@ -75,8 +83,16 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
           });
 
           if (openRouterRes.status === 429) {
-            console.warn(`Model ${targetModel} rate limited. Trying next...`);
+            console.warn(`Model ${targetModel} rate limited (429). Waiting 3s then trying next...`);
+            await sleep(3000); // 3秒待ってから次を試す
+            lastError = new Error(`Rate limited: ${targetModel}`);
             continue; 
+          }
+          
+          if (openRouterRes.status === 404) {
+            console.warn(`Model ${targetModel} not found (404). Trying next immediately...`);
+            lastError = new Error(`Not found: ${targetModel}`);
+            continue;
           }
 
           if (!openRouterRes.ok) {
