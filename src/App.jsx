@@ -518,16 +518,54 @@ export default function App() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden" />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-[#0a0a0a]/95 backdrop-blur-3xl border-r border-white/5 z-[70] p-6 overflow-y-auto md:hidden ">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex flex-col">
-                  <h2 className="text-xl font-black font-oswald uppercase tracking-wider text-white/90">System</h2>
-                  <span className="text-[10px] font-bold text-[#f15a24] uppercase tracking-[0.3em]">Management Console</span>
-                </div>
-                <button onClick={() => setIsDrawerOpen(false)} className="p-2 text-white/40 hover:text-white transition-colors">
-                  <X size={20} />
+              <div className="flex flex-col gap-2">
+                {[
+                  { id: 'library', label: 'THE LIBRARY / 図書館', icon: <Library size={18} />, color: '#f15a24' },
+                  { id: 'directory', label: 'SPIRIT_INDEX / 霊的索引', icon: <User size={18} />, color: '#EAE0D5' },
+                  { id: 'connect', label: 'CONDUIT / 接続設定', icon: <Cpu size={18} />, color: '#f15a24' },
+                  { id: 'account', label: 'RECORDS / 魂の履歴', icon: <Bookmark size={18} />, color: '#b45309' },
+                ].map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setActiveManagerTab(item.id);
+                      setIsDrawerOpen(false);
+                    }}
+                    className={`flex items-center gap-4 p-5 rounded-3xl border transition-all duration-300 ${activeManagerTab === item.id ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/5 text-white/40'}`}
+                  >
+                    <span style={{ color: item.color }}>{item.icon}</span>
+                    <span className="text-[11px] font-black tracking-widest uppercase font-oswald">{item.label}</span>
+                  </button>
+                ))}
+                
+                <div className="my-6 border-b border-white/5" />
+                
+                <button
+                  onClick={() => {
+                    setShowSettings(true);
+                    setIsDrawerOpen(false);
+                  }}
+                  className="flex items-center gap-4 p-5 rounded-3xl bg-white/5 border border-white/5 text-white/40 hover:text-white transition-all"
+                >
+                  <Settings size={18} />
+                  <span className="text-[11px] font-black tracking-widest uppercase font-oswald text-white/60">APP_SETTINGS / アプリ設定</span>
                 </button>
+                
+                <button
+                  onClick={() => {
+                    manualRefreshSpiritWorld();
+                    setIsDrawerOpen(false);
+                  }}
+                  className="flex items-center gap-4 p-5 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 text-emerald-500/60 hover:text-emerald-500 transition-all mt-2"
+                >
+                  <RotateCw size={18} />
+                  <span className="text-[11px] font-black tracking-widest uppercase font-oswald">REFRESH_SPIRIT_WORLD / 精神世界更新</span>
+                </button>
+                
+                <div className="mt-12 text-[8px] font-bold text-white/10 uppercase tracking-[0.5em] text-center">
+                  ITKO_SYS OVERRIDE v2.0
+                </div>
               </div>
-              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, user, loginWithGoogle, handleLogout, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
             </motion.div>
           </>
         ) : null}
