@@ -69,7 +69,7 @@ export default function Logo({ apiStatus = 'idle', onClick }) {
         >
             <div className="flex items-end gap-1 sm:gap-1.5 opacity-90 group-hover:opacity-100 transition-all duration-500">
                 {/* ITAKO */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-[1px]">
                     <LetterI color={logoColor} />
                     <LetterT color={logoColor} />
                     <LetterA color={logoColor} />
@@ -78,10 +78,10 @@ export default function Logo({ apiStatus = 'idle', onClick }) {
                 </div>
                 
                 {/* Space */}
-                <div className="w-2 md:w-4" />
+                <div className="w-1.5 md:w-3" />
                 
                 {/* PLAZA */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-[1px]">
                     <LetterP color={logoColor} />
                     <LetterL color={logoColor} />
                     <LetterA color={logoColor} />
