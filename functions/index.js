@@ -15,6 +15,7 @@ if (admin.apps.length === 0) {
 /**
  * Spiritual Alaya Proxy (v1 Robust - ESM)
  * v2へのアップグレードができない制限のため、v1のまま機能を強化。
+ * Last Updated: 2026-03-22 19:47
  */
 export const streamChat = functions.region('us-central1').https.onRequest((req, res) => {
   return cors(req, res, async () => {
@@ -44,11 +45,12 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
 
       // APIリクエスト
       const payload = req.body;
-      // 確実に存在するモデルリスト（429=存在するが混雑中、のもので構成）
+      // 2026年3月時点の確実に存在する無料モデルリスト
       const FAILOVER_MODELS = [
         "google/gemma-3-27b-it:free",
-        "google/gemma-3-12b-it:free",
-        "meta-llama/llama-3.1-8b-instruct:free",
+        "google/gemma-3-4b-it:free",
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "nvidia/nemotron-3-super-120b-a12b:free",
         "qwen/qwen-2.5-72b-instruct:free",
         "google/gemma-2-9b-it:free"
       ];
@@ -101,16 +103,20 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
           }
 
           // ストリーミング出力ヘッダー
-          res.setHeader('Content-Type', 'text/event-stream');
+          res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
           res.setHeader('Cache-Control', 'no-cache');
           res.setHeader('Connection', 'keep-alive');
 
-          openRouterRes.body.on('data', (chunk) => res.write(chunk));
-          openRouterRes.body.on('end', () => res.end());
-          openRouterRes.body.on('error', (err) => {
-            console.error("Fetch stream error:", err);
+          try {
+            // node-fetch v3 の body は Web ReadableStream なので、非同期イテレータとして扱う
+            for await (const chunk of openRouterRes.body) {
+              res.write(chunk);
+            }
             res.end();
-          });
+          } catch (streamError) {
+            console.error("Fetch stream error:", streamError);
+            res.end();
+          }
           
           return; // 成功！
 
@@ -121,7 +127,7 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
       }
 
       // すべて失敗した場合
-      return res.status(500).json({ error: "All Spiritual Conduits Busy", details: lastError?.message });
+      return res.status(500).json({ error: "All Spiritual Conduits Busy", details: lastError?.message || "No specific error caught" });
 
     } catch (e) {
       console.error("Proxy Error:", e);
