@@ -369,8 +369,9 @@ export default function App() {
   }, []);
 
   const handleSendMessage = async (overrideMsg = null) => {
-    const activeInput = overrideMsg || input;
-    if (!activeInput.trim() || loading || !geminiKey) return;
+    const msgToProcess = (overrideMsg || input || "").toString();
+    if (!msgToProcess.trim() || loading || !geminiKey) return;
+    const activeInput = msgToProcess.trim();
 
     const userMsg = replyTo 
       ? `＞ ${replyTo.charId}: 「${replyTo.content}」\n\n${activeInput}`

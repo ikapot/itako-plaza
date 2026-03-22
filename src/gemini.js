@@ -617,10 +617,11 @@ function extractJson(text) {
 const FALLBACK_FREE_MODELS = [
   "google/gemma-3-27b-it:free",
   "google/gemma-3-12b-it:free",
-  "meta-llama/llama-3.1-8b-instruct:free",
+  "meta-llama/llama-3.3-70b-instruct:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
   "qwen/qwen-2.5-72b-instruct:free",
-  "google/gemma-2-9b-it:free",
-  "microsoft/phi-4:free"
+  "stepfun/step-3.5-flash:free",
+  "minimax/minimax-m2.5:free"
 ];
 
 const PROXY_URL = import.meta.env.VITE_PROXY_URL || "https://us-central1-itako-plaza-kenji.cloudfunctions.net/streamChat";
