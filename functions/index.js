@@ -2,18 +2,46 @@ import functions from "firebase-functions";
 import admin from "firebase-admin";
 import cors from "cors";
 import fetch from "node-fetch";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 admin.initializeApp();
 
-// CORS設定: どこからでも受け入れる（本番環境では許可ドメインを絞ることを推奨）
-const corsHandler = cors({ origin: true });
+// CORS設定: すべてのオリジンからのリクエストを許可し、特にプリフライト(OPTIONS)を適切に処理する
+const corsHandler = cors({
+  origin: true,
+  methods: ["POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+});
 
 export const streamChat = functions.https.onRequest((req, res) => {
-  corsHandler(req, res, async () => {
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Method Not Allowed" });
-    }
+  // 手動で CORS ヘッダーを設定（より確実にするため）
+  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.set('Access-Control-Max-Age', '3600');
 
+  // OPTIONSリクエスト（プリフライト）には204を返して終了
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  // GETリクエスト（生存確認用）
+  if (req.method === 'GET') {
+    res.status(200).send('Spiritual Proxy is live.');
+    return;
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
+  // 以降の処理（POST）
+  (async () => {
     try {
       // 1. Google 認証トークンの検証
       const authHeader = req.headers.authorization || "";
@@ -91,5 +119,5 @@ export const streamChat = functions.https.onRequest((req, res) => {
       console.error("Proxy Error:", e);
       res.status(500).json({ error: "Internal System Failure during proxy tunneling." });
     }
-  });
+  })();
 });

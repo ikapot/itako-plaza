@@ -777,15 +777,19 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
         
         throw { 
           status: response.status, 
-          code: isAuthError ? SPIRITUAL_ERRORS.AUTH_FAILED 
-              : isPaymentRequired ? SPIRITUAL_ERRORS.PAYMENT_REQUIRED
-              : isRateLimit ? SPIRITUAL_ERRORS.RATE_LIMIT 
-              : SPIRITUAL_ERRORS.OPENROUTER_ERROR,
-          message: isAuthError 
-            ? `Authentication Failed: ${errorData.error?.message || "Invalid API Key"}. (Verify your OpenRouter setting/credits)`
-            : isPaymentRequired 
-              ? "OpenRouterのクレジットが不足しています (402 Payment Required)。対話を継続するにはチャージが必要です。"
-              : errorData.error?.message || `Spectral connection lost [${response.status}]` 
+          code: isRateLimit ? SPIRITUAL_ERRORS.RATE_LIMIT :
+                isAuthError ? SPIRITUAL_ERRORS.AUTH_FAILED :
+                isPaymentRequired ? SPIRITUAL_ERRORS.PAYMENT_REQUIRED :
+                SPIRITUAL_ERRORS.OPENROUTER_ERROR,
+          message: isRateLimit 
+            ? (errorData.error?.message?.includes("free-models-per-day") 
+                ? "OpenRouterの外部無料枠が上限（50回/日）に達しました。対話を続けるには $5 程度のチャージで枠を広げる（1,000回/日）か、明日まで待つ必要があります。" 
+                : (errorData.error?.message || "通信量制限により霊界が不安定です。"))
+            : isAuthError 
+              ? `接続失敗: ${errorData.error?.message || "Invalid Key"}`
+              : isPaymentRequired 
+                ? "OpenRouterのクレジットが不足しています (402 Payment Required)。"
+                : errorData.error?.message || `霊的接続エラー [${response.status}]`
         };
       }
 

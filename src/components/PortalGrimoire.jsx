@@ -25,8 +25,8 @@ export default function PortalGrimoire({
     }, [geminiKey]);
 
     async function handleHoneKey() {
-        if (!localKey.startsWith('sk-or-')) {
-            setErrorMessage('OpenRouter API Key (sk-or-...) を入力してください');
+        if (!localKey.startsWith('sk-or-') && localKey !== 'PROXY_MODE') {
+            setErrorMessage('OpenRouter API Key (sk-or-...) または PROXY_MODE を入力してください');
             return;
         }
         setErrorMessage('');

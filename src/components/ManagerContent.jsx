@@ -340,13 +340,24 @@ const ManagerContent = React.memo(({
                         exit={{ opacity: 0, y: -10 }}
                         className="p-8 space-y-12 h-screen overflow-y-auto itako-scrollbar-thin"
                     >
-                        <div className="flex items-center gap-6 p-8 bg-white/5 border border-white/10 rounded-[40px]">
-                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bd8a78] to-[#f15a24] flex items-center justify-center text-4xl shadow-2xl">
-                                {userName?.[0] || '魂'}
+                        <div className="flex flex-col md:flex-row items-center gap-6 p-8 bg-white/5 border border-white/10 rounded-[40px]">
+                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bd8a78] to-[#f15a24] flex items-center justify-center text-4xl shadow-2xl overflow-hidden">
+                                {user?.photoURL ? <img src={user.photoURL} alt="avatar" /> : (userName?.[0] || '魂')}
                             </div>
-                             <div className="flex flex-col">
+                             <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
                                 <h1 className="text-3xl font-black font-oswald uppercase tracking-widest text-white">{userName}</h1>
-                                <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.4em]">Spirit Registry: Active</p>
+                                <p className="text-[10px] font-bold text-white/70 uppercase tracking-[0.4em] mb-4">
+                                    {user ? 'Spirit Registry: Authenticated' : 'Spirit Registry: Guest / Anonymous'}
+                                </p>
+                                
+                                {!user && (
+                                    <button 
+                                        onClick={loginWithGoogle}
+                                        className="px-6 py-2 bg-white text-black text-[10px] font-black tracking-[0.2em] uppercase rounded-full hover:bg-zinc-200 transition-all flex items-center gap-2"
+                                    >
+                                        Google Account Login / 本人確認
+                                    </button>
+                                )}
                             </div>
                         </div>
 

@@ -1,7 +1,7 @@
 // Itako Plaza v1.2.1 - Simplified Architecture
 import React, { useState, useEffect, useRef, useCallback, useMemo, useTransition, startTransition } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { auth, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies, saveBookmark, logout } from './firebase';
+import { auth, loginWithGoogle, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies, saveBookmark, logout } from './firebase';
 import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, extractTrendsFromNews, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback, getPreferredModel, setPreferredModel as setGeminiPreferredModel, distillSpiritualAlaya } from './gemini';
 import { fetchFictionalizedNews } from './news';
 import { searchNDLArchive } from './ndl';
@@ -566,7 +566,7 @@ export default function App() {
                   <X size={20} />
                 </button>
               </div>
-              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), handleGo, globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
+              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, user, loginWithGoogle, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), handleGo, globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
             </motion.div>
           </>
         ) : null}
@@ -645,7 +645,7 @@ export default function App() {
                     </button>
                   </div>
                   <div className="flex-1 overflow-y-auto itako-scrollbar-thin">
-                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), handleGo, globalSentiment, bookmarks, messages, userName }} />
+                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, user, loginWithGoogle, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), handleGo, globalSentiment, bookmarks, messages, userName }} />
                   </div>
                 </motion.div>
               </div>

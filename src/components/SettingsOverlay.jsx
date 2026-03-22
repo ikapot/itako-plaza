@@ -54,7 +54,6 @@ const SettingsOverlay = React.memo(({
                                             onChange={(e) => setGeminiKey(e.target.value)}
                                             className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-xs text-white/80 font-mono focus:border-[#f15a24]/50 outline-none transition-all placeholder:text-white/20"
                                             placeholder={geminiKey === 'PROXY_MODE' ? "🟢 Free API Proxy Active" : "sk-or-v1-..."}
-                                            disabled={geminiKey === 'PROXY_MODE'}
                                         />
                                         <div className="absolute right-4 top-1/2 -translate-y-1/2">
                                             {apiConnectionStatus === 'success' ? (

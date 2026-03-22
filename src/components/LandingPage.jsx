@@ -20,16 +20,25 @@ export default function LandingPage({
     useEffect(function handleAutoTransition() {
         if (!user || step !== 'gate') return;
 
-        const envKey = import.meta.env.VITE_GEMINI_API_KEY;
         const localKey = localStorage.getItem('itako_gemini_key');
-        const keyToUse = envKey || localKey;
-
-        if (keyToUse) {
-            onLoginComplete(keyToUse);
-        } else {
-            setStep('ritual');
+        
+        // If user is already logged in and has a saved key, use it.
+        if (localKey) {
+            onLoginComplete(localKey);
+            return;
         }
+
+        // If user is logged in but no key, and they just want to enter (gate already open),
+        // we might auto-proceed to ritual or handled by handleEnterGate
     }, [user, step, onLoginComplete]);
+
+    async function handleGoogleLogin() {
+        const newUser = await loginWithGoogle();
+        if (newUser) {
+            // After Google Login, we directly authorize entry via Proxy
+            onLoginComplete('PROXY_MODE');
+        }
+    }
 
     async function handleEnterGate() {
         if (!user) {
@@ -123,17 +132,22 @@ export default function LandingPage({
                         </div>
 
                         {/* Subtle Navigation or Action Link */}
-                        <motion.a
-                            href="https://openrouter.ai/keys"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 0.3 }}
-                            whileHover={{ opacity: 1 }}
-                            className="mt-8 text-[8px] md:text-[10px] text-white font-black tracking-[0.5em] uppercase flex items-center gap-2 border-b border-white/20 pb-1"
-                        >
-                            鍵を取得する (Get OpenRouter Key) <Sparkles size={10} className="text-[#f15a24]" />
-                        </motion.a>
+                        <div className="mt-8 flex flex-col md:flex-row items-center gap-6">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                onClick={handleGoogleLogin}
+                                className="px-10 py-4 bg-white text-black font-black text-xs tracking-[0.4em] uppercase shadow-2xl hover:bg-zinc-100 transition-all flex items-center gap-3"
+                            >
+                                <LogIn size={14} /> Google Account Login / 直接入室
+                            </motion.button>
+
+                            <motion.button
+                                onClick={() => setStep('ritual')}
+                                className="text-[9px] md:text-[10px] text-white/40 font-black tracking-[0.5em] uppercase border-b border-white/10 pb-1 hover:text-white/80 transition-all"
+                            >
+                                鍵（API KEY）を奉納する / Private Key Access
+                            </motion.button>
+                        </div>
                     </motion.div>
                 ) : step === 'ritual' ? (
                     <motion.div
