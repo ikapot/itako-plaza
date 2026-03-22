@@ -56,7 +56,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             <div className={`flex w-full ${alignment} px-0 pointer-events-none mb-[-2px]`}>
                 <button 
                     onClick={() => onToggleExpand(isExpanded ? null : c.id)}
-                    className={`relative ${tabTextColor} w-32 md:w-56 h-8 md:h-10 text-[9px] md:text-[11px] font-black tracking-[0.2em] md:tracking-[0.3em] uppercase pointer-events-auto origin-bottom transition-all z-20 font-oswald flex items-center group`}
+                    className={`relative ${tabTextColor} w-32 md:w-56 h-8 md:h-10 text-[9px] md:text-[11px] font-black tracking-[0.2em] md:tracking-[0.3em] uppercase pointer-events-auto origin-bottom transition-all z-20 font-oswald flex items-center group outline-none focus:outline-none`}
                 >
                     {/* Tab Shape Background */}
                     <div 
@@ -104,9 +104,9 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                                 <div className="flex-1 space-y-4 md:space-y-6 w-full">
                                     <div>
                                         <h3 className={`text-3xl md:text-4xl font-black font-oswald tracking-widest border-b ${isOrange ? 'border-black/10':'border-[#f15a24]/10'} pb-2 mb-2 md:mb-4 uppercase`}>{c.name}</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${tagBg} ${tagText} px-3 py-1 rounded-sm border ${isOrange ? 'border-black/10':'border-[#f15a24]/20'} font-oswald`}>{c.role}</span>
-                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${isOrange ? 'bg-black/10 text-black/60 border-black/5':'bg-[#f15a24]/10 text-[#f15a24]/60 border-[#f15a24]/10'} px-3 py-1 rounded-sm border font-oswald`}>{c.flavor}</span>
+                                         <div className="flex flex-wrap gap-2">
+                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${tagBg} ${tagText} px-3 py-1 rounded-sm border ${isOrange ? 'border-black':'border-[#f15a24]'} font-oswald`}>{c.role}</span>
+                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${isOrange ? 'bg-black/10 text-black/80 border-black/20':'bg-[#f15a24]/10 text-[#f15a24]/80 border-[#f15a24]/20'} px-3 py-1 rounded-sm border font-oswald`}>{c.flavor}</span>
                                         </div>
                                     </div>
                                     <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-95 break-words font-medium">
@@ -118,10 +118,10 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                             <div className={`flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t ${isOrange ? 'border-black/10' : 'border-[#f15a24]/10'} font-oswald`}>
                                 <button
                                     onClick={() => onManifestSoul ? onManifestSoul(c.id) : onToggleChar(c.id)}
-                                    className={`w-full sm:w-auto px-10 py-4 rounded-none font-black text-xs md:text-sm uppercase tracking-[0.4em] transition-all active:scale-95 flex items-center justify-center gap-3 border
+                                    className={`w-full sm:w-auto px-10 py-4 rounded-none font-black text-xs md:text-sm uppercase tracking-[0.4em] transition-all active:scale-95 flex items-center justify-center gap-3 border outline-none
                                         ${isSelected 
                                             ? (isOrange ? 'bg-black text-[#f15a24] border-black' : 'bg-[#f15a24] text-black border-[#f15a24]')
-                                            : (isOrange ? 'bg-transparent text-black border-black/30 hover:bg-black hover:text-[#f15a24]' : 'bg-transparent text-[#f15a24] border-[#f15a24]/50 hover:bg-[#f15a24] hover:text-black')}
+                                            : (isOrange ? 'bg-transparent text-black border-black hover:bg-black hover:text-[#f15a24]' : 'bg-transparent text-[#f15a24] border-[#f15a24] hover:bg-[#f15a24] hover:text-black')}
                                     `}
                                 >
                                     {isSelected ? (
