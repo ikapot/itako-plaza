@@ -142,7 +142,6 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
     );
 });
 
-const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleToggleChar }) => {
 const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleToggleChar, onManifestSoul }) => {
     const [expandedId, setExpandedId] = useState(null);
     const containerRef = useRef(null);
@@ -264,6 +263,7 @@ const ManagerContent = React.memo(({
                             characters={characters} 
                             selectedCharIds={selectedCharIds} 
                             handleToggleChar={handleToggleChar} 
+                            onManifestSoul={onManifestSoul}
                         />
                     </motion.div>
                 ) : null}
