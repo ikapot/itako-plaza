@@ -486,7 +486,7 @@ export default function App() {
         {isDrawerOpen ? (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden" />
-            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-black/80 backdrop-blur-3xl border-r border-white/10 z-[70] p-6 overflow-y-auto md:hidden shadow-3xl">
+            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-[#0a0a0a]/95 backdrop-blur-3xl border-r border-white/5 z-[70] p-6 overflow-y-auto md:hidden shadow-3xl">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex flex-col">
                   <h2 className="text-xl font-black font-oswald uppercase tracking-wider text-white/90">System</h2>
@@ -523,11 +523,11 @@ export default function App() {
               initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
               animate={{ opacity: 1, backdropFilter: 'blur(40px)' }}
               exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+              className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-8"
             >
               <div className="absolute inset-0 bg-black/40" onClick={() => setActiveManagerTab(null)} />
               
-              <div className="relative w-full max-w-5xl h-full max-h-[85vh] flex flex-col pointer-events-auto">
+              <div className="relative w-full max-w-5xl h-full max-h-[92vh] md:max-h-[85vh] flex flex-col pointer-events-auto">
                 {/* Conduit Status Monitor (Debug Sidebar) */}
                 <div className="hidden xl:block absolute -right-64 top-0 w-60 h-full glass-spectral rounded-3xl p-4 overflow-hidden border-white/5">
                   <h3 className="text-[10px] font-black tracking-[0.3em] uppercase text-white/20 mb-4 font-oswald flex items-center gap-2">
@@ -560,11 +560,11 @@ export default function App() {
 
                 <motion.div 
                   layoutId="manager-content"
-                  className="w-full h-full glass-spectral rounded-[40px] border border-white/10 shadow-3xl overflow-hidden flex flex-col relative"
+                  className="w-full h-full glass-spectral rounded-t-[32px] md:rounded-[40px] border-t md:border border-white/10 shadow-3xl overflow-hidden flex flex-col relative"
                 >
-                  <div className="flex justify-between items-center p-6 border-b border-white/5">
-                    <h2 className="text-xl md:text-2xl font-black font-oswald uppercase tracking-[0.2em] text-[#f15a24] flex items-center gap-4">
-                      <span className="opacity-20 text-white">ITKO_SYS_01_</span>
+                  <div className="flex justify-between items-center p-4 md:p-6 border-b border-white/5 bg-black/40">
+                    <h2 className="text-lg md:text-2xl font-black font-oswald uppercase tracking-[0.2em] text-[#f15a24] flex items-center gap-3">
+                      <span className="opacity-20 text-white hidden sm:inline">ITKO_SYS_01_</span>
                       {activeManagerTab === 'directory' ? 'SPIRIT_INDEX' : activeManagerTab?.toUpperCase()}
                     </h2>
                     <button 

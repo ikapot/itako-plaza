@@ -17,7 +17,7 @@ const getGenreColors = (index) => {
             tabTextColor: 'text-black',
             tagBg: 'bg-black/20',
             tagText: 'text-black',
-            borderColor: 'border-black', 
+            borderColor: 'border-transparent', 
             btnBg: 'bg-black text-[#f15a24]'
         };
     } else {
@@ -29,7 +29,7 @@ const getGenreColors = (index) => {
             tabTextColor: 'text-[#f15a24]',
             tagBg: 'bg-[#f15a24]/20',
             tagText: 'text-[#f15a24]',
-            borderColor: 'border-[#f15a24]', 
+            borderColor: 'border-transparent', 
             btnBg: 'bg-[#f15a24] text-black'
         };
     }
@@ -60,7 +60,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                 >
                     {/* Tab Shape Background */}
                     <div 
-                        className={`absolute inset-0 ${tabColor} border-t-2 border-x-2 ${borderColor} z-0 rounded-t-[4px] origin-bottom transition-transform duration-300 group-hover:scale-y-110`}
+                        className={`absolute inset-0 ${tabColor} z-0 rounded-t-[8px] origin-bottom transition-transform duration-300 group-hover:scale-y-110`}
                         style={{
                             transform: 'perspective(100px) rotateX(25deg)',
                         }}
@@ -77,7 +77,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             {/* Folder Body */}
             <div 
                 onClick={() => !isExpanded && onToggleExpand(c.id)}
-                className={`w-full rounded-none ${bgColor} ${textColor} border ${borderColor} overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10 shadow-3xl shadow-black/80`}
+                className={`w-full rounded-none ${bgColor} ${textColor} overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]`}
             >
                 {(isInView || isExpanded) ? (
                 <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-12 cursor-default' : 'max-h-[2.5rem] opacity-60 p-0 flex items-center px-8 hover:opacity-100 hover:bg-black/5 shadow-inner'}`}>
@@ -87,7 +87,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                     ) : (
                         <div className="space-y-6 md:space-y-8" onClick={e => e.stopPropagation()}>
                             <div className="flex flex-col sm:flex-row items-start gap-6 md:gap-8">
-                                <div className={`w-24 h-24 md:w-32 md:h-32 shrink-0 rounded-none overflow-hidden border ${isOrange ? 'border-black/20 bg-[#f15a24]' : 'border-[#f15a24]/30 bg-[#f15a24]'} relative shadow-2xl`}>
+                                <div className={`w-28 h-28 md:w-32 md:h-32 shrink-0 rounded-none overflow-hidden ${isOrange ? 'bg-[#f15a24]' : 'bg-[#f15a24]'} relative shadow-2xl`}>
                                     {c.avatar ? (
                                         <>
                                             {/* We use an orange base for all portraits to keep a consistent 'positive print' aesthetic */}
@@ -103,10 +103,10 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                                 </div>
                                 <div className="flex-1 space-y-4 md:space-y-6 w-full">
                                     <div>
-                                        <h3 className={`text-3xl md:text-4xl font-black font-oswald tracking-widest border-b ${isOrange ? 'border-black/20':'border-[#f15a24]/30'} pb-2 mb-2 md:mb-4 uppercase`}>{c.name}</h3>
+                                        <h3 className={`text-3xl md:text-4xl font-black font-oswald tracking-widest border-b ${isOrange ? 'border-black/10':'border-[#f15a24]/10'} pb-2 mb-2 md:mb-4 uppercase`}>{c.name}</h3>
                                         <div className="flex flex-wrap gap-2">
-                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${tagBg} ${tagText} px-3 py-1 rounded-sm border ${isOrange ? 'border-black/30':'border-[#f15a24]/40'} font-oswald`}>{c.role}</span>
-                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${isOrange ? 'bg-black/10 text-black/60 border-black/10':'bg-[#f15a24]/10 text-[#f15a24]/60 border-[#f15a24]/20'} px-3 py-1 rounded-sm border font-oswald`}>{c.flavor}</span>
+                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${tagBg} ${tagText} px-3 py-1 rounded-sm border ${isOrange ? 'border-black/10':'border-[#f15a24]/20'} font-oswald`}>{c.role}</span>
+                                            <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${isOrange ? 'bg-black/10 text-black/60 border-black/5':'bg-[#f15a24]/10 text-[#f15a24]/60 border-[#f15a24]/10'} px-3 py-1 rounded-sm border font-oswald`}>{c.flavor}</span>
                                         </div>
                                     </div>
                                     <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-95 break-words font-medium">
@@ -147,7 +147,7 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
     const containerRef = useRef(null);
 
     return (
-        <div ref={containerRef} className="max-w-2xl mx-auto w-full pb-32 pt-12 px-4 relative mt-12 bg-black/20 rounded-3xl backdrop-blur-sm border border-white/5">
+        <div ref={containerRef} className="max-w-2xl mx-auto w-full pb-32 pt-12 px-0 md:px-4 relative mt-12 bg-black/60 rounded-3xl backdrop-blur-md shadow-2xl">
              <div className="flex flex-col relative z-10 w-full mb-[-2rem]">
                  {characters.map((c, i) => (
                      <CabinetDrawer 
@@ -163,11 +163,11 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
              </div>
 
              {/* The Box Front Bottom */}
-             <div className="relative z-[100] w-[110%] -ml-[5%] mt-8 drop-shadow-3xl pointer-events-none">
-                 <div className="w-full h-32 md:h-48 bg-zinc-900 rounded-b-[40px] shadow-[0_40px_100px_rgba(0,0,0,0.9)] border-t-[8px] border-[#f15a24] flex items-center justify-center relative overflow-hidden">
+             <div className="relative z-[100] w-full mt-8 drop-shadow-3xl pointer-events-none">
+                 <div className="w-full h-32 md:h-48 bg-zinc-950 rounded-b-[40px] shadow-[0_40px_100px_rgba(0,0,0,0.9)] border-t-[8px] border-[#f15a24] flex items-center justify-center relative overflow-hidden">
                      <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black/80 pointer-events-none opacity-60" />
                      {/* Label */}
-                     <div className="bg-[#f15a24] px-12 py-3 shadow-[0_10px_30px_rgba(241,90,36,0.3)] border border-black/20 relative z-10 w-80 text-center flex flex-col items-center justify-center">
+                     <div className="bg-[#f15a24] px-8 md:px-12 py-3 shadow-[0_10px_30px_rgba(241,90,36,0.3)] border border-black/20 relative z-10 w-64 md:w-80 text-center flex flex-col items-center justify-center">
                          <span className="font-oswald text-black text-2xl md:text-3xl font-black tracking-[0.3em] uppercase">Spirit Index</span>
                          <span className="text-[10px] text-black/50 font-bold uppercase tracking-[0.5em]">Soul Configuration V2</span>
                          <div className="absolute top-1 left-1 w-1 h-1 rounded-full bg-black/40" />
