@@ -196,10 +196,6 @@ const ManagerContent = React.memo(({
     setActiveManagerTab,
     user,
     loginWithGoogle,
-    locations,
-    selectedLocationId,
-    setSelectedLocationId,
-    locationEnergies,
     characters,
     selectedCharIds,
     handleToggleChar,
@@ -210,7 +206,6 @@ const ManagerContent = React.memo(({
     isValidatingApi,
     apiConnectionStatus,
     handleValidateApi,
-    handleGo,
     globalSentiment,
     bookmarks,
     messages,
@@ -228,8 +223,8 @@ const ManagerContent = React.memo(({
             const topCharId = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
             return characters.find(c => c.id === topCharId)?.name || 'None';
         })(), icon: <User size={14} /> },
-        { label: 'Energy Sync', val: `${Object.values(locationEnergies).reduce((a, b) => a + b, 0)} pts`, icon: <Activity size={14} /> },
-    ], [bookmarks, messages, characters, locationEnergies]);
+        { label: 'Active Sessions', val: selectedCharIds.length || 0, icon: <Activity size={14} /> },
+    ], [bookmarks, messages, characters, selectedCharIds]);
 
     return (
         <div className="space-y-12">
