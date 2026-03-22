@@ -8,26 +8,15 @@ dotenv.config();
 
 const cors = corsLib({ origin: true });
 
-admin.initializeApp();
+if (admin.apps.length === 0) {
+    admin.initializeApp();
+}
 
 /**
  * Spiritual Alaya Proxy (v1 Robust - ESM)
- * 手動でCORSヘッダーを注入し、さらにmiddlewareでラップした極限まで到達するプロキシ。
+ * v2へのアップグレードができない制限のため、v1のまま機能を強化。
  */
-export const streamChat = functions.https.onRequest((req, res) => {
-  // 1. 全リクエスト（OPTIONS含む）に即座にCORSヘッダーをセット
-  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.set('Access-Control-Allow-Max-Age', '3600');
-
-  // 2. プリフライト(OPTIONS)はこれだけでOK
-  if (req.method === 'OPTIONS') {
-    res.status(204).send(''); 
-    return;
-  }
-
-  // 3. ミドルウェアでもラップしてさらに確実性を高める
+export const streamChat = functions.region('us-central1').https.onRequest((req, res) => {
   return cors(req, res, async () => {
     try {
       // POST以外を許可しない
@@ -41,7 +30,6 @@ export const streamChat = functions.https.onRequest((req, res) => {
         return res.status(401).json({ error: "Missing Token" });
       }
       const idToken = authHeader.split("Bearer ")[1];
-      
       try {
         await admin.auth().verifyIdToken(idToken);
       } catch (authError) {
@@ -49,47 +37,75 @@ export const streamChat = functions.https.onRequest((req, res) => {
       }
 
       // APIキー取得
-      const API_KEY = process.env.OPENROUTER_API_KEY || functions.config().openrouter?.key;
+      const API_KEY = process.env.OPENROUTER_API_KEY;
       if (!API_KEY) {
-        return res.status(500).json({ error: "Master API Key Missing" });
+        return res.status(500).json({ error: "Master API Key Missing on Server" });
       }
 
       // APIリクエスト
       const payload = req.body;
-      const openRouterPayload = {
-        model: payload.model || "google/gemini-2.0-flash-lite-preview-02-05:free",
-        messages: payload.messages,
-        temperature: payload.temperature || 0.7,
-        max_tokens: payload.max_tokens || 1000,
-        stream: true,
-      };
+      const FAILOVER_MODELS = [
+        payload.model || "google/gemini-2.0-flash-lite-preview-02-05:free",
+        "google/gemma-3-27b-it:free",
+        "google/gemma-3-12b-it:free",
+        "mistralai/mistral-7b-instruct:free",
+        "qwen/qwen-2.5-72b-instruct:free"
+      ];
 
-      const openRouterReq = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://itako-plaza-kenji.web.app",
-        },
-        body: JSON.stringify(openRouterPayload),
-      });
+      let lastError = null;
+      for (const targetModel of FAILOVER_MODELS) {
+        try {
+          const openRouterPayload = {
+            model: targetModel,
+            messages: payload.messages,
+            temperature: payload.temperature || 0.7,
+            max_tokens: payload.max_tokens || 1000,
+            stream: true,
+          };
 
-      if (!openRouterReq.ok) {
-        const errorText = await openRouterReq.text();
-        return res.status(openRouterReq.status).json({ error: "OpenRouter Error", details: errorText });
+          const openRouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${API_KEY}`,
+              "Content-Type": "application/json",
+              "HTTP-Referer": "https://itako-plaza-kenji.web.app",
+              "X-Title": "Itako Plaza Proxy",
+            },
+            body: JSON.stringify(openRouterPayload),
+          });
+
+          if (openRouterRes.status === 429) {
+            console.warn(`Model ${targetModel} rate limited. Trying next...`);
+            continue; 
+          }
+
+          if (!openRouterRes.ok) {
+            const errorText = await openRouterRes.text();
+            throw new Error(`OpenRouter Error (${openRouterRes.status}): ${errorText}`);
+          }
+
+          // ストリーミング出力ヘッダー
+          res.setHeader('Content-Type', 'text/event-stream');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.setHeader('Connection', 'keep-alive');
+
+          openRouterRes.body.on('data', (chunk) => res.write(chunk));
+          openRouterRes.body.on('end', () => res.end());
+          openRouterRes.body.on('error', (err) => {
+            console.error("Fetch stream error:", err);
+            res.end();
+          });
+          
+          return; // 成功！
+
+        } catch (e) {
+          lastError = e;
+          console.error(`Attempt with ${targetModel} failed:`, e.message);
+        }
       }
 
-      // ストリーミング出力ヘッダー
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-
-      openRouterReq.body.on('data', (chunk) => res.write(chunk));
-      openRouterReq.body.on('end', () => res.end());
-      openRouterReq.body.on('error', (err) => {
-        console.error("Fetch stream error:", err);
-        res.end();
-      });
+      // すべて失敗した場合
+      return res.status(500).json({ error: "All Spiritual Conduits Busy", details: lastError?.message });
 
     } catch (e) {
       console.error("Proxy Error:", e);

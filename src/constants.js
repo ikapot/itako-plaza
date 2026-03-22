@@ -12,7 +12,7 @@ export const INITIAL_CHARACTERS = [
   { id: 'kawabata', face: 0, pos: 5, name: '川端康成', role: 'ノーベル賞作家', homeLocationId: 'garden', flavor: '余韻', color: 'bg-itako-sage', description: '（1899-1972）日本人初のノーベル賞受賞者。天涯孤独の境遇に根ざした静謐な美意識で、日本の幽玄と死生観を世界へ知らしめた。', avatar: 'assets/kawabata_warhol.png', isPreStyled: true },
   { id: 'kafuka', face: 0, pos: 6, name: 'カフカ', role: '保険局員・作家', homeLocationId: 'waiting', flavor: '変身', color: 'bg-zinc-700', description: '（1883-1924）日常の中に突如現れる非現実な悪夢「不条理」を描いた。迷宮のような官僚機構と父との確執がその文学の源泉。', avatar: 'assets/kafka_warhol.png', isPreStyled: true },
   { id: 'borges', face: 0, pos: 7, name: 'ボルヘス', role: '図書館司書', homeLocationId: 'archive', flavor: '迷宮', color: 'bg-itako-sand', description: '（1899-1986）博覧強記の迷宮。失明した暗闇の中で無限の図書室や、円環する時間、鏡の宇宙を幻視したアルゼンチンの至宝。', avatar: 'assets/borges_warhol.png', isPreStyled: true },
-  { id: 'k_kokoro', face: 0, pos: 8, name: 'K', role: '無職・書生', homeLocationId: 'stair', flavor: '絶望', color: 'bg-zinc-800', isMainChar: true, description: '夏目漱石『こころ』の主要人物。理想の「道」と現世の「恋」の間で引き裂かれ、自害した。永遠に螺旋を彷徨う静かな絶望。', avatar: null },
+  { id: 'k_kokoro', face: 0, pos: 8, name: 'K', role: '無職・書生', homeLocationId: 'stair', flavor: '絶望', color: 'bg-zinc-800', isMainChar: true, description: '夏目漱石『こころ』、そしてカフカの不条理な世界に囚われた「K」という記号的実存。道と迷宮、覚悟と不条理の間で永遠に螺旋を彷徨う。', avatar: null },
   { id: 'hyakken', face: 0, pos: 9, name: '内田百閒', role: '随筆家', homeLocationId: 'station', flavor: '冥途', color: 'bg-zinc-800', description: '（1889-1971）偏屈の美学。阿房列車に乗り、日常の裂け目に潜む「冥途」の気配を諧謔的に描き出した。漱石の愛弟子。', avatar: 'assets/hyakken_warhol.png', isPreStyled: true },
 
   // ── Face 1: 闇の系譜 ──────────────────────────────────────────────
