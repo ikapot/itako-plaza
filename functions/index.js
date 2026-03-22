@@ -40,16 +40,18 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
       // APIキー取得
       const API_KEY = process.env.OPENROUTER_API_KEY;
       if (!API_KEY) {
-        return res.status(500).json({ error: "Master API Key Missing on Server" });
+        return res.status(500).json({ error: "DEBUG-ENV: Master API Key Missing on Server" });
       }
 
       // APIリクエスト
       const payload = req.body;
-      // 2026年3月時点の確実に存在する無料モデルリスト
+      // 2026年3月時点の確実に存在する無料モデルリスト（より広範囲に）
       const FAILOVER_MODELS = [
         "google/gemma-3-27b-it:free",
-        "google/gemma-3-4b-it:free",
+        "deepseek/deepseek-r1:free",
         "meta-llama/llama-3.3-70b-instruct:free",
+        "meta-llama/llama-3.1-8b-instruct:free",
+        "google/gemma-3-4b-it:free",
         "nvidia/nemotron-3-super-120b-a12b:free",
         "qwen/qwen-2.5-72b-instruct:free",
         "google/gemma-2-9b-it:free"
@@ -127,7 +129,11 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
       }
 
       // すべて失敗した場合
-      return res.status(500).json({ error: "All Spiritual Conduits Busy", details: lastError?.message || "No specific error caught" });
+      const finalDetail = lastError?.message || "No specific error caught";
+      console.error("All conduits failed. Last error:", finalDetail);
+      return res.status(500).json({ 
+        error: `DEBUG-LOOP: All Spiritual Conduits Busy. Last Cause: ${finalDetail}`
+      });
 
     } catch (e) {
       console.error("Proxy Error:", e);
