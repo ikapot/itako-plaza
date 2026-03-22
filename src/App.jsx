@@ -180,9 +180,11 @@ export default function App() {
 
   useEffect(() => {
     async function updateAlaya() {
+      // isAppReadyがtrueになるまで（認証が確定するまで）実行しない
+      if (!isAppReady) return;
       // 10メッセージごとに要約を更新
       const effectiveKey = user ? 'PROXY_MODE' : geminiKey;
-      if (messages.length > 0 && messages.length % 10 === 0 && effectiveKey) {
+      if (messages.length > 0 && messages.length % 10 === 0 && effectiveKey && effectiveKey !== '') {
         const summary = await distillSpiritualAlaya(messages, effectiveKey);
         if (summary) {
           setAlaya(summary);
@@ -191,7 +193,7 @@ export default function App() {
       }
     }
     updateAlaya();
-  }, [messages.length, geminiKey, user]);
+  }, [messages.length, geminiKey, user, isAppReady]);
 
   const handleValidateApi = useCallback(async (providedKey) => {
     const keyToValidate = providedKey ? cleanKey(providedKey) : geminiKey;
