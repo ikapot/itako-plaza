@@ -1,11 +1,11 @@
 // Itako Plaza v1.2.1 - Simplified Architecture
 import React, { useState, useEffect, useRef, useCallback, useMemo, useTransition, startTransition } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { auth, loginWithGoogle, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, updateLocationEnergy, fetchLocationEnergies, saveBookmark, logout } from './firebase';
-import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, extractTrendsFromNews, generateWorldEvent, generateLocationDialogueWithEvent, setGeminiDebugCallback, getPreferredModel, setPreferredModel as setGeminiPreferredModel, distillSpiritualAlaya } from './gemini';
+import { auth, loginWithGoogle, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, saveBookmark, logout } from './firebase';
+import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, extractTrendsFromNews, generateWorldEvent, setGeminiDebugCallback, getPreferredModel, setPreferredModel as setGeminiPreferredModel, distillSpiritualAlaya } from './gemini';
 import { fetchFictionalizedNews } from './news';
 import { searchNDLArchive } from './ndl';
-import { INITIAL_CHARACTERS, INITIAL_LOCATIONS, AMBIENT_COLORS } from './constants';
+import { INITIAL_CHARACTERS, AMBIENT_COLORS } from './constants';
 import SpiritNoiseOverlay from './components/SpiritNoiseOverlay';
 
 // Components
@@ -44,7 +44,7 @@ export default function App() {
 
   // --- 2. Navigation & UI States ---
   const [activeSlot, setActiveSlot] = useState(0);
-  const [activeManagerTab, setActiveManagerTab] = useState('dice');
+  const [activeManagerTab, setActiveManagerTab] = useState('directory');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [enlargedCharId, setEnlargedCharId] = useState(null);
@@ -86,8 +86,7 @@ export default function App() {
   
   // --- 4. World & Character States ---
   const [selectedCharIds, setSelectedCharIds] = useState(['soseki']);
-  const [selectedLocationId, setSelectedLocationId] = useState('cafe');
-  const [locationEnergies, setLocationEnergies] = useState({});
+
   const [currentWorldEvent, setCurrentWorldEvent] = useState(null);
   const [globalTrends, setGlobalTrends] = useState(() => {
     const cached = localStorage.getItem('itako_global_trends');
@@ -166,11 +165,7 @@ export default function App() {
     }, 100);
   }, [handleToggleChar, handleSlotChange]);
   
-  const handleGo = useCallback(() => {
-    handleSlotChange(1);
-    setActiveManagerTab(null);
-    setIsDrawerOpen(false);
-  }, [handleSlotChange]);
+
 
   useEffect(() => {
     async function updateAlaya() {
@@ -302,10 +297,7 @@ export default function App() {
     }
   }, [geminiKey, loading, globalTrends]);
 
-  useEffect(() => {
-    const energyInterval = setInterval(async () => setLocationEnergies(await fetchLocationEnergies()), 60000); 
-    return () => clearInterval(energyInterval); 
-  }, []);
+
 
   useEffect(() => {
     setGeminiDebugCallback((log) => {
@@ -318,39 +310,7 @@ export default function App() {
     });
   }, []); // Run once on mount
 
-  useEffect(() => {
-    async function triggerLocationConversation() {
-      try {
-        if (!geminiKey || !isAppReady) return;
-        
-        const charTag = selectedCharIds.join(',');
-        if (lastLocationRef.current === (selectedLocationId + charTag)) return;
-        lastLocationRef.current = selectedLocationId + charTag;
-        
-        // 他の初期化処理が落ち着くまで待機
-        await new Promise(r => setTimeout(r, 6000));
-        
-        setLoading(true);
-        updateLocationEnergy(selectedLocationId, 15);
 
-        const selectedChars = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id));
-        const loc = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
-        const dialogue = await generateLocationDialogueWithEvent(geminiKey, selectedChars, loc, currentWorldEvent, spiritSharedKnowledge);
-        
-        if (dialogue?.length) {
-          setMessages(prev => [...prev, ...dialogue.map(d => ({ role: 'ai', content: d.content, charId: d.charId, sentiment: d.sentiment }))]);
-          const lastSentiment = dialogue[dialogue.length - 1]?.sentiment;
-          if (lastSentiment) setGlobalSentiment(lastSentiment);
-        }
-      } catch (err) {
-        console.error("Location Conversation Failed:", err);
-        if (err.status === 402) setSpiritualError(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    triggerLocationConversation();
-  }, [selectedLocationId, selectedCharIds, geminiKey, currentWorldEvent, APP_CHARACTERS, isAppReady, spiritSharedKnowledge]);
   /**
    * 対話の外部コンテキストを構築する
    */
@@ -361,14 +321,15 @@ export default function App() {
     ].filter(Boolean).join('\n\n');
 
     const interactionDepth = Math.min(Math.floor(messages.filter(m => m.charId === charId).length / 2), 2);
-    const location = INITIAL_LOCATIONS.find(l => l.id === selectedLocationId);
     const others = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id) && c.id !== charId);
 
     return {
       isUnderground,
       externalContext: context,
       interactionDepth,
-      location,
+      isUnderground,
+      externalContext: context,
+      interactionDepth,
       others,
       alaya,
       currentWorldEvent
@@ -454,7 +415,7 @@ export default function App() {
     }
   }, [notebookInput, geminiKey]);
 
-  const currentLocation = useMemo(() => INITIAL_LOCATIONS.find(l => l.id === selectedLocationId), [selectedLocationId]);
+
   const ambient = useMemo(() => AMBIENT_COLORS[globalSentiment] || AMBIENT_COLORS.neutral, [globalSentiment]);
 
   if (!isAppReady || !user) {
@@ -495,8 +456,8 @@ export default function App() {
             transition={{ duration: 3, ease: "easeInOut" }}
             className="absolute inset-0"
             style={{ 
-              backgroundColor: globalSentiment !== 'neutral' ? ambient.color : (currentLocation?.color || '#000'), 
-              backgroundImage: globalSentiment !== 'neutral' ? ambient.pattern : (currentLocation?.pattern || 'none'), 
+              backgroundColor: ambient.color, 
+              backgroundImage: ambient.pattern, 
               backgroundSize: '40px 40px',
             }}
           />
@@ -535,7 +496,7 @@ export default function App() {
                   <X size={20} />
                 </button>
               </div>
-              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, user, loginWithGoogle, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), handleGo, globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
+              <ManagerContent {...{ activeManagerTab, setActiveManagerTab, user, loginWithGoogle, handleLogout, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), globalSentiment, bookmarks, messages, userName, preferredModel, setPreferredModel: handleSetPreferredModel }} />
             </motion.div>
           </>
         ) : null}
@@ -543,15 +504,15 @@ export default function App() {
 
       <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
       <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, setIsAppReady }} />
-      <SpiritNoiseOverlay 
-        error={spiritualError} 
-        onRetry={() => { setSpiritualError(null); handleSendMessage(); }} 
-        onDismiss={() => setSpiritualError(null)} 
+      <SpiritNoiseOverlay
+        error={spiritualError}
+        onRetry={() => { setSpiritualError(null); handleSendMessage(); }}
+        onDismiss={() => setSpiritualError(null)}
       />
 
       <div className="flex-1 flex overflow-hidden relative z-10">
-        <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, setActiveManagerTab, manualRefreshSpiritWorld, isRefreshing: loading }} />
-        
+        <DashboardSidebar {...{ userName, setUserName, setShowSettings, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, setActiveManagerTab, manualRefreshSpiritWorld, isRefreshing: loading, handleLogout }} />
+
         {/* Main Timeline View */}
         <Timeline {...{ scrollRef, handleScroll: (e) => handleSlotChange(Math.round(e.target.scrollLeft / e.target.offsetWidth)), news, characters: APP_CHARACTERS, currentWorldEvent, isUnderground, setIsUnderground, userName, messages, loading, handleBookmark, handleReply: setReplyTo, globalTrends, setShowNotebookModal, futureSelfCritique, archives, globalSentiment }} />
 
@@ -614,7 +575,7 @@ export default function App() {
                     </button>
                   </div>
                   <div className="flex-1 overflow-y-auto itako-scrollbar-thin">
-                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, user, loginWithGoogle, locations: INITIAL_LOCATIONS, selectedLocationId, setSelectedLocationId, locationEnergies, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), handleGo, globalSentiment, bookmarks, messages, userName }} />
+                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, user, loginWithGoogle, handleLogout, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), globalSentiment, bookmarks, messages, userName }} />
                   </div>
                 </motion.div>
               </div>

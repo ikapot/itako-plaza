@@ -190,14 +190,7 @@ export default function PortalGrimoire({
                         </p>
                     </div>
 
-                    <div className="space-y-4">
-                        <h4 className="text-white/60 font-bold uppercase tracking-widest border-l-2 border-[#f15a24] pl-3">3. ローカルでの実行</h4>
-                        <p className="text-white/40 font-serif">
-                            自分のPCで動かす場合は、ターミナルでまずプロジェクト階層へ移動してください：<br/>
-                            <code className="block bg-black/50 p-2 mt-2 text-[#f15a24] rounded-sm font-mono">cd C:\Users\ikapo\Desktop\itako</code>
-                            その後、<code className="text-white/60">npm run dev</code> を実行します。
-                        </p>
-                    </div>
+
 
                     <div className="space-y-4">
                         <h4 className="text-white/60 font-bold uppercase tracking-widest border-l-2 border-[#f15a24] pl-3">4. 接続エラー (402)</h4>

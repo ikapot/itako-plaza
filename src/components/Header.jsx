@@ -21,11 +21,9 @@ const Header = React.memo(({
     ];
 
     const modeTabs = [
-        { id: 'dice', icon: <Globe size={14} />, label: 'RANDAMNI', color: '#f15a24' },
         { id: 'library', icon: <Library size={14} />, label: 'LIBRARY', color: '#f15a24' },
         { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#EAE0D5' },
         { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: apiStatus === 'connected' ? '#10b981' : '#f15a24' },
-        { id: 'grimoire', icon: <BookOpen size={14} />, label: 'Manual', color: '#b45309' },
         { id: 'account', icon: <Settings size={14} />, label: 'Account', color: '#b45309' },
     ];
 

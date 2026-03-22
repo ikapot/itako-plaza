@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, Settings, Ghost, Globe, MapPin, BookOpen, RotateCw } from 'lucide-react';
+import { User, Settings, Ghost, Globe, MapPin, BookOpen, RotateCw, LogOut } from 'lucide-react';
 import WarholAvatar from './WarholAvatar';
 
 const DashboardSidebar = React.memo(({
@@ -16,7 +16,8 @@ const DashboardSidebar = React.memo(({
     locationEnergies,
     setActiveManagerTab,
     manualRefreshSpiritWorld,
-    isRefreshing
+    isRefreshing,
+    handleLogout
 }) => {
     return (
         <div className="hidden md:flex flex-col gap-3 z-[110] absolute top-1/2 -translate-y-1/2 left-0 pl-6 pointer-events-none items-start">
@@ -42,10 +43,20 @@ const DashboardSidebar = React.memo(({
                     </div>
                     <button
                         onClick={() => setShowSettings(true)}
-                        className="p-1.5 text-white/10 hover:text-[#bd8a78] transition-colors cursor-pointer ml-2"
+                        className="p-1.5 text-white/10 hover:text-[#bd8a78] transition-colors cursor-pointer"
+                        title="Settings"
                     >
                         <Settings size={14} />
                     </button>
+                    {handleLogout && (
+                        <button
+                            onClick={handleLogout}
+                            className="p-1.5 text-white/10 hover:text-red-400 transition-colors cursor-pointer ml-1"
+                            title="Logout"
+                        >
+                             <LogOut size={14} />
+                        </button>
+                    )}
                 </div>
             </motion.div>
 
@@ -79,21 +90,7 @@ const DashboardSidebar = React.memo(({
                 </div>
             </div>
 
-            {/* 4. Concept Grimoire Button */}
-            <motion.button
-                whileHover={{ scale: 1.05, x: 5 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setActiveManagerTab('grimoire')}
-                className="pointer-events-auto flex items-center gap-4 p-3 pr-6 glass-spectral rounded-3xl border border-white/5 hover:border-[#bd8a78]/50 transition-all group/manual"
-            >
-                <div className="w-10 h-10 rounded-xl bg-[#bd8a78]/10 flex items-center justify-center border border-[#bd8a78]/20 group-hover/manual:bg-[#bd8a78]/20 transition-all">
-                    <BookOpen size={16} className="text-[#bd8a78]" />
-                </div>
-                <div className="flex flex-col items-start text-left">
-                    <span className="text-xs font-black tracking-widest text-[#bd8a78] uppercase font-oswald">Concept</span>
-                    <span className="text-[7px] font-bold text-white/70 uppercase tracking-[0.4em] font-oswald">理念の断片</span>
-                </div>
-            </motion.button>
+
 
             {/* 5. Manual Refresh Button */}
             <motion.button
