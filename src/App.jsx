@@ -181,8 +181,9 @@ export default function App() {
   useEffect(() => {
     async function updateAlaya() {
       // 10メッセージごとに要約を更新
-      if (messages.length > 0 && messages.length % 10 === 0 && geminiKey) {
-        const summary = await distillSpiritualAlaya(messages, geminiKey);
+      const effectiveKey = user ? 'PROXY_MODE' : geminiKey;
+      if (messages.length > 0 && messages.length % 10 === 0 && effectiveKey) {
+        const summary = await distillSpiritualAlaya(messages, effectiveKey);
         if (summary) {
           setAlaya(summary);
           localStorage.setItem('itako_alaya', summary);
@@ -190,7 +191,7 @@ export default function App() {
       }
     }
     updateAlaya();
-  }, [messages.length, geminiKey]);
+  }, [messages.length, geminiKey, user]);
 
   const handleValidateApi = useCallback(async (providedKey) => {
     const keyToValidate = providedKey ? cleanKey(providedKey) : geminiKey;
