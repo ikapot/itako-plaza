@@ -18,6 +18,17 @@ const corsHandler = cors({
 });
 
 export const streamChat = functions.https.onRequest((req, res) => {
+  // 手動で基本的なCORSヘッダーを設定（プリフライトの確実性を向上）
+  res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.set('Access-Control-Max-Age', '3600');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
   return corsHandler(req, res, async () => {
     try {
       // 1. Google 認証トークンの検証
