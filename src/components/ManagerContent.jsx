@@ -17,7 +17,7 @@ const getGenreColors = (index) => {
             tabTextColor: 'text-black',
             tagBg: 'bg-black/20',
             tagText: 'text-black',
-            borderColor: 'border-black/10', 
+            borderColor: 'border-black', 
             btnBg: 'bg-black text-[#f15a24]'
         };
     } else {
@@ -29,13 +29,13 @@ const getGenreColors = (index) => {
             tabTextColor: 'text-[#f15a24]',
             tagBg: 'bg-[#f15a24]/20',
             tagText: 'text-[#f15a24]',
-            borderColor: 'border-[#f15a24]/10', 
+            borderColor: 'border-[#f15a24]', 
             btnBg: 'bg-[#f15a24] text-black'
         };
     }
 };
 
-const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected, onToggleChar }) => {
+const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected, onToggleChar, onManifestSoul }) => {
     const { bgColor, textColor, subTextColor, tabColor, tabTextColor, tagBg, tagText, borderColor, btnBg } = getGenreColors(i);
     const alignment = i % 2 === 0 ? 'justify-start' : 'justify-end';
     const isOrange = tabColor === 'bg-[#f15a24]';
@@ -60,7 +60,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                 >
                     {/* Tab Shape Background */}
                     <div 
-                        className={`absolute inset-0 ${tabColor} z-0 rounded-t-[8px] origin-bottom transition-transform duration-300 group-hover:scale-y-110`}
+                        className={`absolute inset-0 ${tabColor} z-0 rounded-t-[8px] origin-bottom transition-transform duration-300 group-hover:scale-y-110 border-t-2 border-l-2 border-r-2 ${borderColor}`}
                         style={{
                             transform: 'perspective(100px) rotateX(25deg)',
                         }}
@@ -77,7 +77,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
             {/* Folder Body */}
             <div 
                 onClick={() => !isExpanded && onToggleExpand(c.id)}
-                className={`w-full rounded-none ${bgColor} ${textColor} overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] border-t ${borderColor}`}
+                className={`w-full rounded-none ${bgColor} ${textColor} overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10 border-2 ${borderColor} mb-[-2px]`}
             >
                 {(isInView || isExpanded) ? (
                 <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-12 cursor-default' : 'max-h-[2.5rem] opacity-60 p-0 flex items-center px-8 hover:opacity-100 hover:bg-black/5 shadow-inner'}`}>
@@ -87,7 +87,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                     ) : (
                         <div className="space-y-6 md:space-y-8" onClick={e => e.stopPropagation()}>
                             <div className="flex flex-col sm:flex-row items-start gap-6 md:gap-8">
-                                <div className={`w-28 h-28 md:w-32 md:h-32 shrink-0 rounded-none overflow-hidden ${isOrange ? 'bg-[#f15a24]' : 'bg-[#f15a24]'} relative shadow-2xl`}>
+                                <div className={`w-28 h-28 md:w-32 md:h-32 shrink-0 rounded-none overflow-hidden ${isOrange ? 'bg-[#f15a24]' : 'bg-[#f15a24]'} relative`}>
                                     {c.avatar ? (
                                         <>
                                             {/* We use an orange base for all portraits to keep a consistent 'positive print' aesthetic */}
@@ -117,10 +117,10 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                             
                             <div className={`flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t ${isOrange ? 'border-black/10' : 'border-[#f15a24]/10'} font-oswald`}>
                                 <button
-                                    onClick={() => onToggleChar(c.id)}
+                                    onClick={() => onManifestSoul ? onManifestSoul(c.id) : onToggleChar(c.id)}
                                     className={`w-full sm:w-auto px-10 py-4 rounded-none font-black text-xs md:text-sm uppercase tracking-[0.4em] transition-all active:scale-95 flex items-center justify-center gap-3 border
                                         ${isSelected 
-                                            ? (isOrange ? 'bg-black text-[#f15a24] border-black shadow-xl':'bg-[#f15a24] text-black border-[#f15a24] shadow-[0_0_30px_rgba(241,90,36,0.2)]')
+                                            ? (isOrange ? 'bg-black text-[#f15a24] border-black' : 'bg-[#f15a24] text-black border-[#f15a24]')
                                             : (isOrange ? 'bg-transparent text-black border-black/30 hover:bg-black hover:text-[#f15a24]' : 'bg-transparent text-[#f15a24] border-[#f15a24]/50 hover:bg-[#f15a24] hover:text-black')}
                                     `}
                                 >
@@ -143,11 +143,12 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
 });
 
 const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleToggleChar }) => {
+const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleToggleChar, onManifestSoul }) => {
     const [expandedId, setExpandedId] = useState(null);
     const containerRef = useRef(null);
 
     return (
-        <div ref={containerRef} className="max-w-2xl mx-auto w-full pb-32 pt-12 px-0 md:px-4 relative mt-12 bg-black/60 rounded-3xl backdrop-blur-md shadow-2xl">
+        <div ref={containerRef} className="max-w-2xl mx-auto w-full pb-32 pt-12 px-0 md:px-4 relative mt-12 bg-black/60 rounded-3xl backdrop-blur-md">
              <div className="flex flex-col relative z-10 w-full mb-[-2rem]">
                  {characters.map((c, i) => (
                      <CabinetDrawer 
@@ -158,16 +159,17 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
                         onToggleExpand={setExpandedId}
                         isSelected={selectedCharIds.includes(c.id)}
                         onToggleChar={handleToggleChar}
+                        onManifestSoul={onManifestSoul}
                      />
                  ))}
              </div>
 
              {/* The Box Front Bottom */}
-             <div className="relative z-[100] w-full mt-8 drop-shadow-3xl pointer-events-none">
+             <div className="relative z-[100] w-full mt-8 pointer-events-none">
                  <div className="w-full h-32 md:h-48 bg-zinc-950 flex items-center justify-center relative overflow-hidden border-b-2 border-black">
-                     <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black/80 pointer-events-none opacity-60" />
+                     <div className="absolute inset-0 bg-black/40 pointer-events-none" />
                      {/* Label */}
-                     <div className="bg-[#f15a24] px-8 md:px-12 py-3 shadow-[0_10px_30px_rgba(241,90,36,0.3)] border border-black/20 relative z-10 w-64 md:w-80 text-center flex flex-col items-center justify-center">
+                     <div className="bg-[#f15a24] px-8 md:px-12 py-3 border-2 border-black relative z-10 w-64 md:w-80 text-center flex flex-col items-center justify-center">
                          <span className="font-oswald text-black text-2xl md:text-3xl font-black tracking-[0.3em] uppercase">Spirit Index</span>
                          <span className="text-[10px] text-black/50 font-bold uppercase tracking-[0.5em]">Soul Configuration V2</span>
                          <div className="absolute top-1 left-1 w-1 h-1 rounded-full bg-black/40" />
@@ -210,7 +212,8 @@ const ManagerContent = React.memo(({
     bookmarks,
     messages,
     userName,
-    handleLogout
+    handleLogout,
+    onManifestSoul
 }) => {
     const stats = useMemo(() => [
         { label: 'Bookmarks', val: bookmarks?.length || 0, icon: <Bookmark size={14} /> },

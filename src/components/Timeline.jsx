@@ -157,10 +157,10 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
                 </div>
             ) : null}
 
-            <div className={`relative p-4 md:p-6 border-2 border-black itako-outline transition-all duration-300 max-w-[90%] md:max-w-[80%] ${
+            <div className={`relative p-4 md:p-6 octagon transition-all duration-300 max-w-[90%] md:max-w-[80%] ${
                 isUser 
                     ? 'bg-[#f15a24] text-black font-black text-sm md:text-base selection:bg-black selection:text-[#f15a24]' 
-                    : 'bg-[#1a1a1a] text-[#EAE0D5] font-serif italic text-sm md:text-base selection:bg-[#f15a24] selection:text-black border-l-4 border-l-[#f15a24]'
+                    : 'bg-[#1a1a1a] text-[#EAE0D5] font-serif italic text-sm md:text-base selection:bg-[#f15a24] selection:text-black'
             }`}>
                 {/* Sentiment Tag */}
                 {(!isUser && m.sentiment) ? (

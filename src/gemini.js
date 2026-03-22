@@ -783,7 +783,7 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
                 SPIRITUAL_ERRORS.OPENROUTER_ERROR,
           message: isRateLimit 
             ? (errorData.error?.message?.includes("free-models-per-day") 
-                ? "OpenRouterの外部無料枠が上限（50回/日）に達しました。対話を続けるには $5 程度のチャージで枠を広げる（1,000回/日）か、明日まで待つ必要があります。" 
+                ? "OpenRouterの外部無料枠が上限（50回/日）に達しました。Googleアカウントでログインしてセキュア・プロキシ回路を使用するか、$5程度のチャージで自身のキーの枠を広げる（1,000回/日）か、明日まで待つ必要があります。" 
                 : (errorData.error?.message || "通信量制限により霊界が不安定です。"))
             : isAuthError 
               ? `接続失敗: ${errorData.error?.message || "Invalid Key"}`

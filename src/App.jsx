@@ -154,15 +154,27 @@ export default function App() {
     }
   }, [bookmarks, geminiKey]);
 
-  const handleTalkTo = useCallback((charId) => {
-    handleToggleChar(charId);
-    handleSlotChange(1);
-    setIsDrawerOpen(false);
+  const handleTalkTo = useCallback(async (charId) => {
+    // 1. そのキャラクターのみを選択状態にする（または先頭に追加）
+    setSelectedCharIds([charId]);
+    
+    // 2. 他のオーバーレイを閉じてスロット1（対話）へ切り替え
     setEnlargedCharId(null);
+    setIsDrawerOpen(false);
+    setActiveManagerTab(null);
+    handleSlotChange(1);
+    
+    // 3. スクロール処理
     setTimeout(() => {
       scrollRef.current?.scrollTo({ left: window.innerWidth, behavior: 'smooth' });
     }, 100);
-  }, [handleToggleChar, handleSlotChange]);
+
+    // 4. 初回の呼び出しメッセージをトリガー
+    // 少し待機してから送信（UIの切り替わりを考慮）
+    setTimeout(() => {
+        handleSendMessage("【対話の開始】あなたは呼び出されました。最初の挨拶と、あなたの現状への一言をお願いします。");
+    }, 800);
+  }, [handleSlotChange]);
   
 
 
@@ -212,17 +224,12 @@ export default function App() {
         setSpiritSharedKnowledge(data.map(acc => acc.content).join('\n---\n'));
         
         // --- PHASE 2: Frictionless Onboarding ---
-        // ユーザーが自前のAPIキーを持っていなければ、自動でProxyモードへ移行
-        setGeminiKey(prevKey => {
-           if (!prevKey) {
-               setApiConnectionStatus('success');
-               setIsAppReady(true);
-               return 'PROXY_MODE';
-           }
-           setIsAppReady(true);
-           return prevKey;
-        });
+        // ログインしている場合は、個別のキーの有無に関わらず安全なプロキシ回路（PROXY_MODE）を優先する
+        setGeminiKey('PROXY_MODE');
+        setApiConnectionStatus('success');
+        setIsAppReady(true);
       } else {
+         // 未ログイン時は個別のキー設定があればそれを保持し、なければクリア
          setGeminiKey(prev => prev === 'PROXY_MODE' ? '' : prev);
       }
     });
@@ -358,12 +365,13 @@ export default function App() {
     });
   }, []);
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || loading || !geminiKey) return;
+  const handleSendMessage = async (overrideMsg = null) => {
+    const activeInput = overrideMsg || input;
+    if (!activeInput.trim() || loading || !geminiKey) return;
 
     const userMsg = replyTo 
-      ? `＞ ${replyTo.charId}: 「${replyTo.content}」\n\n${input}`
-      : input;
+      ? `＞ ${replyTo.charId}: 「${replyTo.content}」\n\n${activeInput}`
+      : activeInput;
       
     const charId = selectedCharIds[0];
     const currentChar = APP_CHARACTERS.find(c => c.id === charId);
@@ -496,7 +504,7 @@ export default function App() {
         {isDrawerOpen ? (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] md:hidden" />
-            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-[#0a0a0a]/95 backdrop-blur-3xl border-r border-white/5 z-[70] p-6 overflow-y-auto md:hidden shadow-3xl">
+            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed inset-y-0 left-0 w-[85%] max-w-sm bg-[#0a0a0a]/95 backdrop-blur-3xl border-r border-white/5 z-[70] p-6 overflow-y-auto md:hidden ">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex flex-col">
                   <h2 className="text-xl font-black font-oswald uppercase tracking-wider text-white/90">System</h2>
@@ -570,7 +578,7 @@ export default function App() {
 
                 <motion.div 
                   layoutId="manager-content"
-                  className="w-full h-full glass-spectral rounded-t-[32px] md:rounded-[40px] border-t md:border border-white/10 shadow-3xl overflow-hidden flex flex-col relative"
+                  className="w-full h-full glass-spectral rounded-t-[32px] md:rounded-[40px] border-t md:border border-white/10  overflow-hidden flex flex-col relative"
                 >
                   <div className="flex justify-between items-center p-4 md:p-6 border-b border-white/5 bg-black/40">
                     <h2 className="text-lg md:text-2xl font-black font-oswald uppercase tracking-[0.2em] text-[#f15a24] flex items-center gap-3">
@@ -585,7 +593,7 @@ export default function App() {
                     </button>
                   </div>
                   <div className="flex-1 overflow-y-auto itako-scrollbar-thin">
-                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, user, loginWithGoogle, handleLogout, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), globalSentiment, bookmarks, messages, userName }} />
+                    <ManagerContent {...{ activeManagerTab, setActiveManagerTab, user, loginWithGoogle, handleLogout, characters: APP_CHARACTERS, selectedCharIds, handleToggleChar, handleSetChars, setEnlargedCharId, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi: (key) => handleValidateApi(key), globalSentiment, bookmarks, messages, userName, onManifestSoul: handleTalkTo }} />
                   </div>
                 </motion.div>
               </div>

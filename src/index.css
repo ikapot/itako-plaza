@@ -192,13 +192,11 @@ body {
 
   .spectral-node-active {
     background: #f15a24;
-    box-shadow: 0 0 15px #f15a24, 0 0 30px rgba(241, 90, 36, 0.3);
     animation: nodePulse 4s ease-in-out infinite;
   }
 
   .spectral-node-error {
     background: #ef4444;
-    box-shadow: 0 0 10px #ef4444;
   }
 
   .spectral-node-validating {
@@ -210,7 +208,6 @@ body {
     background: rgba(10, 10, 10, 0.4);
     backdrop-filter: blur(40px) saturate(200%);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
   }
 
   .glass-ethereal {
@@ -283,5 +280,40 @@ body {
     60% { transform: translate(3px, 1px) rotate(-0.5deg); opacity: 0.9;}
     80% { transform: translate(-1px, -1px) rotate(0.5deg); opacity: 0.8;}
     100% { transform: translate(1px, 2px) rotate(0deg); opacity: 1;}
+  }
+
+  .octagon {
+    clip-path: polygon(
+      12px 0, 
+      calc(100% - 12px) 0, 
+      100% 12px, 
+      100% calc(100% - 12px), 
+      calc(100% - 12px) 100%, 
+      12px 100%, 
+      0 calc(100% - 12px), 
+      0 12px
+    );
+  }
+
+  .octagon-outline {
+    position: relative;
+  }
+  
+  .octagon-outline::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 2px solid currentColor;
+    clip-path: polygon(
+      12px 0, 
+      calc(100% - 12px) 0, 
+      100% 12px, 
+      100% calc(100% - 12px), 
+      calc(100% - 12px) 100%, 
+      12px 100%, 
+      0 calc(100% - 12px), 
+      0 12px
+    );
   }
 }
