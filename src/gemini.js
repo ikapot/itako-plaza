@@ -1066,11 +1066,12 @@ export async function generateLocationDialogueWithEvent(apiKey, chars, loc, even
 }
 
 export async function distillSpiritualAlaya(messages, apiKey) {
-  if (!apiKey || messages.length < 8) return null; // Increase threshold for summary
+  // 最低20メッセージ溜まってから要約を試みる
+  if (!apiKey || apiKey === '' || messages.length < 20) return null;
   
   const thread = messages.map(m => `[${m.charId}] ${m.userMsg ? '私: ' + m.userMsg : '相手: ' + m.aiMsg}`).join('\n');
   
-  // Quick hash or length check to see if it's identical to last distilled content
+  // 前回と同じなら再計算しない
   const lastThread = localStorage.getItem('itako_last_distilled_thread');
   if (lastThread === thread) {
       return localStorage.getItem('itako_alaya');
@@ -1086,7 +1087,7 @@ export async function distillSpiritualAlaya(messages, apiKey) {
     }
     return null;
   } catch (e) {
-    console.error("Alaya distillation failed:", e);
+    // 阿頼耶識の要約はオプション機能なので、エラーは静かに無視する
     return null;
   }
 }
