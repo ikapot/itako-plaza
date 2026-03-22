@@ -4,19 +4,19 @@ import { auth, findEchoInFirestore, saveEchoToFirestore } from "./firebase";
 
 export const OPENROUTER_MODELS = [
   { id: "auto", name: "Auto (Intelligent Routing - Free Preferred)" },
-  { id: "google/gemma-3-27b-it:free", name: "Gemma 3 27B (Always Free)" },
-  { id: "google/gemma-3-12b-it:free", name: "Gemma 3 12B (Fast & Free)" },
-  { id: "meta-llama/llama-3.3-70b-instruct:free", name: "Llama 3.3 70B (High Performance Free)" },
-  { id: "mistralai/mistral-small-3.1-24b-instruct:free", name: "Mistral Small 3.1 (Free)" },
+  { id: "google/gemini-2.0-flash-lite-preview-02-05:free", name: "Gemini 2.0 Flash Lite (Stable & Free)" },
+  { id: "google/gemma-2-9b-it:free", name: "Gemma 2 9B (Consistent Free)" },
+  { id: "meta-llama/llama-3.1-8b-instruct:free", name: "Llama 3.1 8B (Reliable Free)" },
+  { id: "qwen/qwen-2.5-72b-instruct:free", name: "Qwen 2.5 72B (Powerful Free)" },
 ];
 
 const TASK_MODELS = {
-  DIALOGUE: "google/gemma-3-27b-it:free",
-  UTILITY: "google/gemma-3-12b-it:free",
-  JSON: "google/gemma-3-27b-it:free",
-  SUMMARY: "google/gemma-3-12b-it:free",
-  CRITICAL: "google/gemma-3-27b-it:free",
-  CHEAP: "openrouter/free" // Automatically pick whatever is available for ping
+  DIALOGUE: "google/gemini-2.0-flash-lite-preview-02-05:free",
+  UTILITY: "google/gemini-2.0-flash-lite-preview-02-05:free",
+  JSON: "google/gemini-2.0-flash-lite-preview-02-05:free",
+  SUMMARY: "google/gemini-2.0-flash-lite-preview-02-05:free",
+  CRITICAL: "google/gemini-2.0-flash-lite-preview-02-05:free",
+  CHEAP: "openrouter/free"
 };
 
 const routeModel = (taskType, preferredModel) => {
@@ -620,7 +620,6 @@ const FALLBACK_FREE_MODELS = [
   "meta-llama/llama-3.1-8b-instruct:free",
   "mistralai/pixtral-12b:free",
   "qwen/qwen-2.5-72b-instruct:free",
-  "google/gemma-3-27b-it:free",
   "microsoft/phi-4:free"
 ];
 
