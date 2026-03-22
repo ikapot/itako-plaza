@@ -60,7 +60,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                 >
                     {/* Tab Shape Background */}
                     <div 
-                        className={`absolute inset-0 ${tabColor} z-0 rounded-t-[8px] origin-bottom transition-transform duration-300 group-hover:scale-y-110 border-none md:border-t-2 md:border-l-2 md:border-r-2 md:${borderColor}`}
+                        className={`absolute inset-0 ${tabColor} z-0 rounded-t-[8px] origin-bottom transition-transform duration-300 group-hover:scale-y-110 border-t-2 border-l-2 border-r-2 ${borderColor}`}
                         style={{
                             transform: 'perspective(100px) rotateX(25deg)',
                         }}
@@ -80,7 +80,7 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                 className={`w-full rounded-none ${bgColor} ${textColor} overflow-hidden cursor-pointer transition-all duration-700 ease-in-out relative z-10 border-2 ${borderColor} mb-[-2px]`}
             >
                 {(isInView || isExpanded) ? (
-                <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-12 cursor-default' : 'max-h-[2.5rem] opacity-60 p-0 flex items-center px-8 hover:opacity-100 hover:bg-black/5 shadow-inner'}`}>
+                <div className={`transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[1200px] opacity-100 p-6 md:p-12 cursor-default' : `max-h-[2.5rem] opacity-60 p-0 flex items-center px-8 hover:opacity-100 ${isOrange ? 'hover:bg-black/10' : 'hover:bg-[#f15a24]/10'}`}`}>
                     
                     {!isExpanded ? (
                         <div className="w-full h-8 flex items-center justify-between pointer-events-none" />
