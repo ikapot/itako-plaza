@@ -4,6 +4,7 @@ import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Ac
 import LibraryView from './Library';
 import WarholAvatar from './WarholAvatar';
 import PortalGrimoire from './PortalGrimoire';
+import { CHARACTER_PROFILES } from '../data/profiles';
 
 const getGenreColors = (index) => {
     const isOrange = index % 2 === 0;
@@ -109,8 +110,8 @@ const CabinetDrawer = React.memo(({ c, i, isExpanded, onToggleExpand, isSelected
                                             <span className={`text-[10px] md:text-xs font-black uppercase tracking-[0.3em] ${isOrange ? 'bg-black/10 text-black/80 border-black/20':'bg-[#f15a24]/10 text-[#f15a24]/80 border-[#f15a24]/20'} px-3 py-1 rounded-sm border font-oswald`}>{c.flavor}</span>
                                         </div>
                                     </div>
-                                    <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-95 break-words font-medium">
-                                        {c.description}
+                                    <p className="text-sm md:text-base leading-relaxed font-serif italic py-2 opacity-95 break-words font-medium whitespace-pre-wrap">
+                                        {CHARACTER_PROFILES[c.id] || c.description}
                                     </p>
                                 </div>
                             </div>
