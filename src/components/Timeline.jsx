@@ -160,7 +160,7 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
             <div className={`relative p-4 md:p-6 octagon transition-all duration-300 max-w-[90%] md:max-w-[80%] ${
                 isUser 
                     ? 'bg-[#f15a24] text-black font-black text-sm md:text-base selection:bg-black selection:text-[#f15a24]' 
-                    : 'bg-[#1a1a1a] text-[#EAE0D5] font-serif italic text-sm md:text-base selection:bg-[#f15a24] selection:text-black'
+                    : 'bg-[#EAE0D5]/10 text-[#EAE0D5] border border-white/5 font-serif italic text-sm md:text-base selection:bg-[#f15a24] selection:text-black'
             }`}>
                 {/* Sentiment Tag */}
                 {(!isUser && m.sentiment) ? (
@@ -320,7 +320,7 @@ const Timeline = React.memo(function Timeline({
                         })() : null}
                     </AnimatePresence>
 
-                    <div className="bg-black/80 border-2 border-black itako-outline overflow-hidden min-h-[600px] flex flex-col">
+                    <div className="bg-black/40 border-2 border-black itako-outline overflow-hidden min-h-[600px] flex flex-col backdrop-blur-sm">
                         {/* Terminal Header */}
                         <div className="p-3 md:p-4 border-b-2 border-black bg-black/40 flex items-center justify-between sticky top-0 bg-black/80 backdrop-blur-md z-50">
                             <div className="flex items-center gap-2 md:gap-3">
