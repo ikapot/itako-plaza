@@ -147,7 +147,7 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
             initial={{ opacity: 0, x: isUser ? 20 : -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 25 }}
-            className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-2`}
+            className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} gap-2 message-item`}
         >
             {/* Minimal Header */}
             {(!isUser && charObj) ? (
@@ -224,10 +224,17 @@ const Timeline = React.memo(function Timeline({
 }) {
     const transcriptScrollRef = useRef(null);
 
-    // 会話更新時に最下部へスクロール
+    // 会話更新時に最下部へスクロール、または最新メッセージを中央に寄せる
     useEffect(() => {
-        if (transcriptScrollRef.current) {
-            transcriptScrollRef.current.scrollTop = transcriptScrollRef.current.scrollHeight;
+        if (transcriptScrollRef.current && messages.length > 0) {
+            // 少し遅延をおいて要素がレンダリングされるのを待つ
+            setTimeout(() => {
+                const messageElements = transcriptScrollRef.current.querySelectorAll('.message-item');
+                const lastMessage = messageElements[messageElements.length - 1];
+                if (lastMessage) {
+                    lastMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
         }
     }, [messages, loading]);
 

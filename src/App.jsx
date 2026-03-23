@@ -146,6 +146,14 @@ export default function App() {
 
   const handleSlotChange = useCallback(async (index) => {
     setActiveSlot(index);
+    // 物理スクロールを実行
+    if (scrollRef.current) {
+        scrollRef.current.scrollTo({
+            left: scrollRef.current.offsetWidth * index,
+            behavior: 'smooth'
+        });
+    }
+
     if (index === 2 && geminiKey) {
       setLoading(true);
       const critique = await evaluateFutureSelf(bookmarks, geminiKey);
@@ -165,9 +173,7 @@ export default function App() {
     handleSlotChange(1);
     
     // 3. スクロール処理
-    setTimeout(() => {
-      scrollRef.current?.scrollTo({ left: window.innerWidth, behavior: 'smooth' });
-    }, 100);
+    handleSlotChange(1);
 
     // 4. 初回の呼び出しメッセージをトリガー
     // 少し待機してから送信（UIの切り替わりを考慮）
@@ -571,7 +577,7 @@ export default function App() {
         ) : null}
       </AnimatePresence>
 
-      <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={(id) => scrollRef.current?.scrollTo({ left: window.innerWidth * id, behavior: 'smooth' })} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
+      <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={handleSlotChange} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
       <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, setIsAppReady }} />
       <SpiritNoiseOverlay
         error={spiritualError}
