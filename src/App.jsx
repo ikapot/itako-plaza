@@ -176,11 +176,11 @@ export default function App() {
     handleSlotChange(1);
 
     // 4. 初回の呼び出しメッセージをトリガー
-    // 少し待機してから送信（UIの切り替わりを考慮）
+    // 少し待機してから送信（UIの切り替わりを考慮し、かつIDを直接指定して確実性を高める）
     setTimeout(() => {
-        handleSendMessage("【対話の開始】あなたは呼び出されました。最初の挨拶と、あなたの現状への一言をお願いします。");
+        handleSendMessage("【対話の開始】あなたは呼び出されました。最初の挨拶と、あなたの現状への一言をお願いします。", charId);
     }, 800);
-  }, [handleSlotChange]);
+  }, [handleSlotChange]); // handleSendMessage 等は後ほど再定義される可能性があるため依存関係に含めないか、ID指定で回避する
   
 
 
@@ -383,19 +383,20 @@ export default function App() {
     });
   }, []);
 
-  const handleSendMessage = async (overrideMsg = null) => {
+  const handleSendMessage = async (overrideMsg = null, targetCharId = null) => {
     // overrideMsg が文字列でない（イベントオブジェクト等の）場合は無視して input を使用する
     const activeMsg = (typeof overrideMsg === 'string') ? overrideMsg : input;
     if (!activeMsg || !activeMsg.trim() || loading || !geminiKey) return;
     const activeInput = activeMsg.trim();
+ 
+    // 指定された ID があればそれを使用し、なければ現在の選択の先頭を使用する
+    const charId = targetCharId || selectedCharIds[0];
+    const currentChar = APP_CHARACTERS.find(c => c.id === charId);
 
     const userMsg = replyTo 
       ? `＞ ${replyTo.charId}: 「${replyTo.content}」\n\n${activeInput}`
       : activeInput;
       
-    const charId = selectedCharIds[0];
-    const currentChar = APP_CHARACTERS.find(c => c.id === charId);
-
     // Prepare UI state for dialogue
     setInput('');
     setReplyTo(null);
