@@ -189,8 +189,9 @@ export default function App() {
       // isAppReadyがtrueになるまで（認証が確定するまで）実行しない
       if (!isAppReady) return;
       // 10メッセージごとに要約を更新
+      // 30メッセージごとに要約を更新（API節約のため頻度を下げました）
       const effectiveKey = user ? 'PROXY_MODE' : geminiKey;
-      if (messages.length > 0 && messages.length % 10 === 0 && effectiveKey && effectiveKey !== '') {
+      if (messages.length > 0 && messages.length % 30 === 0 && effectiveKey && effectiveKey !== '') {
         const summary = await distillSpiritualAlaya(messages, effectiveKey);
         if (summary) {
           setAlaya(summary);
@@ -405,10 +406,12 @@ export default function App() {
     ]);
     setLoading(true);
 
-    // Background research in archives
-    searchNDLArchive(userMsg).then(res => {
-      if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 5));
-    });
+    // 10文字以上の一定の長さがある場合のみアーカイブを検索（API節約）
+    if (userMsg.length > 10) {
+      searchNDLArchive(userMsg).then(res => {
+        if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 5));
+      });
+    }
 
     try {
       const options = buildDialogueOptions(charId);

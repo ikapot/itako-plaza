@@ -12,11 +12,11 @@ export const OPENROUTER_MODELS = [
 
 const TASK_MODELS = {
   DIALOGUE: "google/gemma-3-27b-it:free",
-  UTILITY: "google/gemma-3-12b-it:free",
-  JSON: "google/gemma-3-12b-it:free",
-  SUMMARY: "google/gemma-3-12b-it:free",
+  UTILITY: "google/gemini-2.0-flash:free",
+  JSON: "google/gemini-2.0-flash:free",
+  SUMMARY: "google/gemini-2.0-flash:free",
   CRITICAL: "google/gemma-3-27b-it:free",
-  CHEAP: "openrouter/free"
+  CHEAP: "google/gemini-2.0-flash:free"
 };
 
 const routeModel = (taskType, preferredModel) => {
