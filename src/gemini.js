@@ -545,7 +545,9 @@ const SPIRIT_ECHO_PREFIX = 'itako_echo_v3_';
  * 過去の対話から「エコー（キャッシュ）」を検索する
  */
 async function findSpiritualEcho(systemPrompt, userMsg) {
-  const cacheKey = btoa(encodeURIComponent(`${systemPrompt.substring(0, 100)}:${userMsg.trim()}`)).substring(0, 64);
+  // 生成されるプロンプト全体のハッシュ的なキーを作成（衝突回避のため長めに取得）
+  const combined = `${systemPrompt}|${userMsg.trim()}`;
+  const cacheKey = btoa(encodeURIComponent(combined)).slice(-64); // 末尾側（動的な部分が多い方）から取得
   
   // 1. Memory Cache
   if (semanticCache.has(cacheKey)) return semanticCache.get(cacheKey);
@@ -575,7 +577,8 @@ async function findSpiritualEcho(systemPrompt, userMsg) {
 
 async function storeEcho(systemPrompt, userMsg, response) {
   if (!response) return;
-  const cacheKey = btoa(encodeURIComponent(`${systemPrompt.substring(0, 100)}:${userMsg.trim()}`)).substring(0, 64);
+  const combined = `${systemPrompt}|${userMsg.trim()}`;
+  const cacheKey = btoa(encodeURIComponent(combined)).slice(-64);
   const entry = { data: response, timestamp: Date.now() };
   
   semanticCache.set(cacheKey, response);

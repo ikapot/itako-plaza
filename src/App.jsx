@@ -418,21 +418,16 @@ export default function App() {
     });
   }, []);
 
-  const handleSendMessage = async (overrideMsg = null, targetCharId = null) => {
-    // overrideMsg が文字列でない（イベントオブジェクト等の）場合は無視して input を使用する
-    const activeMsg = (typeof overrideMsg === 'string') ? overrideMsg : input;
-    if (!activeMsg || !activeMsg.trim() || loading || !geminiKey) return;
-    const activeInput = activeMsg.trim();
- 
-    // 指定された ID があればそれを使用し、なければ現在の選択の先頭を使用する
-    const charId = targetCharId || selectedCharIds[0];
+  // --- Sending Logic ---
+  const handleSendMessage = useCallback(async (textOverride = null) => {
+    const userMsg = textOverride || input;
+    if (!userMsg.trim() || loading) return; // 二重送信防止
+
+    const effectiveKey = geminiKey || 'PROXY_MODE';
+    const charId = selectedCharIds[0]; // TODO: multi-char logic refinements
     const currentChar = APP_CHARACTERS.find(c => c.id === charId);
 
-    const userMsg = replyTo 
-      ? `＞ ${replyTo.charId}: 「${replyTo.content}」\n\n${activeInput}`
-      : activeInput;
-      
-    // Prepare UI state for dialogue
+    setLoading(true);
     setInput('');
     setReplyTo(null);
     setMessages(prev => [
