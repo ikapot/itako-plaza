@@ -17,7 +17,10 @@ if (admin.apps.length === 0) {
  * v2へのアップグレードができない制限のため、v1のまま機能を強化。
  * Last Updated: 2026-03-22 19:47
  */
-export const streamChat = functions.region('us-central1').https.onRequest((req, res) => {
+export const streamChat = functions.runWith({ 
+  timeoutSeconds: 300, 
+  memory: '1GB' 
+}).region('us-central1').https.onRequest((req, res) => {
   return cors(req, res, async () => {
     try {
       // POST以外を許可しない
@@ -37,10 +40,10 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
         return res.status(401).json({ error: "Invalid Token" });
       }
 
-      // APIキー取得
-      const API_KEY = process.env.OPENROUTER_API_KEY;
+      // APIキー取得 (環境変数 または Firebase Config)
+      const API_KEY = process.env.OPENROUTER_API_KEY || (functions.config().openrouter ? functions.config().openrouter.key : null);
       if (!API_KEY) {
-        return res.status(500).json({ error: "DEBUG-ENV: Master API Key Missing on Server" });
+        return res.status(500).json({ error: "DEBUG-ENV: Master API Key Missing on Server (Tried Env & Config)" });
       }
 
       // APIリクエスト

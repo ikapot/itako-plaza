@@ -6,6 +6,7 @@
     "dotenv": "^17.3.1",
     "firebase-admin": "^11.5.0",
     "firebase-functions": "^4.1.1",
+    "itako": "file:..",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
