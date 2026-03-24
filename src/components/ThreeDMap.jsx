@@ -85,19 +85,10 @@ const CharTile = React.memo(function CharTile({ char, isSelected, isRolling, onT
             exit={{ scale: 1.5, opacity: 0 }}
             className="flex items-center justify-center"
           >
-            <motion.div
-              animate={{ 
-                scale: [1, 1.3, 1],
-                opacity: [0.3, 0.6, 0.3],
-                boxShadow: [
-                  '0 0 5px rgba(255,255,255,0.2)',
-                  '0 0 15px rgba(255,255,255,0.5)',
-                  '0 0 5px rgba(255,255,255,0.2)'
-                ]
-              }}
-              transition={{ duration: 3 + Math.random() * 2, repeat: Infinity }}
-              className={`w-1.5 h-1.5 rounded-full ${isMain ? 'bg-[#f15a24]' : 'bg-white/40'}`}
+            <div
+              className={`w-1.5 h-1.5 rounded-full spectral-pulse ${isMain ? 'bg-[#f15a24]' : 'bg-white/40'}`}
               style={{ 
+                '--pulse-duration': `${3 + Math.random() * 2}s`,
                 boxShadow: isMain ? '0 0 10px rgba(241, 90, 36, 0.6)' : '0 0 5px rgba(255,255,255,0.3)'
               }}
             />
@@ -160,14 +151,10 @@ const LocTile = React.memo(function LocTile({ loc, isSelected, isRolling, energy
             exit={{ scale: 1.5, opacity: 0 }}
             className="flex items-center justify-center"
           >
-            <motion.div
-              animate={{ 
-                scale: [1, 1.4, 1],
-                opacity: [0.2, 0.5, 0.2],
-              }}
-              transition={{ duration: 4 + Math.random() * 2, repeat: Infinity }}
-              className="w-1.5 h-1.5 bg-white/30 rounded-full"
+            <div
+              className="w-1.5 h-1.5 bg-white/30 rounded-full spectral-pulse"
               style={{ 
+                '--pulse-duration': `${4 + Math.random() * 2}s`,
                 boxShadow: `0 0 ${10 + (energy/5)}px rgba(255,255,255,${0.2 + (energy/200)})` 
               }}
             />
@@ -202,7 +189,7 @@ const NoiseOverlay = React.memo(function NoiseOverlay({ intensity = 0.05, glitch
         className={`absolute inset-0 pointer-events-none mix-blend-overlay ${glitch ? 'spiritual-glitch' : ''}`}
         style={{ 
             opacity: intensity,
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
             backgroundSize: '150px 150px'
         }}
     />

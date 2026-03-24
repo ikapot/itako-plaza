@@ -8,30 +8,24 @@ import WarholAvatar from './WarholAvatar';
 
 const MemoizedEchoItem = React.memo(function EchoItem({ e }) {
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ 
-                opacity: [0, 0.1, 0],
-                y: [-100, -300],
-                scale: [0.9, 1.1]
+        <div
+            className="absolute text-[8px] md:text-[10px] font-serif italic tracking-widest whitespace-nowrap pr-2 echo-item"
+            style={{ 
+                left: `${e.x}%`, 
+                top: `${e.y}%`, 
+                color: '#b45309',
+                '--echo-duration': `${e.duration}s`,
+                '--echo-delay': `${e.delay}s`
             }}
-            transition={{ 
-                duration: e.duration, 
-                repeat: Infinity, 
-                delay: e.delay,
-                ease: "linear"
-            }}
-            className="absolute text-[8px] md:text-[10px] font-serif italic tracking-widest whitespace-nowrap pr-2"
-            style={{ left: `${e.x}%`, top: `${e.y}%`, color: '#b45309' }}
         >
             {e.text}
-        </motion.div>
+        </div>
     );
 });
 
 const DialogueEcho = React.memo(function DialogueEcho({ messages, accentColor }) {
     const echos = useMemo(() => {
-        return messages.slice(0, -1).slice(-15).map((m, i) => ({
+        return messages.slice(0, -1).slice(-10).map((m, i) => ({
             id: i,
             text: m.content.slice(0, 40) + (m.content.length > 40 ? '...' : ''),
             x: 10 + Math.random() * 80,
@@ -143,7 +137,6 @@ const MemoizedMessageItem = React.memo(function MessageItem({ m, i, isUser, char
     }
     return (
         <motion.div
-            layout
             initial={{ opacity: 0, x: isUser ? 20 : -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 25 }}
