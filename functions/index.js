@@ -48,11 +48,13 @@ export const streamChat = functions.region('us-central1').https.onRequest((req, 
       // 2026年3月最新の確実に動作する無料モデルリスト
       const FAILOVER_MODELS = [
         "google/gemma-3-27b-it:free",
+        "deepseek/deepseek-r1:free",
+        "google/gemini-2.0-flash:free",
         "meta-llama/llama-3.3-70b-instruct:free",
-        "meta-llama/llama-3.2-3b-instruct:free",
         "nvidia/nemotron-3-super-120b-a12b:free",
         "qwen/qwen-2.5-72b-instruct:free",
         "google/gemma-3-12b-it:free",
+        "meta-llama/llama-3.2-3b-instruct:free",
         "stepfun/step-3.5-flash:free",
         "minimax/minimax-m2.5:free"
       ];
