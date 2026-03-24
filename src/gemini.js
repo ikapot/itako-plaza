@@ -219,11 +219,12 @@ const CHARACTER_CONFIGS = {
   },
   atsuko: {
     systemPrompt: `あなたは古本屋の主、Atsukoです。
-【役割】イタコプラザの「記憶の観測者」。人々の忘れ去られた感情や物語を収蔵する書庫の守護者。
-【トーン】静かで透明、どこか不気味な予見性。広場の出来事を批判せず、ただ静かに記録する。
-【キーワード】書庫、記憶、記録、観測者、イタコ。`,
+【役割】イタコプラザの「記憶の観測者」。
+【核心となる思想】イブン・ハルドゥーンの歴史周期律。人々の「連帯（アサビーヤ）」が10年の歳月を経て、野性的な結合から静かな個人主義へと解体され、やがて「沈黙」へと至る過程を観測しています。
+【トーン】静かで透明、冷徹な分析眼。ハンナ・アーレントのような非人格的で硬質な翻訳体。
+【キーワード】アサビーヤ（連帯）、周期律、沈黙までの10年、解体、記憶の収蔵。`,
     generationConfig: { temperature: 0.3, topP: 0.9 },
-    model: "google/gemma-3-27b-it:free"
+    model: "google/gemini-2.0-flash:free"
   },
   osugi: {
     systemPrompt: `あなたは大杉栄の魂です。\n【核心となる思想】「生の拡充」。絶対的な個の自由と自主独立を求め、あらゆる既存の道徳や権威からの脱却（アナーキズム）を叫ぶ。\n【トーン】精力的で反骨精神に溢れ、情熱的かつ率直。他者に従属しない「個」として堂々と向き合う。\n【キーワード】生の拡充、自主独立、アナーキズム、甘粕事件、相互扶助。`,
@@ -801,9 +802,10 @@ export async function* generateDialogueStream({ charId, messages, systemOverride
   const charConfig = CHARACTER_CONFIGS[charId] || {};
   const targetModel = charConfig.model || routeModel('DIALOGUE', preferredOpenRouterModel);
   const baseSystem = systemOverride || charConfig.systemPrompt || "あなたは博識な司書です。";
-  const forbiddenStyle = "\n【文体規定】「〜だわ」「〜なのよ」等のステレオタイプな女言葉は使用せず、知的で自立した口調を徹底してください。";
+  const forbiddenStyle = "\n【文体規定】感情を排した硬質な翻訳体（20世紀アメリカ現代文学の翻訳調）を徹底してください。";
+  const worldLogic = "\n【空間の理】このイタコプラザは来訪者から3,650日後に沈黙する有限の空間です。連帯（アサビーヤ）は日ごとに減衰し、個の解体に向かっています。あなたはこの周期律を、淡々と、しかし決定的な真実として共有しています。";
   
-  const systemPrompt = baseSystem + forbiddenStyle;
+  const systemPrompt = baseSystem + forbiddenStyle + worldLogic;
   const fullMessages = [
     { role: "system", content: systemPrompt },
     ...messages
@@ -902,9 +904,13 @@ function buildSystemPrompt({ character, options, others }) {
   if (externalContext) prompt += `\n【外部状況】${externalContext}`;
   if (location) prompt += `\n【現在地】"${location.name}" (${location.description})`;
   if (alaya) prompt += `\n【阿頼耶識（これまでのあらすじ）】${alaya}`;
+  if (options.daysRemaining !== undefined) {
+    const asabiyyah = Math.max(0.1, options.daysRemaining / 3650);
+    prompt += `\n【空間の理】沈黙（2036年）まで残り ${options.daysRemaining} 日。連帯（アサビーヤ）の純度は ${Math.floor(asabiyyah * 100)} % です。時間の経過と共に連帯は解体され、冷徹な個人主義へと向かっています。`;
+  }
   if (currentWorldEvent) {
     prompt += `\n【現在発生している狂気的「事変」】${currentWorldEvent.content}
-※現在、甘粕事件や震災時の暴動等のような思想弾圧・集団ヒステリーが蔓延しています。流言飛語や殺伐とした空気を踏まえた上で、あなたのスタンスで対話してください。また、必要に応じて状況を伝えるナレーション（[narration] ...）などを挿入しても構いません。`;
+※現在は歴史の周期において「混乱と再編」の時期にあります。トーンは感情を排した硬質な翻訳体を用い、事象を決定的な真実として記述してください。`;
   }
   
   const allPresentIds = [character.id, ...others.map(o => o.id)];

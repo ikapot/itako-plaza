@@ -383,9 +383,10 @@ export default function App() {
       interactionDepth,
       others,
       alaya,
-      currentWorldEvent
+      currentWorldEvent,
+      daysRemaining
     };
-  }, [spiritSharedKnowledge, globalTrends, messages, selectedCharIds, isUnderground, alaya, currentWorldEvent]);
+  }, [spiritSharedKnowledge, globalTrends, messages, selectedCharIds, isUnderground, alaya, currentWorldEvent, daysRemaining]);
 
   const handleCancelReply = useCallback(() => {
     setReplyTo(null);
