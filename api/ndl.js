@@ -41,25 +41,31 @@ export default async function handler(req, res) {
             const dateMatch = itemContent.match(/<dc:date>([\s\S]*?)<\/dc:date>/);
 
             if (titleMatch) {
+                const rawLink = linkMatch ? linkMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "#";
                 items.push({
                     id: `ndl-${Math.random().toString(36).substr(2, 9)}`,
-                    title: titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, ""),
-                    author: authorMatch ? authorMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "") : "Unknown Author",
+                    title: titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim(),
+                    creator: authorMatch ? authorMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "著者不明",
+                    author: authorMatch ? authorMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "著者不明", // 互換性のため両方保持
                     quote: descriptionMatch ? descriptionMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").substring(0, 100) + "..." : "時を経て、この記述があなたの言葉に呼応しています。",
-                    link: linkMatch ? linkMatch[1] : "#",
-                    year: dateMatch ? dateMatch[1] : ""
+                    link: rawLink,
+                    issued: dateMatch ? dateMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "",
+                    year: dateMatch ? dateMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "" // 互換性のため両方保持
                 });
             }
         }
 
-        // If no results, return a more poetic fallback than an error
+        // If no results, return a poetic fallback
         if (items.length === 0) {
             return res.status(200).json([{
                 id: 'ndl-fallback',
                 title: "沈黙する書架",
+                creator: "Archives of Silence",
                 author: "Archives of Silence",
                 quote: `「${keyword}」についての記録は、まだこの書庫には見当たりません。`,
-                link: "#"
+                link: "#",
+                issued: "Deep Archive",
+                year: "Deep Archive"
             }]);
         }
 

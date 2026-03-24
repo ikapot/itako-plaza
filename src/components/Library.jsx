@@ -42,10 +42,10 @@ const BookCard = React.memo(({ book, index }) => (
             <Quote size={32} className="text-black/10 group-hover:scale-110 transition-transform" />
         </div>
         <div className="text-[11px] font-black text-black leading-tight mb-1 line-clamp-2">{book.title}</div>
-        <div className="text-[9px] text-black/60 font-serif italic">{book.creator || '著者不明'}</div>
+        <div className="text-[9px] text-black/60 font-serif italic">{book.creator || book.author || '著者不明'}</div>
         <div className="mt-3 pt-3 border-t border-black/10 flex items-center justify-between">
-            <span className="text-[8px] text-black/20 uppercase tracking-widest">{book.issued ? book.issued.slice(0, 4) : 'Unknown Era'}</span>
-            <a href={book.link} target="_blank" rel="noopener noreferrer" className="p-1 px-2 rounded-none border border-black bg-black text-[9px] text-[#EAE0D5] hover:bg-[#f15a24] hover:text-white transition-all">
+            <span className="text-[8px] text-black/20 uppercase tracking-widest">{(book.issued || book.year || 'Deep Archive').toString().slice(0, 4)}</span>
+            <a href={book.link || "#"} target="_blank" rel="noopener noreferrer" className="p-1 px-2 rounded-none border border-black bg-black text-[9px] text-[#EAE0D5] hover:bg-[#f15a24] hover:text-white transition-all">
                 VIEW
             </a>
         </div>
