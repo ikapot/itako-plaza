@@ -383,9 +383,10 @@ export default function App() {
   }, []);
 
   const handleSendMessage = async (overrideMsg = null) => {
-    const msgToProcess = (overrideMsg || input || "").toString();
-    if (!msgToProcess.trim() || loading || !geminiKey) return;
-    const activeInput = msgToProcess.trim();
+    // overrideMsg が文字列でない（イベントオブジェクト等の）場合は無視して input を使用する
+    const activeMsg = (typeof overrideMsg === 'string') ? overrideMsg : input;
+    if (!activeMsg || !activeMsg.trim() || loading || !geminiKey) return;
+    const activeInput = activeMsg.trim();
 
     const userMsg = replyTo 
       ? `＞ ${replyTo.charId}: 「${replyTo.content}」\n\n${activeInput}`

@@ -55,7 +55,7 @@ const FloatingInputBar = React.memo(({
                     className="flex-1 bg-transparent border-none focus:outline-none text-white/90 text-sm md:text-base py-1.5 md:py-4 resize-none h-9 md:h-14 leading-relaxed placeholder:text-white/10 font-biz-mincho tracking-wide"
                 />
                 <button
-                    onClick={handleSendMessage}
+                    onClick={() => handleSendMessage()}
                     disabled={loading || !input.trim()}
                     className={`
                         px-3 md:px-6 h-9 md:h-12 octagon flex items-center gap-2 md:gap-3 transition-all duration-500 active:scale-95 disabled:opacity-20 disabled:grayscale overflow-hidden relative group/send shrink-0
