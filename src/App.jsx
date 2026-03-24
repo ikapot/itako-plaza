@@ -36,7 +36,11 @@ const APP_CHARACTERS = INITIAL_CHARACTERS.map(c => ({
 export default function App() {
   // --- 1. Identity & Auth States ---
   const [user, setUser] = useState(null);
-  const [userName, setUserName] = useState(() => localStorage.getItem('itako_user_name') || '無名の参列者');
+  const [userName, setUserName] = useState('彷徨える魂');
+  const [firstVisitDate, setFirstVisitDate] = useState(() => {
+    return localStorage.getItem('itako_first_visit') || null;
+  });
+  const [daysRemaining, setDaysRemaining] = useState(3650);
   const [geminiKey, setGeminiKey] = useState(() => cleanKey(localStorage.getItem('itako_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || ''));
   const [isAppReady, setIsAppReady] = useState(false);
   const [isValidatingApi, setIsValidatingApi] = useState(false);
@@ -226,6 +230,21 @@ export default function App() {
       setUser(currentUser);
       if (currentUser) {
         setUserName(currentUser.displayName || '彷徨える魂');
+        
+        // 初回ログイン日の処理
+        const now = Date.now();
+        let firstDate = localStorage.getItem('itako_first_visit');
+        if (!firstDate) {
+            firstDate = now.toString();
+            localStorage.setItem('itako_first_visit', firstDate);
+        }
+        setFirstVisitDate(firstDate);
+
+        // 残り日数の計算（10年 = 3650日）
+        const diffMs = now - parseInt(firstDate);
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        setDaysRemaining(Math.max(0, 3650 - diffDays));
+
         const [savedBookMarks, data] = await Promise.all([
           fetchBookmarks(), 
           fetchNotebookAccumulations()
@@ -582,7 +601,15 @@ export default function App() {
         ) : null}
       </AnimatePresence>
 
-      <Header userName={userName} openDrawer={() => setIsDrawerOpen(true)} openSettings={() => setShowSettings(true)} activeSlot={activeSlot} onSlotClick={handleSlotChange} {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} />
+      <Header 
+        userName={userName} 
+        openDrawer={() => setIsDrawerOpen(true)} 
+        openSettings={() => setShowSettings(true)} 
+        activeSlot={activeSlot} 
+        onSlotClick={handleSlotChange} 
+        daysRemaining={daysRemaining}
+        {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} 
+      />
       <SettingsOverlay {...{ showSettings, setShowSettings, geminiKey, setGeminiKey: handleSetGeminiKey, isValidatingApi, apiConnectionStatus, handleValidateApi, setIsAppReady }} />
       <SpiritNoiseOverlay
         error={spiritualError}

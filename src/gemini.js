@@ -990,8 +990,8 @@ export async function validateGeminiApiKey(key) {
 
 export async function extractTrendsFromNotebook(text, apiKey) {
   if (!apiKey || !text) return null;
-  const prompt = `以下を要約せよ:\n${text.substring(0, 3000)}\n出力形式: { "summary": "...", "keywords": [...] }`;
-  const res = await invokeGemini(apiKey, prompt, "あなたは解析者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
+  const prompt = `以下を、乾いた翻訳調（硬質な散文）で要約せよ。感情を排し、事実と核心のみを抽出し、どこか不穏な残響を残すこと:\n${text.substring(0, 3000)}\n出力形式: { "summary": "...", "keywords": [...] }`;
+  const res = await invokeGemini(apiKey, prompt, "あなたは解析者であり、同時に冷徹な記録者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   return res.data;
 }
 
@@ -1011,8 +1011,8 @@ export async function extractTrendsFromNews(newsArray, apiKey) {
   }
 
   const titles = newsArray.map(n => n.title).join('\n');
-  const prompt = `以下のニュースから、現在の世界の「歪み」や「潮流」を抽出し、不穏な要約を作成してください。\n${titles}\n出力形式: { "summary": "...", "keywords": [...] }`;
-  const res = await invokeGemini(apiKey, prompt, "歴史の観測者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
+  const prompt = `以下のニュースから、現在の世界の「歪み」や「潮流」を抽出し、硬質で乾いた翻訳調（現代アメリカ小説のようなトーン）で不穏な要約を作成してください。個別の事件を追うのではなく、通底する空気感を描写すること。\n${titles}\n出力形式: { "summary": "...", "keywords": [...] }`;
+  const res = await invokeGemini(apiKey, prompt, "歴史の観測者。感情を排した文体で事象を俯瞰せよ。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   
   if (res?.data) {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: res.data, timestamp: Date.now() }));
@@ -1050,8 +1050,8 @@ export async function generateWorldEvent(apiKey, trends) {
 3. 犯罪や過ちを犯そうとした者が、土際で踏みとどまり、善行へ転じる。
 4. 長年の罪の赦し、あるいは原罪への償いと、それによる魂の悟り・解脱。
 
-出力形式: { "type": "riot|massacre|assassination|love|birth|forgiveness|enlightenment", "content": "具体的な事象を、その場の空気感と共に描写する状況説明..." }`;
-  const res = await invokeGemini(apiKey, prompt, "事象の観測者。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
+出力形式: { "type": "riot|massacre|assassination|love|birth|forgiveness|enlightenment", "content": "具体的な事象を、その場の空気感と共に描写する状況説明。トーンは硬質で乾いた翻訳体を用い、過剰な装飾を排して描写すること..." }`;
+  const res = await invokeGemini(apiKey, prompt, "事象の観測者。かつてあったかもしれない、あるいはこれから起こる、乾いた現実を記述せよ。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   
   if (res?.data) {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ data: res.data, timestamp: Date.now() }));

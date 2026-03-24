@@ -11,6 +11,7 @@ const Header = React.memo(({
     onSlotClick,
     activeManagerTab,
     setActiveManagerTab,
+    daysRemaining = 3650,
     globalSentiment = 'neutral',
     apiStatus = 'idle'
 }) => {
@@ -50,9 +51,14 @@ const Header = React.memo(({
                                                           globalSentiment === 'melancholic' ? '#4f46e5' :
                                                           globalSentiment === 'joyful' ? '#f59e0b' :
                                                           globalSentiment === 'chaotic' ? '#d946ef' : '#fff' }} />
-                            <span className="text-[8px] font-black tracking-[0.2em] uppercase text-white/40 font-oswald">{globalSentiment}</span>
+                             <span className="text-[8px] font-black tracking-[0.2em] uppercase text-white/40 font-oswald">{globalSentiment}</span>
                         </motion.div>
                     ) : null}
+                    {/* Silence Countdown */}
+                    <div className="flex flex-col ml-1 pointer-events-none select-none">
+                        <span className="text-[6px] md:text-[7px] font-bold text-white/10 tracking-[0.4em] uppercase leading-none mb-1">Silence</span>
+                        <span className="text-[9px] md:text-[10px] font-black font-oswald text-[#f15a24]/60 tracking-tighter leading-none italic">T-{daysRemaining} DAYS</span>
+                    </div>
                 </div>
             </div>
 
