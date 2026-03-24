@@ -446,7 +446,6 @@ export default function App() {
       { role: 'user', content: userMsg },
       { role: 'ai', content: '', charId }
     ]);
-    setLoading(true);
 
     // 10文字以上の一定の長さがある場合のみアーカイブを検索（API節約）
     if (userMsg.length > 10) {
@@ -457,12 +456,12 @@ export default function App() {
 
     try {
       const options = buildDialogueOptions(charId);
-      const effectiveKey = user ? 'PROXY_MODE' : geminiKey;
+      const apiAccessKey = user ? 'PROXY_MODE' : geminiKey;
 
       await streamSpiritualDialogue({
         character: currentChar,
         message: userMsg,
-        apiKey: effectiveKey,
+        apiKey: apiAccessKey,
         options,
         onChunk: (chunk, meta) => {
           updateDialogueInMessages(charId, chunk, meta.sentiment);
@@ -475,11 +474,10 @@ export default function App() {
       });
     
       // --- 対話の共鳴（割り込み）検知 ---
-      const intervention = await detectSpiritIntervention(userMsg, effectiveKey === 'PROXY_MODE' ? null : effectiveKey);
+      const intervention = await detectSpiritIntervention(userMsg, apiAccessKey === 'PROXY_MODE' ? null : apiAccessKey);
       if (intervention && intervention.charId !== charId) {
         const extraChar = APP_CHARACTERS.find(c => c.id === intervention.charId);
         if (extraChar) {
-          // 少しの間をおいて介入
           setTimeout(async () => {
             const extraMsg = { id: Date.now(), charId: extraChar.id, role: 'ai', content: `[${intervention.reason}] `, sentiment: 'neutral', isIntervention: true };
             setMessages(prev => [...prev, extraMsg]);
@@ -487,7 +485,7 @@ export default function App() {
             await streamSpiritualDialogue({
               character: extraChar,
               message: userMsg,
-              apiKey: effectiveKey,
+              apiKey: apiAccessKey,
               options: buildDialogueOptions(extraChar.id),
               onChunk: (chunk, meta) => updateDialogueInMessages(extraChar.id, chunk, meta.sentiment)
             });
