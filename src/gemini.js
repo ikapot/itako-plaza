@@ -680,12 +680,13 @@ async function fetchOpenRouter(apiKey, messages, model, config = {}, stream = fa
         if (!response.ok) {
            const errText = await response.text();
            let errData = {}; try { errData = JSON.parse(errText); } catch(e) {}
-           if (response.status === 429 && retryCount < maxRetries) throw { status: 429 };
            
-           if (response.status === 404) {
-             console.error(`[Spectral Disconnect] Proxy URL not found (404). Current URL: ${PROXY_URL}`);
+           if (response.status === 502) {
+             console.error("[Spectral Disconnect] 502 Bad Gateway - Function might be restarting or overloaded.");
+             throw { status: 502, message: "霊的回路が一時的に遮断されました。数秒後に再試行してください。" };
            }
            
+           if (response.status === 429 && retryCount < maxRetries) throw { status: 429 };
            throw { status: response.status, message: errData.error || errText || "Proxy error" };
         }
 
