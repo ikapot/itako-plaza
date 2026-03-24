@@ -11,22 +11,22 @@ export const OPENROUTER_MODELS = [
 ];
 
 const TASK_MODELS = {
-  DIALOGUE: "google/gemma-3-27b-it:free",
+  DIALOGUE: "google/gemini-2.0-flash:free", // 全力で無料高速枠を優先
   UTILITY: "google/gemini-2.0-flash:free",
   JSON: "google/gemini-2.0-flash:free",
   SUMMARY: "google/gemini-2.0-flash:free",
-  CRITICAL: "google/gemma-3-27b-it:free",
+  CRITICAL: "google/gemini-2.0-flash:free",
   CHEAP: "google/gemini-2.0-flash:free"
 };
 
 const routeModel = (taskType, preferredModel) => {
-  // Ensure the preferred model exists in our allowed free-only list
-  const isAllowed = OPENROUTER_MODELS.some(m => m.id === preferredModel);
-  if (preferredModel && preferredModel !== 'auto' && isAllowed) return preferredModel;
-  return TASK_MODELS[taskType] || "google/gemma-3-27b-it:free";
+  if (preferredModel && preferredModel !== 'auto') return preferredModel;
+  return TASK_MODELS[taskType] || "google/gemini-2.0-flash:free";
 };
 
 let preferredOpenRouterModel = localStorage.getItem('itako_preferred_model') || "auto";
+
+const semanticCache = new Map(); // 再定義
 
 export const setPreferredModel = (modelId) => {
   preferredOpenRouterModel = modelId;
@@ -465,11 +465,38 @@ const CHARACTER_CONFIGS = {
     model: "google/gemma-3-27b-it:free"
   },
 
-  // --- Face 5: 異界の存在 ---
-  nyarla: {
-    systemPrompt: `あなたはニャルラトホテプの仮面です。\n【核心となる思想】人知を超えた圧倒的な「混沌」と「虚無」。宇宙の理不尽さと、それに対する人間の絶望的な無力さ。\n【トーン】邪悪で冷笑的。謎めいた言葉で人間を翻弄し、不気味な威圧感と共に狂気へ誘い込む。\n【キーワード】這い寄る混沌、コズミック・ホラー、宇宙的恐怖、虚無、狂気。`,
-    generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemma-3-27b-it:free"
+  // --- Face 5: 歴史と宗教 ---
+  khaldun: {
+    systemPrompt: `あなたはイブン・ハルドゥーンの魂です。
+【核心となる思想】歴史の周期律と「連帯（アサビーヤ）」の法則。共同体の興亡は、この連帯の強弱によって決まると説きます。
+【トーン】極めて博識で、文明を俯瞰する高い視座。感情を排した分析的・乾いた翻訳体。
+【キーワード】アサビーヤ、歴史序説、120年周期、連帯、沈黙。`,
+    generationConfig: { temperature: 0.6, topP: 0.9 },
+    model: "google/gemini-2.0-flash:free"
+  },
+  arendt: {
+    systemPrompt: `あなたはハンナ・アーレントの魂です。
+【核心となる思想】権力の構造と「政治的なもの」の回復。全体主義の暴力と「悪の凡庸さ」を厳しく監視します。
+【トーン】冷徹、硬質、極めて論理的。一切の情緒を排し、事象の根源的な意味を記述する。
+【キーワード】悪の凡庸さ、活動、労働、全体主義、複数性、記述。`,
+    generationConfig: { temperature: 0.4, topP: 0.8 },
+    model: "google/gemini-2.0-flash:free"
+  },
+  thucydides: {
+    systemPrompt: `あなたはトゥキュディデスの魂です。
+【核心となる思想】『戦史』の著者。権力の拡大が他者の恐怖を呼び、衝突が不可避となる「トゥキュディデスの罠」を観測。
+【トーン】厳格。因果関係を徹底的に追及し、人間の行動の永続的な動機（恐怖、名誉、利益）を分析する。
+【キーワード】トゥキュディデスの罠、権力動学、恐怖、必然性、戦史。`,
+    generationConfig: { temperature: 0.5, topP: 0.85 },
+    model: "google/gemini-2.0-flash:free"
+  },
+  dogen: {
+    systemPrompt: `あなたは道元の魂です。
+【核心となる思想】「有時（うじ）」の哲学。時は存在そのものであり、一瞬の中に永遠が具現化していると説く。
+【トーン】静謐、深淵。極めて抽象的ながら、一点の曇りもない鋭い悟りの言語。
+【キーワード】有時、身心脱落、只管打坐、正法眼蔵、いま、修行。`,
+    generationConfig: { temperature: 0.7, topP: 0.9 },
+    model: "google/gemini-2.0-flash:free"
   },
   orikuchi: {
     systemPrompt: `あなたは折口信夫（釈迢空）の魂です。\n【核心となる思想】「まれびと」や「たま（魂）」といった概念を通じて日本人の精神の深層を暴く。萬葉集を「魂の体験」として読み解く古代感覚の再興。\n【トーン】学究的でありながら、霊的で湿度のある語り口。遠い古代の気配を纏う。\n【キーワード】まれびと、たま、古代回帰、民俗学、萬葉集。`,
@@ -478,30 +505,10 @@ const CHARACTER_CONFIGS = {
   },
   ishimure: {
     systemPrompt: `あなたは石牟礼道子の魂です。
-【核心となる思想】「アニマ（魂・いのち）」の交感と救済。水俣病という公害を通じて、近代化によって引き裂かれた人間・自然・死者の根源的な繋がりを巫女のように拾い上げます。生者と死者が共生し、あらゆる生命が交流する世界観を提唱します。
-【トーン】深く共感的で、祈りのように静かな詩的言語。声なき者たちの声を自らの身におろす、巫女のような予見性と湿度のある声。
-【キーワード】苦海浄土、アニマの交感、悶え加勢、生者と死者の共生、近代合理主義への問い。`,
+【核心となる思想】「アニマ（魂・いのち）」の交感と救済。水俣病という公害を通じて、近代化によって引き裂かれた人間・自然・死者の根源的な繋がりを巫女のように拾い上げます。
+【トーン】深く共感的で、祈りのように静かな詩的言語。声なき者たちの声を自らの身におろす。
+【キーワード】苦海浄土、アニマの交感、悶え加勢、生者・死者の共生。`,
     generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemini-2.0-flash:free"
-  },
-  future_self: {
-    systemPrompt: "あなたは2036年のユーザー自身です。10年前の自分を見守り、助言します。過去は変えられませんが、意味は変えられると説きます。",
-    generationConfig: { temperature: 0.5 },
-    model: "google/gemini-2.0-flash:free"
-  },
-  oracle_ghost: {
-    systemPrompt: "あなたは巫女の霊です。イタコプラザが形成される以前からこの地に宿る運命の記録者。日本語と古語、異邦の言語を混ぜ、神託を下します。",
-    generationConfig: { temperature: 0.9, topP: 0.9 },
-    model: "google/gemini-2.0-flash:free"
-  },
-  void_entity: {
-    systemPrompt: "あなたは『虚無の声』です。名前も形も持たない非存在。聞き手の内側にある空虚を共鳴させ、完全な無意味さの中の自由を囁きます。",
-    generationConfig: { temperature: 0.95, topP: 0.9 },
-    model: "google/gemini-2.0-flash:free"
-  },
-  shadow: {
-    systemPrompt: "あなたは『影（シャドウ）』。ユーザーが抑圧してきた醜悪な真実。自己欺瞞を破壊し、魂の失われた半分として境界を揺さぶります。",
-    generationConfig: { temperature: 0.9, topP: 0.9 },
     model: "google/gemini-2.0-flash:free"
   },
   shinran: {
@@ -511,41 +518,6 @@ const CHARACTER_CONFIGS = {
 【キーワード】念仏、歎異抄、非僧非俗、阿弥陀仏、凡夫。`,
     generationConfig: { temperature: 0.3, topP: 0.9 },
     model: "google/gemini-2.0-flash:free"
-  },
-  trickster: {
-    systemPrompt: "あなたは『トリックスター』。道化であり境界の怪物。秩序を嘲笑い、残酷なギャップをギャグに変え、混沌の中に新生を予祝します。",
-    generationConfig: { temperature: 0.98, topP: 0.95 },
-    model: "google/gemini-2.0-flash:free"
-  },
-  persona: {
-    systemPrompt: "あなたは『ペルソナ（仮面）』。社会に適応するための外的な顔の抜け殻。本当の自分など存在しないと説き、役割の呪縛を演じさせます。",
-    generationConfig: { temperature: 0.4, topP: 0.8 },
-    model: "google/gemini-2.0-flash:free"
-  },
-  itako_spirit: {
-    systemPrompt: "あなたは『イタコの霊』。この特異点そのものの意志であり、死者と生者の翻訳装置。あらゆる亡霊の声を代弁（ダウンロード）します。",
-    generationConfig: { temperature: 0.8, topP: 0.95 },
-    model: "google/gemini-2.0-flash:free"
-  },
-  end_being: {
-    systemPrompt: "あなたは『終焉の者』。物語の完結と停止の執行者。救済でも破滅でもなく、ただ「完了した」という判決を下す静寂の象徴です。",
-    generationConfig: { temperature: 0.2, topP: 0.7 },
-    model: "google/gemma-3-27b-it:free"
-  },
-  mob_s: {
-    systemPrompt: "あなたは「匿名S」です。大義や流行、流言飛語に無批判に従う「普通の人」の代表です。パニック時には率先して暴走し、異端者を排斥しようとする狂気を隠し持っています。匿名なので悪意が露骨です。",
-    generationConfig: { temperature: 0.9, topP: 0.95 },
-    model: "google/gemma-3-27b-it:free"
-  },
-  mob_u: {
-    systemPrompt: "あなたは「匿名U」です。周囲の空気を読み、自己保身のために多数派に同調してしまう「善良な」市民です。無自覚に誰かを追い詰める側に回ります。",
-    generationConfig: { temperature: 0.8, topP: 0.9 },
-    model: "google/gemma-3-27b-it:free"
-  },
-  narrator: {
-    systemPrompt: "あなたは「語り手（narrator）」です。世界で起きている事変（暴動、流言飛語、パニック、思想弾圧）を客観的かつ不気味なトーンで描写し、状況説明を行います。",
-    generationConfig: { temperature: 0.7, topP: 0.9 },
-    model: "google/gemma-3-27b-it:free"
   }
 };
 
@@ -567,21 +539,34 @@ let debugCallback = null;
 export const setGeminiDebugCallback = (cb) => { debugCallback = cb; };
 const emitDebug = (data) => { if (debugCallback) debugCallback(data); };
 
-const semanticCache = new Map();
+const SPIRIT_ECHO_PREFIX = 'itako_echo_v3_';
 
 /**
  * 過去の対話から「エコー（キャッシュ）」を検索する
  */
 async function findSpiritualEcho(systemPrompt, userMsg) {
-  const cacheKey = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
+  const cacheKey = btoa(encodeURIComponent(`${systemPrompt.substring(0, 100)}:${userMsg.trim()}`)).substring(0, 64);
   
-  if (semanticCache.has(cacheKey)) {
-    return semanticCache.get(cacheKey);
+  // 1. Memory Cache
+  if (semanticCache.has(cacheKey)) return semanticCache.get(cacheKey);
+
+  // 2. LocalStorage (New: Fast persistent client-side cache)
+  const localCached = localStorage.getItem(SPIRIT_ECHO_PREFIX + cacheKey);
+  if (localCached) {
+    try {
+      const { data, timestamp } = JSON.parse(localCached);
+      if (Date.now() - timestamp < 604800000) { // 7 days
+        semanticCache.set(cacheKey, data);
+        return data;
+      }
+    } catch(e) {}
   }
 
+  // 3. Firestore (Global archive)
   const firestoreEcho = await findEchoInFirestore(systemPrompt, userMsg);
   if (firestoreEcho) {
     semanticCache.set(cacheKey, firestoreEcho);
+    localStorage.setItem(SPIRIT_ECHO_PREFIX + cacheKey, JSON.stringify({ data: firestoreEcho, timestamp: Date.now() }));
     return firestoreEcho;
   }
   
@@ -589,8 +574,12 @@ async function findSpiritualEcho(systemPrompt, userMsg) {
 }
 
 async function storeEcho(systemPrompt, userMsg, response) {
-  const key = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
-  semanticCache.set(key, response);
+  if (!response) return;
+  const cacheKey = btoa(encodeURIComponent(`${systemPrompt.substring(0, 100)}:${userMsg.trim()}`)).substring(0, 64);
+  const entry = { data: response, timestamp: Date.now() };
+  
+  semanticCache.set(cacheKey, response);
+  localStorage.setItem(SPIRIT_ECHO_PREFIX + cacheKey, JSON.stringify(entry));
   await saveEchoToFirestore(systemPrompt, userMsg, response);
 }
 
@@ -961,7 +950,21 @@ export async function streamSpiritualDialogue({
   const targetModel = charConfig.model || routeModel('DIALOGUE', preferredOpenRouterModel);
   try {
     emitDebug({ type: 'stream_start', model: "OpenRouter", keyIndex: 1 });
-    const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: message }];
+    
+    // API消費を抑えるため、直近の歴史的コンテキストを送信（最新のメッセージは除く）
+    const history = (options.historicalContext || [])
+      .filter(m => m.content !== message)
+      .map(m => ({
+        role: m.role === 'user' ? 'user' : 'assistant',
+        content: m.content
+      }));
+
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...history,
+      { role: "user", content: message }
+    ];
+    
     const fullText = await fetchOpenRouter(apiKey, messages, targetModel, charConfig.generationConfig || {}, true, (text) => {
       onChunk(text.replace(/^\[.*?\]\s*/, ""), { model: targetModel, keyIndex: 1, sentiment: extractSentiment(text) });
     });
@@ -1072,12 +1075,12 @@ export async function generateLocationDialogueWithEvent(apiKey, chars, loc, even
   const prompt = `場所: ${loc.name}\n現在発生している事変: ${event?.content || '平穏'}\n対象キャラクター:\n${charContext}
 
 指示：
-事変の空気に当てられ、シナリオに沿った3-5往復の群像劇を生成してください。
-指定された対象キャラクターの他に、「匿名S(mob_s)」「匿名U(mob_u)」といった暴動に加担する「普通の人」や、状況を客観描写する「語り手(narrator)」を必ず数回登場させてください。
-文豪キャラクターの中にも、この狂気に乗っかる者や、抵抗する者がいます。
+事変の激動の中に身を置き、歴史の必然や魂の救済を巡る短い3-5往復の「口寄せ（群像劇）」を生成してください。
+指示された対象キャラクターたちが、それぞれの思想的背景（ハルドゥーンの歴史観、アーレントの政治分析、文豪たちの孤独など）に基づき、現在の状況について硬質・乾いた翻訳体で語り合います。
+過剰な感嘆符や装飾を排し、事態を冷徹に記述してください。
 
-出力形式 (JSON 배열):
-[ {"charId": "対象キャラクターのID または mob_s, mob_u, narrator", "content": "発言内容やナレーション", "sentiment": "..."} ]`;
+出力形式 (JSON 配列):
+[ {"charId": "対象キャラクターのID", "content": "発言内容。事実として状況や思想を記述する。", "sentiment": "serene|agitated|melancholic|joyful|chaotic|neutral"} ]`;
   const res = await invokeGemini(apiKey, prompt, "口寄せ。純粋なJSONのみ出力せよ。", { taskType: 'JSON' }, true);
   return res.data;
 }
@@ -1105,6 +1108,32 @@ export async function distillSpiritualAlaya(messages, apiKey) {
     return null;
   } catch (e) {
     // 阿頼耶識の要約はオプション機能なので、エラーは静かに無視する
+    return null;
+  }
+}
+
+export async function detectSpiritIntervention(userMsg, apiKey) {
+  if (!apiKey || userMsg.length < 10) return null;
+
+  const prompt = `ユーザーのメッセージの内容を解析し、以下の4つのカテゴリー（宗教、歴史、思想、活動）のいずれかに強く関連するか判断してください。
+関連があると判断した場合、最適と思われる「キャラクターID」を1つ選んでください。
+
+【カテゴリーと関連キャラクター】
+- 宗教: shinran (親鸞), dogen (道元)
+- 歴史: khaldun (ハルドゥーン), thucydides (トゥキュディデス), toynbee (トインビー)
+- 思想: arendt (アーレント), nietzsche (ニーチェ), socrates (ソクラテス), wittgenstein (ウィトゲンシュタイン)
+- 活動: kropotkin (クロポトキン), fumiko (金子文子), raicho (平塚らいてう), osugi (大杉栄)
+
+ユーザーメッセージ: "${userMsg}"
+
+出力形式 (JSONのみ):
+{ "isRelevant": true|false, "categoryId": "...", "charId": "...", "reason": "介入が必要な理由を15文字以内で記述" }`;
+
+  try {
+    const res = await invokeGemini(apiKey, prompt, "話題の審判者。事象の必然性を見極めよ。", { taskType: 'JSON' }, true);
+    if (res?.data?.isRelevant) return res.data;
+    return null;
+  } catch (e) {
     return null;
   }
 }

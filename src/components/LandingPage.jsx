@@ -132,20 +132,22 @@ export default function LandingPage({
                         </div>
 
                         {/* Subtle Navigation or Action Link */}
-                        <div className="mt-8 flex flex-col md:flex-row items-center gap-6">
+                        <div className="mt-6 md:mt-8 flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full max-w-[280px] md:max-w-none">
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 onClick={handleGoogleLogin}
-                                className="px-10 py-4 bg-white text-black font-black text-xs tracking-[0.4em] uppercase shadow-2xl hover:bg-zinc-100 transition-all flex items-center gap-3"
+                                className="w-full md:w-auto px-6 md:px-10 py-3.5 md:py-4 bg-white text-black font-black text-[10px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] uppercase shadow-2xl hover:bg-zinc-100 transition-all flex items-center justify-center gap-3"
                             >
-                                <LogIn size={14} /> Google Account Login / 直接入室
+                                <LogIn size={14} /> Google Login / 直接入室
                             </motion.button>
 
                             <motion.button
+                                whileTap={{ scale: 0.95 }}
                                 onClick={() => setStep('ritual')}
-                                className="text-[9px] md:text-[10px] text-white/40 font-black tracking-[0.5em] uppercase border-b border-white/10 pb-1 hover:text-white/80 transition-all"
+                                className="w-full md:w-auto text-[8px] md:text-[10px] text-white/40 font-black tracking-[0.4em] md:tracking-[0.5em] uppercase border-b border-white/10 pb-1 hover:text-white/80 transition-all text-center"
                             >
-                                鍵（API KEY）を奉納する / Private Key Access
+                                API KEY 奉納 / Private Key Access
                             </motion.button>
                         </div>
                     </motion.div>

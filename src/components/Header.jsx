@@ -62,8 +62,8 @@ const Header = React.memo(({
                 </div>
             </div>
 
-            {/* NEW: Mode Tabs in Header Center - Optimized for Mobile */}
-            <div className="flex-1 flex justify-center px-2 overflow-hidden">
+            {/* NEW: Mode Tabs in Header Center - Optimized for Mobile (Hidden on small mobile) */}
+            <div className="hidden sm:flex flex-1 justify-center px-2 overflow-hidden">
                 <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 max-w-full overflow-x-auto itako-scrollbar-none">
                     {modeTabs.map(tab => {
                         const isActive = activeManagerTab === tab.id;
@@ -86,6 +86,12 @@ const Header = React.memo(({
                         );
                     })}
                 </div>
+            </div>
+
+            {/* Silence Display on Mobile - Instead of Tabs */}
+            <div className="flex flex-col sm:hidden items-center justify-center flex-1 px-1 opacity-40">
+                 <span className="text-[6px] font-bold text-white tracking-[0.2em] uppercase leading-none">Plaza Syncing</span>
+                 <span className="text-[8px] font-black text-[#f15a24] italic tracking-tighter">PROTOCOL_ACTIVE</span>
             </div>
 
             {/* Timeline Buttons moved to Header */}

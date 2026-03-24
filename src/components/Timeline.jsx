@@ -55,7 +55,7 @@ const SpectralBookCover = React.memo(function BookCover({ title, author, idx }) 
     const gradient = gradients[idx % gradients.length];
     
     return (
-        <div className={`shrink-0 w-24 h-36 md:w-32 md:h-48 bg-gradient-to-br ${gradient} border border-white/10 rounded-sm shadow-2xl relative overflow-hidden flex flex-col p-2 md:p-4 group-hover:scale-105 transition-transform duration-700`}>
+        <div className={`shrink-0 w-28 h-40 md:w-32 md:h-48 bg-gradient-to-br ${gradient} border border-white/10 rounded-sm shadow-2xl relative overflow-hidden flex flex-col p-3 md:p-4 group-hover:scale-105 transition-transform duration-700`}>
             <div className="absolute inset-0 opacity-20 pointer-events-none">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent)]" />
                 <div className="editorial-grid w-full h-full scale-150" />
@@ -282,12 +282,11 @@ const Timeline = React.memo(function Timeline({
                     </div>
                 </div>
             </section>
-             {/* Slot 2: Main Dialog Terminal */}
-            <section 
+             <section 
                 ref={transcriptScrollRef}
                 className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-14 md:pt-20 scroll-smooth snap-center"
             >
-                <div className="max-w-3xl mx-auto w-full pb-64 md:pb-96">
+                <div className="max-w-3xl mx-auto w-full pb-32 md:pb-96">
                     {/* Event Anomaly Floating Banner */}
                     <AnimatePresence>
                         {currentWorldEvent ? (function renderEvent() {

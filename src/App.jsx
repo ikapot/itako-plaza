@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useTransition, startTransition } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { auth, loginWithGoogle, fetchBookmarks, fetchNotebookAccumulations, saveNotebookAccumulation, saveBookmark, logout } from './firebase';
-import { invokeGemini, streamSpiritualDialogue, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, extractTrendsFromNews, generateWorldEvent, setGeminiDebugCallback, getPreferredModel, setPreferredModel as setGeminiPreferredModel, distillSpiritualAlaya } from './gemini';
+import { invokeGemini, streamSpiritualDialogue, detectSpiritIntervention, evaluateFutureSelf, validateGeminiApiKey, extractTrendsFromNotebook, extractTrendsFromNews, generateWorldEvent, setGeminiDebugCallback, getPreferredModel, setPreferredModel as setGeminiPreferredModel, distillSpiritualAlaya } from './gemini';
 import { fetchFictionalizedNews } from './news';
 import { searchNDLArchive } from './ndl';
 import { INITIAL_CHARACTERS, AMBIENT_COLORS } from './constants';
@@ -105,6 +105,14 @@ export default function App() {
   const [syncingNotebook, setSyncingNotebook] = useState(false);
   const [notebookInput, setNotebookInput] = useState('');
   const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // 初回起動時、名前が未設定なら案内人が名前を聞く
   useEffect(() => {
@@ -366,7 +374,7 @@ export default function App() {
 
 
   /**
-   * 対話の外部コンテキストを構築する
+   * 対話の外部コンテキストを構築し、API消費を最適化する
    */
   const buildDialogueOptions = useCallback((charId) => {
     const context = [
@@ -374,7 +382,12 @@ export default function App() {
       globalTrends?.summary ? `【トレンド】: ${globalTrends.summary}` : ''
     ].filter(Boolean).join('\n\n');
 
-    const interactionDepth = Math.min(Math.floor(messages.filter(m => m.charId === charId).length / 2), 2);
+    // トークン節約のため、直近のメッセージのみを抽出
+    const recentMessages = messages
+      .filter(m => m.charId === charId || m.role === 'user')
+      .slice(-10); // 直近10件のみ
+
+    const interactionDepth = Math.min(Math.floor(recentMessages.length / 2), 2);
     const others = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id) && c.id !== charId);
 
     return {
@@ -384,7 +397,9 @@ export default function App() {
       others,
       alaya,
       currentWorldEvent,
-      daysRemaining
+      daysRemaining,
+      // 実際に対話に使用するメッセージ（メモリ節約用）
+      historicalContext: recentMessages
     };
   }, [spiritSharedKnowledge, globalTrends, messages, selectedCharIds, isUnderground, alaya, currentWorldEvent, daysRemaining]);
 
@@ -453,6 +468,27 @@ export default function App() {
         }
       });
     
+      // --- 対話の共鳴（割り込み）検知 ---
+      const intervention = await detectSpiritIntervention(userMsg, effectiveKey === 'PROXY_MODE' ? null : effectiveKey);
+      if (intervention && intervention.charId !== charId) {
+        const extraChar = APP_CHARACTERS.find(c => c.id === intervention.charId);
+        if (extraChar) {
+          // 少しの間をおいて介入
+          setTimeout(async () => {
+            const extraMsg = { id: Date.now(), charId: extraChar.id, role: 'ai', content: `[${intervention.reason}] `, sentiment: 'neutral', isIntervention: true };
+            setMessages(prev => [...prev, extraMsg]);
+            
+            await streamSpiritualDialogue({
+              character: extraChar,
+              message: userMsg,
+              apiKey: effectiveKey,
+              options: buildDialogueOptions(extraChar.id),
+              onChunk: (chunk, meta) => updateDialogueInMessages(extraChar.id, chunk, meta.sentiment)
+            });
+          }, 1500);
+        }
+      }
+
       handleSlotChange(1); // Auto-switch to dialog slot
     } catch (error) {
       console.error("Spiritual Dialogue Break:", error);
