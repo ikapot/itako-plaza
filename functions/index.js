@@ -56,6 +56,8 @@ export const streamChat = functions.runWith({
         }
 
         let lastError = null;
+        let hasStartedTransfer = false;
+
         for (const targetModel of FAILOVER_MODELS) {
           try {
             const openRouterRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -79,19 +81,23 @@ export const streamChat = functions.runWith({
               const errorText = await openRouterRes.text();
               console.error(`Model ${targetModel} failure: ${errorText}`);
               lastError = new Error(errorText);
+              if (hasStartedTransfer) break; // すでに開始していたら中途半端に別のモデルに変えない
               continue;
             }
 
-            // ストリーミングヘッダー設定
-            res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-            res.setHeader('Cache-Control', 'no-cache');
-            res.setHeader('Connection', 'keep-alive');
+            // ストリーミングヘッダー設定（一度だけ）
+            if (!res.headersSent) {
+              res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+              res.setHeader('Cache-Control', 'no-cache');
+              res.setHeader('Connection', 'keep-alive');
+            }
 
             // node-fetch v3 / Node 20 でのストリーム処理
             // ReadableStream を安全に転送
             if (openRouterRes.body) {
               for await (const chunk of openRouterRes.body) {
                 res.write(chunk);
+                hasStartedTransfer = true; // データ転送を開始した
               }
             }
             
@@ -101,10 +107,13 @@ export const streamChat = functions.runWith({
           } catch (e) {
             console.error(`Attempt with ${targetModel} failed:`, e.message);
             lastError = e;
+            if (hasStartedTransfer) break; // 書き込み開始後のエラーは即時終了
           }
         }
 
-        res.status(500).json({ error: lastError?.message || "All models failed" });
+        if (!res.writableEnded) {
+          res.status(500).json({ error: lastError?.message || "All models failed" });
+        }
         resolve();
       } catch (globalError) {
         console.error("Global Proxy Error:", globalError);

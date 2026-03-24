@@ -15,10 +15,20 @@ const firebaseConfig = {
 
 console.log("Firebase Status:", {
     connected: !!firebaseConfig.apiKey,
-    domain: firebaseConfig.authDomain
+    domain: firebaseConfig.authDomain,
+    hasApiKey: !!firebaseConfig.apiKey,
+    hasAuthDomain: !!firebaseConfig.authDomain,
+    hasProjectId: !!firebaseConfig.projectId,
+    hasAppId: !!firebaseConfig.appId
 });
 
 const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.authDomain);
+if (!isConfigValid) {
+    console.error("FIREBASE ERROR: Missing essential config!", {
+        missing_api_key: !firebaseConfig.apiKey,
+        missing_auth_domain: !firebaseConfig.authDomain
+    });
+}
 console.log("Is Firebase Config Valid?", isConfigValid);
 
 let app;

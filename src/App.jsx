@@ -419,12 +419,23 @@ export default function App() {
   }, []);
 
   // --- Sending Logic ---
+  const lastSentRef = useRef({ time: 0, content: '' });
+
   const handleSendMessage = useCallback(async (textOverride = null) => {
     const userMsg = textOverride || input;
-    if (!userMsg.trim() || loading) return; // 二重送信防止
+    const now = Date.now();
+
+    // 二重送信防止（連打と、短時間での同一内容送信の両方をガード）
+    if (!userMsg.trim() || loading) return;
+    if (userMsg === lastSentRef.current.content && now - lastSentRef.current.time < 5000) {
+      console.warn("Duplicate message blocked.");
+      return;
+    }
+
+    lastSentRef.current = { time: now, content: userMsg };
 
     const effectiveKey = geminiKey || 'PROXY_MODE';
-    const charId = selectedCharIds[0]; // TODO: multi-char logic refinements
+    const charId = selectedCharIds[0];
     const currentChar = APP_CHARACTERS.find(c => c.id === charId);
 
     setLoading(true);
@@ -491,7 +502,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [input, loading, geminiKey, selectedCharIds, user, buildDialogueOptions, updateDialogueInMessages, handleSlotChange]);
 
   const handleSyncNotebook = useCallback(async () => {
     if (!notebookInput.trim() || !geminiKey) return;
