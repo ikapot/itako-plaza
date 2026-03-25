@@ -1,0 +1,42 @@
+/**
+ * Painter's Studio Palette & Base Styles
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #FDFCFB;
+  --foreground: #2D2926;
+  --atelier-accent: #A68966;
+  --studio-line: #EAE1D1;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* 額縁のように清潔なグリッド */
+.editorial-grid {
+  background-image: radial-gradient(var(--studio-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@layer base {
+  h1, h2, h3, h4, .font-serif {
+    font-family: var(--font-playfair), serif;
+  }
+  
+  body, .font-sans {
+    font-family: var(--font-inter), sans-serif;
+  }
+}
+
+/* レシート画像の透かしのような質感 */
+.receipt-overlay {
+  background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(234,225,209,0.3) 100%);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(234,225,209,0.3);
+}

@@ -510,13 +510,23 @@ export default function App() {
       if (trends) {
         setGlobalTrends(trends);
         localStorage.setItem('itako_global_trends', JSON.stringify(trends));
+        
+        // --- Persistence for Notebook Accumulation ---
+        if (user) {
+          await saveNotebookAccumulation(notebookInput);
+          const data = await fetchNotebookAccumulations();
+          setSpiritSharedKnowledge(data.map(acc => acc.content).join('\n---\n'));
+        } else {
+          setSpiritSharedKnowledge(prev => prev ? `${prev}\n---\n${notebookInput}` : notebookInput);
+        }
+        
         setShowNotebookModal(false);
         setNotebookInput('');
       }
     } finally {
       setSyncingNotebook(false);
     }
-  }, [notebookInput, geminiKey]);
+  }, [notebookInput, geminiKey, user]);
 
 
   const ambient = useMemo(() => AMBIENT_COLORS[globalSentiment] || AMBIENT_COLORS.neutral, [globalSentiment]);
