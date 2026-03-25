@@ -13,4 +13,14 @@ The React Compiler is not enabled on this template because of its impact on dev 
 
 ## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## AI 肖像画生成ルール (Itako Plaza)
+
+このプロジェクトで使用するエコー（精神）たちの肖像画は、以下のルールを厳守して生成してください：
+
+1.  **参照資料:** 必ず日本語版Wikipediaの肖像画をベースにすること。
+2.  **配色制限:** 厳密に3色のみを使用すること。（4色以上は不可）
+3.  **レイアウト:** 1枚の大きなポートレートであること。4分割（グリッド表示）は禁止。
+4.  **技法:** Andy Warholスタイルのシルクスクリーン印刷を模す。
+5.  **質感:** 意図的な**「印刷のずれ（ずれ）」**、インクの滲み、カスレを表現すること。
+
+詳細は [PORTRAIT_STYLE_GUIDE.md](./.agents/PORTRAIT_STYLE_GUIDE.md) を参照。

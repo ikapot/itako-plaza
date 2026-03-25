@@ -1,0 +1,101 @@
+﻿発生場所 行:1 文字:99
++ ... -Content C:\Users\ikap
+o\Desktop\itako\filelist.txt
+; foreach ( in ) {  ...
++                           
+                            
+           ~
+foreach の後に変数名が存在し
+ません。
+発生場所 行:1 文字:103
++ ... ent C:\Users\ikapo\Des
+ktop\itako\filelist.txt; for
+each ( in ) {  = 'C ...
++                           
+                            
+          ~
+式またはステートメントのトー
+クン ')' を使用できません。
+発生場所 行:1 文字:163
++ ...  ) {  = 'C:\Users\ikap
+o\Downloads\aozora\extracted
+\' + .Trim();  = Ge ...
++                           
+                            
+           ~
+式が '(' の後に必要です。
+発生場所 行:1 文字:235
++ ... ontent -Path  -TotalCo
+unt 3; if (.Count -ge 3) {  
+= [2].Trim(); if (  ...
++                           
+                            
+           ~
+式が '(' の後に必要です。
+発生場所 行:1 文字:275
++ ... -ge 3) {  = [2].Trim()
+; if ( -ne '') { Write-Outpu
+t ( + '|' + .Trim() ...
++                           
+                            
+           ~
+'+' 演算子に続けて値の式を指
+定する必要があります。
+発生場所 行:1 文字:276
++ ...  {  = [2].Trim(); if (
+ -ne '') { Write-Output ( + 
+'|' + .Trim()) } }  ...
++                           
+                            
+      ~~~~~
+式またはステートメントのトー
+クン '.Trim' を使用できませ
+ん。
+発生場所 行:1 文字:275
++ ... -ge 3) {  = [2].Trim()
+; if ( -ne '') { Write-Outpu
+t ( + '|' + .Trim() ...
++                           
+                            
+           ~
+式の終わりの ')' が存在しま
+せん。
+発生場所 行:1 文字:282
++ ... {  = [2].Trim(); if ( 
+-ne '') { Write-Output ( + '
+|' + .Trim()) } } }
++                           
+                            
+           ~
+式が '(' の後に必要です。
+発生場所 行:1 文字:251
++ ... talCount 3; if (.Count
+ -ge 3) {  = [2].Trim(); if 
+( -ne '') { Write-O ...
++                           
+                            
+          ~
+ステートメント ブロックまた
+は型定義に終わりの '}' が存
+在しません。
+発生場所 行:1 文字:221
++ ... m();  = Get-Content -P
+ath  -TotalCount 3; if (.Cou
+nt -ge 3) {  = [2]. ...
++                           
+                            
+          ~
+ステートメント ブロックまた
+は型定義に終わりの '}' が存
+在しません。
+報告されていない解析エラーも
+あります。報告されたエラーを
+修正して再試行してください。
+    + CategoryInfo          
+    : ParserError: (:) [],  
+   ParentContainsErrorRec   
+ ordException
+    + FullyQualifiedErrorId 
+    : MissingVariableNameA  
+  fterForeach
+ 

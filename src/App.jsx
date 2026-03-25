@@ -174,6 +174,135 @@ export default function App() {
     }
   }, [bookmarks, geminiKey]);
 
+  /**
+   * 対話の外部コンテキストを構築し、API消費を最適化する
+   */
+  const buildDialogueOptions = useCallback((charId) => {
+    const context = [
+      spiritSharedKnowledge,
+      globalTrends?.summary ? `【トレンド】: ${globalTrends.summary}` : ''
+    ].filter(Boolean).join('\n\n');
+
+    // トークン節約のため、直近のメッセージのみを抽出
+    const recentMessages = messages
+      .filter(m => m.charId === charId || m.role === 'user')
+      .slice(-10); // 直近10件のみ
+
+    const interactionDepth = Math.min(Math.floor(recentMessages.length / 2), 2);
+    const others = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id) && c.id !== charId);
+
+    return {
+      isUnderground,
+      externalContext: context,
+      interactionDepth,
+      others,
+      alaya,
+      currentWorldEvent,
+      daysRemaining,
+      // 実際に対話に使用するメッセージ（メモリ節約用）
+      historicalContext: recentMessages
+    };
+  }, [spiritSharedKnowledge, globalTrends, messages, selectedCharIds, isUnderground, alaya, currentWorldEvent, daysRemaining]);
+
+  const handleCancelReply = useCallback(() => {
+    setReplyTo(null);
+  }, []);
+
+  const updateDialogueInMessages = useCallback((charId, chunk, sentiment) => {
+    setMessages(prev => {
+      const next = [...prev];
+      const lastIdx = next.length - 1;
+      if (next[lastIdx]?.charId === charId) {
+        next[lastIdx] = { ...next[lastIdx], content: chunk, sentiment };
+      }
+      return next;
+    });
+  }, []);
+
+  // --- Sending Logic ---
+  const lastSentRef = useRef({ time: 0, content: '' });
+
+  const handleSendMessage = useCallback(async (textOverride = null, charIdOverride = null) => {
+    const userMsg = textOverride || input;
+    const now = Date.now();
+
+    // 二重送信防止（連打と、短時間での同一内容送信の両方をガード）
+    if (!userMsg.trim() || loading) return;
+    if (userMsg === lastSentRef.current.content && now - lastSentRef.current.time < 5000) {
+      console.warn("Duplicate message blocked.");
+      return;
+    }
+
+    lastSentRef.current = { time: now, content: userMsg };
+
+    const effectiveKey = geminiKey || 'PROXY_MODE';
+    const charId = charIdOverride || selectedCharIds[0];
+    const currentChar = APP_CHARACTERS.find(c => c.id === charId);
+
+    setLoading(true);
+    setInput('');
+    setReplyTo(null);
+    setMessages(prev => [
+      ...prev, 
+      { role: 'user', content: userMsg },
+      { role: 'ai', content: '', charId }
+    ]);
+
+    // 10文字以上の一定の長さがある場合のみアーカイブを検索（API節約）
+    if (userMsg.length > 10) {
+      searchNDLArchive(userMsg).then(res => {
+        if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 5));
+      });
+    }
+
+    try {
+      const options = buildDialogueOptions(charId);
+      const apiAccessKey = user ? 'PROXY_MODE' : geminiKey;
+
+      await streamSpiritualDialogue({
+        character: currentChar,
+        message: userMsg,
+        apiKey: apiAccessKey,
+        options,
+        onChunk: (chunk, meta) => {
+          updateDialogueInMessages(charId, chunk, meta.sentiment);
+          if (meta.sentiment) {
+            startTransition(() => {
+              setGlobalSentiment(meta.sentiment);
+            });
+          }
+        }
+      });
+    
+      // --- 対話の共鳴（割り込み）検知 ---
+      const intervention = await detectSpiritIntervention(userMsg, apiAccessKey === 'PROXY_MODE' ? null : apiAccessKey);
+      if (intervention && intervention.charId !== charId) {
+        const extraChar = APP_CHARACTERS.find(c => c.id === intervention.charId);
+        if (extraChar) {
+          setTimeout(async () => {
+            const extraMsg = { id: Date.now(), charId: extraChar.id, role: 'ai', content: `[${intervention.reason}] `, sentiment: 'neutral', isIntervention: true };
+            setMessages(prev => [...prev, extraMsg]);
+            
+            await streamSpiritualDialogue({
+              character: extraChar,
+              message: userMsg,
+              apiKey: apiAccessKey,
+              options: buildDialogueOptions(extraChar.id),
+              onChunk: (chunk, meta) => updateDialogueInMessages(extraChar.id, chunk, meta.sentiment)
+            });
+          }, 1500);
+        }
+      }
+
+      handleSlotChange(1); // Auto-switch to dialog slot
+    } catch (error) {
+      console.error("Spiritual Dialogue Break:", error);
+      setSpiritualError(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [input, loading, geminiKey, selectedCharIds, user, buildDialogueOptions, updateDialogueInMessages, handleSlotChange]);
+
   const handleTalkTo = useCallback(async (charId) => {
     // 1. そのキャラクターのみを選択状態にする（または先頭に追加）
     setSelectedCharIds([charId]);
@@ -192,7 +321,7 @@ export default function App() {
     setTimeout(() => {
         handleSendMessage("【対話の開始】あなたは呼び出されました。最初の挨拶と、あなたの現状への一言をお願いします。", charId);
     }, 800);
-  }, [handleSlotChange]); // handleSendMessage 等は後ほど再定義される可能性があるため依存関係に含めないか、ID指定で回避する
+  }, [handleSlotChange, handleSendMessage]); 
   
 
 
@@ -373,134 +502,7 @@ export default function App() {
   }, []); // Run once on mount
 
 
-  /**
-   * 対話の外部コンテキストを構築し、API消費を最適化する
-   */
-  const buildDialogueOptions = useCallback((charId) => {
-    const context = [
-      spiritSharedKnowledge,
-      globalTrends?.summary ? `【トレンド】: ${globalTrends.summary}` : ''
-    ].filter(Boolean).join('\n\n');
 
-    // トークン節約のため、直近のメッセージのみを抽出
-    const recentMessages = messages
-      .filter(m => m.charId === charId || m.role === 'user')
-      .slice(-10); // 直近10件のみ
-
-    const interactionDepth = Math.min(Math.floor(recentMessages.length / 2), 2);
-    const others = APP_CHARACTERS.filter(c => selectedCharIds.includes(c.id) && c.id !== charId);
-
-    return {
-      isUnderground,
-      externalContext: context,
-      interactionDepth,
-      others,
-      alaya,
-      currentWorldEvent,
-      daysRemaining,
-      // 実際に対話に使用するメッセージ（メモリ節約用）
-      historicalContext: recentMessages
-    };
-  }, [spiritSharedKnowledge, globalTrends, messages, selectedCharIds, isUnderground, alaya, currentWorldEvent, daysRemaining]);
-
-  const handleCancelReply = useCallback(() => {
-    setReplyTo(null);
-  }, []);
-
-  const updateDialogueInMessages = useCallback((charId, chunk, sentiment) => {
-    setMessages(prev => {
-      const next = [...prev];
-      const lastIdx = next.length - 1;
-      if (next[lastIdx]?.charId === charId) {
-        next[lastIdx] = { ...next[lastIdx], content: chunk, sentiment };
-      }
-      return next;
-    });
-  }, []);
-
-  // --- Sending Logic ---
-  const lastSentRef = useRef({ time: 0, content: '' });
-
-  const handleSendMessage = useCallback(async (textOverride = null) => {
-    const userMsg = textOverride || input;
-    const now = Date.now();
-
-    // 二重送信防止（連打と、短時間での同一内容送信の両方をガード）
-    if (!userMsg.trim() || loading) return;
-    if (userMsg === lastSentRef.current.content && now - lastSentRef.current.time < 5000) {
-      console.warn("Duplicate message blocked.");
-      return;
-    }
-
-    lastSentRef.current = { time: now, content: userMsg };
-
-    const effectiveKey = geminiKey || 'PROXY_MODE';
-    const charId = selectedCharIds[0];
-    const currentChar = APP_CHARACTERS.find(c => c.id === charId);
-
-    setLoading(true);
-    setInput('');
-    setReplyTo(null);
-    setMessages(prev => [
-      ...prev, 
-      { role: 'user', content: userMsg },
-      { role: 'ai', content: '', charId }
-    ]);
-
-    // 10文字以上の一定の長さがある場合のみアーカイブを検索（API節約）
-    if (userMsg.length > 10) {
-      searchNDLArchive(userMsg).then(res => {
-        if (res?.length) setArchives(prev => [...res, ...prev].slice(0, 5));
-      });
-    }
-
-    try {
-      const options = buildDialogueOptions(charId);
-      const apiAccessKey = user ? 'PROXY_MODE' : geminiKey;
-
-      await streamSpiritualDialogue({
-        character: currentChar,
-        message: userMsg,
-        apiKey: apiAccessKey,
-        options,
-        onChunk: (chunk, meta) => {
-          updateDialogueInMessages(charId, chunk, meta.sentiment);
-          if (meta.sentiment) {
-            startTransition(() => {
-              setGlobalSentiment(meta.sentiment);
-            });
-          }
-        }
-      });
-    
-      // --- 対話の共鳴（割り込み）検知 ---
-      const intervention = await detectSpiritIntervention(userMsg, apiAccessKey === 'PROXY_MODE' ? null : apiAccessKey);
-      if (intervention && intervention.charId !== charId) {
-        const extraChar = APP_CHARACTERS.find(c => c.id === intervention.charId);
-        if (extraChar) {
-          setTimeout(async () => {
-            const extraMsg = { id: Date.now(), charId: extraChar.id, role: 'ai', content: `[${intervention.reason}] `, sentiment: 'neutral', isIntervention: true };
-            setMessages(prev => [...prev, extraMsg]);
-            
-            await streamSpiritualDialogue({
-              character: extraChar,
-              message: userMsg,
-              apiKey: apiAccessKey,
-              options: buildDialogueOptions(extraChar.id),
-              onChunk: (chunk, meta) => updateDialogueInMessages(extraChar.id, chunk, meta.sentiment)
-            });
-          }, 1500);
-        }
-      }
-
-      handleSlotChange(1); // Auto-switch to dialog slot
-    } catch (error) {
-      console.error("Spiritual Dialogue Break:", error);
-      setSpiritualError(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [input, loading, geminiKey, selectedCharIds, user, buildDialogueOptions, updateDialogueInMessages, handleSlotChange]);
 
   const handleSyncNotebook = useCallback(async () => {
     if (!notebookInput.trim() || !geminiKey) return;

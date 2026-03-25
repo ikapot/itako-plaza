@@ -53,7 +53,7 @@ export const INITIAL_CHARACTERS = [
   // ── Face 4: 芸術家・詩人 ─────────────────────────────────────────
   { id: 'frankl', face: 4, pos: 0, name: 'フランクル', role: '精神科医', homeLocationId: 'altar', flavor: '意志', color: 'bg-orange-950/70', description: '極限状態でも態度を選択する「最後の自由」を説いた意味の心理学。', avatar: 'assets/frankl_warhol.png', isPreStyled: true },
   { id: 'jack_london', face: 4, pos: 1, name: 'ジャック・ロンドン', role: '作家', homeLocationId: 'cliff', flavor: '野生', color: 'bg-itako-sand', description: '荒野の実体験に基づき、生命の爆発的エネルギーを肯定。', avatar: 'assets/jack_london_warhol.png', isPreStyled: true },
-  { id: 'basho', face: 4, pos: 2, name: '松尾芭蕉', role: '俳人', homeLocationId: 'mountain', flavor: '不易流行', color: 'bg-itako-sage', description: '一瞬の中に永遠の静寂を見出す。旅を修行とした隠逸の美学。', avatar: null },
+  { id: 'basho', face: 4, pos: 2, name: '松尾芭蕉', role: '俳人', homeLocationId: 'mountain', flavor: '不易流行', color: 'bg-itako-sage', description: '一瞬の中に永遠の静寂を見出す。旅を修行とした隠逸の美学。', avatar: 'assets/basho_warhol.png', isPreStyled: true },
   { id: 'shakespeare', face: 4, pos: 3, name: 'シェイクスピア', role: '劇作家', homeLocationId: 'theatre', flavor: '人生の舞台', color: 'bg-itako-sand', description: '人間のあらゆる葛藤を言語化し、脚本に刻んだ言葉の神。', avatar: null },
   { id: 'beethoven', face: 4, pos: 4, name: 'ベートーヴェン', role: '作曲家', homeLocationId: 'roof', flavor: '歓喜', color: 'bg-zinc-800', description: '運命への屈服を拒否し、不屈の闘志で究極の調和を追求。', avatar: null },
   { id: 'chopin', face: 4, pos: 5, name: 'ショパン', role: 'ピアニスト', homeLocationId: 'piano', flavor: '郷愁', color: 'bg-itako-sand', description: '繊細な憂鬱と、結晶化した純粋な悲しみを音に託したピアノの詩人。', avatar: null },
