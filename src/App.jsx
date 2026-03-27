@@ -41,7 +41,7 @@ export default function App() {
     return localStorage.getItem('itako_first_visit') || null;
   });
   const [daysRemaining, setDaysRemaining] = useState(3650);
-  const [geminiKey, setGeminiKey] = useState(() => cleanKey(localStorage.getItem('itako_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || ''));
+  const [geminiKey, setGeminiKey] = useState(() => cleanKey(localStorage.getItem('itako_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || 'PROXY_MODE'));
   const [isAppReady, setIsAppReady] = useState(false);
   const [isValidatingApi, setIsValidatingApi] = useState(false);
   const [apiConnectionStatus, setApiConnectionStatus] = useState('idle');
