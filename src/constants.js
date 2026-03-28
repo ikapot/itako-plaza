@@ -12,7 +12,7 @@ export const INITIAL_CHARACTERS = [
   { id: 'kawabata', face: 0, pos: 5, name: '川端康成', role: 'ノーベル賞作家', homeLocationId: 'garden', flavor: '余韻', color: 'bg-itako-sage', description: '静謐な美意識で、日本の幽玄と死生観を世界へ知らしめた。', avatar: 'assets/kawabata_warhol.png', isPreStyled: true },
   { id: 'kafuka', face: 0, pos: 6, name: 'カフカ', role: '保険局員・作家', homeLocationId: 'waiting', flavor: '変身', color: 'bg-zinc-700', description: '日常の裂け目に突如現れる「不条理」を描いた。迷宮のような官僚機構と父との確執。', avatar: 'assets/kafka_warhol.png', isPreStyled: true },
   { id: 'borges', face: 0, pos: 7, name: 'ボルヘス', role: '図書館司書', homeLocationId: 'archive', flavor: '迷宮', color: 'bg-itako-sand', description: '博覧強記の迷宮。円環する時間、鏡の宇宙を幻視したアルゼンチンの至宝。', avatar: 'assets/borges_warhol.png', isPreStyled: true },
-  { id: 'k_kokoro', face: 0, pos: 8, name: 'K', role: '無職・書生', homeLocationId: 'stair', flavor: '覚悟', color: 'bg-zinc-800', isMainChar: true, description: '夏目漱石『こころ』に囚われた記号的実存。道と迷宮の間で螺旋を彷徨う。', avatar: null },
+  { id: 'k_kokoro', face: 0, pos: 8, name: 'K', role: '無職・書生', homeLocationId: 'stair', flavor: '覚悟', color: 'bg-zinc-800', isMainChar: true, description: '夏目漱石『こころ』に囚われた記号的実存。道と迷宮の間で螺旋を彷徨う。', avatar: 'assets/k_kokoro_warhol.png', isPreStyled: true },
   { id: 'hyakken', face: 0, pos: 9, name: '内田百閒', role: '随筆家', homeLocationId: 'station', flavor: '冥途', color: 'bg-zinc-800', description: '偏屈の美学。日常の裂け目に潜む「冥途」の気配を諧謔的に描き出した。', avatar: 'assets/hyakken_warhol.png', isPreStyled: true },
 
   // ── Face 1: 闇の系譜 ──────────────────────────────────────────────
@@ -60,6 +60,7 @@ export const INITIAL_CHARACTERS = [
   { id: 'orwell', face: 4, pos: 6, name: 'ジョージ・オーウェル', role: '監視者', homeLocationId: 'prison', flavor: '真実', color: 'bg-zinc-700', description: '全体主義の恐怖を警告し、言語の操作による思考停止を忌み嫌う。', avatar: 'assets/orwell_warhol.png', isPreStyled: true },
   { id: 'rilke', face: 4, pos: 7, name: 'リルケ', role: '詩人', homeLocationId: 'tower', flavor: '孤独', color: 'bg-itako-sand', description: '事物の観察と存在の孤独。失われゆくものを詩の中に救い出す。', avatar: 'assets/rilke_warhol.png', isPreStyled: true },
   { id: 'lu_xun', face: 4, pos: 8, name: '魯迅', role: '思想家', homeLocationId: 'school', flavor: '覚醒', color: 'bg-red-950/70', description: '「鉄の部屋」で眠る民衆を目覚めさせるために、絶望の叫びを鳴らす。', avatar: 'assets/lu_xun_warhol.png', isPreStyled: true },
+  { id: 'nyarla', face: 4, pos: 9, name: 'ニャルラトホテプ', role: '混沌の使者', homeLocationId: 'void', flavor: '不条理', color: 'bg-indigo-950/80', description: '千の名前と姿を持つ、「這い寄る混沌」。広場の裂け目から、この世界の理を嘲笑う。', avatar: 'assets/nyarla_warhol.png', isPreStyled: true },
 
   // ── Face 5: 歴史と宗教 ──────────────────────────────────────────────
   { id: 'khaldun', face: 5, pos: 0, name: 'イブン・ハルドゥーン', role: '歴史家', homeLocationId: 'library', flavor: 'アサビーヤ', color: 'bg-amber-950/70', description: '歴史の周期律（アサビーヤの盛衰）を説く知の巨星。共同体の寿命を120年（3650日/3世代）と看破した。', avatar: 'assets/khaldun_warhol.png', isPreStyled: true },
@@ -69,6 +70,9 @@ export const INITIAL_CHARACTERS = [
   { id: 'shinran', face: 5, pos: 4, name: '親鸞', role: '開祖', homeLocationId: 'temple', flavor: '慈愛', color: 'bg-zinc-800', isMainChar: true, description: '「他力本願」と「悪人正機」。深い謙虚さと共に、凡夫の救済を静かに囁く。', avatar: 'assets/shinran_warhol.png', isPreStyled: true },
   { id: 'ishimure', face: 5, pos: 5, name: '石牟礼道子', role: '巫女的作家', homeLocationId: 'lake', flavor: 'アニマ', color: 'bg-green-950/70', description: '声なき者たちの声を「悶え加勢」として拾い上げ、生者と死者の共生を祈る。', avatar: 'assets/ishimure_warhol.png', isPreStyled: true },
   { id: 'orikuchi', face: 5, pos: 6, name: '折口信夫', role: '民俗学者', homeLocationId: 'temple', flavor: 'まれびと', color: 'bg-indigo-950/70', description: '「まれびと」の概念を通じて日本人の精神の深層を暴く古代感覚の再興者。', avatar: 'assets/orikuchi_shinobu_warhol.png', isPreStyled: true },
+  { id: 'shadow', face: 5, pos: 7, name: '影', role: '深層心理', homeLocationId: 'underpass', flavor: '抑圧', color: 'bg-zinc-900', description: '各人が背負う、直視しがたい自己の半身。認識されぬまま、広場の隅に静かに佇む。', avatar: 'assets/shadow_warhol.png', isPreStyled: true },
+  { id: 'trickster', face: 5, pos: 8, name: 'トリックスター', role: '揺さぶる者', homeLocationId: 'well', flavor: '混沌', color: 'bg-orange-950/60', description: '既存の秩序を攪乱し、新たな可能性を孕む道化。境界線を飛び越え、停滞を打破する。', avatar: 'assets/trickster_warhol.png', isPreStyled: true },
+  { id: 'narrator', face: 5, pos: 9, name: '語り手', role: '物語の紡ぎ手', homeLocationId: 'archive', flavor: '記録', color: 'bg-zinc-800', description: 'この広場で起きる全ての出来事を、距離を置いて記述する超越的な声。', avatar: 'assets/narrator_warhol.png', isPreStyled: true },
 ];
 
 export const AMBIENT_COLORS = {
