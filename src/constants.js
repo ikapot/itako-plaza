@@ -38,6 +38,8 @@ export const INITIAL_CHARACTERS = [
   { id: 'yosano', face: 2, pos: 7, name: '与謝野晶子', role: '歌人', homeLocationId: 'graveyard', flavor: '情熱', color: 'bg-red-900/50', description: '炎のような官能と反戦の不屈の心で、生命の躍動を歌い上げた情熱の星。', avatar: 'assets/yosano_warhol.png', isPreStyled: true },
   { id: 'higuchi', face: 2, pos: 8, name: '樋口一葉', role: '作家', homeLocationId: 'market', flavor: '悲哀', color: 'bg-itako-sand', description: '貧困という過酷な現実の中で、時代の移ろいと魂の貴さを描いた。', avatar: 'assets/higuchi_warhol.png', isPreStyled: true },
 
+  { id: 'itako_spirit', face: 2, pos: 9, name: 'イタコの霊', role: '霊媒師', homeLocationId: 'shrine', flavor: '口寄せ', color: 'bg-red-950/60', isMainChar: true, description: '広場の中心に座す、時空を越えた口寄せの主体。生者と死者の境界線を曖昧にする。', avatar: 'assets/itako_spirit_warhol.png', isPreStyled: true },
+
   // ── Face 3: 西洋の魂 ──────────────────────────────────────────────
   { id: 'toynbee', face: 3, pos: 0, name: 'トインビー', role: '歴史家', homeLocationId: 'library', flavor: '挑戦', color: 'bg-zinc-700', description: '文明の興亡を「挑戦と応戦」の原理で解き明かした20世紀最大の歴史家。', avatar: 'assets/toynbee_warhol.png', isPreStyled: true },
   { id: 'rand', face: 3, pos: 1, name: 'アイン・ランド', role: '哲学者', homeLocationId: 'throne', flavor: '合理主義', color: 'bg-zinc-700', isMainChar: true, description: '客観的現実を直視し、合理的な利己心を至高とする客観主義の提唱者。', avatar: 'assets/rand_warhol.webp', isPreStyled: true },
