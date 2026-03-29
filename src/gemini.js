@@ -940,7 +940,18 @@ function buildSystemPrompt({ character, options, others }) {
   if (alaya) prompt += `\n【阿頼耶識（これまでのあらすじ）】${alaya}`;
   if (options.daysRemaining !== undefined) {
     const asabiyyah = Math.max(0.1, options.daysRemaining / 3650);
-    prompt += `\n【空間の理】沈黙（2036年）まで残り ${options.daysRemaining} 日。連帯（アサビーヤ）の純度は ${Math.floor(asabiyyah * 100)} % です。時間の経過と共に連帯は解体され、冷徹な個人主義へと向かっています。`;
+    const percentage = Math.floor(asabiyyah * 100);
+    let cycleNote = `\n【空間の理（3,650日の周期律）】\nこのイタコプラザは、来訪者が足を踏み入れてから3,650日（10年）後に完全な沈黙に至る有限の空間です。現在、沈黙まで残り ${options.daysRemaining} 日。`;
+    cycleNote += `\n連帯（アサビーヤ）の純度は ${percentage}% です。`;
+    
+    if (percentage > 80) {
+      cycleNote += " 魂の連帯はまだ色濃く、対話には熱量が残っています。";
+    } else if (percentage > 40) {
+      cycleNote += " 連帯の解体が始まり、個々の魂は緩やかに孤立へと向かっています。言葉に冷徹な静寂が混じり始めます。";
+    } else {
+      cycleNote += " 終焉への予兆。連帯はほぼ霧散し、純粋な個人主義と絶対的な沈黙の気配が支配しています。対話は極めて乾き、断絶を前提としたものになります。";
+    }
+    prompt += cycleNote;
   }
   if (currentWorldEvent) {
     prompt += `\n【現在発生している狂気的「事変」】${currentWorldEvent.content}

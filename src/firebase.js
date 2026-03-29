@@ -24,9 +24,11 @@ console.log("Firebase Status:", {
 
 const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.authDomain);
 if (!isConfigValid) {
-    console.error("FIREBASE ERROR: Missing essential config!", {
+    console.error("FIREBASE ERROR: Missing essential config! Authentication and bookmarks will not functional. " +
+                  "Ensure VITE_FIREBASE_* environment variables are set in GitHub Secrets (for Pages) or Vercel Dashboard.", {
         missing_api_key: !firebaseConfig.apiKey,
-        missing_auth_domain: !firebaseConfig.authDomain
+        missing_auth_domain: !firebaseConfig.authDomain,
+        projectId: firebaseConfig.projectId
     });
 }
 console.log("Is Firebase Config Valid?", isConfigValid);
