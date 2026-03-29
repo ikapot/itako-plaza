@@ -40,7 +40,7 @@ const authCallbacks = new Set();
 let currentUser = null;
 
 if (isConfigValid) {
-    app = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
     const realAuth = getAuth(app);
     db = getFirestore(app);
 

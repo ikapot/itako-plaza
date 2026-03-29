@@ -397,6 +397,7 @@ export default function App() {
       } else {
          // 未ログイン時は個別のキー設定があればそれを保持し、なければクリア
          setGeminiKey(prev => prev === 'PROXY_MODE' ? '' : prev);
+         setIsAppReady(true);
       }
     });
 
