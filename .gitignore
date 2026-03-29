@@ -34,3 +34,4 @@ sync_log.txt
 _temp_design.md
 
 .vercel
+.env*.local
