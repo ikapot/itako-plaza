@@ -85,3 +85,12 @@ export const AMBIENT_COLORS = {
   joyful: { color: '#1a1505', pattern: 'radial-gradient(circle, #2a2005 2px, transparent 2px)' },
   chaotic: { color: '#0f0515', pattern: 'repeating-linear-gradient(45deg, #102 0, #102 1px, transparent 0, transparent 20px)' },
 };
+
+export const SENTIMENT_ACCENTS = {
+  neutral: 'rgba(255,255,255,0.4)',
+  serene: 'rgba(0,255,255,0.4)',
+  agitated: 'rgba(255,0,0,0.4)',
+  melancholic: 'rgba(79,70,229,0.4)',
+  joyful: 'rgba(245,158,11,0.4)',
+  chaotic: 'rgba(217,70,239,0.4)',
+};

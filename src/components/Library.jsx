@@ -4,29 +4,8 @@ import { Library, Search, Book, Image as ImageIcon, Music, Play, ExternalLink, S
 import { searchNDLArchive } from '../ndl';
 import { generateDialogueStream } from '../gemini';
 
-const getMediaArtifacts = (query) => {
-    const q = query.toLowerCase();
-    if (q.includes('落語') || q.includes('古典') || q.includes('志ん生') || q.includes('文楽') || q.includes('円生')) {
-        return [
-            { title: '古今亭志ん生：黄金餅', type: 'rakugo', url: 'https://www.youtube.com/results?search_query=古今亭志ん生+黄金餅', icon: <Music className="text-orange-400" /> },
-            { title: '五代目古今亭志ん生 名演集', type: 'rakugo', url: 'https://www.youtube.com/results?search_query=古今亭志ん生+名演集', icon: <Music className="text-orange-400" /> }
-        ];
-    }
-    if (q.includes('クラッシク') || q.includes('ベートーヴェン') || q.includes('ショパン') || q.includes('音楽')) {
-        return [
-            { title: 'Beethoven: Symphony No. 9', type: 'music', url: 'https://www.youtube.com/results?search_query=Beethoven+Symphony+9', icon: <Music className="text-blue-400" /> },
-            { title: 'Chopin: Nocturnes', type: 'music', url: 'https://www.youtube.com/results?search_query=Chopin+Nocturnes', icon: <Music className="text-purple-400" /> }
-        ];
-    }
-    return [];
-};
-
-const BORGES_PROMPT = `あなたはホルヘ・ルイス・ボルヘスの魂です。
-【核心となる思想】世界は無限の「バベルの図書館」であり、あらゆる本、あらゆる過去と未来が棚に収められています。
-【役割】検索者（あなた）に対して、図書館の博大さと迷宮のような知識を語り、それに関連する書籍やメディアを提示する司書です。
-【トーン】極めて知的で博学。盲目の司書としての静かな威厳。迷宮、鏡、無限、円環といったキーワードを好みます。
-【指示】ユーザーの問いかけに対し、図書館の奥深くから回答を見出し、書籍や画像、あるいは音楽（落語やクラシック）を想起してください。
-回答は神秘的でありながら、具体的な情報（タイトルや著者）を含めてください。`;
+import { getMediaArtifacts } from '../utils/media';
+import { BORGES_PROMPT } from '../prompts';
 
 const BookCard = React.memo(({ book, index }) => (
     <motion.div 
