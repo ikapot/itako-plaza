@@ -1,7 +1,5 @@
 import { invokeGemini } from "./gemini";
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 const CACHE_KEY = 'itako_news_cache';
 const CACHE_TIME_KEY = 'itako_news_cache_time';
 const CACHE_EXPIRY_MS = 3600000;

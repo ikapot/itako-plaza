@@ -1,0 +1,69 @@
+﻿
+> itako@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m笨・[39m 2136 modules transformed.
+node.exe : [31m笨・[39m Build f
+ailed in 4.88s
+発生場所 C:\Program Files\nodejs\n
+pm.ps1:29 文字:3
++   & $NODE_EXE $NPM_CLI_JS $a
+rgs
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo          : 
+    NotSpecified: ([31m笨・[3  
+  9m Build failed in 4.88s:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+[31merror during build:
+[31msrc/utils/media.js (18:22
+): Expression expected[31m
+file: [36mC:/Users/ikapo/Desk
+top/itako/src/utils/media.js:1
+8:22[31m
+[33m
+16:                 type: 'rak
+ugo', 
+17:                 url: 'http
+s://www.youtube.com/results?se
+arch_query=蜿､莉贋ｺｭ蠢励ｓ逕・鮟・≡鬢・, 
+18:                 icon: <Mus
+ic className="text-orange-400"
+ /> 
+                          ^
+19:             },
+20:             { 
+[31m
+    at getRollupError (file://
+/C:/Users/ikapo/Desktop/itako/
+node_modules/rollup/dist/es/sh
+ared/parseAst.js:402:41)
+    at ParseError.initialise (
+file:///C:/Users/ikapo/Desktop
+/itako/node_modules/rollup/dis
+t/es/shared/node-entry.js:1446
+5:28)
+    at convertNode (file:///C:
+/Users/ikapo/Desktop/itako/nod
+e_modules/rollup/dist/es/share
+d/node-entry.js:16437:10)
+    at convertProgram (file://
+/C:/Users/ikapo/Desktop/itako/
+node_modules/rollup/dist/es/sh
+ared/node-entry.js:15677:12)
+    at Module.setSource (file:
+///C:/Users/ikapo/Desktop/itak
+o/node_modules/rollup/dist/es/
+shared/node-entry.js:17392:24)
+    at async ModuleLoader.addM
+oduleSource (file:///C:/Users/
+ikapo/Desktop/itako/node_modul
+es/rollup/dist/es/shared/node-
+entry.js:21497:13)[39m
+

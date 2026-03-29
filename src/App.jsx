@@ -18,7 +18,7 @@ import DashboardSidebar from './components/DashboardSidebar';
 import FloatingInputBar from './components/FloatingInputBar';
 import CharacterOverlay from './components/CharacterOverlay';
 import NamePromptModal from './components/NamePromptModal';
-import { X, Activity } from 'lucide-react';
+import { X, Library, User, Cpu, Bookmark, Settings, RotateCw } from 'lucide-react';
 
 function cleanKey(key) {
   if (typeof key !== 'string') return key;

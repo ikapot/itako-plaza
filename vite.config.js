@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'fs'
 import path from 'path'
+import iconv from 'iconv-lite'
 
 const aozoraPlugin = () => ({
   name: 'aozora-api',
@@ -37,7 +38,6 @@ const aozoraPlugin = () => ({
         
         // ランダムに最大3ファイルを選び、その冒頭1500文字を抽出する
         const selected = files.sort(() => 0.5 - Math.random()).slice(0, 3);
-        const iconv = require('iconv-lite'); // Dynamically require iconv
         
         const results = selected.map(file => {
            let buffer = fs.readFileSync(path.join(authorDir, file));
