@@ -81,7 +81,7 @@ const Timeline = React.memo(function Timeline({
                         {/* Content */}
                         <div className="p-3 md:p-10 space-y-8 md:space-y-12">
                             {news.map(function renderNews(n) {
-                                return <MemoizedNewsItem key={n.id} n={n} charMap={charMap} />;
+                                return <NewsItem key={n.id} n={n} charMap={charMap} />;
                             })}
                         </div>
                     </div>
@@ -139,7 +139,7 @@ const Timeline = React.memo(function Timeline({
                         <div className="flex-1 p-4 md:p-8 space-y-12">
                             {messages.map(function renderMessage(m, i) {
                                 return (
-                                    <MemoizedMessageItem 
+                                    <MessageItem 
                                         key={i} 
                                         m={m} 
                                         i={i} 
