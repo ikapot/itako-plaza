@@ -1,4 +1,6 @@
 import React, { useMemo, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp, MessageSquare, ChevronRight, Bookmark } from 'lucide-react';
 import { SENTIMENT_ACCENTS } from '../constants';
 import DialogueEcho from './timeline/DialogueEcho';
 import SpectralBookCover from './timeline/SpectralBookCover';
@@ -6,6 +8,43 @@ import NewsItem from './timeline/NewsItem';
 import MessageItem from './timeline/MessageItem';
 
 // ── Main Component ──────────────────────────────────────────────
+
+const Timeline = React.memo(function Timeline({
+    scrollRef,
+    handleScroll,
+    news,
+    characters,
+    currentWorldEvent,
+    isUnderground,
+    setIsUnderground,
+    userName,
+    messages,
+    loading,
+    handleBookmark,
+    handleReply,
+    globalTrends,
+    setShowNotebookModal,
+    futureSelfCritique,
+    archives,
+    globalSentiment = 'neutral',
+}) {
+    const transcriptScrollRef = useRef(null);
+
+    // 会話更新時に最下部へスクロール、または最新メッセージを中央に寄せる
+    useEffect(() => {
+        if (transcriptScrollRef.current && messages.length > 0) {
+            // 少し遅延をおいて要素がレンダリングされるのを待つ
+            setTimeout(() => {
+                const messageElements = transcriptScrollRef.current.querySelectorAll('.message-item');
+                const lastMessage = messageElements[messageElements.length - 1];
+                if (lastMessage) {
+                    lastMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+        }
+    }, [messages, loading]);
+
+    const accentColor = SENTIMENT_ACCENTS[globalSentiment] || SENTIMENT_ACCENTS.neutral;
 
     const charMap = useMemo(() => {
         const map = {};
