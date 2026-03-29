@@ -156,7 +156,7 @@ export default function App() {
     setGeminiKey(cleaned);
   }, []);
 
-  const handleSlotChange = useCallback(async (index) => {
+  const handleSlotChange = useCallback(async (index, shouldScrollToBottom = false) => {
     setActiveSlot(index);
     // 物理スクロールを実行
     if (scrollRef.current) {
@@ -164,6 +164,17 @@ export default function App() {
             left: scrollRef.current.offsetWidth * index,
             behavior: 'smooth'
         });
+    }
+
+    // 最新メッセージへスクロール（ロゴクリック時など）
+    if (index === 1 && shouldScrollToBottom) {
+      setTimeout(() => {
+        const timelineSlots = document.querySelectorAll('.timeline-slot');
+        const dialogSlot = timelineSlots[1];
+        if (dialogSlot) {
+          dialogSlot.scrollTo({ top: dialogSlot.scrollHeight, behavior: 'smooth' });
+        }
+      }, 300);
     }
 
     if (index === 2 && geminiKey) {
@@ -660,7 +671,7 @@ export default function App() {
         openDrawer={() => setIsDrawerOpen(true)} 
         openSettings={() => setShowSettings(true)} 
         activeSlot={activeSlot} 
-        onSlotClick={handleSlotChange} 
+        onSlotClick={(idx) => handleSlotChange(idx, idx === 1)} 
         daysRemaining={daysRemaining}
         {...{ activeManagerTab, setActiveManagerTab, globalSentiment, apiStatus: apiConnectionStatus }} 
       />

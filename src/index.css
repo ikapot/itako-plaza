@@ -29,8 +29,25 @@
 
 @media (max-width: 640px) {
   :root {
-    font-size: 14px;
+    font-size: 13px; /* Slightly smaller base for 375px */
   }
+}
+
+/* Color Rule: Orange paper -> Black line, Black paper -> Orange line */
+.border-on-orange {
+  border: 1.5px solid #000000 !important;
+}
+
+.border-on-black {
+  border: 1px solid #f15a24 !important;
+}
+
+.divider-on-orange {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+.divider-on-black {
+  border-color: rgba(241, 90, 36, 0.2) !important;
 }
 
 .itako-outline {

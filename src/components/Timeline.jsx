@@ -63,7 +63,7 @@ const Timeline = React.memo(function Timeline({
             <DialogueEcho messages={messages} accentColor={accentColor} />
             
             {/* Slot 1: News Terminal */}
-            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-16 md:pt-32 snap-center">
+            <section className="timeline-slot p-2 md:p-6 overflow-y-auto bg-transparent pt-14 md:pt-32 snap-center">
                 <div className="max-w-3xl mx-auto w-full pb-20">
                     <div className="bg-black/80 border-2 border-black itako-outline overflow-hidden">
                         {/* Terminal Header */}
@@ -123,7 +123,7 @@ const Timeline = React.memo(function Timeline({
                             <div className="flex items-center gap-2 md:gap-3">
                                 <MessageSquare size={16} className="text-[#f15a24]" />
                                 <div>
-                                    <div className="text-[9px] md:text-[10px] font-black text-[#f15a24] uppercase tracking-widest leading-none">Transcripts</div>
+                                    <div className="text-[10px] font-black text-[#f15a24] uppercase tracking-widest leading-none">Dialog Transcript</div>
                                     <div className="text-[7px] md:text-[8px] text-[#EAE0D5]/40 uppercase tracking-widest mt-0.5">Session: {userName || 'GUEST'}</div>
                                 </div>
                             </div>
@@ -218,7 +218,7 @@ const Timeline = React.memo(function Timeline({
                                             whileInView={{ opacity: 1, x: 0 }}
                                             viewport={{ once: true }}
                                             transition={{ delay: idx * 0.1 }}
-                                            className="group block p-8 bg-white/[0.02] border border-white/5 rounded-[40px] hover:bg-white/[0.05] hover:border-[#bd8a78]/30 transition-all duration-500 relative overflow-hidden"
+                                            className="group block p-6 md:p-8 bg-white/[0.02] border-on-black rounded-[32px] md:rounded-[40px] hover:bg-white/[0.05] hover:border-[#bd8a78]/30 transition-all duration-500 relative overflow-hidden"
                                         >
                                             <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-10 transition-opacity">
                                                 <Bookmark size={48} className="text-[#bd8a78]" />

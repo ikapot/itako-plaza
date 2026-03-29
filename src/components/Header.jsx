@@ -29,8 +29,8 @@ const Header = React.memo(({
     ];
 
     return (
-        <header className="pt-safe flex items-center justify-between px-2 md:px-6 border-b-2 border-black bg-black z-50 shrink-0 transition-all duration-300">
-            <div className="h-14 md:h-16 flex items-center gap-2 md:gap-6">
+        <header className="pt-safe flex items-center justify-between px-2 md:px-6 border-b-2 border-black bg-black z-50 shrink-0 transition-all duration-300 h-12 md:h-16">
+            <div className="h-full flex items-center gap-2 md:gap-6">
                 <button
                     onClick={openDrawer}
                     className="p-2 -ml-1 text-white/40 hover:text-white transition-colors active:scale-90 md:hidden drop-shadow-md"
@@ -95,7 +95,7 @@ const Header = React.memo(({
             </div>
 
             {/* Timeline Buttons moved to Header */}
-            <div className="flex items-center gap-0 md:gap-2 h-14 md:h-16 shrink-0">
+            <div className="flex items-center gap-0 md:gap-2 h-full shrink-0">
                 {navItems.map(item => (
                     <motion.button
                         key={item.id}

@@ -26,7 +26,7 @@ const NewsItem = React.memo(function NewsItem({ n, charMap }) {
                             viewport={{ once: true }}
                             className={`flex ${dIdx % 2 === 0 ? 'justify-end' : 'justify-start'} w-full`}
                         >
-                            <div className={`p-4 md:p-8 rounded-none border-2 border-black max-w-[90%] md:max-w-[85%] bg-black/80 text-[#EAE0D5]`}>
+                            <div className={`p-4 md:p-8 rounded-none border-on-black max-w-[90%] md:max-w-[85%] bg-black/80 text-[#EAE0D5]`}>
                                 <div className="flex items-center gap-3 mb-3">
                                     {char ? <WarholAvatar src={char.avatar} size="w-6 h-6" isSelected isPreStyled={char.isPreStyled} colorClass={char.color} /> : null}
                                     <span className="text-[9px] font-black tracking-[0.3em] text-[#f15a24] uppercase">{char?.name || d.charId}</span>

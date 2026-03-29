@@ -37,8 +37,8 @@ const MessageItem = React.memo(function MessageItem({ m, i, isUser, charObj, han
 
             <div className={`relative p-4 md:p-6 octagon transition-all duration-300 max-w-[90%] md:max-w-[80%] ${
                 isUser 
-                    ? 'bg-[#f15a24] text-black font-black text-sm md:text-base selection:bg-black selection:text-[#f15a24]' 
-                    : 'bg-[#EAE0D5]/10 text-[#EAE0D5] border border-white/5 font-serif italic text-sm md:text-base selection:bg-[#f15a24] selection:text-black'
+                    ? 'bg-[#f15a24] text-black font-black text-sm md:text-base selection:bg-black selection:text-[#f15a24] border-on-orange' 
+                    : 'bg-[#EAE0D5]/10 text-[#EAE0D5] border-on-black font-serif italic text-sm md:text-base selection:bg-[#f15a24] selection:text-black'
             }`}>
                 {/* Sentiment Tag */}
                 {(!isUser && m.sentiment) ? (
@@ -52,7 +52,7 @@ const MessageItem = React.memo(function MessageItem({ m, i, isUser, charObj, han
                 </p>
 
                 {/* Interaction Buttons (Subtle - only visible on hover or mobile) */}
-                <div className={`mt-4 pt-3 border-t border-black/10 flex items-center gap-4 opacity-40 hover:opacity-100 transition-opacity ${isUser ? 'justify-end' : 'justify-start'}`}>
+                <div className={`mt-4 pt-3 border-t divider-on-orange flex items-center gap-4 opacity-40 hover:opacity-100 transition-opacity ${isUser ? 'justify-end' : 'justify-start'}`}>
                     <motion.button 
                         onClick={() => handleBookmark?.(m)} 
                         whileHover={{ scale: 1.05 }}

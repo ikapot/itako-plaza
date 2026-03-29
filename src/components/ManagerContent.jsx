@@ -275,7 +275,7 @@ const ManagerContent = React.memo(({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="p-8 rounded-[40px] bg-white/5 border border-white/10 space-y-10"
+                        className="p-8 rounded-[40px] bg-black/40 border-on-black space-y-10"
                     >
                         <div className="flex items-center gap-6 p-8 bg-[#f15a24]/5 border border-[#f15a24]/10 rounded-[35px] relative overflow-hidden group">
                             <motion.div 
@@ -316,7 +316,7 @@ const ManagerContent = React.memo(({
                         exit={{ opacity: 0, y: -10 }}
                         className="p-8 space-y-12 h-screen overflow-y-auto itako-scrollbar-thin"
                     >
-                        <div className="flex flex-col md:flex-row items-center gap-6 p-8 bg-white/5 border border-white/10 rounded-[40px]">
+                        <div className="flex flex-col md:flex-row items-center gap-6 p-8 bg-black/40 border-on-black rounded-[40px]">
                             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#bd8a78] to-[#f15a24] flex items-center justify-center text-4xl shadow-2xl overflow-hidden">
                                 {user?.photoURL ? <img src={user.photoURL} alt="avatar" /> : (userName?.[0] || '魂')}
                             </div>
@@ -346,7 +346,7 @@ const ManagerContent = React.memo(({
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {stats.map((s, i) => (
-                                <div key={i} className="p-4 bg-white/5 border border-white/10 rounded-3xl">
+                                <div key={i} className="p-4 bg-black/40 border-on-black rounded-3xl">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{s.label}</span>
                                         <div className="text-white/50">{s.icon}</div>
