@@ -31,52 +31,63 @@ if (!isConfigValid) {
 }
 console.log("Is Firebase Config Valid?", isConfigValid);
 
-let app;
 let auth;
 let db;
 
-const dummyAuthCallbacks = new Set();
-let dummyCurrentUser = null;
+const authCallbacks = new Set();
+let currentUser = null;
 
 if (isConfigValid) {
     app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
+    const realAuth = getAuth(app);
     db = getFirestore(app);
+
+    // Bridge real auth changes to our unified unified listeners
+    realAuth.onAuthStateChanged((user) => {
+        currentUser = user;
+        authCallbacks.forEach(cb => cb(user));
+    });
+    
+    // We export a wrapper that uses our unified listeners and realAuth's actual state
+    auth = {
+        onAuthStateChanged: (cb) => {
+            authCallbacks.add(cb);
+            cb(currentUser);
+            return () => { authCallbacks.delete(cb); };
+        },
+        get currentUser() { return currentUser; },
+        signOut: () => signOut(realAuth),
+        // Pass through any other required functions if needed, 
+        // but App.jsx mostly uses these and direct realAuth for popups
+        _realAuth: realAuth 
+    };
 } else {
     console.warn("Firebase config is missing. Authentication will not work.");
     auth = {
         onAuthStateChanged: (cb) => {
-            dummyAuthCallbacks.add(cb);
-            cb(dummyCurrentUser);
-            return () => { dummyAuthCallbacks.delete(cb); };
+            authCallbacks.add(cb);
+            cb(currentUser);
+            return () => { authCallbacks.delete(cb); };
         },
-        get currentUser() { return dummyCurrentUser; },
-        onIdTokenChanged: (cb) => {
-            dummyAuthCallbacks.add(cb);
-            cb(dummyCurrentUser);
-            return () => { dummyAuthCallbacks.delete(cb); };
-        },
-        // getIdToken をモックに追加（PROXY_MODEでのクラッシュ防止）
         get currentUser() { 
-          if (!dummyCurrentUser) return null;
+          if (!currentUser) return null;
           return {
-            ...dummyCurrentUser,
+            ...currentUser,
             getIdToken: async () => "dummy-id-token"
           };
         }
     };
-    // db を空のオブジェクトではなく、Firestore のメソッド呼び出しに対してエラーを投げない Proxy にする
     db = new Proxy({}, {
         get: (target, prop) => {
             if (prop === 'type' || prop === '_type') return 'Firestore';
-            return () => ({}); // ほとんどのメソッドがオブジェクトを返すように
+            return () => ({}); 
         }
     });
 }
 
 const triggerAuthChange = (user) => {
-    dummyCurrentUser = user;
-    dummyAuthCallbacks.forEach(cb => cb(user));
+    currentUser = user;
+    authCallbacks.forEach(cb => cb(user));
 };
 
 export { auth, db, triggerAuthChange };
@@ -91,7 +102,7 @@ export const loginWithGoogle = async () => {
         return user;
     }
     try {
-        const result = await signInWithPopup(auth, googleProvider);
+        const result = await signInWithPopup(auth._realAuth || auth, googleProvider);
         return result.user;
     } catch (error) {
         console.error("Google Auth Error:", error);
@@ -108,7 +119,7 @@ export const loginWithGoogle = async () => {
 export const logout = () => {
     if (isConfigValid) {
         try {
-            signOut(auth);
+            signOut(auth._realAuth || auth);
         } catch (e) {
             triggerAuthChange(null);
         }
@@ -125,7 +136,7 @@ export const loginAnonymously = async () => {
         return user;
     }
     try {
-        const result = await signInAnonymously(auth);
+        const result = await signInAnonymously(auth._realAuth || auth);
         return result.user;
     } catch (error) {
         console.error("Auth Error:", error);
@@ -143,7 +154,7 @@ export const loginAnonymously = async () => {
  * 栞（ブックマーク）を保存
  */
 export const saveBookmark = async (userMsg, aiMsg, charId) => {
-    if (!isConfigValid || !db || typeof db.collection !== 'function') {
+    if (!isConfigValid || !db) {
         console.warn("SaveBookmark ignored: Firebase not connected.");
         return;
     }
@@ -166,7 +177,7 @@ export const saveBookmark = async (userMsg, aiMsg, charId) => {
  * 保存された栞を全取得
  */
 export const fetchBookmarks = async () => {
-    if (!isConfigValid || !db || typeof db.collection !== 'function') return [];
+    if (!isConfigValid || !db) return [];
     const user = auth.currentUser;
     if (!user) return [];
     try {
@@ -187,7 +198,7 @@ export const fetchBookmarks = async () => {
  * NotebookLMの蓄積データを保存
  */
 export const saveNotebookAccumulation = async (content) => {
-    if (!isConfigValid || !db || typeof db.collection !== 'function') return;
+    if (!isConfigValid || !db) return;
     const user = auth.currentUser;
     if (!user || !content.trim()) return;
     try {
@@ -205,7 +216,7 @@ export const saveNotebookAccumulation = async (content) => {
  * NotebookLMの蓄積データを全取得
  */
 export const fetchNotebookAccumulations = async () => {
-    if (!isConfigValid || !db || typeof db.collection !== 'function') return [];
+    if (!isConfigValid || !db) return [];
     const user = auth.currentUser;
     if (!user) return [];
     try {
@@ -225,7 +236,7 @@ export const fetchNotebookAccumulations = async () => {
  * 霊的エコー（セマンティックキャッシュ）を検索
  */
 export const findEchoInFirestore = async (systemPrompt, userMsg) => {
-    if (!isConfigValid || !db || typeof db.collection !== 'function') return null;
+    if (!isConfigValid || !db) return null;
     const cacheKey = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
     try {
         const q = query(
@@ -247,7 +258,7 @@ export const findEchoInFirestore = async (systemPrompt, userMsg) => {
  * 霊的エコーを保存
  */
 export const saveEchoToFirestore = async (systemPrompt, userMsg, response) => {
-    if (!isConfigValid || !db || typeof db.collection !== 'function') return;
+    if (!isConfigValid || !db) return;
     const cacheKey = `${systemPrompt.substring(0, 50)}:${userMsg.trim()}`;
     try {
         await addDoc(collection(db, "semantic_echoes"), {
