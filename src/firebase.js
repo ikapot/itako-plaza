@@ -320,3 +320,38 @@ export const fetchLocationEnergies = async () => {
         return {};
     }
 };
+
+/**
+ * 対話の記憶（Alaya）を Firestore に保存
+ */
+export const saveAlayaToFirestore = async (content) => {
+    if (!isConfigValid || !db) return;
+    const user = auth.currentUser;
+    if (!user || !content.trim()) return;
+    try {
+        await setDoc(doc(db, "alaya", user.uid), {
+            content,
+            timestamp: serverTimestamp()
+        });
+    } catch (e) {
+        console.error("Save Alaya Error:", e);
+    }
+};
+
+/**
+ * 対話の記憶（Alaya）を Firestore から取得
+ */
+export const fetchAlayaFromFirestore = async () => {
+    if (!isConfigValid || !db) return null;
+    const user = auth.currentUser;
+    if (!user) return null;
+    try {
+        const snap = await getDoc(doc(db, "alaya", user.uid));
+        if (snap.exists()) {
+            return snap.data().content;
+        }
+    } catch (e) {
+        console.error("Fetch Alaya Error:", e);
+    }
+    return null;
+};
