@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Playwright / App State
+node_modules/
+rakuten_session.json
+trading_state.json
+
+# Logs
+*.log

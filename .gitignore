@@ -1,6 +1,13 @@
 # 🚨 秘密鍵（APIキーなど）は絶対にGitにアップしない！
 .env*
 ! .env.sample
+*.json
+!package.json
+!firebase.json
+!package-lock.json
+!tsconfig.json
+!*.config.json
+!*.schema.json
 
 # 🧠 AI Context (Do NOT ignore! These sync AI consciousness across PCs)
 # .agents/ フォルダは同期に必要です。ここにタスクや進捗が保存されています。

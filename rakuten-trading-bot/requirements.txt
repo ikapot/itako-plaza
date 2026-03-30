@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+playwright
+pandas
+pandas_ta
+streamlit
+discord.py
+python-dotenv
+requests

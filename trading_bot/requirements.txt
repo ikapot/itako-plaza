@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+playwright
+requests
+streamlit
+pandas
+python-dotenv
+pydantic
+yfinance
+ccxt
+pandas_ta
