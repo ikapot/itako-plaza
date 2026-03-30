@@ -1,9 +1,9 @@
+discord.py
+google-generativeai
+firebase-admin
+python-dotenv
 fastapi
 uvicorn[standard]
-playwright
-pandas
-pandas_ta
-streamlit
-discord.py
-python-dotenv
 requests
+pandas
+pandas-ta
