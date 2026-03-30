@@ -41,12 +41,10 @@ class ItakoPlazaBot(discord.Client):
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model = genai.GenerativeModel('gemini-flash-lite-latest')
         
-        self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
-        self.target_keys = ["kropotkin", "dogen", "fumiko", "rimbaud", "lu_xun", "soseki", "dosto", "mishima", "kafuka", "kobayashi", "akutagawa"]
-        
         # データベース & 人格初期化
         self.db = self._init_firebase()
         self.personas = self._load_personas()
+        self.target_keys = list(self.personas.keys())
         
         # 状態管理
         self.last_price = None
@@ -94,14 +92,15 @@ class ItakoPlazaBot(discord.Client):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
-                for key in self.target_keys:
-                    # 形式: key: `value`
-                    match = re.search(f"{key}:\\s*`([^`]*)`", content, re.DOTALL)
-                    if match:
-                        loaded[key] = match.group(1).strip()
-                    else:
-                        print(f"⚠️ 人格抽出失敗: {key}")
-                        loaded[key] = f"({key}の魂が欠落)"
+                # オブジェクト内のすべてのキーを抽出
+                # 形式: key: `value`
+                matches = re.finditer(r"(\w+):\s*`([^`]*)` samples?", content, re.DOTALL)
+                # re.finditer を使って全体から抽出
+                # profiles.js は export const CHARACTER_PROFILES = { ... } の形式
+                matches = re.finditer(r"(\w+):\s*`([^`]*)`", content, re.DOTALL)
+                for m in matches:
+                    loaded[m.group(1)] = m.group(2).strip()
+            
             print(f"✅ 人格同期成功 ({len(loaded)}名): {path}")
         except Exception as e:
             print(f"❌ プロフィール読み込みエラー: {e}")
@@ -207,10 +206,26 @@ class ItakoPlazaBot(discord.Client):
 
     async def on_message(self, message):
         if message.author == self.user: return
-        if self.user in message.mentions:
-            target = next((k for k in self.target_keys if k in message.content.lower()), "kropotkin")
+        
+        content = message.content.strip()
+        target = None
+
+        # 1. 直接名前を呼ばれたかチェック（例: @soseki 今日はどう？）
+        for key in self.target_keys:
+            if content.lower().startswith(f"@{key.lower()}"):
+                target = key
+                # @名前 の部分を削る
+                content = content[len(key)+1:].strip()
+                break
+        
+        # 2. ボットそのものが呼ばれたかチェック
+        if not target and self.user in message.mentions:
+            target = next((k for k in self.target_keys if k in content.lower()), "kropotkin")
+        
+        if target:
+            print(f"🧠 チャネリング開始: {target} (メッセージ: {content[:20]}...)")
             async with message.channel.typing():
-                response = await self.get_ai_response(target, message.content)
+                response = await self.get_ai_response(target, content)
                 await message.reply(f"📜 **{target.capitalize()} からの返信**:\n{response}")
 
 if __name__ == "__main__":
