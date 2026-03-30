@@ -97,17 +97,28 @@ body {
   position: relative;
 }
 
-/* Custom Scrollbar for horizontal timeline */
+/* Custom Scrollbar for all elements */
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #f15a24; /* Orange Scrollbar */
+  border-radius: 10px;
+}
+
+/* Specific narrow vertical scrollbars for timeline slots */
 .itako-scrollbar::-webkit-scrollbar {
   height: 4px;
 }
 
-.itako-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .itako-scrollbar::-webkit-scrollbar-thumb {
-  background: #f15a24; /* Gray -> Orange */
+  background: #f15a24;
   border-radius: 10px;
 }
 
@@ -115,12 +126,8 @@ body {
   width: 2px;
 }
 
-.itako-scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .itako-scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(241, 90, 36, 0.3); /* Gray-white -> Orange-dim */
+  background: rgba(241, 90, 36, 0.4);
   border-radius: 10px;
 }
 

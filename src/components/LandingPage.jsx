@@ -137,7 +137,7 @@ export default function LandingPage({
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={handleGoogleLogin}
-                                className="w-full md:w-auto px-6 md:px-10 py-3.5 md:py-4 bg-white text-black font-black text-[10px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] uppercase shadow-2xl hover:bg-zinc-100 transition-all flex flex-col items-center justify-center gap-1"
+                                className="w-full md:w-auto px-6 md:px-10 py-3.5 md:py-4 bg-white text-black font-black text-[10px] md:text-xs tracking-[0.3em] md:tracking-[0.4em] uppercase shadow-2xl hover:bg-[#f15a24] hover:text-white transition-all flex flex-col items-center justify-center gap-1"
                             >
                                 <div className="flex items-center gap-3">
                                     <LogIn size={14} /> Google Login / 直接入室

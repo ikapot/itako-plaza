@@ -248,12 +248,15 @@ export const findEchoInFirestore = async (systemPrompt, userMsg) => {
     try {
         const q = query(
             collection(db, "semantic_echoes"),
-            where("key", "==", cacheKey),
-            orderBy("timestamp", "desc")
+            where("key", "==", cacheKey)
+            // orderByを削除して複合インデックス要件を回避
         );
         const snapshot = await getDocs(q);
         if (!snapshot.empty) {
-            return snapshot.docs[0].data().response;
+            // 複数の候補がある場合はタイムスタンプでソートして最新を返す
+            const docs = snapshot.docs.map(d => d.data());
+            docs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+            return docs[0].response;
         }
     } catch (e) {
         console.error("Find Echo Error:", e);
