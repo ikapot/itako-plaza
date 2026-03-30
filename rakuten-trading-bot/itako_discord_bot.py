@@ -42,6 +42,7 @@ class ItakoPlazaBot(discord.Client):
         self.model = genai.GenerativeModel('gemini-flash-lite-latest')
         
         # データベース & 人格初期化
+        self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
         self.db = self._init_firebase()
         self.personas = self._load_personas()
         self.target_keys = list(self.personas.keys())
