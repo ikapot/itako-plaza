@@ -179,7 +179,7 @@ const Timeline = React.memo(function Timeline({
                                 </motion.button>
                             </div>
                         </div>
-                        <p className="text-xs md:text-sm font-bold text-zinc-500 pl-1 tracking-[0.5em] uppercase font-biz-mincho -mt-2">思考と記録の書架</p>
+                        <p className="text-xs md:text-sm font-bold text-[#f15a24]/60 pl-1 tracking-[0.5em] uppercase font-biz-mincho -mt-2">思考と記録の書架</p>
                     </header>
 
                     <div className="space-y-16">

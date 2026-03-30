@@ -23,10 +23,10 @@ const getGenreColors = (index) => {
         };
     } else {
         return {
-            bgColor: 'bg-zinc-950', // Black Paper
+            bgColor: 'bg-[#050505]', // Deep Black Paper
             textColor: 'text-[#f15a24]',
             subTextColor: 'text-[#f15a24]/40',
-            tabColor: 'bg-zinc-950', 
+            tabColor: 'bg-[#050505]', 
             tabTextColor: 'text-[#f15a24]',
             tagBg: 'bg-[#f15a24]/20',
             tagText: 'text-[#f15a24]',
@@ -166,7 +166,7 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
 
              {/* The Box Front Bottom */}
              <div className="relative z-[100] w-full mt-8 pointer-events-none">
-                 <div className="w-full h-32 md:h-48 bg-zinc-950 flex items-center justify-center relative overflow-hidden border-b-2 border-black">
+                 <div className="w-full h-32 md:h-48 bg-black flex items-center justify-center relative overflow-hidden border-b-2 border-black">
                      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
                      {/* Label */}
                      <div className="bg-[#f15a24] px-8 md:px-12 py-3 border-2 border-black relative z-10 w-64 md:w-80 text-center flex flex-col items-center justify-center">
@@ -179,8 +179,8 @@ const FileCabinetDirectory = React.memo(({ characters, selectedCharIds, handleTo
                      </div>
                  </div>
                  {/* Trapeze sides trick using CSS borders */}
-                 <div className="absolute top-0 -left-6 border-t-[0px] border-b-[8rem] md:border-b-[12rem] border-b-zinc-900 border-l-[1.5rem] border-l-transparent hidden md:block" />
-                 <div className="absolute top-0 -right-6 border-t-[0px] border-b-[8rem] md:border-b-[12rem] border-b-zinc-900 border-r-[1.5rem] border-r-transparent hidden md:block" />
+                  <div className="absolute top-0 -left-6 border-t-[0px] border-b-[8rem] md:border-b-[12rem] border-b-black border-l-[1.5rem] border-l-transparent hidden md:block" />
+                  <div className="absolute top-0 -right-6 border-t-[0px] border-b-[8rem] md:border-b-[12rem] border-b-black border-r-[1.5rem] border-r-transparent hidden md:block" />
              </div>
         </div>
     );
@@ -329,7 +329,7 @@ const ManagerContent = React.memo(({
                                  {!user ? (
                                     <button 
                                         onClick={loginWithGoogle}
-                                        className="px-6 py-2 bg-white text-black text-[10px] font-black tracking-[0.2em] uppercase rounded-full hover:bg-zinc-200 transition-all flex items-center gap-2"
+                                        className="px-6 py-2 bg-white text-black text-[10px] font-black tracking-[0.2em] uppercase rounded-full hover:bg-[#f15a24] transition-all flex items-center gap-2"
                                     >
                                         Google Account Login / 本人確認
                                     </button>

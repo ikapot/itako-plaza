@@ -43,7 +43,7 @@ const Header = React.memo(({
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="hidden lg:flex px-3 py-1 rounded-full bg-white/5 border border-white/10 items-center gap-2"
+                            className="hidden lg:flex px-3 py-1 rounded-full bg-black border border-[#f15a24]/30 items-center gap-2"
                         >
                             <div className="w-1.5 h-1.5 rounded-full animate-pulse" 
                                  style={{ backgroundColor: globalSentiment === 'serene' ? '#00ffff' : 
@@ -64,7 +64,7 @@ const Header = React.memo(({
 
             {/* NEW: Mode Tabs in Header Center - Optimized for Mobile (Hidden on small mobile) */}
             <div className="hidden sm:flex flex-1 justify-center px-2 overflow-hidden">
-                <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/5 max-w-full overflow-x-auto itako-scrollbar-none">
+                <div className="flex items-center gap-1 bg-black p-1 rounded-full border border-[#f15a24]/20 max-w-full overflow-x-auto itako-scrollbar-none">
                     {modeTabs.map(tab => {
                         const isActive = activeManagerTab === tab.id;
                         return (

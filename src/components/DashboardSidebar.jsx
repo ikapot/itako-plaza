@@ -96,7 +96,7 @@ const DashboardSidebar = React.memo(({
                 onClick={manualRefreshSpiritWorld}
                 className="pointer-events-auto flex items-center gap-4 p-3 pr-6 glass-spectral rounded-3xl border border-white/5 hover:border-[#f15a24]/50 transition-all group/sync"
             >
-                <div className={`w-10 h-10 rounded-xl ${isRefreshing ? 'bg-zinc-800' : 'bg-[#f15a24]/10'} flex items-center justify-center border border-white/5 group-hover/sync:bg-[#f15a24]/20 transition-all`}>
+                <div className={`w-10 h-10 rounded-xl ${isRefreshing ? 'bg-[#f15a24]/30' : 'bg-[#f15a24]/10'} flex items-center justify-center border border-white/5 group-hover/sync:bg-[#f15a24]/20 transition-all`}>
                     <RotateCw size={16} className={`text-[#f15a24] ${isRefreshing ? 'animate-spin' : ''}`} />
                 </div>
                 <div className="flex flex-col items-start text-left">
