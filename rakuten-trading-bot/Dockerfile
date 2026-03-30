@@ -1,5 +1,5 @@
-# 1. ベースイメージの指定
-FROM python:3.11-slim
+# 1. ベースイメージの指定 (Python 3.12 を使用)
+FROM python:3.12-slim
 
 # 2. 作業ディレクトリの設定
 WORKDIR /app
