@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ログイン中のユーザーのみが自分のドキュメントを読み書きできる基本ルール
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // ブックマーク（栞）
+    match /bookmarks/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Alaya（魂の記憶/要約）
+    match /alaya/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // ノート蓄積（Notebook Accumulations）
+    match /notebook_accumulations/{docId} {
+      allow read: if true; // 共有知識は全員読み取り可能にする（コンセプトに合わせる）
+      allow write: if request.auth != null; // ログインしていれば書き込み可能
+    }
+    
+    // 霊的エネルギー（Location Energy / 世界の状態）
+    match /location_energy/{docId} {
+      allow read: if true;
+      allow write: if false; // 基本はシステム側で更新、ユーザーからは書き込み不可
+    }
+  }
+}

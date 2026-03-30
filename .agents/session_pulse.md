@@ -2,16 +2,17 @@
 
 AIのフリーズ・再起動時に、直前の意図と文脈を復旧するための「短期記憶」領域。
 
-## LAST_PULSE: 2026-03-30 09:10 (JST)
-- **[STATUS]**: 開発健全化（整理整頓）とデータの堅牢化（A+C）を完了。
+## LAST_PULSE: 2026-03-30 09:15 (JST)
+- **[STATUS]**: マルチユーザー対応・セキュリティ強化を完了。
 - **[LAST]**: 
-    - ルートディレクトリのクリーンアップ（ログやスクリプトを .archive/ へ移動）
-    - App.jsx の Hook 化リファクタリング（useItakoAuth, useWorldState, useSpiritualDialogue）
-    - Firestore による対話要約（Alaya）の永続化実装
+    - `firestore.rules` の新規作成（uid ベースのアクセス制限）
+    - `firebase.json` の更新（ルールの適用）
+    - `LandingPage.jsx` の UX 改善（Google ログインのメリット明記）
+    - `useItakoAuth.js` のデータマージロジックの実装（LocalStorage -> Firestore）
 - **[NEXT]**: 
-    - デザインの深化（背景演出やカウントダウンの連動）への検討準備。
-    - サブプロジェクト（Painter Tax Assist）の進捗確認。
+    - 公開後の運用（API クォータ制限やモニタリング）の検討。
+    - サブプロジェクト（Painter Tax Assist）への完全移行の準備。
 - **[CONTEXT]**: 
-    - コードベースが軽量化 (`App.jsx` 約780行 → 約200行)
-    - Alaya がデバイスを跨いで同期可能に。
+    - これで不特定多数がアクセスしても、プライバシーが守られ、シームレスな体験が提供できるようになりました。
+    - 「管理者のAPI回路」が強調され、オンボーディングの心理的障壁が下がりました。
 - **[NOTE]**: このファイルは最新の「鼓動」のみを保持し、AIの意識を常に最新の状態に引き止めること。
