@@ -11,11 +11,11 @@ const MessageItem = React.memo(function MessageItem({ m, i, isUser, charObj, han
                 className="w-full text-center py-6 md:py-10 px-4 my-2"
             >
                 <div className="max-w-xl mx-auto flex flex-col items-center gap-4">
-                    <div className="w-12 h-[1px] bg-[#bd8a78]/30" />
-                    <p className="text-sm md:text-base leading-relaxed text-[#bd8a78]/90 font-serif italic tracking-[0.2em] whitespace-pre-wrap py-2">
+                    <div className="w-12 h-[1px] bg-[#f15a24]/30" />
+                    <p className="text-sm md:text-base leading-relaxed text-[#f15a24]/80 font-serif italic tracking-[0.2em] whitespace-pre-wrap py-2">
                         {m.content.replace(/^\[narration\]\s*/i, '').replace(/^【ナレーション】\s*/i, '')}
                     </p>
-                    <div className="w-12 h-[1px] bg-[#bd8a78]/30" />
+                    <div className="w-12 h-[1px] bg-[#f15a24]/30" />
                 </div>
             </motion.div>
         );
