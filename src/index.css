@@ -59,7 +59,7 @@
 .glass-spectral {
   background: var(--itako-panel);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(234, 224, 213, 0.1);
+  border: 1px solid rgba(241, 90, 36, 0.2); /* Gray -> Orange-dim */
   box-shadow: none !important;
 }
 
@@ -107,7 +107,7 @@ body {
 }
 
 .itako-scrollbar::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: #f15a24; /* Gray -> Orange */
   border-radius: 10px;
 }
 
@@ -120,7 +120,7 @@ body {
 }
 
 .itako-scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(241, 90, 36, 0.3); /* Gray-white -> Orange-dim */
   border-radius: 10px;
 }
 
@@ -239,9 +239,9 @@ body {
   }
 
   .glass-spectral {
-    background: rgba(10, 10, 10, 0.4);
+    background: rgba(10, 10, 10, 0.6); /* Slightly darker for better contrast */
     backdrop-filter: blur(20px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(241, 90, 36, 0.2); /* Faint orange border */
   }
 
   .glass-ethereal {
