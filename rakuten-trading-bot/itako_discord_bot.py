@@ -42,7 +42,7 @@ class ItakoPlazaBot(discord.Client):
         # Google検索ツール (正しくは google_search_retrieval) を定義
         tools = [{'google_search_retrieval': {}}]
         self.model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
+            model_name='gemini-1.5-flash-latest',
             tools=tools
         )
         
