@@ -224,6 +224,22 @@ class ItakoPlazaBot(discord.Client):
         print(f"🛸 {self.user} (AIパートナー：進化した知能) が顕現しました。")
         self.loop.create_task(self.market_monitor_loop())
 
+    async def on_member_join(self, member):
+        """新しいメンバーが参加した時の挨拶"""
+        print(f"🎉 新メンバー参加: {member.name}")
+        channel = self.get_channel(self.channel_id)
+        if not channel: return
+
+        # 誰が挨拶するかランダムに選ぶ
+        import random
+        speaker = random.choice(self.target_keys)
+        
+        async with channel.typing():
+            welcome_msg = f"{member.mention} さんがこのプラザに迷い込んだようだ。歓迎の一言をくれ。"
+            response = await self.get_ai_response(speaker, welcome_msg)
+            name_display = self.name_map.get(speaker, [speaker])[0]
+            await channel.send(f"🌸 **{name_display} からの歓迎**:\n{response}")
+
     async def on_message(self, message):
         if message.author == self.user: return
         
@@ -263,5 +279,6 @@ if __name__ == "__main__":
 
     intents = discord.Intents.default()
     intents.message_content = True
+    intents.members = True
     bot = ItakoPlazaBot(intents=intents)
     bot.run(os.getenv("DISCORD_TOKEN"))

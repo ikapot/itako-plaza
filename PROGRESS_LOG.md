@@ -60,6 +60,16 @@
 - ユーザー環境にMarketSpeed IIがあるため、RSS機能(DDE通信)を活用する方針に決定。
 - pywin32のインストールとDDE通信テストを実施したが、MS2 RSSへの接続に失敗している。
 - ユーザーがPC再起動を実施中。復帰後にExcel連携も視野に入れ検証を継続する。
+### 3. Discordボットの機能拡張
+- **[完了] メンバー参加検知の実装**: `rakuten-trading-bot/itako_discord_bot.py` を修正。
+    - `intents.members = True` を設定。
+    - `on_member_join` を追加し、誰かがランダムに挨拶するロジックを統合。
+- **[完了] ニラ様の人格確認**: `src/data/profiles.js` に「ニラ様」の定義が既に存在することを確認しました。
+
+---
+## 次回への申し送り（随時更新）
+- [ ] **SERVER MEMBERS INTENT の有効化**: Discord Developer Portal で、このボットの `Server Members Intent` を ON にする必要があります（ユーザー作業）。
+- [ ] **ボットの動作テスト**: 実際にボットを起動して、エラーが出ないか、挨拶が動くかを確認する。
 - [ ] **Painter Tax Assist**: 領収書解析・CSV出力機能の続きの着手。
 
 ---
