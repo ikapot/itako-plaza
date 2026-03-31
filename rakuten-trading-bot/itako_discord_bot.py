@@ -221,7 +221,10 @@ class ItakoPlazaBot(discord.Client):
             await asyncio.sleep(60)
 
     async def on_ready(self):
-        print(f"🛸 {self.user} (AIパートナー：進化した知能) が顕現しました。")
+        print(f"--- BOT CONNECTED ---")
+        print(f"Logged in as: {self.user} (ID: {self.user.id})")
+        print(f"Target Channel ID: {self.channel_id}")
+        print(f"--- 🛸 {self.user} が顕現しました。 ---")
         self.loop.create_task(self.market_monitor_loop())
 
     async def on_member_join(self, member):
@@ -277,8 +280,21 @@ if __name__ == "__main__":
     # ヘルスチェック用サーバーを別スレッドで起動 (Cloud Run 用)
     threading.Thread(target=run_health_check, daemon=True).start()
 
-    intents = discord.Intents.default()
-    intents.message_content = True
-    intents.members = True
-    bot = ItakoPlazaBot(intents=intents)
-    bot.run(os.getenv("DISCORD_TOKEN"))
+    def run_bot(members_intent=True):
+        intents = discord.Intents.default()
+        intents.message_content = True
+        intents.members = members_intent
+        
+        try:
+            bot = ItakoPlazaBot(intents=intents)
+            bot.run(os.getenv("DISCORD_TOKEN"))
+        except discord.errors.PrivilegedIntentsRequired:
+            if members_intent:
+                print("⚠️ SERVER MEMBERS INTENT が許可されていません。制限モードで再起動します...")
+                run_bot(members_intent=False)
+            else:
+                print("❌ 致命的なエラー: ボットの起動に失敗しました。")
+        except Exception as e:
+            print(f"❌ 起動エラー: {e}")
+
+    run_bot(members_intent=True)
