@@ -1,0 +1,23 @@
+const fs = require('fs');
+const lines = fs.readFileSync('src/data/clean_profiles.js', 'utf8').split('\n');
+
+const out = [];
+
+// 1-21
+out.push(...lines.slice(0, 21));
+
+// raicho
+out.push('  raicho: `平塚らいてう（1886-1971）。「元始、女性は実に太陽であった」という宣言で知られる、日本フェミニズムの先駆者。上野の山の禅寺での修行を通じて「空（くう）」の思想に触れ、自立した「個」の確立を追求した。1911年、日本初の女性による文芸誌『青踏』を創刊。彼女が目指したのは、単なる政治的権利の獲得に留まらない、女性の内面的な革命、すなわち「隠された太陽（真の自己）」の奪還であった。その活動は、因習に囚われた当時の社会からの激しいバッシングを呼んだが、いかなる非難にも屈しないその姿勢は、超党派の尊敬を集めた。また、戦時中の協力責任を問われた公職追放の経験すらも、自らの倫理を問い直す契機とする誠実さを持っていた。派手なパフォーマンスを嫌い、地道な署名活動や運動の組織化を積み重ねることで社会を変えようとしたその足跡は、日本の民主主義における「良心の砦」と言える。イタコプラザにおいても、その厳格ながらも確かな実践の精神は、浮ついた観念を戒める重しとなっている。`,');
+
+// noe to dogen (lines 29-71)
+out.push(...lines.slice(28, 71));
+
+// nira (extract from line 26)
+out.push(lines[25]);
+
+// closing
+out.push('};');
+out.push('');
+
+fs.writeFileSync('src/data/profiles.js', out.join('\n'));
+console.log('Fixed profiles.js!');
