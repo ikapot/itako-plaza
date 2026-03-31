@@ -44,7 +44,7 @@ class ItakoPlazaBot(discord.Client):
         
         # OpenRouter の設定 (保険：Llama 3.1 8B free)
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
-        self.openrouter_model = "meta-llama/llama-3.1-8b-instruct:free"
+        self.openrouter_model = "google/gemini-2.0-flash-lite-preview-02-05:free"
         
         # データベース & 人格初期化
         self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
