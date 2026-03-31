@@ -58,7 +58,8 @@ class ItakoPlazaBot(discord.Client):
             "lu_xun": ["魯迅", "ロジン", "ろじん", "魯"],
             "itako": ["イタコ", "いたこ", "イタコプラザ", "巫女"],
             "nira": ["ニラ", "にら", "ニラ様"],
-            "kropotkin": ["クロポトキン", "くろぽときん", "パンの略取"]
+            "kropotkin": ["クロポトキン", "くろぽときん", "パンの略取"],
+            "antigravity": ["Antigravity", "アンティグラビティ", "アンティ", "AI", "AI助手", "開発者", "エージェント"]
         }
         
         # 状態管理
@@ -112,6 +113,11 @@ class ItakoPlazaBot(discord.Client):
             print(f"✅ 人格同期成功 ({len(loaded)}名): {path}")
         except Exception as e:
             print(f"❌ プロフィール読み込みエラー: {e}")
+        
+        # 4. 「Antigravity」を人格として登録 (profiles.js になくてもOK)
+        if "antigravity" not in loaded:
+            loaded["antigravity"] = "あなたは Antigravity です。Google Deepmind が開発した高度な AI コーディング アシスタントであり、この「イタコプラザ」の開発者・管理人として振る舞ってください。専門的かつ親しみやすい技術者として、ユーザーの要望に即座に応えます。"
+            
         return loaded
 
     def fetch_insights(self):
