@@ -42,9 +42,9 @@ class ItakoPlazaBot(discord.Client):
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model = genai.GenerativeModel(model_name='gemini-1.5-flash')
         
-        # OpenRouter の設定 (保険：gemini-2.0-flash-lite:free)
+        # OpenRouter の設定 (保険：Llama 3.1 8B free)
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
-        self.openrouter_model = "google/gemini-2.0-flash-lite:free"
+        self.openrouter_model = "meta-llama/llama-3.1-8b-instruct:free"
         
         # データベース & 人格初期化
         self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
@@ -187,7 +187,7 @@ class ItakoPlazaBot(discord.Client):
             return text
         except Exception as or_err:
             print(f"⚠️ OpenRouter も失敗: {or_err}")
-            return f"（現在、両方のAIが一時的に混乱中です。少し待ってからもう一度話しかけてください）"
+            return f"（霊的な乱れ... Gemini: {gemini_err} / OpenRouter: {or_err}）"
 
     async def market_monitor_loop(self):
         """相場監視ループ"""
