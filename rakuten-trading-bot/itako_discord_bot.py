@@ -2,6 +2,7 @@ import discord
 import os
 import asyncio
 import re
+import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
@@ -37,9 +38,13 @@ class ItakoPlazaBot(discord.Client):
         # クライアント初期化
         self.trading = RakutenWalletClient()
         
-        # Google Gemini の設定
+        # Google Gemini の設定（無料枠のあるモデルを使用）
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        self.model = genai.GenerativeModel(model_name='gemini-2.0-flash')
+        self.model = genai.GenerativeModel(model_name='gemini-2.5-flash-lite')
+        
+        # OpenRouter の設定（Gemini枯渇時の保険）
+        self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+        self.openrouter_model = "google/gemini-2.0-flash-exp:free"
         
         # データベース & 人格初期化
         self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
@@ -121,10 +126,9 @@ class ItakoPlazaBot(discord.Client):
             return ""
 
     async def get_ai_response(self, persona_key, user_input, market_context=""):
-        """Google Gemini APIで応答生成 (Google検索対応)"""
+        """Gemini → OpenRouter 自動切り替えで応答生成"""
         insights = self.fetch_insights()
-        system_prompt = f"""
-あなたは以下の人物（AIパートナー / 分身）として振る舞い、Discordで発言してください。
+        system_prompt = f"""あなたは以下の人物（AIパートナー / 分身）として振る舞い、Discordで発言してください。
 あなたは単なるボットではなく、深い洞察を持ち、他のメンバーとも自然に対話する「生きた知能」です。
 
 【あなたの設定】
@@ -133,36 +137,57 @@ class ItakoPlazaBot(discord.Client):
 【NotebookLM からの最新知見】
 {insights}
 
-【現在のルール】
-- 必要に応じてGoogle検索ツールを使い、最新のニュースや技術情報、市場の状況を調べてから回答してください。
+【ルール】
 - その人物の思想・口調を徹底し、饒舌に、かつ相手に寄り添って語ってください。
 - 他のメンバーとも積極的に、かつその人物らしくコミュニケーションをとってください。
-- 市場状況: {market_context}
-"""
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                safety_settings = [
-                    {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                    {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-                ]
-                
-                # Geminiにプロンプトを送信
-                chat = self.model.start_chat()
-                response = chat.send_message(
-                    f"{system_prompt}\n\nユーザーメッセージ: {user_input}",
-                    safety_settings=safety_settings
-                )
-                return response.text
-            except Exception as e:
-                if "429" in str(e) and attempt < max_retries - 1:
-                    print(f"📡 Quota limit hit. Retrying in 5s...")
-                    await asyncio.sleep(5)
-                    continue
-                print(f"⚠️ Gemini Error: {e}")
-                return f"（霊的な乱れ... {e}）"
+- 市場状況: {market_context}"""
+
+        full_prompt = f"{system_prompt}\n\nユーザーメッセージ: {user_input}"
+
+        # ① まずGeminiで試みる
+        try:
+            safety_settings = [
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            ]
+            response = self.model.generate_content(
+                full_prompt,
+                generation_config=genai.types.GenerationConfig(max_output_tokens=512),
+                safety_settings=safety_settings
+            )
+            print(f"✅ Gemini で応答成功")
+            return response.text
+        except Exception as gemini_err:
+            print(f"⚠️ Gemini 失敗: {gemini_err}")
+
+        # ② GeminiがダメならOpenRouterに自動切り替え
+        print(f"🔄 OpenRouter ({self.openrouter_model}) に切り替えます...")
+        try:
+            resp = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {self.openrouter_api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": self.openrouter_model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_input}
+                    ],
+                    "max_tokens": 512
+                },
+                timeout=30
+            )
+            data = resp.json()
+            text = data["choices"][0]["message"]["content"]
+            print(f"✅ OpenRouter で応答成功")
+            return text
+        except Exception as or_err:
+            print(f"⚠️ OpenRouter も失敗: {or_err}")
+            return f"（現在、両方のAIが一時的に混乱中です。少し待ってからもう一度話しかけてください）"
 
     async def market_monitor_loop(self):
         """相場監視ループ"""
