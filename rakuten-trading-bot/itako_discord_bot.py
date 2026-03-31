@@ -39,8 +39,8 @@ class ItakoPlazaBot(discord.Client):
         
         # Google Gemini の設定 (Google検索ツールを有効化)
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        # Google検索ツールを定義
-        tools = [{"google_search": {}}]
+        # Google検索ツール (正しくは google_search_retrieval) を定義
+        tools = [{'google_search_retrieval': {}}]
         self.model = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
             tools=tools
