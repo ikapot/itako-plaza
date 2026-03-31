@@ -244,7 +244,8 @@ class ItakoPlazaBot(discord.Client):
             await channel.send(f"🌸 **{name_display} からの歓迎**:\n{response}")
 
     async def on_message(self, message):
-        if message.author == self.user: return
+        # 自分自身のメッセージや、他のボットのメッセージには反応しない
+        if message.author.bot: return
         
         content = message.content.strip()
         target_key = None
@@ -269,8 +270,14 @@ class ItakoPlazaBot(discord.Client):
         if not target_key and self.user in message.mentions:
             target_key = "itako" # デフォルトはイタコ
 
+        # 3. 名前が指定されていない場合、ランダムな人格が返信するように変更
+        if not target_key:
+            import random
+            target_key = random.choice(self.target_keys)
+
         if target_key:
-            name_display = self.name_map[target_key][0] # 漢字名を優先表示
+            # name_mapにあれば漢字名、なければキー名をそのまま大文字等で使う
+            name_display = self.name_map[target_key][0] if target_key in self.name_map else target_key.capitalize()
             print(f"🧠 {name_display} として思考中... (メッセージ: {content[:20]}...)")
             async with message.channel.typing():
                 response = await self.get_ai_response(target_key, content)
