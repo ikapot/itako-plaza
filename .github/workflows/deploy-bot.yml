@@ -43,6 +43,7 @@ jobs:
           gcloud run deploy ${{ env.SERVICE }} \
             --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
             --platform managed \
             --allow-unauthenticated \
             --min-instances 1 \
