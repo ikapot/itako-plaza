@@ -38,9 +38,9 @@ class ItakoPlazaBot(discord.Client):
         # クライアント初期化
         self.trading = RakutenWalletClient()
         
-        # Google Gemini の設定 (無料枠の大きい 1.5 Flash を使用)
+        # Google Gemini の設定 (最新の 2.0 Flash を使用)
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        self.model = genai.GenerativeModel(model_name='gemini-1.5-flash')
+        self.model = genai.GenerativeModel(model_name='gemini-2.0-flash')
         
         # OpenRouter の設定 (保険：Llama 3.1 8B free)
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")

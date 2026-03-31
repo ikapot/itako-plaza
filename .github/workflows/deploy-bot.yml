@@ -50,4 +50,5 @@ jobs:
             --set-env-vars "WALLET_API_KEY=${{ secrets.WALLET_API_KEY }}" \
             --set-env-vars "WALLET_API_SECRET=${{ secrets.WALLET_API_SECRET }}" \
             --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" \
-            --set-env-vars "DISCORD_CHANNEL_ID=${{ secrets.DISCORD_CHANNEL_ID }}"
+            --set-env-vars "DISCORD_CHANNEL_ID=${{ secrets.DISCORD_CHANNEL_ID }}" \
+            --set-env-vars "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}"
