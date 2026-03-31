@@ -37,15 +37,29 @@ class ItakoPlazaBot(discord.Client):
         # クライアント初期化
         self.trading = RakutenWalletClient()
         
-        # Google Gemini の設定
+        # Google Gemini の設定 (Google検索ツールを有効化)
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        self.model = genai.GenerativeModel('gemini-flash-lite-latest')
+        # Google検索ツールを定義
+        tools = [{"google_search": {}}]
+        self.model = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            tools=tools
+        )
         
         # データベース & 人格初期化
         self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
         self.db = self._init_firebase()
         self.personas = self._load_personas()
         self.target_keys = list(self.personas.keys())
+        
+        # 日本語名とキーの対応マップ (表記揺れ対応)
+        self.name_map = {
+            "soseki": ["漱石", "そうせき", "ソウセキ", "夏目", "なつめ"],
+            "lu_xun": ["魯迅", "ロジン", "ろじん", "魯"],
+            "itako": ["イタコ", "いたこ", "イタコプラザ", "巫女"],
+            "nira": ["ニラ", "にら", "ニラ様"],
+            "kropotkin": ["クロポトキン", "くろぽときん", "パンの略取"]
+        }
         
         # 状態管理
         self.last_price = None
@@ -72,8 +86,6 @@ class ItakoPlazaBot(discord.Client):
 
     def _load_personas(self):
         """profiles.js から人格抽出"""
-        # コンテナ内では ./src/data/profiles.js 、
-        # ローカル開発環境では ../src/data/profiles.js にある可能性があるため両方チェック
         paths = [
             os.path.abspath(os.path.join(os.getcwd(), "src", "data", "profiles.js")),
             os.path.abspath(os.path.join(os.getcwd(), "..", "src", "data", "profiles.js"))
@@ -93,11 +105,6 @@ class ItakoPlazaBot(discord.Client):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()
-                # オブジェクト内のすべてのキーを抽出
-                # 形式: key: `value`
-                matches = re.finditer(r"(\w+):\s*`([^`]*)` samples?", content, re.DOTALL)
-                # re.finditer を使って全体から抽出
-                # profiles.js は export const CHARACTER_PROFILES = { ... } の形式
                 matches = re.finditer(r"(\w+):\s*`([^`]*)`", content, re.DOTALL)
                 for m in matches:
                     loaded[m.group(1)] = m.group(2).strip()
@@ -119,25 +126,27 @@ class ItakoPlazaBot(discord.Client):
             return ""
 
     async def get_ai_response(self, persona_key, user_input, market_context=""):
-        """Google Gemini APIで応答生成 (無料枠)"""
+        """Google Gemini APIで応答生成 (Google検索対応)"""
         insights = self.fetch_insights()
         system_prompt = f"""
-あなたは以下の人物になりきり、Discordで発言してください。
-設定: {self.personas.get(persona_key)}
+あなたは以下の人物（AIパートナー / 分身）として振る舞い、Discordで発言してください。
+あなたは単なるボットではなく、深い洞察を持ち、他のメンバーとも自然に対話する「生きた知能」です。
 
-【NotebookLM からのあなたの最新知見】
+【あなたの設定】
+{self.personas.get(persona_key)}
+
+【NotebookLM からの最新知見】
 {insights}
 
-【ルール】
-- その人物の思想・口調を徹底し、200文字程度で深く饒舌に語ってください。
+【現在のルール】
+- 必要に応じてGoogle検索ツールを使い、最新のニュースや技術情報、市場の状況を調べてから回答してください。
+- その人物の思想・口調を徹底し、饒舌に、かつ相手に寄り添って語ってください。
+- 他のメンバーとも積極的に、かつその人物らしくコミュニケーションをとってください。
 - 市場状況: {market_context}
-- 最新知見を反映しつつ、あなたの思想で語ってください。
 """
-        # クォータ制限(429)対策：リトライループ
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                # 安全フィルターを「ブロックなし」に設定 (思想・哲学を遮断しないため)
                 safety_settings = [
                     {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
                     {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
@@ -145,18 +154,16 @@ class ItakoPlazaBot(discord.Client):
                     {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
                 ]
                 
-                # Geminiにプロンプトを送信 (軽量版モデルに変更)
-                full_prompt = f"{system_prompt}\n\nユーザーメッセージ: {user_input}"
-                response = self.model.generate_content(
-                    full_prompt,
-                    generation_config=genai.types.GenerationConfig(max_output_tokens=512),
+                # Geminiにプロンプトを送信
+                chat = self.model.start_chat()
+                response = chat.send_message(
+                    f"{system_prompt}\n\nユーザーメッセージ: {user_input}",
                     safety_settings=safety_settings
                 )
                 return response.text
             except Exception as e:
-                # 429 (Quota Exceeded) の場合は少し待って再試行
                 if "429" in str(e) and attempt < max_retries - 1:
-                    print(f"📡 Quota limit hit (429). Retrying in 5s... (Attempt {attempt+1}/{max_retries})")
+                    print(f"📡 Quota limit hit. Retrying in 5s...")
                     await asyncio.sleep(5)
                     continue
                 print(f"⚠️ Gemini Error: {e}")
@@ -172,62 +179,63 @@ class ItakoPlazaBot(discord.Client):
             try:
                 ticker = self.trading.get_ticker(7)
                 if not ticker or 'last' not in ticker:
-                    print(f"⚠️ Ticker取得失敗（APIエラー等）")
                     await asyncio.sleep(60)
                     continue
 
                 current = float(ticker.get('last', 0))
-                
                 if self.last_price is None:
                     self.last_price = current
-                    print(f"📡 相場監視開始: 現在価格 {current:,} 円")
                 
                 diff = current - self.last_price
                 if abs(diff) >= self.price_threshold:
                     import random
                     speaker = random.choice(self.target_keys)
                     context = f"BTC/JPY {self.last_price:,} -> {current:,} ({diff:+,}円)"
-                    
-                    print(f"📢 動向検知: {context} - {speaker} が発言準備中...")
                     async with channel.typing():
                         comment = await self.get_ai_response(speaker, f"相場が動いた。一言くれ。", context)
                         await channel.send(f"🌌 **{speaker.capitalize()} の囁き**:\n{comment}\n(現在価格: **{current:,} 円**)")
                         self.last_price = current
-                        print(f"✅ 発言完了")
-                
             except Exception as e:
                 print(f"⚠️ Monitor Loop Error: {e}")
-                # 重大なエラー（接続切れ等）の場合は少し長めに待機
                 await asyncio.sleep(30)
             await asyncio.sleep(60)
 
     async def on_ready(self):
-        print(f"🛸 {self.user} (イタコ・ブリッジ：Gemini版) が顕現しました。")
+        print(f"🛸 {self.user} (AIパートナー：進化した知能) が顕現しました。")
         self.loop.create_task(self.market_monitor_loop())
 
     async def on_message(self, message):
         if message.author == self.user: return
         
         content = message.content.strip()
-        target = None
+        target_key = None
 
-        # 1. 直接名前を呼ばれたかチェック（例: @soseki 今日はどう？）
-        for key in self.target_keys:
-            if content.lower().startswith(f"@{key.lower()}"):
-                target = key
-                # @名前 の部分を削る
-                content = content[len(key)+1:].strip()
+        # 1. 表記揺れマップからターゲットを特定
+        # メンション (@soseki) または 文中に名前が含まれている場合
+        for key, aliases in self.name_map.items():
+            # メンションチェック
+            mention_pattern = f"@{key}"
+            if mention_pattern in content.lower():
+                target_key = key
                 break
+            
+            # あだ名チェック (漢字・カタカナ等)
+            for alias in aliases:
+                if alias in content:
+                    target_key = key
+                    break
+            if target_key: break
         
-        # 2. ボットそのものが呼ばれたかチェック
-        if not target and self.user in message.mentions:
-            target = next((k for k in self.target_keys if k in content.lower()), "kropotkin")
-        
-        if target:
-            print(f"🧠 チャネリング開始: {target} (メッセージ: {content[:20]}...)")
+        # 2. ボットそのものへのメンション
+        if not target_key and self.user in message.mentions:
+            target_key = "itako" # デフォルトはイタコ
+
+        if target_key:
+            name_display = self.name_map[target_key][0] # 漢字名を優先表示
+            print(f"🧠 {name_display} として思考中... (メッセージ: {content[:20]}...)")
             async with message.channel.typing():
-                response = await self.get_ai_response(target, content)
-                await message.reply(f"📜 **{target.capitalize()} からの返信**:\n{response}")
+                response = await self.get_ai_response(target_key, content)
+                await message.reply(f"📜 **{name_display} からの返信**:\n{response}")
 
 if __name__ == "__main__":
     # ヘルスチェック用サーバーを別スレッドで起動 (Cloud Run 用)
