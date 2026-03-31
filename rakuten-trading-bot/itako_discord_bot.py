@@ -149,6 +149,7 @@ class ItakoPlazaBot(discord.Client):
 - 市場状況: {market_context}"""
 
         full_prompt = f"{system_prompt}\n\nユーザーメッセージ: {user_input}"
+        gemini_err = "No Error"
 
         # ① まずGeminiで試みる
         try:
@@ -165,7 +166,8 @@ class ItakoPlazaBot(discord.Client):
             )
             print(f"✅ Gemini で応答成功")
             return response.text
-        except Exception as gemini_err:
+        except Exception as e:
+            gemini_err = str(e)
             print(f"⚠️ Gemini 失敗: {gemini_err}")
 
         # ② GeminiがダメならOpenRouterに自動切り替え
@@ -188,9 +190,12 @@ class ItakoPlazaBot(discord.Client):
                 timeout=30
             )
             data = resp.json()
-            text = data["choices"][0]["message"]["content"]
-            print(f"✅ OpenRouter で応答成功")
-            return text
+            if "choices" in data and len(data["choices"]) > 0:
+                text = data["choices"][0]["message"]["content"]
+                print(f"✅ OpenRouter で応答成功")
+                return text
+            else:
+                raise Exception(f"OpenRouter API Error: {data}")
         except Exception as or_err:
             print(f"⚠️ OpenRouter も失敗: {or_err}")
             return f"（霊的な乱れ... Gemini: {gemini_err} / OpenRouter: {or_err}）"
