@@ -67,10 +67,26 @@
 - **[完了] ニラ様の人格確認**: `src/data/profiles.js` に「ニラ様」の定義が既に存在することを確認しました。
 
 ---
+---
 ## 次回への申し送り（随時更新）
 - [ ] **SERVER MEMBERS INTENT の有効化**: Discord Developer Portal で、このボットの `Server Members Intent` を ON にする必要があります（ユーザー作業）。
 - [ ] **ボットの動作テスト**: 実際にボットを起動して、エラーが出ないか、挨拶が動くかを確認する。
 - [ ] **Painter Tax Assist**: 領収書解析・CSV出力機能の続きの着手。
+
+---
+## 2026-03-31 作業ログ（進捗と中断・引き継ぎ）
+
+### 1. プロジェクトの状況再確認と復旧準備
+- **[調査完了] Itako Plaza のビルドエラー**: `src/data/profiles.js` における「平塚らいてう (raicho)」と「イブン・ハルドゥーン (khaldun)」の定義が22行目で混ざり合っていることを特定。また、68行目にもハルドゥーンが重複していることを確認しました（これらがビルド失敗の原因です）。次回、これを安全に取り除きます。
+- **Itako Bridge (Discordボット)**: ビルドエラー解消後に自動デプロイが完了したのち、疎通テストを行う準備を整えました。
+- **Painter Tax Assist**: Google Drive上の領収書画像データを抽出・解析するロジック（`resumption_summary.md`）の引き継ぎ確認を行いました。
+
+---
+## 次回（再開時）の申し送り
+- [ ] **【最優先】profiles.js の修復**: `src/data/profiles.js` 22行目・68行目付近の混入テキストを綺麗に分離し、GitHubでのビルドエラーを消滅させる。
+- [ ] **【テスト】Itako Bridge のデプロイ確認**: 上記が完了したら、Discord で「おはよう」などと話しかけ、正常に反応するかテストする。
+- [ ] **【ユーザー作業】SERVER MEMBERS INTENT の有効化**: Discord Developer Portal でボットの `Server Members Intent` を ON にする（未完了の場合）。
+- [ ] **【開発】Painter Tax Assist**: 領収書解析・CSV出力APIの実装に着手する。
 
 ---
 ## AI運用ルール (Communication & Persistence)
