@@ -244,44 +244,61 @@ class ItakoPlazaBot(discord.Client):
             await channel.send(f"🌸 **{name_display} からの歓迎**:\n{response}")
 
     async def on_message(self, message):
+        # 1. ログ出力：メッセージを受信したことをコンソールに表示
+        print(f"📩 メッセージ受信 [{message.channel.name}]: {message.author.name} -> {message.content[:30]}")
+
         # 自分自身のメッセージや、他のボットのメッセージには反応しない
-        if message.author.bot: return
+        if message.author.bot: 
+            print("🤖 ボットのメッセージなので無視します。")
+            return
         
         content = message.content.strip()
+
+        # 緊急テスト用：pingやテストに即レス
+        if content in ["ping", "テスト", "てすと"]:
+            print("🚨 テストコマンドを検知！即レスします。")
+            await message.reply("📡 霊界との通信は生きています。私はあなたの声を聞いています。")
+            return
+
         target_key = None
 
-        # 1. 表記揺れマップからターゲットを特定
-        # メンション (@soseki) または 文中に名前が含まれている場合
+        # 2. 表記揺れマップからターゲットを特定
         for key, aliases in self.name_map.items():
-            # メンションチェック
             mention_pattern = f"@{key}"
             if mention_pattern in content.lower():
                 target_key = key
+                print(f"🎯 メンション一致: {key}")
                 break
             
-            # あだ名チェック (漢字・カタカナ等)
             for alias in aliases:
                 if alias in content:
                     target_key = key
+                    print(f"🎯 名前キーワード一致: {alias} -> {key}")
                     break
             if target_key: break
         
-        # 2. ボットそのものへのメンション
+        # 3. ボットそのものへのメンション
         if not target_key and self.user in message.mentions:
-            target_key = "itako" # デフォルトはイタコ
+            target_key = "itako"
+            print("🎯 ボット本体へのメンションを検知")
 
-        # 3. 名前が指定されていない場合、ランダムな人格が返信するように変更
+        # 4. 名前が指定されていない場合、ランダムな人格が返信
         if not target_key:
             import random
             target_key = random.choice(self.target_keys)
+            print(f"🎲 人格未指定のためランダム選択: {target_key}")
 
         if target_key:
-            # name_mapにあれば漢字名、なければキー名をそのまま大文字等で使う
             name_display = self.name_map[target_key][0] if target_key in self.name_map else target_key.capitalize()
-            print(f"🧠 {name_display} として思考中... (メッセージ: {content[:20]}...)")
-            async with message.channel.typing():
-                response = await self.get_ai_response(target_key, content)
-                await message.reply(f"📜 **{name_display} からの返信**:\n{response}")
+            print(f"🧠 {name_display} として思考中...")
+            try:
+                async with message.channel.typing():
+                    response = await self.get_ai_response(target_key, content)
+                    await message.reply(f"📜 **{name_display} からの返信**:\n{response}")
+                    print(f"✅ 返信送信完了: {name_display}")
+            except Exception as e:
+                print(f"❌ 応答生成・送信エラー: {e}")
+                await message.reply(f"⚠️ 霊的なエラーが発生しました: {e}")
 
 if __name__ == "__main__":
     # ヘルスチェック用サーバーを別スレッドで起動 (Cloud Run 用)
