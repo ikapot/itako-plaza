@@ -37,13 +37,9 @@ class ItakoPlazaBot(discord.Client):
         # クライアント初期化
         self.trading = RakutenWalletClient()
         
-        # Google Gemini の設定 (Google検索ツールを有効化)
+        # Google Gemini の設定
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        # 最もシンプルなツールの指定方法
-        self.model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
-            tools="google_search_retrieval"
-        )
+        self.model = genai.GenerativeModel(model_name='gemini-2.0-flash')
         
         # データベース & 人格初期化
         self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
