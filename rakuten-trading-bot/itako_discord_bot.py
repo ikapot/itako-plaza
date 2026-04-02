@@ -45,7 +45,7 @@ class ItakoPlazaBot(discord.Client):
         
         # 自動売買エンジンの初期化
         self.engine = TradingEngine(
-            dry_run=True, # 最初は安全のため Dry Run
+            dry_run=False, # 本番稼働モード！
             on_announce=self.on_engine_announcement,
             db=self.db
         )
