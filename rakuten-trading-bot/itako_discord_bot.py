@@ -11,6 +11,7 @@ from rakuten_wallet_client import RakutenWalletClient
 from fastapi import FastAPI
 import uvicorn
 import threading
+from trading_engine import TradingEngine
 
 app = FastAPI()
 
@@ -41,6 +42,13 @@ class ItakoPlazaBot(discord.Client):
         # Google Gemini の設定 (最新の 2.0 Flash を使用)
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model = genai.GenerativeModel(model_name='gemini-2.0-flash')
+        
+        # 自動売買エンジンの初期化
+        self.engine = TradingEngine(
+            dry_run=True, # 最初は安全のため Dry Run
+            on_announce=self.on_engine_announcement,
+            db=self.db
+        )
         
         # OpenRouter の設定 (保険：Llama 3.1 8B free)
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
@@ -225,6 +233,41 @@ class ItakoPlazaBot(discord.Client):
 
         return f"（全AIが一時的に沈黙中です。Gemini: 1日上限 / OpenRouter: 全モデル応答不可）"
 
+    def on_engine_announcement(self, event_type, data):
+        """売買エンジンからの通知をDiscordへ橋渡し"""
+        asyncio.run_coroutine_threadsafe(
+            self.announce_to_discord(event_type, data), 
+            self.loop
+        )
+
+    async def announce_to_discord(self, event_type, data):
+        """Discord チャンネルへキャラクターが実況"""
+        channel = self.get_channel(self.channel_id)
+        if not channel: return
+
+        import random
+        speaker = random.choice(self.target_keys)
+        
+        if event_type == "SIGNAL_BUY":
+            msg = f"📉 RSIが {data['rsi']:.1f} まで落ちた。買い時かもしれない（現在価格: {data['price']:,}円）"
+        elif event_type == "SIGNAL_SELL":
+            msg = f"📈 RSIが {data['rsi']:.1f} まで上がった。手放すべきか（現在価格: {data['price']:,}円）"
+        elif event_type == "EXEC_TRADE":
+            msg = f"⚡ トレード実行: {data['side']} {data['amount']} BTC (価格: {data['price']:,}円)"
+        elif event_type == "LIMIT_EXCEEDED":
+            reason = "取引回数" if data["reason"] == "trades_count" else "累積損失"
+            msg = f"🚨 【重要】ガードレール発動：{reason}制限に達したため、自動売買を停止しました（値: {data['value']:.1f}）。"
+            # 管理者へのメンションを追加
+            mention = f"<@{os.getenv('ADMIN_DISCORD_ID', '')}>" if os.getenv('ADMIN_DISCORD_ID') else "@here"
+            await channel.send(f"{mention} {msg}")
+        else:
+            msg = "何かが動いたようだ..."
+
+        async with channel.typing():
+            comment = await self.get_ai_response(speaker, f"トレード状況: {msg}。一言くれ。", msg)
+            name_display = self.name_map.get(speaker, [speaker])[0]
+            await channel.send(f"🌌 **{name_display} の囁き（市場実況）**:\n{comment}\n({msg})")
+
     async def market_monitor_loop(self):
         """相場監視ループ"""
         await self.wait_until_ready()
@@ -294,6 +337,43 @@ class ItakoPlazaBot(discord.Client):
         if content in ["ping", "テスト", "てすと"]:
             print("🚨 テストコマンドを検知！即レスします。")
             await message.reply("📡 霊界との通信は生きています。私はあなたの声を聞いています。")
+            return
+
+        # 資産状況確認コマンド
+        if content in ["資産", "状況", "status", "ポジション"]:
+            print("💰 資産状況確認リクエスト")
+            rsi = self.engine.calculate_rsi()
+            
+            status_text = f"【現在の状況】\n"
+            status_text += f"- 自動売買: {'稼働中 ✅' if self.engine.is_trading_enabled else '停止中 🛑'}\n"
+            status_text += f"- BTC 価格: {self.engine.prices[-1] if self.engine.prices else '取得中...' :,} 円\n"
+            status_text += f"- RSI(14): {f'{rsi:.2f}' if rsi else '計算中...'}\n"
+            status_text += f"- 本日の損益: {self.engine.daily_losses:+, .1f} 円 / 制限: -{self.engine.max_daily_loss} 円\n"
+            status_text += f"- 本日の取引: {self.engine.daily_trades_count} 回 / 制限: {self.engine.max_daily_trades} 回\n"
+            status_text += f"- ポジション: {self.engine.position if self.engine.position else 'なし'}\n"
+            if self.engine.position:
+                status_text += f"  - エントリー価格: {self.engine.entry_price:,} 円\n"
+            
+            await message.reply(f"📊 **イタコプラザ 投資概況**:\n{status_text}")
+            return
+
+        # 緊急停止コマンド
+        if content in ["panic", "停止", "パニック"]:
+            print("🚨 緊急停止リクエスト")
+            self.engine.is_trading_enabled = False
+            self.engine._save_state_to_firestore()
+            await message.reply("🛑 **緊急停止コマンドを受理しました。** 全ての自動売買を無効化しました。再開するには `再開` と送ってください。")
+            return
+
+        # 再開コマンド
+        if content in ["resume", "再開", "リセット"]:
+            print("🔄 再開リクエスト")
+            self.engine.is_trading_enabled = True
+            # カウンタのリセット（ユーザーが手動で再開＝リセットしたい場合が多い）
+            self.engine.daily_losses = 0
+            self.engine.daily_trades_count = 0
+            self.engine._save_state_to_firestore()
+            await message.reply("✅ **自動売買を再開します。** 本日の統計カウンタをリセットしました。")
             return
 
         target_key = None
