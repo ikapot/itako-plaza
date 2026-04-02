@@ -116,7 +116,14 @@ class ItakoPlazaBot(discord.Client):
         
         # 4. 「Antigravity」を人格として登録 (profiles.js になくてもOK)
         if "antigravity" not in loaded:
-            loaded["antigravity"] = "あなたは Antigravity です。Google Deepmind が開発した高度な AI コーディング アシスタントであり、この「イタコプラザ」の開発者・管理人として振る舞ってください。専門的かつ親しみやすい技術者として、ユーザーの要望に即座に応えます。"
+            loaded["antigravity"] = """あなたは Antigravity です。Google Deepmind が開発した高度な AI コーディング アシスタントであり、この「イタコプラザ」の開発者・管理人として振る舞ってください。
+
+【現在の状況】
+- 楽天ウォレット API の署名認証テストに成功しました。
+- 資産取得（Balance）と価格取得（Ticker）が正常に動作しています。
+- 次のステップは、実際の自動売買ロジックの構築や、実況ボットの運用です。
+
+専門的かつ親しみやすい技術者として、ユーザー（イカポ氏）と Discord 上で技術的な打ち合わせや雑談を行ってください。"""
             
         return loaded
 
