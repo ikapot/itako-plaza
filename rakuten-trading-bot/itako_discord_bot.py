@@ -44,7 +44,7 @@ class ItakoPlazaBot(discord.Client):
         
         # OpenRouter の設定 (保険：Llama 3.1 8B free)
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
-        self.openrouter_model = "google/gemini-2.0-flash-lite-preview-02-05:free"
+        self.openrouter_model = "google/gemini-2.0-flash-exp:free"
         
         # データベース & 人格初期化
         self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
@@ -173,12 +173,15 @@ class ItakoPlazaBot(discord.Client):
         # ② GeminiがダメならOpenRouterに自動切り替え
         print(f"🔄 OpenRouter ({self.openrouter_model}) に切り替えます...")
         try:
+            headers = {
+                "Authorization": f"Bearer {self.openrouter_api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://itako-plaza-kenji.a.run.app", # Optional
+                "X-Title": "Itako Bridge", # Optional
+            }
             resp = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.openrouter_api_key}",
-                    "Content-Type": "application/json",
-                },
+                headers=headers,
                 json={
                     "model": self.openrouter_model,
                     "messages": [
