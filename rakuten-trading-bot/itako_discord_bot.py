@@ -311,7 +311,12 @@ class ItakoPlazaBot(discord.Client):
             try:
                 async with message.channel.typing():
                     response = await self.get_ai_response(target_key, content)
-                    await message.reply(f"📜 **{name_display} からの返信**:\n{response}")
+                    # Discord の上限（2000字）に合わせてトリミング
+                    header = f"📜 **{name_display} からの返信**:\n"
+                    max_response_len = 1900 - len(header)
+                    if len(response) > max_response_len:
+                        response = response[:max_response_len] + "……（以下略）"
+                    await message.reply(f"{header}{response}")
                     print(f"✅ 返信送信完了: {name_display}")
             except Exception as e:
                 print(f"❌ 応答生成・送信エラー: {e}")
