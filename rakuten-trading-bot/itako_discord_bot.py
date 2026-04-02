@@ -44,7 +44,7 @@ class ItakoPlazaBot(discord.Client):
         
         # OpenRouter の設定 (保険：Llama 3.1 8B free)
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
-        self.openrouter_model = "google/gemini-2.0-flash-exp:free"
+        self.openrouter_model = "qwen/qwen3.6-plus:free"
         
         # データベース & 人格初期化
         self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
@@ -151,7 +151,7 @@ class ItakoPlazaBot(discord.Client):
         full_prompt = f"{system_prompt}\n\nユーザーメッセージ: {user_input}"
         gemini_err = "No Error"
 
-        # ① まずGeminiで試みる
+        # ① まずGeminiで試みる（1日の枠切れ=429+daily は即スキップ）
         try:
             safety_settings = [
                 {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
@@ -169,6 +169,9 @@ class ItakoPlazaBot(discord.Client):
         except Exception as e:
             gemini_err = str(e)
             print(f"⚠️ Gemini 失敗: {gemini_err}")
+            # 1日枠が0の場合はすぐにOpenRouterへ（待機しない）
+            if "GenerateRequestsPerDayPerProjectPerModel-FreeTier" in gemini_err:
+                print("🔴 Gemini 1日枠ゼロ → 直接 OpenRouter へ")
 
         # ② GeminiがダメならOpenRouterに自動切り替え
         print(f"🔄 OpenRouter ({self.openrouter_model}) に切り替えます...")
