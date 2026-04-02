@@ -151,7 +151,8 @@ class ItakoPlazaBot(discord.Client):
         full_prompt = f"{system_prompt}\n\nユーザーメッセージ: {user_input}"
         gemini_err = "No Error"
 
-        # ① まずGeminiで試みる（1日の枠切れ=429+daily は即スキップ）
+        # ① Geminiで試みる（1日枠ゼロ検知時はスキップ）
+        daily_quota_hit = False
         try:
             safety_settings = [
                 {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
@@ -169,42 +170,53 @@ class ItakoPlazaBot(discord.Client):
         except Exception as e:
             gemini_err = str(e)
             print(f"⚠️ Gemini 失敗: {gemini_err}")
-            # 1日枠が0の場合はすぐにOpenRouterへ（待機しない）
             if "GenerateRequestsPerDayPerProjectPerModel-FreeTier" in gemini_err:
                 print("🔴 Gemini 1日枠ゼロ → 直接 OpenRouter へ")
+                daily_quota_hit = True
 
-        # ② GeminiがダメならOpenRouterに自動切り替え
-        print(f"🔄 OpenRouter ({self.openrouter_model}) に切り替えます...")
-        try:
-            headers = {
-                "Authorization": f"Bearer {self.openrouter_api_key}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://itako-plaza-kenji.a.run.app", # Optional
-                "X-Title": "Itako Bridge", # Optional
-            }
-            resp = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers=headers,
-                json={
-                    "model": self.openrouter_model,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_input}
-                    ],
-                    "max_tokens": 512
-                },
-                timeout=30
-            )
-            data = resp.json()
-            if "choices" in data and len(data["choices"]) > 0:
-                text = data["choices"][0]["message"]["content"]
-                print(f"✅ OpenRouter で応答成功")
-                return text
-            else:
-                raise Exception(f"OpenRouter API Error: {data}")
-        except Exception as or_err:
-            print(f"⚠️ OpenRouter も失敗: {or_err}")
-            return f"（霊的な乱れ... Gemini: {gemini_err} / OpenRouter: {or_err}）"
+        # ② OpenRouter 複数モデルを順番に試す
+        fallback_models = [
+            "qwen/qwen3.6-plus:free",
+            "mistralai/mistral-7b-instruct:free",
+            "nousresearch/nous-capybara-7b:free",
+            "liquid/lfm-2.5-1.2b-instruct:free",
+            "google/gemma-3n-e2b-it:free",
+        ]
+        print(f"🔄 OpenRouter フォールバック開始...")
+        for model_id in fallback_models:
+            try:
+                print(f"  試行: {model_id}")
+                headers = {
+                    "Authorization": f"Bearer {self.openrouter_api_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://itako-plaza-kenji.a.run.app",
+                    "X-Title": "Itako Bridge",
+                }
+                resp = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json={
+                        "model": model_id,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_input}
+                        ],
+                        "max_tokens": 400
+                    },
+                    timeout=30
+                )
+                data = resp.json()
+                if "choices" in data and len(data["choices"]) > 0:
+                    text = data["choices"][0]["message"]["content"]
+                    print(f"✅ OpenRouter 応答成功: {model_id}")
+                    return text
+                else:
+                    print(f"  ❌ {model_id}: {data.get('error', {}).get('message', '不明なエラー')}")
+            except Exception as or_err:
+                print(f"  ❌ {model_id} 例外: {or_err}")
+                continue
+
+        return f"（全AIが一時的に沈黙中です。Gemini: 1日上限 / OpenRouter: 全モデル応答不可）"
 
     async def market_monitor_loop(self):
         """相場監視ループ"""
