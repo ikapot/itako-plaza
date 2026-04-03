@@ -56,6 +56,7 @@ class ItakoPlazaBot(discord.Client):
         
         # データベース & 人格初期化
         self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
+        self.trading_channel_id = int(os.getenv("DISCORD_TRADING_CHANNEL_ID", os.getenv("DISCORD_CHANNEL_ID")))
         self.db = self._init_firebase()
         self.personas = self._load_personas()
         self.target_keys = list(self.personas.keys())
@@ -241,8 +242,8 @@ class ItakoPlazaBot(discord.Client):
         )
 
     async def announce_to_discord(self, event_type, data):
-        """Discord チャンネルへキャラクターが実況"""
-        channel = self.get_channel(self.channel_id)
+        """Discord チャンネルへキャラクターが実況 (トレード用チャンネルへ)"""
+        channel = self.get_channel(self.trading_channel_id)
         if not channel: return
 
         import random
@@ -269,9 +270,9 @@ class ItakoPlazaBot(discord.Client):
             await channel.send(f"🌌 **{name_display} の囁き（市場実況）**:\n{comment}\n({msg})")
 
     async def market_monitor_loop(self):
-        """相場監視ループ"""
+        """相場監視ループ (トレード用チャンネルへ)"""
         await self.wait_until_ready()
-        channel = self.get_channel(self.channel_id)
+        channel = self.get_channel(self.trading_channel_id)
         if not channel: return
 
         while not self.is_closed():
@@ -302,7 +303,8 @@ class ItakoPlazaBot(discord.Client):
     async def on_ready(self):
         print(f"--- BOT CONNECTED ---")
         print(f"Logged in as: {self.user} (ID: {self.user.id})")
-        print(f"Target Channel ID: {self.channel_id}")
+        print(f"General Channel ID: {self.channel_id}")
+        print(f"Trading Channel ID: {self.trading_channel_id}")
         print(f"--- 🛸 {self.user} が顕現しました。 ---")
         self.loop.create_task(self.market_monitor_loop())
 
@@ -398,8 +400,16 @@ class ItakoPlazaBot(discord.Client):
             target_key = "itako"
             print("🎯 ボット本体へのメンションを検知")
 
-        # 4. 名前が指定されていない場合、ランダムな人格が返信
+        # 4. チャンネルによる反応制限
+        is_trading_channel = (message.channel.id == self.trading_channel_id)
+        
+        # 名前が指定されていない場合
         if not target_key:
+            # トレード用チャンネルでは「メンションなし」の雑談には反応しない
+            if is_trading_channel:
+                print("🤐 トレード用チャンネルのため、メンションなしの雑談をスルーします。")
+                return
+            
             import random
             target_key = random.choice(self.target_keys)
             print(f"🎲 人格未指定のためランダム選択: {target_key}")
