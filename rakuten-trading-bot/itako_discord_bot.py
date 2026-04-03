@@ -48,8 +48,10 @@ class ItakoPlazaBot(discord.Client):
         
         # チャンネルIDの安全な取得 (空文字や非数値によるクラッシュ防止)
         def get_safe_id(env_name, fallback=0):
-            val = os.getenv(env_name, "")
-            return int(val) if val.isdigit() else fallback
+            val = os.getenv(env_name, "").strip()
+            res = int(val) if val.isdigit() else fallback
+            print(f"🔍 {env_name}: '{val}' -> Result ID: {res}")
+            return res
 
         self.channel_id = get_safe_id("DISCORD_CHANNEL_ID")
         self.trading_channel_id = get_safe_id("DISCORD_TRADING_CHANNEL_ID", self.channel_id)
@@ -312,7 +314,18 @@ class ItakoPlazaBot(discord.Client):
         print(f"Logged in as: {self.user} (ID: {self.user.id})")
         print(f"General Channel ID: {self.channel_id}")
         print(f"Trading Channel ID: {self.trading_channel_id}")
-        print(f"--- 🛸 {self.user} が顕現しました。 ---")
+        
+        # 起動の挨拶（両チャンネルへ）
+        for cid in set([self.channel_id, self.trading_channel_id]):
+            if cid == 0: continue
+            channel = self.get_channel(cid)
+            if channel:
+                await channel.send(f"🌌 **{self.user.name} が起動しました。**\nトレード監視と雑談の準備が整いました。霊感、良好です。")
+                print(f"✅ Startup message sent to: {cid}")
+            else:
+                print(f"❌ チャンネル(ID: {cid})が見つかりません。ボットが参加していない可能性があります。")
+
+        print(f"--- 🛸 接続完了いたしました。 ---")
         self.loop.create_task(self.market_monitor_loop())
 
     async def on_member_join(self, member):
@@ -343,9 +356,9 @@ class ItakoPlazaBot(discord.Client):
         content = message.content.strip()
 
         # 緊急テスト用：pingやテストに即レス
-        if content in ["ping", "テスト", "てすと"]:
+        if content.lower() in ["ping", "!ping", "テスト", "てすと"]:
             print("🚨 テストコマンドを検知！即レスします。")
-            await message.reply("📡 霊界との通信は生きています。私はあなたの声を聞いています。")
+            await message.reply(f"📡 疎通成功！現在のチャンネルID: {message.channel.id}\n私はここにおります。あなたの声は届いていますよ。")
             return
 
         # 資産状況確認コマンド
