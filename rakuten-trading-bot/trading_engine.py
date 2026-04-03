@@ -6,10 +6,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 class TradingEngine:
-    def __init__(self, dry_run=True, symbol_id=7, rsi_period=14, on_announce=None, db=None):
+    def __init__(self, dry_run=False, symbol_id=10, rsi_period=14, on_announce=None, db=None):
         self.client = RakutenWalletClient()
         self.dry_run = dry_run
-        self.symbol_id = symbol_id
+        self.symbol_id = symbol_id # 10 = LTC/JPY
         self.rsi_period = rsi_period
         self.prices = []
         self.position = None # Enum: 'LONG', 'SHORT', or None
@@ -17,13 +17,14 @@ class TradingEngine:
         self.on_announce = on_announce # Discord への実況用コールバック
         self.db = db # Firestore Client
         
-        # 損切り・利確設定 (1% = 0.01)
-        self.stop_loss_ratio = 0.01
-        self.take_profit_ratio = 0.02
+        # リスク管理設定 (LTC/0.1単位向け)
+        self.stop_loss_value = 200  # 固定額(円)での損切り
+        self.take_profit_ratio = 0.05 # 利確は比率(5%)
+        self.amount = 0.1 # 最小注文単位
 
         # 稼働制限（ガードレール）
         self.is_trading_enabled = True
-        self.max_daily_loss = 2000
+        self.max_daily_loss = 1000 # 2,000円から1,000円へ縮小
         self.max_daily_trades = 10
         self.daily_losses = 0
         self.daily_trades_count = 0
@@ -120,8 +121,10 @@ class TradingEngine:
             return last_price
         return None
 
-    def execute_trade(self, side, amount=0.01):
+    def execute_trade(self, side, amount=None):
         """売買の実行"""
+        if amount is None: amount = self.amount
+
         if not self.is_trading_enabled:
             logger.warning("🚫 取引が無効化されているため、実行をスキップします。")
             return {"success": False, "message": "Trading disabled"}
@@ -164,14 +167,17 @@ class TradingEngine:
 
         # リスク管理: 損切り・利確 (既にポジションがある場合)
         if self.position == 'LONG':
-            pnl = (current_price - self.entry_price) * 0.01 # 0.01 BTC換算
-            if current_price <= self.entry_price * (1 - self.stop_loss_ratio):
-                logger.warning(f"🚨 損切り発動（LONG）: {current_price}")
+            pnl = (current_price - self.entry_price) * self.amount
+            
+            # 固定額(200円)での損切り判定
+            if pnl <= -self.stop_loss_value:
+                logger.warning(f"🚨 損切り発動（LONG）: {current_price} (損失: {pnl:.1f}円)")
                 self.execute_trade('SELL')
                 self.position = None
                 self.daily_losses += pnl
+            # 利確判定 (5%等)
             elif current_price >= self.entry_price * (1 + self.take_profit_ratio):
-                logger.info(f"💰 利確発動（LONG）: {current_price}")
+                logger.info(f"💰 利確発動（LONG）: {current_price} (利益: {pnl:.1f}円)")
                 self.execute_trade('SELL')
                 self.position = None
                 self.daily_losses += pnl
