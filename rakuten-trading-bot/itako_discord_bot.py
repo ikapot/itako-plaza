@@ -45,8 +45,14 @@ class ItakoPlazaBot(discord.Client):
         
         # データベース & 人格初期化
         self.db = self._init_firebase()
-        self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
-        self.trading_channel_id = int(os.getenv("DISCORD_TRADING_CHANNEL_ID", os.getenv("DISCORD_CHANNEL_ID")))
+        
+        # チャンネルIDの安全な取得 (空文字や非数値によるクラッシュ防止)
+        def get_safe_id(env_name, fallback=0):
+            val = os.getenv(env_name, "")
+            return int(val) if val.isdigit() else fallback
+
+        self.channel_id = get_safe_id("DISCORD_CHANNEL_ID")
+        self.trading_channel_id = get_safe_id("DISCORD_TRADING_CHANNEL_ID", self.channel_id)
         
         # 自動売買エンジンの初期化
         self.engine = TradingEngine(
