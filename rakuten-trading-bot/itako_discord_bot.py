@@ -43,6 +43,11 @@ class ItakoPlazaBot(discord.Client):
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model = genai.GenerativeModel(model_name='gemini-2.0-flash')
         
+        # データベース & 人格初期化
+        self.db = self._init_firebase()
+        self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
+        self.trading_channel_id = int(os.getenv("DISCORD_TRADING_CHANNEL_ID", os.getenv("DISCORD_CHANNEL_ID")))
+        
         # 自動売買エンジンの初期化
         self.engine = TradingEngine(
             dry_run=False, # 本番稼働モード！
@@ -54,10 +59,6 @@ class ItakoPlazaBot(discord.Client):
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         self.openrouter_model = "qwen/qwen3.6-plus:free"
         
-        # データベース & 人格初期化
-        self.channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
-        self.trading_channel_id = int(os.getenv("DISCORD_TRADING_CHANNEL_ID", os.getenv("DISCORD_CHANNEL_ID")))
-        self.db = self._init_firebase()
         self.personas = self._load_personas()
         self.target_keys = list(self.personas.keys())
         
