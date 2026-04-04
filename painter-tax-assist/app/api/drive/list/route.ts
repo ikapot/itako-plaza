@@ -24,9 +24,19 @@ export async function GET() {
       fields: "files(id, name)",
     });
 
-    const folderId = folderRes.data.files?.[0]?.id;
+    let folderId = folderRes.data.files?.[0]?.id;
+    
     if (!folderId) {
-      return NextResponse.json([]); // フォルダがない場合は空を返す
+      logger.info("ℹ️ 'Receipts' フォルダが見つからないため、新規作成します。");
+      const newFolder = await drive.files.create({
+        requestBody: {
+          name: 'Receipts',
+          mimeType: 'application/vnd.google-apps.folder',
+        },
+        fields: 'id',
+      });
+      folderId = newFolder.data.id;
+      return NextResponse.json([]); // 作成直後なので空を返す
     }
 
     // 2. フォルダ内の画像をリスト

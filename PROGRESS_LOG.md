@@ -106,10 +106,37 @@
 - **[完了] API 接続テストの成功**: 署名認証（HMAC生成）を伴うプライベート API (`get_balance`) にて、正常な応答（資産情報の取得）を確認。これにより、自動売買エンジンの「核」となる部分の動作が保証されました。
 
 ---
+## 2026-04-04 作業ログ（自律型ニュース・トレードシステム V2 構築）
+
+### 1. プロジェクトの再設計と実装 (News-Trade System Implementation)
+- **[完了] 基盤構造の構築**: `rakuten-trading-bot-v2/` ディレクトリに、Cloud Run 運用向けのクリーンな設計（FastAPI）を実装しました。
+- **[完了] 判断エンジンの実装**: 
+    - `engine/news.py`: CoinDesk (JP/EN) および CoinPost からの RSS ニュース取得。
+    - `engine/analysis.py`: OpenRouter (Gemini 1.5 Flash) による感情分析とスコアリング。
+- **[完了] 安全・実行基盤の構築**:
+    - `engine/safety.py`: スプレッド制限（2%）およびメンテナンス時間の回避。
+    - `lib/rakuten_api.py`: 証拠金取引対応版の API クライアント。
+    - `lib/firestore.py` & `lib/discord_util.py`: 状態永続化と通知基盤の統合。
+- **[完了] デプロイ準備**: `Dockerfile` およびデプロイ手順書（`walkthrough.md`）の作成。
+
+
+### 2. Painter Tax Assist の機能拡張 (Tax Assist Enhancements)
+- **[完了] UI の刷新**: 「確定済みアイテム」の表示セクションを実装。CSV 書き出し前に内容を確認・レビューできるようにしました。
+- **[完了] Google Drive 連携の親切設計**: 
+    - `Receipts` フォルダがない場合に自動で作成するロジックを API に追加。
+    - フォルダが見つからないエラーを回避し、スムーズな導入を可能にしました。
+
+### 3. 人格・トーンの修正 (Persona Refinement)
+- **[完了] 松尾芭蕉の削除と全体トーンの刷新**: 
+    - `src/data/profiles.js` から松尾芭蕉を完全に削除。
+    - 与謝野晶子を含む全キャラクターの口調を「現代的・知的・非ステレオタイプ」かつ「ジェンダーニュートラル」に調整しました。
+
+---
 ## 次回への申し送り（随時更新）
-- [ ] **Discord での打ち合わせ**: 対話の主戦場を Discord。今後の自動売買ロジック（RSI、損切りルール）の最終詰めを行う。
-- [ ] **自動売買実況ボットの運用**: BTC 価格の変動に応じた文豪たちの囁き機能を Cloud Run で常時稼働させる。
-- [ ] **Painter Tax Assist**: 領収書解析機能の再開。
+- [ ] **GCP デプロイとシークレット設定**: Cloud Run へのデプロイと、APIキー等の Secret Manager への登録（ユーザー作業）。
+- [ ] **実売買の有効化**: `main.py` の `dry_run=True` を解除し、本格運用を開始。
+- [ ] **Painter Tax Assist**: 滞っている領収書解析機能の再開。
+- [ ] **Discord 承認ボタンの実装**: Discord Bot との双方向連携による、通知からの直接承認ロジックの構築。
 
 ---
 ## AI運用ルール (Communication & Persistence)

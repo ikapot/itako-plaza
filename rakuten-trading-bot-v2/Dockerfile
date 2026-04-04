@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+# OSレイヤーの依存関係 (ビルド、OpenSSL等)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# 依存ライブラリのインストール
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ソースコードのコピー
+COPY . .
+
+# Cloud Run のデフォルトポート 8080
+ENV PORT 8080
+ENV PYTHONUNBUFFERED=TRUE
+
+# アプリの起動
+# main.py 内で定義された FastAPI 'app' インスタンスを uvicorn で実行
+CMD ["uvicorn", "main.py:app", "--host", "0.0.0.0", "--port", "8080"]

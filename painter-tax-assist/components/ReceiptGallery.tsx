@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Image as ImageIcon, Loader2, CheckCircle2, AlertCircle, Download } from 'lucide-react';
+import { generateEnboCSV, downloadShiftJISCSV } from '../lib/csv-exporter';
 
 interface DriveFile {
   id: string;
@@ -71,7 +72,6 @@ export default function ReceiptGallery() {
 
   const handleExport = () => {
     if (confirmedItems.length === 0) return;
-    const { generateEnboCSV, downloadShiftJISCSV } = require('../lib/csv-exporter');
     const csv = generateEnboCSV(confirmedItems);
     downloadShiftJISCSV(csv, `enbo_receipts_${new Date().toISOString().slice(0,10)}.csv`);
   };
@@ -153,7 +153,44 @@ export default function ReceiptGallery() {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      {/* 確定済みアイテムのプレビュー一覧 */}
+      {confirmedItems.length > 0 && (
+        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+          <div className="flex items-center gap-2 border-b border-[#EAE1D1] pb-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            <h3 className="text-lg font-serif">Confirmed Journal Entries</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr className="border-b border-[#EAE1D1] text-[10px] uppercase tracking-widest opacity-40">
+                  <th className="py-3 px-2">Date</th>
+                  <th className="py-3 px-2">Category</th>
+                  <th className="py-3 px-2">Shop / Description</th>
+                  <th className="py-3 px-2 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {confirmedItems.map((item, idx) => (
+                  <tr key={idx} className="border-b border-[#F5F1EA] hover:bg-white/50 transition-colors">
+                    <td className="py-3 px-2 font-mono text-[11px]">{item.date}</td>
+                    <td className="py-3 px-2">
+                      <span className="px-2 py-0.5 bg-[#A68966]/10 text-[#A68966] text-[10px] font-bold rounded-sm uppercase">{item.category}</span>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="font-medium text-[#2D2926]">{item.shop}</div>
+                      <div className="text-[10px] opacity-40 truncate max-w-[200px]">{item.description}</div>
+                    </td>
+                    <td className="py-3 px-2 text-right font-bold text-[#A68966]">¥{item.totalAmount?.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mt-12">
         <h2 className="text-2xl font-serif text-[#2D2926]">Unprocessed Receipts</h2>
         <button 
           onClick={fetchFiles}
@@ -175,6 +212,7 @@ export default function ReceiptGallery() {
           <div className="p-20 text-center border border-[#EAE1D1] rounded-sm bg-white/40">
              <ImageIcon className="w-12 h-12 mx-auto mb-4 opacity-10" />
              <p className="opacity-40">Google Drive の &apos;Receipts&apos; フォルダにレシートがありません。</p>
+             <p className="text-[10px] mt-2 opacity-30">フォルダ名が大文字の &apos;Receipts&apos; であることを確認してください。</p>
           </div>
       )}
 
