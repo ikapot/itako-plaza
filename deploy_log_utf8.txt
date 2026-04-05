@@ -1,0 +1,1019 @@
+﻿deploy	Set up job	・ｿ2026-03-31T21:31:35.3032804Z Current runner version: '2.333.1'
+deploy	Set up job	2026-03-31T21:31:35.3071612Z ##[group]Runner Image Provisioner
+deploy	Set up job	2026-03-31T21:31:35.3073588Z Hosted Compute Agent
+deploy	Set up job	2026-03-31T21:31:35.3075106Z Version: 20260213.493
+deploy	Set up job	2026-03-31T21:31:35.3076767Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+deploy	Set up job	2026-03-31T21:31:35.3078603Z Build Date: 2026-02-13T00:28:41Z
+deploy	Set up job	2026-03-31T21:31:35.3080731Z Worker ID: ***bd4748a1-9391-421e-8e66-50ed5df42e0e***
+deploy	Set up job	2026-03-31T21:31:35.3082640Z Azure Region: eastus
+deploy	Set up job	2026-03-31T21:31:35.3084076Z ##[endgroup]
+deploy	Set up job	2026-03-31T21:31:35.3086685Z ##[group]Operating System
+deploy	Set up job	2026-03-31T21:31:35.3088387Z Ubuntu
+deploy	Set up job	2026-03-31T21:31:35.3089913Z 24.04.4
+deploy	Set up job	2026-03-31T21:31:35.3091237Z LTS
+deploy	Set up job	2026-03-31T21:31:35.3092478Z ##[endgroup]
+deploy	Set up job	2026-03-31T21:31:35.3093954Z ##[group]Runner Image
+deploy	Set up job	2026-03-31T21:31:35.3095357Z Image: ubuntu-24.04
+deploy	Set up job	2026-03-31T21:31:35.3096761Z Version: 20260323.65.1
+deploy	Set up job	2026-03-31T21:31:35.3099329Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260323.65/images/ubuntu/Ubuntu2404-Readme.md
+deploy	Set up job	2026-03-31T21:31:35.3102863Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260323.65
+deploy	Set up job	2026-03-31T21:31:35.3105118Z ##[endgroup]
+deploy	Set up job	2026-03-31T21:31:35.3108009Z ##[group]GITHUB_TOKEN Permissions
+deploy	Set up job	2026-03-31T21:31:35.3111740Z Contents: read
+deploy	Set up job	2026-03-31T21:31:35.3113043Z Metadata: read
+deploy	Set up job	2026-03-31T21:31:35.3114264Z Packages: read
+deploy	Set up job	2026-03-31T21:31:35.3115513Z ##[endgroup]
+deploy	Set up job	2026-03-31T21:31:35.3119335Z Secret source: Actions
+deploy	Set up job	2026-03-31T21:31:35.3120882Z Prepare workflow directory
+deploy	Set up job	2026-03-31T21:31:35.3673533Z Prepare all required actions
+deploy	Set up job	2026-03-31T21:31:35.3729716Z Getting action download info
+deploy	Set up job	2026-03-31T21:31:35.7412483Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+deploy	Set up job	2026-03-31T21:31:35.8482031Z Download action repository 'google-github-actions/auth@v2' (SHA:c200f3691d83b41bf9bbd8638997a462592937ed)
+deploy	Set up job	2026-03-31T21:31:36.0488645Z Download action repository 'google-github-actions/setup-gcloud@v2' (SHA:e427ad8a34f8676edf47cf7d7925499adf3eb74f)
+deploy	Set up job	2026-03-31T21:31:36.3335407Z Complete job name: deploy
+deploy	Checkout	・ｿ2026-03-31T21:31:36.4088889Z ##[group]Run actions/checkout@v4
+deploy	Checkout	2026-03-31T21:31:36.4090285Z with:
+deploy	Checkout	2026-03-31T21:31:36.4091009Z   repository: ikapot/itako-plaza
+deploy	Checkout	2026-03-31T21:31:36.4091924Z   token: ***
+deploy	Checkout	2026-03-31T21:31:36.4092524Z   ssh-strict: true
+deploy	Checkout	2026-03-31T21:31:36.4093138Z   ssh-user: git
+deploy	Checkout	2026-03-31T21:31:36.4093756Z   persist-credentials: true
+deploy	Checkout	2026-03-31T21:31:36.4094425Z   clean: true
+deploy	Checkout	2026-03-31T21:31:36.4095046Z   sparse-checkout-cone-mode: true
+deploy	Checkout	2026-03-31T21:31:36.4095763Z   fetch-depth: 1
+deploy	Checkout	2026-03-31T21:31:36.4096359Z   fetch-tags: false
+deploy	Checkout	2026-03-31T21:31:36.4096984Z   show-progress: true
+deploy	Checkout	2026-03-31T21:31:36.4097605Z   lfs: false
+deploy	Checkout	2026-03-31T21:31:36.4098174Z   submodules: false
+deploy	Checkout	2026-03-31T21:31:36.4098787Z   set-safe-directory: true
+deploy	Checkout	2026-03-31T21:31:36.4099858Z env:
+deploy	Checkout	2026-03-31T21:31:36.4100477Z   PROJECT_ID: itako-plaza-kenji
+deploy	Checkout	2026-03-31T21:31:36.4101173Z   REGION: asia-northeast1
+deploy	Checkout	2026-03-31T21:31:36.4101824Z   SERVICE: itako-bridge
+deploy	Checkout	2026-03-31T21:31:36.4102499Z   REPOSITORY: itako-bridge
+deploy	Checkout	2026-03-31T21:31:36.4103139Z ##[endgroup]
+deploy	Checkout	2026-03-31T21:31:36.5193995Z Syncing repository: ikapot/itako-plaza
+deploy	Checkout	2026-03-31T21:31:36.5196324Z ##[group]Getting Git version info
+deploy	Checkout	2026-03-31T21:31:36.5197384Z Working directory is '/home/runner/work/itako-plaza/itako-plaza'
+deploy	Checkout	2026-03-31T21:31:36.5198817Z [command]/usr/bin/git version
+deploy	Checkout	2026-03-31T21:31:36.5232341Z git version 2.53.0
+deploy	Checkout	2026-03-31T21:31:36.5259986Z ##[endgroup]
+deploy	Checkout	2026-03-31T21:31:36.5283943Z Temporarily overriding HOME='/home/runner/work/_temp/02480bee-c6be-4c9c-9cf7-c674dde1081c' before making global git config changes
+deploy	Checkout	2026-03-31T21:31:36.5286922Z Adding repository directory to the temporary git global config as a safe directory
+deploy	Checkout	2026-03-31T21:31:36.5290571Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/itako-plaza/itako-plaza
+deploy	Checkout	2026-03-31T21:31:36.5324119Z Deleting the contents of '/home/runner/work/itako-plaza/itako-plaza'
+deploy	Checkout	2026-03-31T21:31:36.5327885Z ##[group]Initializing the repository
+deploy	Checkout	2026-03-31T21:31:36.5333819Z [command]/usr/bin/git init /home/runner/work/itako-plaza/itako-plaza
+deploy	Checkout	2026-03-31T21:31:36.5411366Z hint: Using 'master' as the name for the initial branch. This default branch name
+deploy	Checkout	2026-03-31T21:31:36.5414370Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+deploy	Checkout	2026-03-31T21:31:36.5416049Z hint: to use in all of your new repositories, which will suppress this warning,
+deploy	Checkout	2026-03-31T21:31:36.5417371Z hint: call:
+deploy	Checkout	2026-03-31T21:31:36.5418544Z hint:
+deploy	Checkout	2026-03-31T21:31:36.5420053Z hint: 	git config --global init.defaultBranch <name>
+deploy	Checkout	2026-03-31T21:31:36.5421216Z hint:
+deploy	Checkout	2026-03-31T21:31:36.5422304Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+deploy	Checkout	2026-03-31T21:31:36.5423910Z hint: 'development'. The just-created branch can be renamed via this command:
+deploy	Checkout	2026-03-31T21:31:36.5494154Z hint:
+deploy	Checkout	2026-03-31T21:31:36.5495358Z hint: 	git branch -m <name>
+deploy	Checkout	2026-03-31T21:31:36.5496591Z hint:
+deploy	Checkout	2026-03-31T21:31:36.5497952Z hint: Disable this message with "git config set advice.defaultBranchName false"
+deploy	Checkout	2026-03-31T21:31:36.5499902Z Initialized empty Git repository in /home/runner/work/itako-plaza/itako-plaza/.git/
+deploy	Checkout	2026-03-31T21:31:36.5502422Z [command]/usr/bin/git remote add origin https://github.com/ikapot/itako-plaza
+deploy	Checkout	2026-03-31T21:31:36.5504501Z ##[endgroup]
+deploy	Checkout	2026-03-31T21:31:36.5505524Z ##[group]Disabling automatic garbage collection
+deploy	Checkout	2026-03-31T21:31:36.5506397Z [command]/usr/bin/git config --local gc.auto 0
+deploy	Checkout	2026-03-31T21:31:36.5508287Z ##[endgroup]
+deploy	Checkout	2026-03-31T21:31:36.5509530Z ##[group]Setting up auth
+deploy	Checkout	2026-03-31T21:31:36.5510502Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+deploy	Checkout	2026-03-31T21:31:36.5526691Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+deploy	Checkout	2026-03-31T21:31:36.5802482Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+deploy	Checkout	2026-03-31T21:31:36.5831750Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+deploy	Checkout	2026-03-31T21:31:36.6044771Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+deploy	Checkout	2026-03-31T21:31:36.6076374Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+deploy	Checkout	2026-03-31T21:31:36.6294167Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+deploy	Checkout	2026-03-31T21:31:36.6326356Z ##[endgroup]
+deploy	Checkout	2026-03-31T21:31:36.6327558Z ##[group]Fetching the repository
+deploy	Checkout	2026-03-31T21:31:36.6334815Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +88e58d2c82a7f7fdadad03472eec68ef5597f1c4:refs/remotes/origin/master
+deploy	Checkout	2026-03-31T21:31:37.3395449Z From https://github.com/ikapot/itako-plaza
+deploy	Checkout	2026-03-31T21:31:37.3399796Z  * [new ref]         88e58d2c82a7f7fdadad03472eec68ef5597f1c4 -> origin/master
+deploy	Checkout	2026-03-31T21:31:37.3431074Z ##[endgroup]
+deploy	Checkout	2026-03-31T21:31:37.3434187Z ##[group]Determining the checkout info
+deploy	Checkout	2026-03-31T21:31:37.3437919Z ##[endgroup]
+deploy	Checkout	2026-03-31T21:31:37.3440777Z [command]/usr/bin/git sparse-checkout disable
+deploy	Checkout	2026-03-31T21:31:37.3481667Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+deploy	Checkout	2026-03-31T21:31:37.3518128Z ##[group]Checking out the ref
+deploy	Checkout	2026-03-31T21:31:37.3521733Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+deploy	Checkout	2026-03-31T21:31:37.4656300Z Reset branch 'master'
+deploy	Checkout	2026-03-31T21:31:37.4662323Z branch 'master' set up to track 'origin/master'.
+deploy	Checkout	2026-03-31T21:31:37.4688344Z ##[endgroup]
+deploy	Checkout	2026-03-31T21:31:37.4726516Z [command]/usr/bin/git log -1 --format=%H
+deploy	Checkout	2026-03-31T21:31:37.4750037Z 88e58d2c82a7f7fdadad03472eec68ef5597f1c4
+deploy	Google Auth	・ｿ2026-03-31T21:31:37.5164731Z ##[group]Run google-github-actions/auth@v2
+deploy	Google Auth	2026-03-31T21:31:37.5166316Z with:
+deploy	Google Auth	2026-03-31T21:31:37.5206897Z   credentials_json: ***
+deploy	Google Auth	
+deploy	Google Auth	2026-03-31T21:31:37.5208298Z   create_credentials_file: true
+deploy	Google Auth	2026-03-31T21:31:37.5209854Z   export_environment_variables: true
+deploy	Google Auth	2026-03-31T21:31:37.5211333Z   universe: googleapis.com
+deploy	Google Auth	2026-03-31T21:31:37.5212689Z   cleanup_credentials: true
+deploy	Google Auth	2026-03-31T21:31:37.5214049Z   access_token_lifetime: 3600s
+deploy	Google Auth	2026-03-31T21:31:37.5215835Z   access_token_scopes: https://www.googleapis.com/auth/cloud-platform
+deploy	Google Auth	2026-03-31T21:31:37.5217742Z   id_token_include_email: false
+deploy	Google Auth	2026-03-31T21:31:37.5219259Z env:
+deploy	Google Auth	2026-03-31T21:31:37.5220430Z   PROJECT_ID: itako-plaza-kenji
+deploy	Google Auth	2026-03-31T21:31:37.5221772Z   REGION: asia-northeast1
+deploy	Google Auth	2026-03-31T21:31:37.5223187Z   SERVICE: itako-bridge
+deploy	Google Auth	2026-03-31T21:31:37.5224455Z   REPOSITORY: itako-bridge
+deploy	Google Auth	2026-03-31T21:31:37.5225696Z ##[endgroup]
+deploy	Google Auth	2026-03-31T21:31:37.6155077Z Created credentials file at "/home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json"
+deploy	Set up Cloud SDK	・ｿ2026-03-31T21:31:37.6405328Z ##[group]Run google-github-actions/setup-gcloud@v2
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6406934Z with:
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6407972Z   version: latest
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6409359Z   skip_install: false
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6410573Z   skip_tool_cache: false
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6411755Z env:
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6412816Z   PROJECT_ID: itako-plaza-kenji
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6414123Z   REGION: asia-northeast1
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6415365Z   SERVICE: itako-bridge
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6416568Z   REPOSITORY: itako-bridge
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6418845Z   CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6422371Z   GOOGLE_APPLICATION_CREDENTIALS: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6425338Z   GOOGLE_GHA_CREDS_PATH: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6427517Z   CLOUDSDK_CORE_PROJECT: itako-plaza-kenji
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6429000Z   CLOUDSDK_PROJECT: itako-plaza-kenji
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6430700Z   GCLOUD_PROJECT: itako-plaza-kenji
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6432084Z   GCP_PROJECT: itako-plaza-kenji
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6433460Z   GOOGLE_CLOUD_PROJECT: itako-plaza-kenji
+deploy	Set up Cloud SDK	2026-03-31T21:31:37.6434843Z ##[endgroup]
+deploy	Set up Cloud SDK	2026-03-31T21:31:39.0481252Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/e626ab1b-96c4-4d67-937c-17ff684f4d32 -f /home/runner/work/_temp/c96c8170-5d77-4fd8-82d4-c07b559f1252
+deploy	Set up Cloud SDK	2026-03-31T21:31:59.9924663Z Successfully authenticated
+deploy	Authorize Docker	・ｿ2026-03-31T21:32:00.0136500Z ##[group]Run gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+deploy	Authorize Docker	2026-03-31T21:32:00.0137280Z [36;1mgcloud auth configure-docker asia-northeast1-docker.pkg.dev[0m
+deploy	Authorize Docker	2026-03-31T21:32:00.0170765Z shell: /usr/bin/bash -e ***0***
+deploy	Authorize Docker	2026-03-31T21:32:00.0171208Z env:
+deploy	Authorize Docker	2026-03-31T21:32:00.0171541Z   PROJECT_ID: itako-plaza-kenji
+deploy	Authorize Docker	2026-03-31T21:32:00.0171959Z   REGION: asia-northeast1
+deploy	Authorize Docker	2026-03-31T21:32:00.0172342Z   SERVICE: itako-bridge
+deploy	Authorize Docker	2026-03-31T21:32:00.0172711Z   REPOSITORY: itako-bridge
+deploy	Authorize Docker	2026-03-31T21:32:00.0173441Z   CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Authorize Docker	2026-03-31T21:32:00.0174498Z   GOOGLE_APPLICATION_CREDENTIALS: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Authorize Docker	2026-03-31T21:32:00.0175469Z   GOOGLE_GHA_CREDS_PATH: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Authorize Docker	2026-03-31T21:32:00.0176189Z   CLOUDSDK_CORE_PROJECT: itako-plaza-kenji
+deploy	Authorize Docker	2026-03-31T21:32:00.0176648Z   CLOUDSDK_PROJECT: itako-plaza-kenji
+deploy	Authorize Docker	2026-03-31T21:32:00.0177138Z   GCLOUD_PROJECT: itako-plaza-kenji
+deploy	Authorize Docker	2026-03-31T21:32:00.0177568Z   GCP_PROJECT: itako-plaza-kenji
+deploy	Authorize Docker	2026-03-31T21:32:00.0177998Z   GOOGLE_CLOUD_PROJECT: itako-plaza-kenji
+deploy	Authorize Docker	2026-03-31T21:32:00.0178516Z   CLOUDSDK_METRICS_ENVIRONMENT: github-actions-setup-gcloud
+deploy	Authorize Docker	2026-03-31T21:32:00.0179400Z   CLOUDSDK_METRICS_ENVIRONMENT_VERSION: 2.2.1
+deploy	Authorize Docker	2026-03-31T21:32:00.0179987Z ##[endgroup]
+deploy	Authorize Docker	2026-03-31T21:32:00.4723355Z Adding credentials for: asia-northeast1-docker.pkg.dev
+deploy	Authorize Docker	2026-03-31T21:32:00.4725428Z After update, the following will be written to your Docker config file located 
+deploy	Authorize Docker	2026-03-31T21:32:00.4726775Z at [/home/runner/.docker/config.json]:
+deploy	Authorize Docker	2026-03-31T21:32:00.4727749Z  ***
+deploy	Authorize Docker	2026-03-31T21:32:00.4728299Z   "credHelpers": ***
+deploy	Authorize Docker	2026-03-31T21:32:00.4728857Z     "asia-northeast1-docker.pkg.dev": "gcloud"
+deploy	Authorize Docker	2026-03-31T21:32:00.4729701Z   ***
+deploy	Authorize Docker	2026-03-31T21:32:00.4730104Z ***
+deploy	Authorize Docker	2026-03-31T21:32:00.4730368Z 
+deploy	Authorize Docker	2026-03-31T21:32:00.4730590Z Do you want to continue (Y/n)?  
+deploy	Authorize Docker	2026-03-31T21:32:00.4890734Z Docker configuration file updated.
+deploy	Build and Push Container	・ｿ2026-03-31T21:32:00.5763497Z ##[group]Run docker build -t asia-northeast1-docker.pkg.dev/itako-plaza-kenji/itako-bridge/itako-bridge:88e58d2c82a7f7fdadad03472eec68ef5597f1c4 -f rakuten-trading-bot/Dockerfile .
+deploy	Build and Push Container	2026-03-31T21:32:00.5765334Z [36;1mdocker build -t asia-northeast1-docker.pkg.dev/itako-plaza-kenji/itako-bridge/itako-bridge:88e58d2c82a7f7fdadad03472eec68ef5597f1c4 -f rakuten-trading-bot/Dockerfile .[0m
+deploy	Build and Push Container	2026-03-31T21:32:00.5766855Z [36;1mdocker push asia-northeast1-docker.pkg.dev/itako-plaza-kenji/itako-bridge/itako-bridge:88e58d2c82a7f7fdadad03472eec68ef5597f1c4[0m
+deploy	Build and Push Container	2026-03-31T21:32:00.5793732Z shell: /usr/bin/bash -e ***0***
+deploy	Build and Push Container	2026-03-31T21:32:00.5794141Z env:
+deploy	Build and Push Container	2026-03-31T21:32:00.5794467Z   PROJECT_ID: itako-plaza-kenji
+deploy	Build and Push Container	2026-03-31T21:32:00.5794904Z   REGION: asia-northeast1
+deploy	Build and Push Container	2026-03-31T21:32:00.5795275Z   SERVICE: itako-bridge
+deploy	Build and Push Container	2026-03-31T21:32:00.5795639Z   REPOSITORY: itako-bridge
+deploy	Build and Push Container	2026-03-31T21:32:00.5796350Z   CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Build and Push Container	2026-03-31T21:32:00.5797430Z   GOOGLE_APPLICATION_CREDENTIALS: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Build and Push Container	2026-03-31T21:32:00.5798520Z   GOOGLE_GHA_CREDS_PATH: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Build and Push Container	2026-03-31T21:32:00.5799374Z   CLOUDSDK_CORE_PROJECT: itako-plaza-kenji
+deploy	Build and Push Container	2026-03-31T21:32:00.5799873Z   CLOUDSDK_PROJECT: itako-plaza-kenji
+deploy	Build and Push Container	2026-03-31T21:32:00.5800334Z   GCLOUD_PROJECT: itako-plaza-kenji
+deploy	Build and Push Container	2026-03-31T21:32:00.5800776Z   GCP_PROJECT: itako-plaza-kenji
+deploy	Build and Push Container	2026-03-31T21:32:00.5801224Z   GOOGLE_CLOUD_PROJECT: itako-plaza-kenji
+deploy	Build and Push Container	2026-03-31T21:32:00.5801767Z   CLOUDSDK_METRICS_ENVIRONMENT: github-actions-setup-gcloud
+deploy	Build and Push Container	2026-03-31T21:32:00.5802342Z   CLOUDSDK_METRICS_ENVIRONMENT_VERSION: 2.2.1
+deploy	Build and Push Container	2026-03-31T21:32:00.5802793Z ##[endgroup]
+deploy	Build and Push Container	2026-03-31T21:32:00.7548767Z #0 building with "default" instance using docker driver
+deploy	Build and Push Container	2026-03-31T21:32:00.7550101Z 
+deploy	Build and Push Container	2026-03-31T21:32:00.7550500Z #1 [internal] load build definition from Dockerfile
+deploy	Build and Push Container	2026-03-31T21:32:00.9417563Z #1 transferring dockerfile: 755B done
+deploy	Build and Push Container	2026-03-31T21:32:00.9419604Z #1 DONE 0.0s
+deploy	Build and Push Container	2026-03-31T21:32:00.9420282Z 
+deploy	Build and Push Container	2026-03-31T21:32:00.9420872Z #2 [auth] library/python:pull token for registry-1.docker.io
+deploy	Build and Push Container	2026-03-31T21:32:00.9421989Z #2 DONE 0.0s
+deploy	Build and Push Container	2026-03-31T21:32:00.9422407Z 
+deploy	Build and Push Container	2026-03-31T21:32:00.9423013Z #3 [internal] load metadata for docker.io/library/python:3.12-slim
+deploy	Build and Push Container	2026-03-31T21:32:01.0968186Z #3 DONE 0.3s
+deploy	Build and Push Container	2026-03-31T21:32:01.2168153Z 
+deploy	Build and Push Container	2026-03-31T21:32:01.2170749Z #4 [internal] load .dockerignore
+deploy	Build and Push Container	2026-03-31T21:32:01.2171515Z #4 transferring context: 2B done
+deploy	Build and Push Container	2026-03-31T21:32:01.2172116Z #4 DONE 0.0s
+deploy	Build and Push Container	2026-03-31T21:32:01.2172385Z 
+deploy	Build and Push Container	2026-03-31T21:32:01.2172618Z #5 [internal] load build context
+deploy	Build and Push Container	2026-03-31T21:32:01.2173228Z #5 transferring context: 1.04MB 0.0s done
+deploy	Build and Push Container	2026-03-31T21:32:01.2173828Z #5 DONE 0.0s
+deploy	Build and Push Container	2026-03-31T21:32:01.2174085Z 
+deploy	Build and Push Container	2026-03-31T21:32:01.2174843Z #6 [1/7] FROM docker.io/library/python:3.12-slim@sha256:3d5ed973e45820f5ba5e46bd065bd88b3a504ff0724d85980dcd05eab361fcf4
+deploy	Build and Push Container	2026-03-31T21:32:01.2176565Z #6 resolve docker.io/library/python:3.12-slim@sha256:3d5ed973e45820f5ba5e46bd065bd88b3a504ff0724d85980dcd05eab361fcf4 done
+deploy	Build and Push Container	2026-03-31T21:32:01.2178839Z #6 sha256:b1a20e2fae4cdafe596f3275baf250182347549a39d648abbad68a25f2e151fd 0B / 1.29MB 0.1s
+deploy	Build and Push Container	2026-03-31T21:32:01.2181083Z #6 sha256:a6d1911b36ac5b384a54e9197335acdf0ebb0a06910b25b67b9afd054cdc2eb7 1.05MB / 12.11MB 0.1s
+deploy	Build and Push Container	2026-03-31T21:32:01.2182873Z #6 sha256:3d5ed973e45820f5ba5e46bd065bd88b3a504ff0724d85980dcd05eab361fcf4 10.37kB / 10.37kB done
+deploy	Build and Push Container	2026-03-31T21:32:01.2184416Z #6 sha256:0bbd3d5f3abb2024c1b92ce69e8bdfefa17c248999827c34e2ed52ba0772da1b 1.75kB / 1.75kB done
+deploy	Build and Push Container	2026-03-31T21:32:01.2185622Z #6 sha256:fb1118f126b507965df3c46fdfc52312dfd5262e7b6652ef510bd9298f69a6bc 5.66kB / 5.66kB done
+deploy	Build and Push Container	2026-03-31T21:32:01.2186822Z #6 sha256:ec781dee3f4719c2ca0dd9e73cb1d4ed834ed1a406495eb6e44b6dfaad5d1f8f 6.29MB / 29.78MB 0.1s
+deploy	Build and Push Container	2026-03-31T21:32:01.4158838Z #6 sha256:b1a20e2fae4cdafe596f3275baf250182347549a39d648abbad68a25f2e151fd 1.29MB / 1.29MB 0.1s done
+deploy	Build and Push Container	2026-03-31T21:32:01.4162572Z #6 sha256:a6d1911b36ac5b384a54e9197335acdf0ebb0a06910b25b67b9afd054cdc2eb7 12.11MB / 12.11MB 0.2s done
+deploy	Build and Push Container	2026-03-31T21:32:01.5161746Z #6 sha256:ec781dee3f4719c2ca0dd9e73cb1d4ed834ed1a406495eb6e44b6dfaad5d1f8f 20.97MB / 29.78MB 0.3s
+deploy	Build and Push Container	2026-03-31T21:32:01.5163800Z #6 sha256:e3c59d77c03efd793b736fb93c9b3c578eb84a62458c148b6974323225d030c2 249B / 249B 0.2s done
+deploy	Build and Push Container	2026-03-31T21:32:01.5165655Z #6 sha256:ec781dee3f4719c2ca0dd9e73cb1d4ed834ed1a406495eb6e44b6dfaad5d1f8f 24.12MB / 29.78MB 0.4s
+deploy	Build and Push Container	2026-03-31T21:32:01.7162983Z #6 sha256:ec781dee3f4719c2ca0dd9e73cb1d4ed834ed1a406495eb6e44b6dfaad5d1f8f 27.26MB / 29.78MB 0.6s
+deploy	Build and Push Container	2026-03-31T21:32:01.9157778Z #6 sha256:ec781dee3f4719c2ca0dd9e73cb1d4ed834ed1a406495eb6e44b6dfaad5d1f8f 29.78MB / 29.78MB 0.7s done
+deploy	Build and Push Container	2026-03-31T21:32:02.1128389Z #6 extracting sha256:ec781dee3f4719c2ca0dd9e73cb1d4ed834ed1a406495eb6e44b6dfaad5d1f8f
+deploy	Build and Push Container	2026-03-31T21:32:03.1282557Z #6 extracting sha256:ec781dee3f4719c2ca0dd9e73cb1d4ed834ed1a406495eb6e44b6dfaad5d1f8f 0.9s done
+deploy	Build and Push Container	2026-03-31T21:32:03.1286945Z #6 extracting sha256:b1a20e2fae4cdafe596f3275baf250182347549a39d648abbad68a25f2e151fd 0.1s
+deploy	Build and Push Container	2026-03-31T21:32:03.2796805Z #6 extracting sha256:b1a20e2fae4cdafe596f3275baf250182347549a39d648abbad68a25f2e151fd 0.1s done
+deploy	Build and Push Container	2026-03-31T21:32:03.6151321Z #6 extracting sha256:a6d1911b36ac5b384a54e9197335acdf0ebb0a06910b25b67b9afd054cdc2eb7
+deploy	Build and Push Container	2026-03-31T21:32:04.1825916Z #6 extracting sha256:a6d1911b36ac5b384a54e9197335acdf0ebb0a06910b25b67b9afd054cdc2eb7 0.5s done
+deploy	Build and Push Container	2026-03-31T21:32:04.1828198Z #6 extracting sha256:e3c59d77c03efd793b736fb93c9b3c578eb84a62458c148b6974323225d030c2
+deploy	Build and Push Container	2026-03-31T21:32:04.3615704Z #6 extracting sha256:e3c59d77c03efd793b736fb93c9b3c578eb84a62458c148b6974323225d030c2 done
+deploy	Build and Push Container	2026-03-31T21:32:04.3616643Z #6 DONE 3.1s
+deploy	Build and Push Container	2026-03-31T21:32:04.3616883Z 
+deploy	Build and Push Container	2026-03-31T21:32:04.3617068Z #7 [2/7] WORKDIR /app
+deploy	Build and Push Container	2026-03-31T21:32:04.3617518Z #7 DONE 0.0s
+deploy	Build and Push Container	2026-03-31T21:32:04.3617757Z 
+deploy	Build and Push Container	2026-03-31T21:32:04.3618716Z #8 [3/7] RUN apt-get update && apt-get install -y     build-essential     && rm -rf /var/lib/apt/lists/*
+deploy	Build and Push Container	2026-03-31T21:32:04.3770329Z #8 0.166 Hit:1 http://deb.debian.org/debian trixie InRelease
+deploy	Build and Push Container	2026-03-31T21:32:04.3772518Z #8 0.166 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+deploy	Build and Push Container	2026-03-31T21:32:04.5959519Z #8 0.168 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+deploy	Build and Push Container	2026-03-31T21:32:04.5961563Z #8 0.183 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9671 kB]
+deploy	Build and Push Container	2026-03-31T21:32:04.5963489Z #8 0.234 Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
+deploy	Build and Push Container	2026-03-31T21:32:04.5965166Z #8 0.234 Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [114 kB]
+deploy	Build and Push Container	2026-03-31T21:32:05.0831562Z #8 0.872 Fetched 9881 kB in 1s (13.6 MB/s)
+deploy	Build and Push Container	2026-03-31T21:32:05.5190549Z #8 0.872 Reading package lists...
+deploy	Build and Push Container	2026-03-31T21:32:05.9696117Z #8 1.326 Reading package lists...
+deploy	Build and Push Container	2026-03-31T21:32:06.0832916Z #8 1.768 Building dependency tree...
+deploy	Build and Push Container	2026-03-31T21:32:06.0833828Z #8 1.872 Reading state information...
+deploy	Build and Push Container	2026-03-31T21:32:06.2080653Z #8 1.997 The following additional packages will be installed:
+deploy	Build and Push Container	2026-03-31T21:32:06.2085174Z #8 1.997   binutils binutils-common binutils-x86-64-linux-gnu bzip2 cpp cpp-14
+deploy	Build and Push Container	2026-03-31T21:32:06.2087388Z #8 1.997   cpp-14-x86-64-linux-gnu cpp-x86-64-linux-gnu dpkg-dev fakeroot g++ g++-14
+deploy	Build and Push Container	2026-03-31T21:32:06.2089229Z #8 1.997   g++-14-x86-64-linux-gnu g++-x86-64-linux-gnu gcc gcc-14
+deploy	Build and Push Container	2026-03-31T21:32:06.3608467Z #8 1.997   gcc-14-x86-64-linux-gnu gcc-x86-64-linux-gnu libalgorithm-diff-perl
+deploy	Build and Push Container	2026-03-31T21:32:06.3610225Z #8 1.997   libalgorithm-diff-xs-perl libalgorithm-merge-perl libasan8 libatomic1
+deploy	Build and Push Container	2026-03-31T21:32:06.3611456Z #8 1.997   libbinutils libc-dev-bin libc6-dev libcc1-0 libcrypt-dev libctf-nobfd0
+deploy	Build and Push Container	2026-03-31T21:32:06.3612631Z #8 1.997   libctf0 libdpkg-perl libfakeroot libfile-fcntllock-perl libgcc-14-dev
+deploy	Build and Push Container	2026-03-31T21:32:06.3613767Z #8 1.997   libgdbm-compat4t64 libgomp1 libgprofng0 libhwasan0 libisl23 libitm1
+deploy	Build and Push Container	2026-03-31T21:32:06.3615021Z #8 1.997   libjansson4 liblocale-gettext-perl liblsan0 libmpc3 libmpfr6 libperl5.40
+deploy	Build and Push Container	2026-03-31T21:32:06.3616584Z #8 1.998   libquadmath0 libsframe1 libstdc++-14-dev libtsan2 libubsan1 linux-libc-dev
+deploy	Build and Push Container	2026-03-31T21:32:06.3617846Z #8 1.998   make manpages manpages-dev patch perl perl-modules-5.40 rpcsvc-proto sq
+deploy	Build and Push Container	2026-03-31T21:32:06.3618802Z #8 1.998   xz-utils
+deploy	Build and Push Container	2026-03-31T21:32:06.3619600Z #8 1.999 Suggested packages:
+deploy	Build and Push Container	2026-03-31T21:32:06.3620448Z #8 1.999   binutils-doc gprofng-gui binutils-gold bzip2-doc cpp-doc gcc-14-locales
+deploy	Build and Push Container	2026-03-31T21:32:06.3621602Z #8 1.999   cpp-14-doc debian-keyring debian-tag2upload-keyring g++-multilib
+deploy	Build and Push Container	2026-03-31T21:32:06.3622722Z #8 1.999   g++-14-multilib gcc-14-doc gcc-multilib autoconf automake libtool flex bison
+deploy	Build and Push Container	2026-03-31T21:32:06.3623905Z #8 1.999   gdb gcc-doc gcc-14-multilib gdb-x86-64-linux-gnu libc-devtools glibc-doc
+deploy	Build and Push Container	2026-03-31T21:32:06.3625004Z #8 1.999   sensible-utils git bzr libstdc++-14-doc make-doc man-browser ed
+deploy	Build and Push Container	2026-03-31T21:32:06.3625976Z #8 1.999   diffutils-doc perl-doc libterm-readline-gnu-perl
+deploy	Build and Push Container	2026-03-31T21:32:06.3626906Z #8 1.999   | libterm-readline-perl-perl libtap-harness-archive-perl
+deploy	Build and Push Container	2026-03-31T21:32:06.3957294Z #8 2.185 The following NEW packages will be installed:
+deploy	Build and Push Container	2026-03-31T21:32:06.3959860Z #8 2.185   binutils binutils-common binutils-x86-64-linux-gnu build-essential bzip2 cpp
+deploy	Build and Push Container	2026-03-31T21:32:06.4973648Z #8 2.185   cpp-14 cpp-14-x86-64-linux-gnu cpp-x86-64-linux-gnu dpkg-dev fakeroot g++
+deploy	Build and Push Container	2026-03-31T21:32:06.4975035Z #8 2.185   g++-14 g++-14-x86-64-linux-gnu g++-x86-64-linux-gnu gcc gcc-14
+deploy	Build and Push Container	2026-03-31T21:32:06.4976703Z #8 2.185   gcc-14-x86-64-linux-gnu gcc-x86-64-linux-gnu libalgorithm-diff-perl
+deploy	Build and Push Container	2026-03-31T21:32:06.4978027Z #8 2.185   libalgorithm-diff-xs-perl libalgorithm-merge-perl libasan8 libatomic1
+deploy	Build and Push Container	2026-03-31T21:32:06.4979982Z #8 2.185   libbinutils libc-dev-bin libc6-dev libcc1-0 libcrypt-dev libctf-nobfd0
+deploy	Build and Push Container	2026-03-31T21:32:06.4982999Z #8 2.185   libctf0 libdpkg-perl libfakeroot libfile-fcntllock-perl libgcc-14-dev
+deploy	Build and Push Container	2026-03-31T21:32:06.4984325Z #8 2.185   libgdbm-compat4t64 libgomp1 libgprofng0 libhwasan0 libisl23 libitm1
+deploy	Build and Push Container	2026-03-31T21:32:06.4985387Z #8 2.185   libjansson4 liblocale-gettext-perl liblsan0 libmpc3 libmpfr6 libperl5.40
+deploy	Build and Push Container	2026-03-31T21:32:06.4986525Z #8 2.186   libquadmath0 libsframe1 libstdc++-14-dev libtsan2 libubsan1 linux-libc-dev
+deploy	Build and Push Container	2026-03-31T21:32:06.4987602Z #8 2.186   make manpages manpages-dev patch perl perl-modules-5.40 rpcsvc-proto sq
+deploy	Build and Push Container	2026-03-31T21:32:06.4988366Z #8 2.186   xz-utils
+deploy	Build and Push Container	2026-03-31T21:32:06.4989027Z #8 2.254 0 upgraded, 62 newly installed, 0 to remove and 0 not upgraded.
+deploy	Build and Push Container	2026-03-31T21:32:06.4989995Z #8 2.254 Need to get 91.8 MB of archives.
+deploy	Build and Push Container	2026-03-31T21:32:06.4990744Z #8 2.254 After this operation, 366 MB of additional disk space will be used.
+deploy	Build and Push Container	2026-03-31T21:32:06.4992747Z #8 2.254 Get:1 http://deb.debian.org/debian trixie/main amd64 liblocale-gettext-perl amd64 1.07-7+b1 [15.3 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.4994480Z #8 2.257 Get:2 http://deb.debian.org/debian trixie/main amd64 bzip2 amd64 1.0.8-6 [40.5 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.4996365Z #8 2.259 Get:3 http://deb.debian.org/debian trixie/main amd64 manpages all 6.9.1-1 [1393 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.4997506Z #8 2.273 Get:4 http://deb.debian.org/debian trixie/main amd64 perl-modules-5.40 all 5.40.1-6 [3019 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.4998735Z #8 2.286 Get:5 http://deb.debian.org/debian trixie/main amd64 libgdbm-compat4t64 amd64 1.24-2 [50.3 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6021511Z #8 2.288 Get:6 http://deb.debian.org/debian trixie/main amd64 libperl5.40 amd64 5.40.1-6 [4341 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6028915Z #8 2.303 Get:7 http://deb.debian.org/debian trixie/main amd64 perl amd64 5.40.1-6 [267 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6030317Z #8 2.304 Get:8 http://deb.debian.org/debian trixie/main amd64 xz-utils amd64 5.8.1-1 [660 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6032317Z #8 2.307 Get:9 http://deb.debian.org/debian trixie/main amd64 libsframe1 amd64 2.44-3 [78.4 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6033707Z #8 2.307 Get:10 http://deb.debian.org/debian trixie/main amd64 binutils-common amd64 2.44-3 [2509 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6035373Z #8 2.316 Get:11 http://deb.debian.org/debian trixie/main amd64 libbinutils amd64 2.44-3 [534 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6037551Z #8 2.318 Get:12 http://deb.debian.org/debian trixie/main amd64 libgprofng0 amd64 2.44-3 [808 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6038840Z #8 2.321 Get:13 http://deb.debian.org/debian trixie/main amd64 libctf-nobfd0 amd64 2.44-3 [156 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6040653Z #8 2.322 Get:14 http://deb.debian.org/debian trixie/main amd64 libctf0 amd64 2.44-3 [88.6 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6042403Z #8 2.323 Get:15 http://deb.debian.org/debian trixie/main amd64 libjansson4 amd64 2.14-2+b3 [39.8 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6044205Z #8 2.323 Get:16 http://deb.debian.org/debian trixie/main amd64 binutils-x86-64-linux-gnu amd64 2.44-3 [1014 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6045437Z #8 2.327 Get:17 http://deb.debian.org/debian trixie/main amd64 binutils amd64 2.44-3 [265 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6046616Z #8 2.328 Get:18 http://deb.debian.org/debian trixie/main amd64 libc-dev-bin amd64 2.41-12+deb13u2 [59.4 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6047945Z #8 2.329 Get:19 http://deb.debian.org/debian-security trixie-security/main amd64 linux-libc-dev all 6.12.74-2 [2746 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6050120Z #8 2.337 Get:20 http://deb.debian.org/debian trixie/main amd64 libcrypt-dev amd64 1:4.4.38-1 [119 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6051412Z #8 2.338 Get:21 http://deb.debian.org/debian trixie/main amd64 rpcsvc-proto amd64 1.4.3-1 [63.3 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6053013Z #8 2.339 Get:22 http://deb.debian.org/debian trixie/main amd64 libc6-dev amd64 2.41-12+deb13u2 [1996 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6054207Z #8 2.347 Get:23 http://deb.debian.org/debian trixie/main amd64 libisl23 amd64 0.27-1 [659 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6055492Z #8 2.350 Get:24 http://deb.debian.org/debian trixie/main amd64 libmpfr6 amd64 4.2.2-1 [729 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6057187Z #8 2.353 Get:25 http://deb.debian.org/debian trixie/main amd64 libmpc3 amd64 1.3.1-1+b3 [52.2 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6059297Z #8 2.355 Get:26 http://deb.debian.org/debian trixie/main amd64 cpp-14-x86-64-linux-gnu amd64 14.2.0-19 [11.0 MB]
+deploy	Build and Push Container	2026-03-31T21:32:06.6060518Z #8 2.391 Get:27 http://deb.debian.org/debian trixie/main amd64 cpp-14 amd64 14.2.0-19 [1280 B]
+deploy	Build and Push Container	2026-03-31T21:32:06.7180316Z #8 2.391 Get:28 http://deb.debian.org/debian trixie/main amd64 cpp-x86-64-linux-gnu amd64 4:14.2.0-1 [4840 B]
+deploy	Build and Push Container	2026-03-31T21:32:06.7181812Z #8 2.392 Get:29 http://deb.debian.org/debian trixie/main amd64 cpp amd64 4:14.2.0-1 [1568 B]
+deploy	Build and Push Container	2026-03-31T21:32:06.7183252Z #8 2.392 Get:30 http://deb.debian.org/debian trixie/main amd64 libcc1-0 amd64 14.2.0-19 [42.8 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7184620Z #8 2.392 Get:31 http://deb.debian.org/debian trixie/main amd64 libgomp1 amd64 14.2.0-19 [137 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7186400Z #8 2.393 Get:32 http://deb.debian.org/debian trixie/main amd64 libitm1 amd64 14.2.0-19 [26.0 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7187647Z #8 2.394 Get:33 http://deb.debian.org/debian trixie/main amd64 libatomic1 amd64 14.2.0-19 [9308 B]
+deploy	Build and Push Container	2026-03-31T21:32:06.7188891Z #8 2.394 Get:34 http://deb.debian.org/debian trixie/main amd64 libasan8 amd64 14.2.0-19 [2725 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7190338Z #8 2.403 Get:35 http://deb.debian.org/debian trixie/main amd64 liblsan0 amd64 14.2.0-19 [1204 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7191567Z #8 2.407 Get:36 http://deb.debian.org/debian trixie/main amd64 libtsan2 amd64 14.2.0-19 [2460 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7192816Z #8 2.416 Get:37 http://deb.debian.org/debian trixie/main amd64 libubsan1 amd64 14.2.0-19 [1074 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7194033Z #8 2.420 Get:38 http://deb.debian.org/debian trixie/main amd64 libhwasan0 amd64 14.2.0-19 [1488 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7196293Z #8 2.425 Get:39 http://deb.debian.org/debian trixie/main amd64 libquadmath0 amd64 14.2.0-19 [145 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7198561Z #8 2.426 Get:40 http://deb.debian.org/debian trixie/main amd64 libgcc-14-dev amd64 14.2.0-19 [2672 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7200225Z #8 2.435 Get:41 http://deb.debian.org/debian trixie/main amd64 gcc-14-x86-64-linux-gnu amd64 14.2.0-19 [21.4 MB]
+deploy	Build and Push Container	2026-03-31T21:32:06.7201537Z #8 2.507 Get:42 http://deb.debian.org/debian trixie/main amd64 gcc-14 amd64 14.2.0-19 [540 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9219644Z #8 2.509 Get:43 http://deb.debian.org/debian trixie/main amd64 gcc-x86-64-linux-gnu amd64 4:14.2.0-1 [1436 B]
+deploy	Build and Push Container	2026-03-31T21:32:06.9222542Z #8 2.510 Get:44 http://deb.debian.org/debian trixie/main amd64 gcc amd64 4:14.2.0-1 [5136 B]
+deploy	Build and Push Container	2026-03-31T21:32:06.9225534Z #8 2.510 Get:45 http://deb.debian.org/debian trixie/main amd64 libstdc++-14-dev amd64 14.2.0-19 [2376 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9227954Z #8 2.518 Get:46 http://deb.debian.org/debian trixie/main amd64 g++-14-x86-64-linux-gnu amd64 14.2.0-19 [12.1 MB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9230037Z #8 2.559 Get:47 http://deb.debian.org/debian trixie/main amd64 g++-14 amd64 14.2.0-19 [22.5 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9231007Z #8 2.560 Get:48 http://deb.debian.org/debian trixie/main amd64 g++-x86-64-linux-gnu amd64 4:14.2.0-1 [1200 B]
+deploy	Build and Push Container	2026-03-31T21:32:06.9231950Z #8 2.560 Get:49 http://deb.debian.org/debian trixie/main amd64 g++ amd64 4:14.2.0-1 [1344 B]
+deploy	Build and Push Container	2026-03-31T21:32:06.9232812Z #8 2.560 Get:50 http://deb.debian.org/debian trixie/main amd64 make amd64 4.4.1-2 [463 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9233686Z #8 2.562 Get:51 http://deb.debian.org/debian trixie/main amd64 libdpkg-perl all 1.22.22 [651 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9234554Z #8 2.565 Get:52 http://deb.debian.org/debian trixie/main amd64 patch amd64 2.8-2 [134 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9235406Z #8 2.566 Get:53 http://deb.debian.org/debian trixie/main amd64 dpkg-dev all 1.22.22 [1337 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9236553Z #8 2.572 Get:54 http://deb.debian.org/debian trixie/main amd64 build-essential amd64 12.12 [4624 B]
+deploy	Build and Push Container	2026-03-31T21:32:06.9237491Z #8 2.572 Get:55 http://deb.debian.org/debian trixie/main amd64 libfakeroot amd64 1.37.1.1-1 [29.6 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9238397Z #8 2.572 Get:56 http://deb.debian.org/debian trixie/main amd64 fakeroot amd64 1.37.1.1-1 [76.0 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9239689Z #8 2.573 Get:57 http://deb.debian.org/debian trixie/main amd64 libalgorithm-diff-perl all 1.201-1 [43.3 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9240902Z #8 2.574 Get:58 http://deb.debian.org/debian trixie/main amd64 libalgorithm-diff-xs-perl amd64 0.04-9 [11.1 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9241970Z #8 2.574 Get:59 http://deb.debian.org/debian trixie/main amd64 libalgorithm-merge-perl all 0.08-5 [11.8 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9242981Z #8 2.574 Get:60 http://deb.debian.org/debian trixie/main amd64 libfile-fcntllock-perl amd64 0.22-4+b4 [34.6 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9243947Z #8 2.575 Get:61 http://deb.debian.org/debian trixie/main amd64 manpages-dev all 6.9.1-1 [2122 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9244812Z #8 2.583 Get:62 http://deb.debian.org/debian trixie/main amd64 sq amd64 1.3.1-2+b2 [5653 kB]
+deploy	Build and Push Container	2026-03-31T21:32:06.9245528Z #8 2.711 debconf: unable to initialize frontend: Dialog
+deploy	Build and Push Container	2026-03-31T21:32:06.9246160Z #8 2.711 debconf: (TERM is not set, so the dialog frontend is not usable.)
+deploy	Build and Push Container	2026-03-31T21:32:06.9246786Z #8 2.711 debconf: falling back to frontend: Readline
+deploy	Build and Push Container	2026-03-31T21:32:07.0779275Z #8 2.711 debconf: unable to initialize frontend: Readline
+deploy	Build and Push Container	2026-03-31T21:32:07.0791481Z #8 2.711 debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC entries checked: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.40.1 /usr/local/share/perl/5.40.1 /usr/lib/x86_64-linux-gnu/perl5/5.40 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl-base /usr/lib/x86_64-linux-gnu/perl/5.40 /usr/share/perl/5.40 /usr/local/lib/site_perl) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 8, <STDIN> line 62.)
+deploy	Build and Push Container	2026-03-31T21:32:07.0796384Z #8 2.711 debconf: falling back to frontend: Teletype
+deploy	Build and Push Container	2026-03-31T21:32:07.0797874Z #8 2.716 debconf: unable to initialize frontend: Teletype
+deploy	Build and Push Container	2026-03-31T21:32:07.0799226Z #8 2.716 debconf: (This frontend requires a controlling tty.)
+deploy	Build and Push Container	2026-03-31T21:32:07.0800362Z #8 2.716 debconf: falling back to frontend: Noninteractive
+deploy	Build and Push Container	2026-03-31T21:32:08.2486853Z #8 4.038 Fetched 91.8 MB in 0s (225 MB/s)
+deploy	Build and Push Container	2026-03-31T21:32:08.4956815Z #8 4.050 Selecting previously unselected package liblocale-gettext-perl.
+deploy	Build and Push Container	2026-03-31T21:32:08.4958518Z #8 4.050 (Reading database ... 
+deploy	Build and Push Container	2026-03-31T21:32:08.4959489Z (Reading database ... 5%
+deploy	Build and Push Container	2026-03-31T21:32:08.4960123Z (Reading database ... 10%
+deploy	Build and Push Container	2026-03-31T21:32:08.4961061Z (Reading database ... 15%
+deploy	Build and Push Container	2026-03-31T21:32:08.4961688Z (Reading database ... 20%
+deploy	Build and Push Container	2026-03-31T21:32:08.4962487Z (Reading database ... 25%
+deploy	Build and Push Container	2026-03-31T21:32:08.4963079Z (Reading database ... 30%
+deploy	Build and Push Container	2026-03-31T21:32:08.4963722Z (Reading database ... 35%
+deploy	Build and Push Container	2026-03-31T21:32:08.4964435Z (Reading database ... 40%
+deploy	Build and Push Container	2026-03-31T21:32:08.4965029Z (Reading database ... 45%
+deploy	Build and Push Container	2026-03-31T21:32:08.4965621Z (Reading database ... 50%
+deploy	Build and Push Container	2026-03-31T21:32:08.4966386Z (Reading database ... 55%
+deploy	Build and Push Container	2026-03-31T21:32:08.4966990Z (Reading database ... 60%
+deploy	Build and Push Container	2026-03-31T21:32:08.4967690Z (Reading database ... 65%
+deploy	Build and Push Container	2026-03-31T21:32:08.4968336Z (Reading database ... 70%
+deploy	Build and Push Container	2026-03-31T21:32:08.4968927Z (Reading database ... 75%
+deploy	Build and Push Container	2026-03-31T21:32:08.4969678Z (Reading database ... 80%
+deploy	Build and Push Container	2026-03-31T21:32:08.4970236Z (Reading database ... 85%
+deploy	Build and Push Container	2026-03-31T21:32:08.4970695Z (Reading database ... 90%
+deploy	Build and Push Container	2026-03-31T21:32:08.4971143Z (Reading database ... 95%
+deploy	Build and Push Container	2026-03-31T21:32:08.4971603Z (Reading database ... 100%
+deploy	Build and Push Container	2026-03-31T21:32:08.4972405Z (Reading database ... 5645 files and directories currently installed.)
+deploy	Build and Push Container	2026-03-31T21:32:08.4973349Z #8 4.056 Preparing to unpack .../00-liblocale-gettext-perl_1.07-7+b1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:08.4974350Z #8 4.057 Unpacking liblocale-gettext-perl (1.07-7+b1) ...
+deploy	Build and Push Container	2026-03-31T21:32:08.4975183Z #8 4.072 Selecting previously unselected package bzip2.
+deploy	Build and Push Container	2026-03-31T21:32:08.4975926Z #8 4.073 Preparing to unpack .../01-bzip2_1.0.8-6_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:08.4976594Z #8 4.073 Unpacking bzip2 (1.0.8-6) ...
+deploy	Build and Push Container	2026-03-31T21:32:08.4977213Z #8 4.088 Selecting previously unselected package manpages.
+deploy	Build and Push Container	2026-03-31T21:32:08.4978082Z #8 4.089 Preparing to unpack .../02-manpages_6.9.1-1_all.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:08.4978749Z #8 4.090 Unpacking manpages (6.9.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:08.4979645Z #8 4.132 Selecting previously unselected package perl-modules-5.40.
+deploy	Build and Push Container	2026-03-31T21:32:08.4980427Z #8 4.133 Preparing to unpack .../03-perl-modules-5.40_5.40.1-6_all.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:08.4981212Z #8 4.134 Unpacking perl-modules-5.40 (5.40.1-6) ...
+deploy	Build and Push Container	2026-03-31T21:32:08.5898367Z #8 4.379 Selecting previously unselected package libgdbm-compat4t64:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:08.7606061Z #8 4.380 Preparing to unpack .../04-libgdbm-compat4t64_1.24-2_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:08.7607388Z #8 4.382 Unpacking libgdbm-compat4t64:amd64 (1.24-2) ...
+deploy	Build and Push Container	2026-03-31T21:32:08.7608487Z #8 4.397 Selecting previously unselected package libperl5.40:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:08.7610094Z #8 4.398 Preparing to unpack .../05-libperl5.40_5.40.1-6_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:08.7611089Z #8 4.399 Unpacking libperl5.40:amd64 (5.40.1-6) ...
+deploy	Build and Push Container	2026-03-31T21:32:08.8138875Z #8 4.603 Selecting previously unselected package perl.
+deploy	Build and Push Container	2026-03-31T21:32:09.0007034Z #8 4.604 Preparing to unpack .../06-perl_5.40.1-6_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.0008293Z #8 4.605 Unpacking perl (5.40.1-6) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.0009589Z #8 4.629 Selecting previously unselected package xz-utils.
+deploy	Build and Push Container	2026-03-31T21:32:09.0010844Z #8 4.630 Preparing to unpack .../07-xz-utils_5.8.1-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.0012030Z #8 4.631 Unpacking xz-utils (5.8.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.0013176Z #8 4.662 Selecting previously unselected package libsframe1:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.0014508Z #8 4.663 Preparing to unpack .../08-libsframe1_2.44-3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.0015705Z #8 4.664 Unpacking libsframe1:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.0016952Z #8 4.678 Selecting previously unselected package binutils-common:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.0018698Z #8 4.679 Preparing to unpack .../09-binutils-common_2.44-3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.0019974Z #8 4.680 Unpacking binutils-common:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.0020893Z #8 4.790 Selecting previously unselected package libbinutils:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.1099829Z #8 4.792 Preparing to unpack .../10-libbinutils_2.44-3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.1100831Z #8 4.793 Unpacking libbinutils:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.1101627Z #8 4.828 Selecting previously unselected package libgprofng0:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.1102759Z #8 4.829 Preparing to unpack .../11-libgprofng0_2.44-3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.1103516Z #8 4.830 Unpacking libgprofng0:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.1104260Z #8 4.878 Selecting previously unselected package libctf-nobfd0:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.1105107Z #8 4.879 Preparing to unpack .../12-libctf-nobfd0_2.44-3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.1105848Z #8 4.880 Unpacking libctf-nobfd0:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.1106568Z #8 4.899 Selecting previously unselected package libctf0:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.2271983Z #8 4.900 Preparing to unpack .../13-libctf0_2.44-3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.2280109Z #8 4.901 Unpacking libctf0:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.2281412Z #8 4.920 Selecting previously unselected package libjansson4:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.2283070Z #8 4.921 Preparing to unpack .../14-libjansson4_2.14-2+b3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.2284641Z #8 4.922 Unpacking libjansson4:amd64 (2.14-2+b3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.2285677Z #8 4.936 Selecting previously unselected package binutils-x86-64-linux-gnu.
+deploy	Build and Push Container	2026-03-31T21:32:09.2286928Z #8 4.937 Preparing to unpack .../15-binutils-x86-64-linux-gnu_2.44-3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.2288010Z #8 4.937 Unpacking binutils-x86-64-linux-gnu (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.2288930Z #8 5.016 Selecting previously unselected package binutils.
+deploy	Build and Push Container	2026-03-31T21:32:09.4258990Z #8 5.018 Preparing to unpack .../16-binutils_2.44-3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.4260480Z #8 5.020 Unpacking binutils (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.4261377Z #8 5.046 Selecting previously unselected package libc-dev-bin.
+deploy	Build and Push Container	2026-03-31T21:32:09.4263047Z #8 5.047 Preparing to unpack .../17-libc-dev-bin_2.41-12+deb13u2_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.4264254Z #8 5.048 Unpacking libc-dev-bin (2.41-12+deb13u2) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.4265212Z #8 5.063 Selecting previously unselected package linux-libc-dev.
+deploy	Build and Push Container	2026-03-31T21:32:09.4266461Z #8 5.064 Preparing to unpack .../18-linux-libc-dev_6.12.74-2_all.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.4267645Z #8 5.065 Unpacking linux-libc-dev (6.12.74-2) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.5842898Z #8 5.373 Selecting previously unselected package libcrypt-dev:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.7437044Z #8 5.375 Preparing to unpack .../19-libcrypt-dev_1%3a4.4.38-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.7437882Z #8 5.381 Unpacking libcrypt-dev:amd64 (1:4.4.38-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.7438543Z #8 5.399 Selecting previously unselected package rpcsvc-proto.
+deploy	Build and Push Container	2026-03-31T21:32:09.7439587Z #8 5.400 Preparing to unpack .../20-rpcsvc-proto_1.4.3-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.7440244Z #8 5.401 Unpacking rpcsvc-proto (1.4.3-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.7440870Z #8 5.419 Selecting previously unselected package libc6-dev:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.7441624Z #8 5.420 Preparing to unpack .../21-libc6-dev_2.41-12+deb13u2_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.7442319Z #8 5.420 Unpacking libc6-dev:amd64 (2.41-12+deb13u2) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.7442981Z #8 5.533 Selecting previously unselected package libisl23:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.9895692Z #8 5.535 Preparing to unpack .../22-libisl23_0.27-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.9896852Z #8 5.536 Unpacking libisl23:amd64 (0.27-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.9898333Z #8 5.577 Selecting previously unselected package libmpfr6:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.9899706Z #8 5.579 Preparing to unpack .../23-libmpfr6_4.2.2-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.9900634Z #8 5.579 Unpacking libmpfr6:amd64 (4.2.2-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.9901535Z #8 5.609 Selecting previously unselected package libmpc3:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:09.9902987Z #8 5.611 Preparing to unpack .../24-libmpc3_1.3.1-1+b3_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.9904463Z #8 5.611 Unpacking libmpc3:amd64 (1.3.1-1+b3) ...
+deploy	Build and Push Container	2026-03-31T21:32:09.9905462Z #8 5.626 Selecting previously unselected package cpp-14-x86-64-linux-gnu.
+deploy	Build and Push Container	2026-03-31T21:32:09.9906673Z #8 5.627 Preparing to unpack .../25-cpp-14-x86-64-linux-gnu_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:09.9907757Z #8 5.628 Unpacking cpp-14-x86-64-linux-gnu (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.1930834Z #8 5.981 Selecting previously unselected package cpp-14.
+deploy	Build and Push Container	2026-03-31T21:32:10.3011006Z #8 5.983 Preparing to unpack .../26-cpp-14_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3013407Z #8 5.984 Unpacking cpp-14 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3014302Z #8 5.997 Selecting previously unselected package cpp-x86-64-linux-gnu.
+deploy	Build and Push Container	2026-03-31T21:32:10.3015374Z #8 5.998 Preparing to unpack .../27-cpp-x86-64-linux-gnu_4%3a14.2.0-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3016348Z #8 5.999 Unpacking cpp-x86-64-linux-gnu (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3017131Z #8 6.013 Selecting previously unselected package cpp.
+deploy	Build and Push Container	2026-03-31T21:32:10.3017950Z #8 6.015 Preparing to unpack .../28-cpp_4%3a14.2.0-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3018702Z #8 6.020 Unpacking cpp (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3019802Z #8 6.034 Selecting previously unselected package libcc1-0:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.3020988Z #8 6.035 Preparing to unpack .../29-libcc1-0_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3022368Z #8 6.036 Unpacking libcc1-0:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3023825Z #8 6.052 Selecting previously unselected package libgomp1:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.3024687Z #8 6.053 Preparing to unpack .../30-libgomp1_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3025456Z #8 6.054 Unpacking libgomp1:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3026185Z #8 6.073 Selecting previously unselected package libitm1:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.3027034Z #8 6.074 Preparing to unpack .../31-libitm1_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3027677Z #8 6.075 Unpacking libitm1:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.3028313Z #8 6.090 Selecting previously unselected package libatomic1:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.4489121Z #8 6.092 Preparing to unpack .../32-libatomic1_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.4491236Z #8 6.093 Unpacking libatomic1:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.4492465Z #8 6.107 Selecting previously unselected package libasan8:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.4493803Z #8 6.108 Preparing to unpack .../33-libasan8_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.4494967Z #8 6.109 Unpacking libasan8:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.4496092Z #8 6.238 Selecting previously unselected package liblsan0:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.6339934Z #8 6.240 Preparing to unpack .../34-liblsan0_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.6341125Z #8 6.241 Unpacking liblsan0:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.6342179Z #8 6.306 Selecting previously unselected package libtsan2:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.6343355Z #8 6.308 Preparing to unpack .../35-libtsan2_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.6344368Z #8 6.309 Unpacking libtsan2:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.6345345Z #8 6.423 Selecting previously unselected package libubsan1:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.7772803Z #8 6.425 Preparing to unpack .../36-libubsan1_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.7773818Z #8 6.430 Unpacking libubsan1:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.7774567Z #8 6.487 Selecting previously unselected package libhwasan0:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.7775421Z #8 6.489 Preparing to unpack .../37-libhwasan0_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.7776204Z #8 6.490 Unpacking libhwasan0:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.7776946Z #8 6.566 Selecting previously unselected package libquadmath0:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.9088343Z #8 6.568 Preparing to unpack .../38-libquadmath0_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.9090023Z #8 6.569 Unpacking libquadmath0:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.9091314Z #8 6.587 Selecting previously unselected package libgcc-14-dev:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:10.9093385Z #8 6.588 Preparing to unpack .../39-libgcc-14-dev_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:10.9094576Z #8 6.589 Unpacking libgcc-14-dev:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:10.9095720Z #8 6.698 Selecting previously unselected package gcc-14-x86-64-linux-gnu.
+deploy	Build and Push Container	2026-03-31T21:32:11.0623070Z #8 6.700 Preparing to unpack .../40-gcc-14-x86-64-linux-gnu_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:11.0624551Z #8 6.701 Unpacking gcc-14-x86-64-linux-gnu (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:11.3518523Z #8 7.141 Selecting previously unselected package gcc-14.
+deploy	Build and Push Container	2026-03-31T21:32:11.5620582Z #8 7.143 Preparing to unpack .../41-gcc-14_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:11.5621874Z #8 7.144 Unpacking gcc-14 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:11.5623070Z #8 7.166 Selecting previously unselected package gcc-x86-64-linux-gnu.
+deploy	Build and Push Container	2026-03-31T21:32:11.5624637Z #8 7.167 Preparing to unpack .../42-gcc-x86-64-linux-gnu_4%3a14.2.0-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:11.5626101Z #8 7.168 Unpacking gcc-x86-64-linux-gnu (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:11.5627260Z #8 7.182 Selecting previously unselected package gcc.
+deploy	Build and Push Container	2026-03-31T21:32:11.5628396Z #8 7.183 Preparing to unpack .../43-gcc_4%3a14.2.0-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:11.5629590Z #8 7.184 Unpacking gcc (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:11.5630648Z #8 7.199 Selecting previously unselected package libstdc++-14-dev:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:11.5631984Z #8 7.200 Preparing to unpack .../44-libstdc++-14-dev_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:11.5633172Z #8 7.201 Unpacking libstdc++-14-dev:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:11.5922492Z #8 7.381 Selecting previously unselected package g++-14-x86-64-linux-gnu.
+deploy	Build and Push Container	2026-03-31T21:32:11.7458844Z #8 7.383 Preparing to unpack .../45-g++-14-x86-64-linux-gnu_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:11.7460363Z #8 7.384 Unpacking g++-14-x86-64-linux-gnu (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:11.9548448Z #8 7.744 Selecting previously unselected package g++-14.
+deploy	Build and Push Container	2026-03-31T21:32:12.0743947Z #8 7.746 Preparing to unpack .../46-g++-14_14.2.0-19_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0744900Z #8 7.747 Unpacking g++-14 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0745687Z #8 7.761 Selecting previously unselected package g++-x86-64-linux-gnu.
+deploy	Build and Push Container	2026-03-31T21:32:12.0746707Z #8 7.762 Preparing to unpack .../47-g++-x86-64-linux-gnu_4%3a14.2.0-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0747590Z #8 7.763 Unpacking g++-x86-64-linux-gnu (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0748319Z #8 7.776 Selecting previously unselected package g++.
+deploy	Build and Push Container	2026-03-31T21:32:12.0749295Z #8 7.777 Preparing to unpack .../48-g++_4%3a14.2.0-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0750224Z #8 7.778 Unpacking g++ (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0751097Z #8 7.791 Selecting previously unselected package make.
+deploy	Build and Push Container	2026-03-31T21:32:12.0752176Z #8 7.792 Preparing to unpack .../49-make_4.4.1-2_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0753277Z #8 7.793 Unpacking make (4.4.1-2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0754496Z #8 7.822 Selecting previously unselected package libdpkg-perl.
+deploy	Build and Push Container	2026-03-31T21:32:12.0756281Z #8 7.824 Preparing to unpack .../50-libdpkg-perl_1.22.22_all.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0758030Z #8 7.824 Unpacking libdpkg-perl (1.22.22) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.0760283Z #8 7.864 Selecting previously unselected package patch.
+deploy	Build and Push Container	2026-03-31T21:32:12.1799362Z #8 7.866 Preparing to unpack .../51-patch_2.8-2_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.1800777Z #8 7.866 Unpacking patch (2.8-2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.1814236Z #8 7.884 Selecting previously unselected package dpkg-dev.
+deploy	Build and Push Container	2026-03-31T21:32:12.1815254Z #8 7.885 Preparing to unpack .../52-dpkg-dev_1.22.22_all.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.1816284Z #8 7.886 Unpacking dpkg-dev (1.22.22) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.1817325Z #8 7.935 Selecting previously unselected package build-essential.
+deploy	Build and Push Container	2026-03-31T21:32:12.1818766Z #8 7.936 Preparing to unpack .../53-build-essential_12.12_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.1820175Z #8 7.937 Unpacking build-essential (12.12) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.1821143Z #8 7.952 Selecting previously unselected package libfakeroot:amd64.
+deploy	Build and Push Container	2026-03-31T21:32:12.1822628Z #8 7.953 Preparing to unpack .../54-libfakeroot_1.37.1.1-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.1823293Z #8 7.954 Unpacking libfakeroot:amd64 (1.37.1.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.1823889Z #8 7.969 Selecting previously unselected package fakeroot.
+deploy	Build and Push Container	2026-03-31T21:32:12.3577420Z #8 7.970 Preparing to unpack .../55-fakeroot_1.37.1.1-1_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3578671Z #8 7.972 Unpacking fakeroot (1.37.1.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3580103Z #8 7.986 Selecting previously unselected package libalgorithm-diff-perl.
+deploy	Build and Push Container	2026-03-31T21:32:12.3581989Z #8 7.987 Preparing to unpack .../56-libalgorithm-diff-perl_1.201-1_all.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3583248Z #8 7.989 Unpacking libalgorithm-diff-perl (1.201-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3584421Z #8 8.003 Selecting previously unselected package libalgorithm-diff-xs-perl.
+deploy	Build and Push Container	2026-03-31T21:32:12.3585611Z #8 8.005 Preparing to unpack .../57-libalgorithm-diff-xs-perl_0.04-9_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3586608Z #8 8.006 Unpacking libalgorithm-diff-xs-perl (0.04-9) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3587581Z #8 8.023 Selecting previously unselected package libalgorithm-merge-perl.
+deploy	Build and Push Container	2026-03-31T21:32:12.3588626Z #8 8.024 Preparing to unpack .../58-libalgorithm-merge-perl_0.08-5_all.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3590316Z #8 8.025 Unpacking libalgorithm-merge-perl (0.08-5) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3591288Z #8 8.039 Selecting previously unselected package libfile-fcntllock-perl.
+deploy	Build and Push Container	2026-03-31T21:32:12.3592370Z #8 8.040 Preparing to unpack .../59-libfile-fcntllock-perl_0.22-4+b4_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3593245Z #8 8.041 Unpacking libfile-fcntllock-perl (0.22-4+b4) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3593892Z #8 8.056 Selecting previously unselected package manpages-dev.
+deploy	Build and Push Container	2026-03-31T21:32:12.3594685Z #8 8.057 Preparing to unpack .../60-manpages-dev_6.9.1-1_all.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3595275Z #8 8.058 Unpacking manpages-dev (6.9.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.3595920Z #8 8.147 Selecting previously unselected package sq.
+deploy	Build and Push Container	2026-03-31T21:32:12.5115873Z #8 8.149 Preparing to unpack .../61-sq_1.3.1-2+b2_amd64.deb ...
+deploy	Build and Push Container	2026-03-31T21:32:12.5117475Z #8 8.150 Unpacking sq (1.3.1-2+b2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.5990490Z #8 8.388 Setting up libgdbm-compat4t64:amd64 (1.24-2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7011970Z #8 8.390 Setting up manpages (6.9.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7012821Z #8 8.394 Setting up binutils-common:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7013732Z #8 8.396 Setting up linux-libc-dev (6.12.74-2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7014548Z #8 8.398 Setting up libctf-nobfd0:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7015405Z #8 8.400 Setting up sq (1.3.1-2+b2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7016390Z #8 8.402 Setting up libgomp1:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7017324Z #8 8.404 Setting up bzip2 (1.0.8-6) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7018409Z #8 8.406 Setting up libsframe1:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7019815Z #8 8.409 Setting up libfakeroot:amd64 (1.37.1.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7020760Z #8 8.412 Setting up libjansson4:amd64 (2.14-2+b3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7021521Z #8 8.414 Setting up fakeroot (1.37.1.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7022891Z #8 8.418 update-alternatives: using /usr/bin/fakeroot-sysv to provide /usr/bin/fakeroot (fakeroot) in auto mode
+deploy	Build and Push Container	2026-03-31T21:32:12.7024795Z #8 8.418 update-alternatives: warning: skip creation of /usr/share/man/man1/fakeroot.1.gz because associated file /usr/share/man/man1/fakeroot-sysv.1.gz (of link group fakeroot) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7027393Z #8 8.418 update-alternatives: warning: skip creation of /usr/share/man/man1/faked.1.gz because associated file /usr/share/man/man1/faked-sysv.1.gz (of link group fakeroot) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7030003Z #8 8.418 update-alternatives: warning: skip creation of /usr/share/man/es/man1/fakeroot.1.gz because associated file /usr/share/man/es/man1/fakeroot-sysv.1.gz (of link group fakeroot) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7032355Z #8 8.418 update-alternatives: warning: skip creation of /usr/share/man/es/man1/faked.1.gz because associated file /usr/share/man/es/man1/faked-sysv.1.gz (of link group fakeroot) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7035849Z #8 8.418 update-alternatives: warning: skip creation of /usr/share/man/fr/man1/fakeroot.1.gz because associated file /usr/share/man/fr/man1/fakeroot-sysv.1.gz (of link group fakeroot) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7038210Z #8 8.418 update-alternatives: warning: skip creation of /usr/share/man/fr/man1/faked.1.gz because associated file /usr/share/man/fr/man1/faked-sysv.1.gz (of link group fakeroot) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7041147Z #8 8.418 update-alternatives: warning: skip creation of /usr/share/man/sv/man1/fakeroot.1.gz because associated file /usr/share/man/sv/man1/fakeroot-sysv.1.gz (of link group fakeroot) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7043928Z #8 8.419 update-alternatives: warning: skip creation of /usr/share/man/sv/man1/faked.1.gz because associated file /usr/share/man/sv/man1/faked-sysv.1.gz (of link group fakeroot) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7045241Z #8 8.422 Setting up rpcsvc-proto (1.4.3-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7045721Z #8 8.424 Setting up make (4.4.1-2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7046358Z #8 8.426 Setting up libmpfr6:amd64 (4.2.2-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7047052Z #8 8.429 Setting up xz-utils (5.8.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7048025Z #8 8.432 update-alternatives: using /usr/bin/xz to provide /usr/bin/lzma (lzma) in auto mode
+deploy	Build and Push Container	2026-03-31T21:32:12.7049552Z #8 8.432 update-alternatives: warning: skip creation of /usr/share/man/man1/lzma.1.gz because associated file /usr/share/man/man1/xz.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7051064Z #8 8.433 update-alternatives: warning: skip creation of /usr/share/man/man1/unlzma.1.gz because associated file /usr/share/man/man1/unxz.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7052974Z #8 8.433 update-alternatives: warning: skip creation of /usr/share/man/man1/lzcat.1.gz because associated file /usr/share/man/man1/xzcat.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7055072Z #8 8.433 update-alternatives: warning: skip creation of /usr/share/man/man1/lzmore.1.gz because associated file /usr/share/man/man1/xzmore.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7057791Z #8 8.433 update-alternatives: warning: skip creation of /usr/share/man/man1/lzless.1.gz because associated file /usr/share/man/man1/xzless.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7059725Z #8 8.433 update-alternatives: warning: skip creation of /usr/share/man/man1/lzdiff.1.gz because associated file /usr/share/man/man1/xzdiff.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7061492Z #8 8.433 update-alternatives: warning: skip creation of /usr/share/man/man1/lzcmp.1.gz because associated file /usr/share/man/man1/xzcmp.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7063103Z #8 8.433 update-alternatives: warning: skip creation of /usr/share/man/man1/lzgrep.1.gz because associated file /usr/share/man/man1/xzgrep.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7064823Z #8 8.434 update-alternatives: warning: skip creation of /usr/share/man/man1/lzegrep.1.gz because associated file /usr/share/man/man1/xzegrep.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7066563Z #8 8.434 update-alternatives: warning: skip creation of /usr/share/man/man1/lzfgrep.1.gz because associated file /usr/share/man/man1/xzfgrep.1.gz (of link group lzma) doesn't exist
+deploy	Build and Push Container	2026-03-31T21:32:12.7067599Z #8 8.436 Setting up libquadmath0:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7068161Z #8 8.438 Setting up libmpc3:amd64 (1.3.1-1+b3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7068802Z #8 8.440 Setting up libatomic1:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7069659Z #8 8.442 Setting up patch (2.8-2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7070249Z #8 8.444 Setting up libubsan1:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7070695Z #8 8.446 Setting up perl-modules-5.40 (5.40.1-6) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7071121Z #8 8.449 Setting up libhwasan0:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7071673Z #8 8.451 Setting up libcrypt-dev:amd64 (1:4.4.38-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7072324Z #8 8.458 Setting up libasan8:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7072749Z #8 8.460 Setting up libtsan2:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7073255Z #8 8.462 Setting up libbinutils:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7073791Z #8 8.465 Setting up libisl23:amd64 (0.27-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7074213Z #8 8.467 Setting up libc-dev-bin (2.41-12+deb13u2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7074640Z #8 8.469 Setting up libcc1-0:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7075076Z #8 8.471 Setting up liblocale-gettext-perl (1.07-7+b1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7075604Z #8 8.473 Setting up liblsan0:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7076295Z #8 8.476 Setting up libitm1:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7076691Z #8 8.478 Setting up libctf0:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7077130Z #8 8.480 Setting up manpages-dev (6.9.1-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7077750Z #8 8.482 Setting up libperl5.40:amd64 (5.40.1-6) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7078448Z #8 8.485 Setting up perl (5.40.1-6) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.7079403Z #8 8.490 Setting up libgprofng0:amd64 (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9287292Z #8 8.493 Setting up cpp-14-x86-64-linux-gnu (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9288632Z #8 8.495 Setting up libdpkg-perl (1.22.22) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9289934Z #8 8.497 Setting up cpp-14 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9290973Z #8 8.500 Setting up libc6-dev:amd64 (2.41-12+deb13u2) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9291981Z #8 8.502 Setting up libgcc-14-dev:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9292976Z #8 8.504 Setting up libstdc++-14-dev:amd64 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9293823Z #8 8.506 Setting up binutils-x86-64-linux-gnu (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9294616Z #8 8.509 Setting up cpp-x86-64-linux-gnu (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9295404Z #8 8.511 Setting up libfile-fcntllock-perl (0.22-4+b4) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9296249Z #8 8.513 Setting up libalgorithm-diff-perl (1.201-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9296984Z #8 8.516 Setting up binutils (2.44-3) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9297624Z #8 8.519 Setting up dpkg-dev (1.22.22) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9298266Z #8 8.523 Setting up cpp (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9298967Z #8 8.531 Setting up gcc-14-x86-64-linux-gnu (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9300151Z #8 8.533 Setting up libalgorithm-diff-xs-perl (0.04-9) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9300951Z #8 8.535 Setting up libalgorithm-merge-perl (0.08-5) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9301721Z #8 8.538 Setting up gcc-x86-64-linux-gnu (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9302426Z #8 8.540 Setting up gcc-14 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9303118Z #8 8.542 Setting up g++-14-x86-64-linux-gnu (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9303796Z #8 8.544 Setting up g++-x86-64-linux-gnu (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9304349Z #8 8.547 Setting up g++-14 (14.2.0-19) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9304833Z #8 8.550 Setting up gcc (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9305316Z #8 8.559 Setting up g++ (4:14.2.0-1) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9306011Z #8 8.562 update-alternatives: using /usr/bin/g++ to provide /usr/bin/c++ (c++) in auto mode
+deploy	Build and Push Container	2026-03-31T21:32:12.9306793Z #8 8.564 Setting up build-essential (12.12) ...
+deploy	Build and Push Container	2026-03-31T21:32:12.9307407Z #8 8.567 Processing triggers for libc-bin (2.41-12+deb13u2) ...
+deploy	Build and Push Container	2026-03-31T21:32:13.3855316Z #8 DONE 9.2s
+deploy	Build and Push Container	2026-03-31T21:32:13.5870685Z 
+deploy	Build and Push Container	2026-03-31T21:32:13.5871564Z #9 [4/7] COPY rakuten-trading-bot/requirements.txt .
+deploy	Build and Push Container	2026-03-31T21:32:13.5872417Z #9 DONE 0.0s
+deploy	Build and Push Container	2026-03-31T21:32:13.5872698Z 
+deploy	Build and Push Container	2026-03-31T21:32:13.5873050Z #10 [5/7] RUN pip install --no-cache-dir -r requirements.txt
+deploy	Build and Push Container	2026-03-31T21:32:14.8624281Z #10 1.426 Collecting discord.py (from -r requirements.txt (line 1))
+deploy	Build and Push Container	2026-03-31T21:32:14.9890307Z #10 1.451   Downloading discord_py-2.7.1-py3-none-any.whl.metadata (7.5 kB)
+deploy	Build and Push Container	2026-03-31T21:32:14.9891901Z #10 1.464 Collecting google-generativeai (from -r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:14.9893062Z #10 1.470   Downloading google_generativeai-0.8.6-py3-none-any.whl.metadata (3.9 kB)
+deploy	Build and Push Container	2026-03-31T21:32:14.9894161Z #10 1.484 Collecting firebase-admin (from -r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:14.9895499Z #10 1.488   Downloading firebase_admin-7.3.0-py3-none-any.whl.metadata (1.7 kB)
+deploy	Build and Push Container	2026-03-31T21:32:14.9896530Z #10 1.502 Collecting python-dotenv (from -r requirements.txt (line 4))
+deploy	Build and Push Container	2026-03-31T21:32:14.9897546Z #10 1.506   Downloading python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+deploy	Build and Push Container	2026-03-31T21:32:14.9898519Z #10 1.553 Collecting fastapi (from -r requirements.txt (line 5))
+deploy	Build and Push Container	2026-03-31T21:32:15.1353238Z #10 1.556   Downloading fastapi-0.135.2-py3-none-any.whl.metadata (28 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.1354947Z #10 1.582 Collecting requests (from -r requirements.txt (line 7))
+deploy	Build and Push Container	2026-03-31T21:32:15.1356419Z #10 1.586   Downloading requests-2.33.1-py3-none-any.whl.metadata (4.8 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.1357544Z #10 1.699 Collecting pandas (from -r requirements.txt (line 8))
+deploy	Build and Push Container	2026-03-31T21:32:15.3612421Z #10 1.702   Downloading pandas-3.0.2-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.3614604Z #10 1.744 Collecting pandas-ta (from -r requirements.txt (line 9))
+deploy	Build and Push Container	2026-03-31T21:32:15.3616290Z #10 1.750   Downloading pandas_ta-0.4.71b0-py3-none-any.whl.metadata (2.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.3617376Z #10 1.771 Collecting uvicorn[standard] (from -r requirements.txt (line 6))
+deploy	Build and Push Container	2026-03-31T21:32:15.3618411Z #10 1.774   Downloading uvicorn-0.42.0-py3-none-any.whl.metadata (6.7 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.6283431Z #10 2.192 Collecting aiohttp<4,>=3.7.4 (from discord.py->-r requirements.txt (line 1))
+deploy	Build and Push Container	2026-03-31T21:32:15.7286191Z #10 2.196   Downloading aiohttp-3.13.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.7288165Z #10 2.209 Collecting google-ai-generativelanguage==0.6.15 (from google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:15.7289883Z #10 2.214   Downloading google_ai_generativelanguage-0.6.15-py3-none-any.whl.metadata (5.7 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.7291203Z #10 2.241 Collecting google-api-core (from google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:15.7292421Z #10 2.245   Downloading google_api_core-2.30.1-py3-none-any.whl.metadata (3.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.7293675Z #10 2.289 Collecting google-api-python-client (from google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:15.7295005Z #10 2.292   Downloading google_api_python_client-2.193.0-py3-none-any.whl.metadata (7.0 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.9141377Z #10 2.325 Collecting google-auth>=2.15.0 (from google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:15.9144209Z #10 2.329   Downloading google_auth-2.49.1-py3-none-any.whl.metadata (6.2 kB)
+deploy	Build and Push Container	2026-03-31T21:32:15.9146110Z #10 2.477 Collecting protobuf (from google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:16.0399323Z #10 2.481   Downloading protobuf-7.34.1-cp310-abi3-manylinux2014_x86_64.whl.metadata (595 bytes)
+deploy	Build and Push Container	2026-03-31T21:32:16.0401842Z #10 2.570 Collecting pydantic (from google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:16.0403146Z #10 2.573   Downloading pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.0404392Z #10 2.603 Collecting tqdm (from google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:16.1799622Z #10 2.607   Downloading tqdm-4.67.3-py3-none-any.whl.metadata (57 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.1801961Z #10 2.625 Collecting typing-extensions (from google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:16.1803581Z #10 2.628   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.1805514Z #10 2.743 Collecting proto-plus<2.0.0dev,>=1.22.3 (from google-ai-generativelanguage==0.6.15->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:16.3267141Z #10 2.747   Downloading proto_plus-1.27.2-py3-none-any.whl.metadata (2.2 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.3268713Z #10 2.812 Collecting protobuf (from google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:16.3270794Z #10 2.815   Downloading protobuf-5.29.6-cp38-abi3-manylinux2014_x86_64.whl.metadata (592 bytes)
+deploy	Build and Push Container	2026-03-31T21:32:16.3272384Z #10 2.826 Collecting cachecontrol>=0.14.3 (from firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.3274173Z #10 2.829   Downloading cachecontrol-0.14.4-py3-none-any.whl.metadata (3.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.3275728Z #10 2.890 Collecting google-cloud-firestore>=2.21.0 (from firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.4338625Z #10 2.894   Downloading google_cloud_firestore-2.26.0-py3-none-any.whl.metadata (10 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.4341528Z #10 2.918 Collecting google-cloud-storage>=3.1.1 (from firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.4343296Z #10 2.921   Downloading google_cloud_storage-3.10.1-py3-none-any.whl.metadata (15 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.4344786Z #10 2.940 Collecting pyjwt>=2.10.1 (from pyjwt[crypto]>=2.10.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.4346160Z #10 2.943   Downloading pyjwt-2.12.1-py3-none-any.whl.metadata (4.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.4347508Z #10 2.960 Collecting httpx==0.28.1 (from httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.4348853Z #10 2.963   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.4350328Z #10 2.979 Collecting anyio (from httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.4351391Z #10 2.983   Downloading anyio-4.13.0-py3-none-any.whl.metadata (4.5 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.4352460Z #10 2.997 Collecting certifi (from httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.5512815Z #10 3.001   Downloading certifi-2026.2.25-py3-none-any.whl.metadata (2.5 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.5515025Z #10 3.016 Collecting httpcore==1.* (from httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.5517096Z #10 3.019   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.5518836Z #10 3.030 Collecting idna (from httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.5520408Z #10 3.033   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.5521644Z #10 3.048 Collecting h2<5,>=3 (from httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.5522770Z #10 3.053   Downloading h2-4.3.0-py3-none-any.whl.metadata (5.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.5524072Z #10 3.062 Collecting h11>=0.16 (from httpcore==1.*->httpx==0.28.1->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:16.5525390Z #10 3.065   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.5526421Z #10 3.092 Collecting starlette>=0.46.0 (from fastapi->-r requirements.txt (line 5))
+deploy	Build and Push Container	2026-03-31T21:32:16.5527492Z #10 3.095   Downloading starlette-1.0.0-py3-none-any.whl.metadata (6.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.5528621Z #10 3.115 Collecting typing-inspection>=0.4.2 (from fastapi->-r requirements.txt (line 5))
+deploy	Build and Push Container	2026-03-31T21:32:16.6724516Z #10 3.118   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.6726537Z #10 3.124 Collecting annotated-doc>=0.0.2 (from fastapi->-r requirements.txt (line 5))
+deploy	Build and Push Container	2026-03-31T21:32:16.6728746Z #10 3.128   Downloading annotated_doc-0.0.4-py3-none-any.whl.metadata (6.6 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.6730511Z #10 3.143 Collecting click>=7.0 (from uvicorn[standard]->-r requirements.txt (line 6))
+deploy	Build and Push Container	2026-03-31T21:32:16.6731843Z #10 3.146   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.6733208Z #10 3.169 Collecting httptools>=0.6.3 (from uvicorn[standard]->-r requirements.txt (line 6))
+deploy	Build and Push Container	2026-03-31T21:32:16.6734833Z #10 3.173   Downloading httptools-0.7.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.6736292Z #10 3.203 Collecting pyyaml>=5.1 (from uvicorn[standard]->-r requirements.txt (line 6))
+deploy	Build and Push Container	2026-03-31T21:32:16.6737767Z #10 3.207   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.6739621Z #10 3.236 Collecting uvloop>=0.15.1 (from uvicorn[standard]->-r requirements.txt (line 6))
+deploy	Build and Push Container	2026-03-31T21:32:16.8034359Z #10 3.239   Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.8036496Z #10 3.297 Collecting watchfiles>=0.20 (from uvicorn[standard]->-r requirements.txt (line 6))
+deploy	Build and Push Container	2026-03-31T21:32:16.8037913Z #10 3.300   Downloading watchfiles-1.1.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.8039835Z #10 3.367 Collecting websockets>=10.4 (from uvicorn[standard]->-r requirements.txt (line 6))
+deploy	Build and Push Container	2026-03-31T21:32:16.9106116Z #10 3.375   Downloading websockets-16.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.8 kB)
+deploy	Build and Push Container	2026-03-31T21:32:16.9108408Z #10 3.474 Collecting charset_normalizer<4,>=2 (from requests->-r requirements.txt (line 7))
+deploy	Build and Push Container	2026-03-31T21:32:17.0965333Z #10 3.478   Downloading charset_normalizer-3.4.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.0967691Z #10 3.506 Collecting urllib3<3,>=1.26 (from requests->-r requirements.txt (line 7))
+deploy	Build and Push Container	2026-03-31T21:32:17.0969598Z #10 3.509   Downloading urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.1060480Z #10 3.669 Collecting numpy>=1.26.0 (from pandas->-r requirements.txt (line 8))
+deploy	Build and Push Container	2026-03-31T21:32:17.2725712Z #10 3.673   Downloading numpy-2.4.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.2728465Z #10 3.683 Collecting python-dateutil>=2.8.2 (from pandas->-r requirements.txt (line 8))
+deploy	Build and Push Container	2026-03-31T21:32:17.2730234Z #10 3.686   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.2731637Z #10 3.760 Collecting numba==0.61.2 (from pandas-ta->-r requirements.txt (line 9))
+deploy	Build and Push Container	2026-03-31T21:32:17.2733154Z #10 3.764   Downloading numba-0.61.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.8 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.2734842Z #10 3.836 Collecting llvmlite<0.45,>=0.44.0dev0 (from numba==0.61.2->pandas-ta->-r requirements.txt (line 9))
+deploy	Build and Push Container	2026-03-31T21:32:17.3923969Z #10 3.841   Downloading llvmlite-0.44.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.0 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.3925718Z #10 3.848 Collecting numpy>=1.26.0 (from pandas->-r requirements.txt (line 8))
+deploy	Build and Push Container	2026-03-31T21:32:17.3927397Z #10 3.852   Downloading numpy-2.2.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (62 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.3929400Z #10 3.876 Collecting aiohappyeyeballs>=2.5.0 (from aiohttp<4,>=3.7.4->discord.py->-r requirements.txt (line 1))
+deploy	Build and Push Container	2026-03-31T21:32:17.3930961Z #10 3.880   Downloading aiohappyeyeballs-2.6.1-py3-none-any.whl.metadata (5.9 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.3932389Z #10 3.887 Collecting aiosignal>=1.4.0 (from aiohttp<4,>=3.7.4->discord.py->-r requirements.txt (line 1))
+deploy	Build and Push Container	2026-03-31T21:32:17.3933750Z #10 3.890   Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.3935088Z #10 3.902 Collecting attrs>=17.3.0 (from aiohttp<4,>=3.7.4->discord.py->-r requirements.txt (line 1))
+deploy	Build and Push Container	2026-03-31T21:32:17.3936387Z #10 3.905   Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.3937724Z #10 3.956 Collecting frozenlist>=1.1.1 (from aiohttp<4,>=3.7.4->discord.py->-r requirements.txt (line 1))
+deploy	Build and Push Container	2026-03-31T21:32:17.5464316Z #10 3.959   Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.6205831Z #10 4.184 Collecting multidict<7.0,>=4.5 (from aiohttp<4,>=3.7.4->discord.py->-r requirements.txt (line 1))
+deploy	Build and Push Container	2026-03-31T21:32:17.8183488Z #10 4.187   Downloading multidict-6.7.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.8185467Z #10 4.228 Collecting propcache>=0.2.0 (from aiohttp<4,>=3.7.4->discord.py->-r requirements.txt (line 1))
+deploy	Build and Push Container	2026-03-31T21:32:17.8187949Z #10 4.231   Downloading propcache-0.4.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (13 kB)
+deploy	Build and Push Container	2026-03-31T21:32:17.8704072Z #10 4.434 Collecting yarl<2.0,>=1.17.0 (from aiohttp<4,>=3.7.4->discord.py->-r requirements.txt (line 1))
+deploy	Build and Push Container	2026-03-31T21:32:18.1137038Z #10 4.437   Downloading yarl-1.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+deploy	Build and Push Container	2026-03-31T21:32:18.1138780Z #10 4.501 Collecting msgpack<2.0.0,>=0.5.2 (from cachecontrol>=0.14.3->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:18.1140994Z #10 4.504   Downloading msgpack-1.1.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:18.1142822Z #10 4.523 Collecting googleapis-common-protos<2.0.0,>=1.63.2 (from google-api-core->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:18.1144333Z #10 4.527   Downloading googleapis_common_protos-1.73.1-py3-none-any.whl.metadata (9.2 kB)
+deploy	Build and Push Container	2026-03-31T21:32:18.4938257Z #10 5.057 Collecting grpcio<2.0.0,>=1.33.2 (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.1->google-ai-generativelanguage==0.6.15->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:18.7252664Z #10 5.061   Downloading grpcio-1.80.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (3.8 kB)
+deploy	Build and Push Container	2026-03-31T21:32:18.7256672Z #10 5.106 Collecting grpcio-status<2.0.0,>=1.33.2 (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.1->google-ai-generativelanguage==0.6.15->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:18.7258906Z #10 5.109   Downloading grpcio_status-1.80.0-py3-none-any.whl.metadata (1.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:18.7260433Z #10 5.139 Collecting pyasn1-modules>=0.2.1 (from google-auth>=2.15.0->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:18.7261771Z #10 5.143   Downloading pyasn1_modules-0.4.2-py3-none-any.whl.metadata (3.5 kB)
+deploy	Build and Push Container	2026-03-31T21:32:18.7263052Z #10 5.288 Collecting cryptography>=38.0.3 (from google-auth>=2.15.0->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:18.8559824Z #10 5.292   Downloading cryptography-46.0.6-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (5.7 kB)
+deploy	Build and Push Container	2026-03-31T21:32:18.8562006Z #10 5.315 Collecting google-cloud-core<3.0.0,>=1.4.1 (from google-cloud-firestore>=2.21.0->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:18.8563879Z #10 5.319   Downloading google_cloud_core-2.5.1-py3-none-any.whl.metadata (2.8 kB)
+deploy	Build and Push Container	2026-03-31T21:32:18.8565613Z #10 5.366 Collecting google-resumable-media<3.0.0,>=2.7.2 (from google-cloud-storage>=3.1.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:18.8567132Z #10 5.370   Downloading google_resumable_media-2.8.2-py3-none-any.whl.metadata (2.2 kB)
+deploy	Build and Push Container	2026-03-31T21:32:18.8568565Z #10 5.419 Collecting google-crc32c<2.0.0,>=1.1.3 (from google-cloud-storage>=3.1.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:19.0304967Z #10 5.423   Downloading google_crc32c-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl.metadata (1.7 kB)
+deploy	Build and Push Container	2026-03-31T21:32:19.0307184Z #10 5.440 Collecting annotated-types>=0.6.0 (from pydantic->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:19.0308717Z #10 5.443   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+deploy	Build and Push Container	2026-03-31T21:32:19.4575972Z #10 6.021 Collecting pydantic-core==2.41.5 (from pydantic->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:19.5873646Z #10 6.025   Downloading pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:19.5875693Z #10 6.064 Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas->-r requirements.txt (line 8))
+deploy	Build and Push Container	2026-03-31T21:32:19.5877160Z #10 6.067   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+deploy	Build and Push Container	2026-03-31T21:32:19.5879332Z #10 6.114 Collecting httplib2<1.0.0,>=0.19.0 (from google-api-python-client->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:19.5880706Z #10 6.117   Downloading httplib2-0.31.2-py3-none-any.whl.metadata (2.2 kB)
+deploy	Build and Push Container	2026-03-31T21:32:19.5882133Z #10 6.151 Collecting google-auth-httplib2<1.0.0,>=0.2.0 (from google-api-python-client->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:19.7039449Z #10 6.154   Downloading google_auth_httplib2-0.3.1-py3-none-any.whl.metadata (3.0 kB)
+deploy	Build and Push Container	2026-03-31T21:32:19.7043923Z #10 6.162 Collecting uritemplate<5,>=3.0.1 (from google-api-python-client->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:19.7045366Z #10 6.165   Downloading uritemplate-4.2.0-py3-none-any.whl.metadata (2.6 kB)
+deploy	Build and Push Container	2026-03-31T21:32:19.7046770Z #10 6.267 Collecting cffi>=2.0.0 (from cryptography>=38.0.3->google-auth>=2.15.0->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:19.8353036Z #10 6.271   Downloading cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+deploy	Build and Push Container	2026-03-31T21:32:19.8355937Z #10 6.399 INFO: pip is looking at multiple versions of grpcio-status to determine which version is compatible with other requirements. This could take a while.
+deploy	Build and Push Container	2026-03-31T21:32:20.0025981Z #10 6.399 Collecting grpcio-status<2.0.0,>=1.33.2 (from google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.1->google-ai-generativelanguage==0.6.15->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:20.0029872Z #10 6.403   Downloading grpcio_status-1.78.0-py3-none-any.whl.metadata (1.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0031086Z #10 6.408   Downloading grpcio_status-1.76.0-py3-none-any.whl.metadata (1.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0032144Z #10 6.414   Downloading grpcio_status-1.75.1-py3-none-any.whl.metadata (1.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0033199Z #10 6.419   Downloading grpcio_status-1.75.0-py3-none-any.whl.metadata (1.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0034251Z #10 6.425   Downloading grpcio_status-1.74.0-py3-none-any.whl.metadata (1.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0035297Z #10 6.430   Downloading grpcio_status-1.73.1-py3-none-any.whl.metadata (1.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0036335Z #10 6.456   Downloading grpcio_status-1.73.0-py3-none-any.whl.metadata (1.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0037866Z #10 6.458 INFO: pip is still looking at multiple versions of grpcio-status to determine which version is compatible with other requirements. This could take a while.
+deploy	Build and Push Container	2026-03-31T21:32:20.0039327Z #10 6.462   Downloading grpcio_status-1.72.2-py3-none-any.whl.metadata (1.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0040162Z #10 6.467   Downloading grpcio_status-1.72.1-py3-none-any.whl.metadata (1.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0040993Z #10 6.473   Downloading grpcio_status-1.71.2-py3-none-any.whl.metadata (1.1 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.0042008Z #10 6.566 Collecting hyperframe<7,>=6.1 (from h2<5,>=3->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:20.1091304Z #10 6.569   Downloading hyperframe-6.1.0-py3-none-any.whl.metadata (4.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.1093251Z #10 6.577 Collecting hpack<5,>=4.1 (from h2<5,>=3->httpx[http2]==0.28.1->firebase-admin->-r requirements.txt (line 3))
+deploy	Build and Push Container	2026-03-31T21:32:20.1095017Z #10 6.580   Downloading hpack-4.1.0-py3-none-any.whl.metadata (4.6 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.1097109Z #10 6.606 Collecting pyparsing<4,>=3.1 (from httplib2<1.0.0,>=0.19.0->google-api-python-client->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:20.1099308Z #10 6.609   Downloading pyparsing-3.3.2-py3-none-any.whl.metadata (5.8 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.1100971Z #10 6.638 Collecting pyasn1<0.7.0,>=0.6.1 (from pyasn1-modules>=0.2.1->google-auth>=2.15.0->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:20.1102571Z #10 6.642   Downloading pyasn1-0.6.3-py3-none-any.whl.metadata (8.4 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.1104203Z #10 6.673 Collecting pycparser (from cffi>=2.0.0->cryptography>=38.0.3->google-auth>=2.15.0->google-generativeai->-r requirements.txt (line 2))
+deploy	Build and Push Container	2026-03-31T21:32:20.2117977Z #10 6.677   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2119637Z #10 6.696 Downloading discord_py-2.7.1-py3-none-any.whl (1.2 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2121568Z #10 6.705    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 1.2/1.2 MB 194.7 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.2122854Z #10 6.709 Downloading google_generativeai-0.8.6-py3-none-any.whl (155 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2124139Z #10 6.715 Downloading google_ai_generativelanguage-0.6.15-py3-none-any.whl (1.3 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2125492Z #10 6.723    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 1.3/1.3 MB 202.0 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.2126137Z #10 6.727 Downloading firebase_admin-7.3.0-py3-none-any.whl (138 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2126745Z #10 6.733 Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2127303Z #10 6.737 Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2127885Z #10 6.740 Downloading python_dotenv-1.2.2-py3-none-any.whl (22 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2128491Z #10 6.745 Downloading fastapi-0.135.2-py3-none-any.whl (117 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2129251Z #10 6.748 Downloading requests-2.33.1-py3-none-any.whl (64 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.2130013Z #10 6.752 Downloading pandas-3.0.2-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (10.9 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4613763Z #10 6.775    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 10.9/10.9 MB 499.2 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.4616086Z #10 6.786 Downloading pandas_ta-0.4.71b0-py3-none-any.whl (240 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4617455Z #10 6.790 Downloading numba-0.61.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (3.9 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4618825Z #10 6.813    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 3.9/3.9 MB 199.2 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.4620345Z #10 6.817 Downloading aiohttp-3.13.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.8 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4621852Z #10 6.823    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 1.8/1.8 MB 684.0 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.4622799Z #10 6.827 Downloading annotated_doc-0.0.4-py3-none-any.whl (5.3 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4623724Z #10 6.831 Downloading cachecontrol-0.14.4-py3-none-any.whl (22 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4624627Z #10 6.834 Downloading certifi-2026.2.25-py3-none-any.whl (153 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4625978Z #10 6.838 Downloading charset_normalizer-3.4.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (207 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4627058Z #10 6.841 Downloading click-8.3.1-py3-none-any.whl (108 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4627780Z #10 6.845 Downloading google_api_core-2.30.1-py3-none-any.whl (173 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4628521Z #10 6.848 Downloading google_auth-2.49.1-py3-none-any.whl (240 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4629456Z #10 6.852 Downloading google_cloud_firestore-2.26.0-py3-none-any.whl (416 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4630289Z #10 6.858 Downloading google_cloud_storage-3.10.1-py3-none-any.whl (324 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4631029Z #10 6.862 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4631992Z #10 6.866 Downloading httptools-0.7.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (517 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4632984Z #10 6.870 Downloading idna-3.11-py3-none-any.whl (71 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.4633851Z #10 6.874 Downloading numpy-2.2.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.5 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5707395Z #10 7.025    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 16.5/16.5 MB 112.0 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.5708589Z #10 7.029 Downloading protobuf-5.29.6-cp38-abi3-manylinux2014_x86_64.whl (320 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5710228Z #10 7.033 Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5711434Z #10 7.038 Downloading pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5712848Z #10 7.043    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 2.1/2.1 MB 569.0 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.5713999Z #10 7.049 Downloading pyjwt-2.12.1-py3-none-any.whl (29 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5714956Z #10 7.053 Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5716347Z #10 7.057 Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5717810Z #10 7.060    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏・807.9/807.9 kB 797.1 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.5718508Z #10 7.064 Downloading starlette-1.0.0-py3-none-any.whl (72 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5719541Z #10 7.067 Downloading tqdm-4.67.3-py3-none-any.whl (78 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5720180Z #10 7.071 Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5720891Z #10 7.074 Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5721538Z #10 7.078 Downloading urllib3-2.6.3-py3-none-any.whl (131 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5722433Z #10 7.081 Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.4 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5723487Z #10 7.090    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 4.4/4.4 MB 636.5 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.5724331Z #10 7.095 Downloading watchfiles-1.1.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5725445Z #10 7.099 Downloading websockets-16.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (184 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.5726429Z #10 7.102 Downloading google_api_python_client-2.193.0-py3-none-any.whl (14.9 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8152982Z #10 7.134    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 14.9/14.9 MB 500.1 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.8154452Z #10 7.138 Downloading uvicorn-0.42.0-py3-none-any.whl (68 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8155712Z #10 7.142 Downloading aiohappyeyeballs-2.6.1-py3-none-any.whl (15 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8156662Z #10 7.146 Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8157599Z #10 7.150 Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8158474Z #10 7.154 Downloading anyio-4.13.0-py3-none-any.whl (114 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8159774Z #10 7.157 Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8160792Z #10 7.161 Downloading cryptography-46.0.6-cp311-abi3-manylinux_2_34_x86_64.whl (4.5 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8162049Z #10 7.172    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 4.5/4.5 MB 521.5 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.8163242Z #10 7.175 Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (242 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8164451Z #10 7.179 Downloading google_auth_httplib2-0.3.1-py3-none-any.whl (9.5 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8165334Z #10 7.182 Downloading google_cloud_core-2.5.1-py3-none-any.whl (29 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8166626Z #10 7.186 Downloading google_crc32c-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl (33 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8167961Z #10 7.189 Downloading google_resumable_media-2.8.2-py3-none-any.whl (81 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8168889Z #10 7.193 Downloading googleapis_common_protos-1.73.1-py3-none-any.whl (297 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8170146Z #10 7.197 Downloading grpcio-1.80.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (6.8 MB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8171311Z #10 7.212    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 6.8/6.8 MB 513.1 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:20.8172131Z #10 7.216 Downloading grpcio_status-1.71.2-py3-none-any.whl (14 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8172800Z #10 7.220 Downloading h2-4.3.0-py3-none-any.whl (61 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8173369Z #10 7.224 Downloading httplib2-0.31.2-py3-none-any.whl (91 kB)
+deploy	Build and Push Container	2026-03-31T21:32:20.8174181Z #10 7.228 Downloading llvmlite-0.44.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (42.4 MB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1897309Z #10 7.545    笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤笏≫煤 42.4/42.4 MB 134.8 MB/s eta 0:00:00
+deploy	Build and Push Container	2026-03-31T21:32:21.1900152Z #10 7.549 Downloading msgpack-1.1.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (427 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1902665Z #10 7.553 Downloading multidict-6.7.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (256 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1905426Z #10 7.557 Downloading propcache-0.4.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (221 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1907330Z #10 7.560 Downloading proto_plus-1.27.2-py3-none-any.whl (50 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1908880Z #10 7.563 Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1910064Z #10 7.567 Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1910894Z #10 7.570 Downloading uritemplate-4.2.0-py3-none-any.whl (11 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1912220Z #10 7.575 Downloading yarl-1.23.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (100 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1913684Z #10 7.580 Downloading cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (219 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1914951Z #10 7.584 Downloading hpack-4.1.0-py3-none-any.whl (34 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1916094Z #10 7.588 Downloading hyperframe-6.1.0-py3-none-any.whl (13 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1917386Z #10 7.593 Downloading pyasn1-0.6.3-py3-none-any.whl (83 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.1918657Z #10 7.598 Downloading pyparsing-3.3.2-py3-none-any.whl (122 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.3617346Z #10 7.603 Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+deploy	Build and Push Container	2026-03-31T21:32:21.3627382Z #10 7.925 Installing collected packages: websockets, uvloop, urllib3, uritemplate, typing-extensions, tqdm, six, pyyaml, python-dotenv, pyparsing, pyjwt, pycparser, pyasn1, protobuf, propcache, numpy, multidict, msgpack, llvmlite, idna, hyperframe, httptools, hpack, h11, google-crc32c, frozenlist, click, charset_normalizer, certifi, attrs, annotated-types, annotated-doc, aiohappyeyeballs, yarl, uvicorn, typing-inspection, requests, python-dateutil, pydantic-core, pyasn1-modules, proto-plus, numba, httplib2, httpcore, h2, grpcio, googleapis-common-protos, google-resumable-media, cffi, anyio, aiosignal, watchfiles, starlette, pydantic, pandas, httpx, grpcio-status, cryptography, cachecontrol, aiohttp, pandas-ta, google-auth, fastapi, discord.py, google-auth-httplib2, google-api-core, google-cloud-core, google-api-python-client, google-cloud-storage, google-cloud-firestore, google-ai-generativelanguage, google-generativeai, firebase-admin
+deploy	Build and Push Container	2026-03-31T21:32:35.0826871Z #10 21.64 Successfully installed aiohappyeyeballs-2.6.1 aiohttp-3.13.4 aiosignal-1.4.0 annotated-doc-0.0.4 annotated-types-0.7.0 anyio-4.13.0 attrs-26.1.0 cachecontrol-0.14.4 certifi-2026.2.25 cffi-2.0.0 charset_normalizer-3.4.6 click-8.3.1 cryptography-46.0.6 discord.py-2.7.1 fastapi-0.135.2 firebase-admin-7.3.0 frozenlist-1.8.0 google-ai-generativelanguage-0.6.15 google-api-core-2.30.1 google-api-python-client-2.193.0 google-auth-2.49.1 google-auth-httplib2-0.3.1 google-cloud-core-2.5.1 google-cloud-firestore-2.26.0 google-cloud-storage-3.10.1 google-crc32c-1.8.0 google-generativeai-0.8.6 google-resumable-media-2.8.2 googleapis-common-protos-1.73.1 grpcio-1.80.0 grpcio-status-1.71.2 h11-0.16.0 h2-4.3.0 hpack-4.1.0 httpcore-1.0.9 httplib2-0.31.2 httptools-0.7.1 httpx-0.28.1 hyperframe-6.1.0 idna-3.11 llvmlite-0.44.0 msgpack-1.1.2 multidict-6.7.1 numba-0.61.2 numpy-2.2.6 pandas-3.0.2 pandas-ta-0.4.71b0 propcache-0.4.1 proto-plus-1.27.2 protobuf-5.29.6 pyasn1-0.6.3 pyasn1-modules-0.4.2 pycparser-3.0 pydantic-2.12.5 pydantic-core-2.41.5 pyjwt-2.12.1 pyparsing-3.3.2 python-dateutil-2.9.0.post0 python-dotenv-1.2.2 pyyaml-6.0.3 requests-2.33.1 six-1.17.0 starlette-1.0.0 tqdm-4.67.3 typing-extensions-4.15.0 typing-inspection-0.4.2 uritemplate-4.2.0 urllib3-2.6.3 uvicorn-0.42.0 uvloop-0.22.1 watchfiles-1.1.1 websockets-16.0 yarl-1.23.0
+deploy	Build and Push Container	2026-03-31T21:32:35.2955927Z #10 21.65 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+deploy	Build and Push Container	2026-03-31T21:32:35.2961372Z #10 21.71 
+deploy	Build and Push Container	2026-03-31T21:32:35.2962487Z #10 21.71 [notice] A new release of pip is available: 25.0.1 -> 26.0.1
+deploy	Build and Push Container	2026-03-31T21:32:35.2964332Z #10 21.71 [notice] To update, run: pip install --upgrade pip
+deploy	Build and Push Container	2026-03-31T21:32:36.2858917Z #10 DONE 22.8s
+deploy	Build and Push Container	2026-03-31T21:32:36.4614689Z 
+deploy	Build and Push Container	2026-03-31T21:32:36.4615385Z #11 [6/7] COPY rakuten-trading-bot/ .
+deploy	Build and Push Container	2026-03-31T21:32:36.4616116Z #11 DONE 0.0s
+deploy	Build and Push Container	2026-03-31T21:32:36.4616427Z 
+deploy	Build and Push Container	2026-03-31T21:32:36.4616782Z #12 [7/7] COPY src/data/profiles.js ./src/data/profiles.js
+deploy	Build and Push Container	2026-03-31T21:32:36.4617577Z #12 DONE 0.0s
+deploy	Build and Push Container	2026-03-31T21:32:36.4617863Z 
+deploy	Build and Push Container	2026-03-31T21:32:36.4618083Z #13 exporting to image
+deploy	Build and Push Container	2026-03-31T21:32:36.4618614Z #13 exporting layers
+deploy	Build and Push Container	2026-03-31T21:32:39.5831216Z #13 exporting layers 3.3s done
+deploy	Build and Push Container	2026-03-31T21:32:39.6012409Z #13 writing image sha256:cc9b6a7db2d3c0f67db3e514fd0db73731566466f4a28b5a8ff0f9ed2ed20d8c done
+deploy	Build and Push Container	2026-03-31T21:32:39.6014309Z #13 naming to asia-northeast1-docker.pkg.dev/itako-plaza-kenji/itako-bridge/itako-bridge:88e58d2c82a7f7fdadad03472eec68ef5597f1c4 done
+deploy	Build and Push Container	2026-03-31T21:32:39.6017043Z #13 DONE 3.3s
+deploy	Build and Push Container	2026-03-31T21:32:40.3194823Z The push refers to repository [asia-northeast1-docker.pkg.dev/itako-plaza-kenji/itako-bridge/itako-bridge]
+deploy	Build and Push Container	2026-03-31T21:32:41.2101271Z 04d331a9c5fc: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2103946Z ca1518ce718f: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2105120Z b0eab52df22d: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2106186Z 4700bf8ffec4: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2106977Z 7cf3455d9aa0: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2107729Z 9c066ded79e9: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2108257Z addf8d91bd21: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2108698Z 481070cf8ce5: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2109378Z 1c107a897b02: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2109826Z 188c9b34dfbe: Preparing
+deploy	Build and Push Container	2026-03-31T21:32:41.2110264Z 9c066ded79e9: Waiting
+deploy	Build and Push Container	2026-03-31T21:32:41.2110718Z addf8d91bd21: Waiting
+deploy	Build and Push Container	2026-03-31T21:32:41.2111148Z 481070cf8ce5: Waiting
+deploy	Build and Push Container	2026-03-31T21:32:41.2111562Z 1c107a897b02: Waiting
+deploy	Build and Push Container	2026-03-31T21:32:41.2111980Z 188c9b34dfbe: Waiting
+deploy	Build and Push Container	2026-03-31T21:32:46.0135460Z 4700bf8ffec4: Pushed
+deploy	Build and Push Container	2026-03-31T21:32:46.0497613Z 04d331a9c5fc: Pushed
+deploy	Build and Push Container	2026-03-31T21:32:46.9674899Z addf8d91bd21: Layer already exists
+deploy	Build and Push Container	2026-03-31T21:32:47.2959261Z ca1518ce718f: Pushed
+deploy	Build and Push Container	2026-03-31T21:32:47.8963071Z 481070cf8ce5: Layer already exists
+deploy	Build and Push Container	2026-03-31T21:32:48.2305352Z 1c107a897b02: Layer already exists
+deploy	Build and Push Container	2026-03-31T21:32:49.0501628Z 9c066ded79e9: Pushed
+deploy	Build and Push Container	2026-03-31T21:32:56.5929927Z 188c9b34dfbe: Pushed
+deploy	Build and Push Container	2026-03-31T21:33:01.4980622Z 7cf3455d9aa0: Pushed
+deploy	Build and Push Container	2026-03-31T21:33:06.3176124Z b0eab52df22d: Pushed
+deploy	Build and Push Container	2026-03-31T21:33:09.8145548Z 88e58d2c82a7f7fdadad03472eec68ef5597f1c4: digest: sha256:532813322e464d267384ec71b9b17da30ba46b0eb69fac37945cd9241a0d61f7 size: 2417
+deploy	Deploy to Cloud Run	・ｿ2026-03-31T21:33:09.8215710Z ##[group]Run gcloud run deploy itako-bridge \
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8216452Z [36;1mgcloud run deploy itako-bridge \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8217398Z [36;1m  --image asia-northeast1-docker.pkg.dev/itako-plaza-kenji/itako-bridge/itako-bridge:88e58d2c82a7f7fdadad03472eec68ef5597f1c4 \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8218285Z [36;1m  --region asia-northeast1 \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8218712Z [36;1m  --project itako-plaza-kenji \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8219385Z [36;1m  --platform managed \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8219799Z [36;1m  --allow-unauthenticated \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8220205Z [36;1m  --min-instances 1 \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8220609Z [36;1m  --no-cpu-throttling \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8221414Z [36;1m  --set-env-vars "DISCORD_TOKEN=***" \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8222002Z [36;1m  --set-env-vars "WALLET_API_KEY=***" \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8222748Z [36;1m  --set-env-vars "WALLET_API_SECRET=***" \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8223412Z [36;1m  --set-env-vars "GEMINI_API_KEY=***" \[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8223978Z [36;1m  --set-env-vars "DISCORD_CHANNEL_ID=***"[0m
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8250657Z shell: /usr/bin/bash -e ***0***
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8251077Z env:
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8251424Z   PROJECT_ID: itako-plaza-kenji
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8251846Z   REGION: asia-northeast1
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8252238Z   SERVICE: itako-bridge
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8252628Z   REPOSITORY: itako-bridge
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8253392Z   CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8254525Z   GOOGLE_APPLICATION_CREDENTIALS: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8255542Z   GOOGLE_GHA_CREDS_PATH: /home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8256282Z   CLOUDSDK_CORE_PROJECT: itako-plaza-kenji
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8256762Z   CLOUDSDK_PROJECT: itako-plaza-kenji
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8257210Z   GCLOUD_PROJECT: itako-plaza-kenji
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8257656Z   GCP_PROJECT: itako-plaza-kenji
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8258094Z   GOOGLE_CLOUD_PROJECT: itako-plaza-kenji
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8258646Z   CLOUDSDK_METRICS_ENVIRONMENT: github-actions-setup-gcloud
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8259448Z   CLOUDSDK_METRICS_ENVIRONMENT_VERSION: 2.2.1
+deploy	Deploy to Cloud Run	2026-03-31T21:33:09.8259905Z ##[endgroup]
+deploy	Deploy to Cloud Run	2026-03-31T21:33:12.8713487Z Deploying container to Cloud Run service [itako-bridge] in project [itako-plaza-kenji] region [asia-northeast1]
+deploy	Deploy to Cloud Run	2026-03-31T21:33:12.8715333Z Deploying...
+deploy	Deploy to Cloud Run	2026-03-31T21:33:16.5436144Z Setting IAM Policy.............................done
+deploy	Deploy to Cloud Run	2026-03-31T21:33:44.0860290Z Creating Revision..........................................................................................................................................................................................................................................................................................done
+deploy	Deploy to Cloud Run	2026-03-31T21:33:44.0864010Z Routing traffic.....done
+deploy	Deploy to Cloud Run	2026-03-31T21:33:44.5288069Z Done.
+deploy	Deploy to Cloud Run	2026-03-31T21:33:44.6104351Z Service [itako-bridge] revision [itako-bridge-00021-khn] has been deployed and is serving 100 percent of traffic.
+deploy	Deploy to Cloud Run	2026-03-31T21:33:44.6107117Z Service URL: https://itako-bridge-588973200958.asia-northeast1.run.app
+deploy	Post Google Auth	・ｿ2026-03-31T21:33:44.7746060Z Post job cleanup.
+deploy	Post Google Auth	2026-03-31T21:33:44.8574114Z Removed exported credentials at "/home/runner/work/itako-plaza/itako-plaza/gha-creds-56b885b7647d1c74.json".
+deploy	Post Checkout	・ｿ2026-03-31T21:33:44.8708778Z Post job cleanup.
+deploy	Post Checkout	2026-03-31T21:33:44.9639710Z [command]/usr/bin/git version
+deploy	Post Checkout	2026-03-31T21:33:44.9684077Z git version 2.53.0
+deploy	Post Checkout	2026-03-31T21:33:44.9728021Z Temporarily overriding HOME='/home/runner/work/_temp/a3ffeb0f-3a36-4956-a8f1-692978bc8e3f' before making global git config changes
+deploy	Post Checkout	2026-03-31T21:33:44.9730391Z Adding repository directory to the temporary git global config as a safe directory
+deploy	Post Checkout	2026-03-31T21:33:44.9743599Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/itako-plaza/itako-plaza
+deploy	Post Checkout	2026-03-31T21:33:44.9781047Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+deploy	Post Checkout	2026-03-31T21:33:44.9815531Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+deploy	Post Checkout	2026-03-31T21:33:45.0055812Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+deploy	Post Checkout	2026-03-31T21:33:45.0078799Z http.https://github.com/.extraheader
+deploy	Post Checkout	2026-03-31T21:33:45.0092092Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+deploy	Post Checkout	2026-03-31T21:33:45.0125874Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+deploy	Post Checkout	2026-03-31T21:33:45.0364947Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+deploy	Post Checkout	2026-03-31T21:33:45.0398389Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+deploy	Complete job	・ｿ2026-03-31T21:33:45.0761200Z Cleaning up orphan processes
+deploy	Complete job	2026-03-31T21:33:45.1103491Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, google-github-actions/auth@v2, google-github-actions/setup-gcloud@v2. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

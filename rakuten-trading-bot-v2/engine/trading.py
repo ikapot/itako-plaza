@@ -1,5 +1,8 @@
 import logging
 import time
+import os
+from typing import Dict, List, Optional, Any
+from engine.risk import SafetyGuard
 from lib.rakuten_api import RakutenWalletClient
 from lib.firestore import TradingState
 from lib.discord_util import send_discord_notification, request_trade_approval
@@ -10,77 +13,154 @@ from engine.safety import check_safety
 logger = logging.getLogger(__name__)
 
 class NewsTradingEngine:
-    def __init__(self, symbol_id=7, dry_run=True):
+    """
+    ニュースベースの自動売買エンジン
+    """
+    def __init__(self, symbol_id: int = 7):
         self.client = RakutenWalletClient()
         self.state = TradingState()
         self.symbol_id = symbol_id
-        self.dry_run = dry_run
-        self.amount = 0.0001 # TODO: 設定から取得 (2,000円相当)
-
-    def run_cycle(self):
-        """1回の情報収集〜執行サイクル"""
-        logger.info("🚀 サイクルを開始中...")
         
-        # 1. ニュース収集
-        news_items = fetch_crypto_news(60 * 30) # 直近30分
+        # 環境変数から設定を読み込み
+        self.dry_run = os.getenv("DRY_RUN", "True").lower() == "true"
+        self.amount = float(os.getenv("TRADE_AMOUNT", "0.0001")) # デフォルト 0.0001 BTC
+        
+        # リスク管理レイヤーの導入
+        self.guard = SafetyGuard(
+            max_position=float(os.getenv("MAX_POSITION", "0.001")),
+            error_threshold=int(os.getenv("ERROR_THRESHOLD", "3"))
+        )
+        
+        logger.info(f"⚙️ Engine Initialized: Symbol={symbol_id}, DryRun={self.dry_run}, Amount={self.amount}")
+
+    def run_cycle(self) -> Dict[str, Any]:
+        """1回の情報収集〜解析〜通知サイクルを実行"""
+        logger.info("🚀 ニュース・トレードサイクルを開始...")
+        
+        # 1. ニュース収集 (直近30分)
+        news_items = fetch_crypto_news(interval_seconds=1800)
         if not news_items:
-            logger.info("💤 新規ニュースなし。待機します。")
+            logger.info("💤 新規ニュースはありません。")
             return {"status": "no_news"}
 
+        return self.process_news(news_items)
+
+    def run_mock_cycle(self, mock_news: List[Dict[str, str]]) -> Dict[str, Any]:
+        """検証用のニュースを注入してプロセスを開始"""
+        logger.info("🧪 モックニュースによる検証サイクルを実行...")
+        return self.process_news(mock_news)
+
+    def process_news(self, news_items: List[Dict[str, str]]) -> Dict[str, Any]:
+        """ニュースの解析から承認依頼送信までのメインロジック"""
         # 2. AI 解析
         analysis = analyze_sentiment(news_items)
         decision = analysis.get('decision', 'HOLD')
         
         if decision == 'HOLD':
-            logger.info("⏸️ 判断は HOLD です。何もしません。")
+            logger.info(f"⏸️ 判断は HOLD です。理由: {analysis.get('reason')}")
             return {"status": "hold", "reason": analysis.get('reason')}
 
-        # 3. 安全確認 & 価格取得
+        # 3. 安全確認 (スプレッド / メンテナンス時間)
         ticker = self.client.get_ticker(self.symbol_id)
+        if "error" in ticker:
+            logger.error(f"❌ 価格取得失敗。サイクルを中断します: {ticker['error']}")
+            return {"status": "error", "message": "Failed to fetch ticker"}
+
         is_safe, safety_msg = check_safety(ticker)
-        
         if not is_safe:
-            logger.warning(f"🚫 安全確認失敗: {safety_msg}")
-            send_discord_notification("🚨 安全チェック失敗", f"判断: {decision}\n理由: {safety_msg}", color=0xf1c40f)
+            logger.warning(f"🚫 安全チェックによりブロックされました: {safety_msg}")
+            send_discord_notification("⚠️ 安全チェックによる待機", f"判定: {decision}\n理由: {safety_msg}", color=0xf1c40f)
             return {"status": "safety_blocked", "reason": safety_msg}
 
-        # 4. 通知と承認依頼 (現状は全件承認要請)
+        # 4. Discordへの承認依頼
         news_titles = [item['title'] for item in news_items]
         request_trade_approval(news_titles, analysis, ticker)
-
-        # TODO: 承認ボタンからのコールバック待機ロジック
-        # 現状はここで一旦停止し、人間が手動でAPIを叩くか、DiscordからのWebhook経由で後続処理を動かす想定
         
         logger.info(f"📩 承認依頼を送信しました。判定: {decision}")
         return {"status": "sent_approval", "decision": decision, "analysis": analysis}
 
-    def execute_approved_trade(self, side, analysis_id=None):
-        """承認された取引の執行"""
-        # 価格再取得
+    def execute_approved_trade(self, side: str, analysis_id: Optional[str] = None) -> Dict[str, Any]:
+        """人間による承認後の実注文執行 (三段階冪等性チェック)"""
+        # 最新価格と「発注前の残高」を取得
         ticker = self.client.get_ticker(self.symbol_id)
         current_price = float(ticker.get('last', 0))
+        before_bal = self.client.get_btc_balance()
         
-        logger.info(f"⚡ 執行中: {side} @ {current_price}")
+        if current_price == 0:
+            logger.error("❌ 執行時の価格取得に失敗しました。")
+            return {"success": False, "error": "Invalid current price"}
+
+        # 1. 安全チェック (リスク管理レイヤー)
+        current_pos_status = self.state.get_status().get("position_amount", 0)
+        self.guard.check_rate_limit()
+        if not self.guard.is_order_allowed(current_pos_status, self.amount):
+            logger.warning("🚫 注文はリスク制限により拒否されました。")
+            return {"success": False, "error": "Risk limit exceeded"}
+
+        # 2. 注文執行
+        logger.info(f"🚀 発注開始: {side} {self.amount} BTC @ {current_price} (Before Bal: {before_bal})")
         
+        balance_changed = False
         if self.dry_run:
-            logger.info("🧪 Dry Run モードのため、実際の発注は行いません。")
-            res = {"success": True, "message": "Dry Run Success"}
+            logger.info("🧪 [PAPER TRADING] 実際の発注は行わず、成功として扱います。")
+            res = {"success": True, "message": "Dry Run", "price": current_price}
+            balance_changed = True # 擬似的に成功扱い
         else:
             res = self.client.place_order(self.symbol_id, side, self.amount)
-        
-        if res.get('success', False) or self.dry_run:
-            # 状態更新
-            status = self.state.get_status()
-            status["position"] = 'LONG' if side == 'BUY' else None # 簡易化
-            status["entry_price"] = current_price if side == 'BUY' else 0
-            self.state.update_status(status)
-            
+            # APIのラグを考慮し、再度残高を確認して約定を確定させる
+            time.sleep(2) # システムラグ待機
+            after_bal = self.client.get_btc_balance()
+            # 残高に変化があれば、APIレスポンスに関わらず「約定成功」とみなす（冪等性確保）
+            if abs(after_bal - before_bal) >= (self.amount * 0.9): # 誤差を考慮
+                logger.info(f"✨ 残高変化を検知しました (After Bal: {after_bal})。取引を成功として確定します。")
+                balance_changed = True
+
+        # 3. 確定後の処理
+        if res.get('success', False) or balance_changed:
+            self.guard.report_success()
+            try:
+                status = self.state.get_status() or {}
+                # 正確な現在残高をベースにステータスを更新
+                actual_bal = self.client.get_btc_balance() if not self.dry_run else (before_bal + self.amount if side == 'BUY' else before_bal - self.amount)
+                status["position_amount"] = actual_bal
+                status["position"] = 'LONG' if actual_bal > 0.00001 else None
+                status["entry_price"] = res.get('price', current_price) if side == 'BUY' else 0
+                status["last_updated"] = time.time()
+                self.state.update_status(status)
+                logger.info(f"✅ 状態管理を更新しました: Position={status['position']}, Amount={actual_bal}")
+            except Exception as e:
+                logger.error(f"⚠️ 状態更新失敗: {e}")
+
             send_discord_notification(
-                "💸 注文執行完了",
-                f"{side} {self.amount} BTC\n価格: {current_price} JPY",
+                "💸 取引完了通知",
+                f"**結果**: {'成功 (約定確定)' if balance_changed else '成功'}\n**Side**: {side}\n**Amount**: {self.amount} BTC\n**Price**: {current_price} JPY\nMode: {'Paper' if self.dry_run else 'Live'}",
                 color=0x2ecc71
             )
-            return res
+            return {"success": True, "price": current_price}
         
-        send_discord_notification("❌ 注文失敗", f"APIエラー: {res.get('error', '不明')}", color=0xe74c3c)
-        return res
+        # 失敗時
+        self.guard.report_error()
+        err_msg = res.get('error', 'API通信エラーまたは約定未確認')
+        logger.error(f"❌ 注文失敗: {err_msg}")
+        send_discord_notification("🚨 注文執行エラー", f"理由: {err_msg}", color=0xe74c3c)
+        return {"success": False, "error": err_msg}
+    def get_dashboard_data(self) -> Dict[str, Any]:
+        """ダッシュボード表示用の統合データを取得"""
+        ticker = self.client.get_ticker(self.symbol_id)
+        balance = self.client.get_balance()
+        margin = self.client.get_margin_info()
+        status = self.state.get_status() or {}
+
+        return {
+            "mode": "Live" if not self.dry_run else "DryRun",
+            "symbol": "BTC/JPY",
+            "last_price": ticker.get("last", 0),
+            "ask": ticker.get("ask", 0),
+            "bid": ticker.get("bid", 0),
+            "balance": balance.get("assets", []),
+            "equity": margin.get("equity", 0),
+            "margin_usage": margin.get("marginUsageRate", 0),
+            "position": status.get("position"),
+            "entry_price": status.get("entry_price", 0),
+            "last_updated": status.get("last_updated", time.time())
+        }

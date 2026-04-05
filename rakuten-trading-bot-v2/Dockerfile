@@ -20,4 +20,4 @@ ENV PYTHONUNBUFFERED=TRUE
 
 # アプリの起動
 # main.py 内で定義された FastAPI 'app' インスタンスを uvicorn で実行
-CMD ["uvicorn", "main.py:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

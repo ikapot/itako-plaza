@@ -1,8 +1,14 @@
 import feedparser
 import time
 import logging
+import requests
 
 logger = logging.getLogger(__name__)
+
+# ユーザーエージェントを模倣してブロックを回避
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+}
 
 def fetch_crypto_news(interval_seconds=1800):
     """
@@ -21,16 +27,19 @@ def fetch_crypto_news(interval_seconds=1800):
     for url in feeds:
         try:
             logger.info(f"📰 フィードを取得中: {url}")
-            feed = feedparser.parse(url)
+            # requests経由で取得することでタイムアウトとヘッダーを制御
+            response = requests.get(url, headers=HEADERS, timeout=15)
+            response.raise_for_status()
+            
+            feed = feedparser.parse(response.content)
             
             if feed.bozo:
                 logger.warning(f"⚠️ 解析エラー（非致命的）: {url}")
-                # bozoがTrueでもデータが取れている場合がある
 
             for entry in feed.entries:
-                # published_parsed が無い場合はスキップ、または現在時刻を採用
+                # published_parsed が無い場合はスキップ
                 if not hasattr(entry, 'published_parsed') or not entry.published_parsed:
-                    # 更新日付がないニュースは一旦無視、または「最新」として扱う（要件に応じて）
+                    # 更新日付がないニュースは一旦無視
                     continue
 
                 published_time = time.mktime(entry.published_parsed)
@@ -43,16 +52,18 @@ def fetch_crypto_news(interval_seconds=1800):
                                   "CoinPost"
                     news_items.append({
                         "title": entry.title,
-                        "summary": getattr(entry, 'summary', entry.title), # summaryがない場合はtitle
+                        "summary": getattr(entry, 'summary', entry.title), 
                         "link": entry.link,
                         "source": source_name,
                         "published_at": time.strftime('%Y-%m-%d %H:%M:%S', entry.published_parsed)
                     })
                     
+        except requests.exceptions.Timeout:
+            logger.error(f"⌛ タイムアウト発生 ({url})")
         except Exception as e:
             logger.error(f"❌ ニュース取得中にエラー発生 ({url}): {e}")
             
-    # 重複削除（同じニュースが複数回取得された場合）
+    # 重複削除
     unique_news = {item['link']: item for item in news_items}.values()
     return list(unique_news)
 
