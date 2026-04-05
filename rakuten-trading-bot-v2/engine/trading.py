@@ -35,8 +35,13 @@ class NewsTradingEngine:
 
     def run_cycle(self) -> Dict[str, Any]:
         """1回の情報収集〜解析〜通知サイクルを実行"""
-        logger.info("🚀 ニュース・トレードサイクルを開始...")
+        logger.info("🚀 潮目感知サイクルを開始...")
         
+        # 0. 既存ポジションの損切り・利確チェック (自律ガードレール)
+        exit_res = self.check_and_execute_pnl_exit()
+        if exit_res.get("executed"):
+            return {"status": "pnl_exit_executed", "result": exit_res}
+
         # 1. ニュース収集 (直近30分)
         news_items = fetch_crypto_news(interval_seconds=1800)
         if not news_items:
@@ -78,6 +83,41 @@ class NewsTradingEngine:
         
         logger.info(f"📩 承認依頼を送信しました。判定: {decision}")
         return {"status": "sent_approval", "decision": decision, "analysis": analysis}
+
+    def check_and_execute_pnl_exit(self) -> Dict[str, Any]:
+        """ポジションの損益を確認し、-3% または +2% で自律決済する"""
+        status = self.state.get_status()
+        if not status or status.get("position") != 'LONG':
+            return {"executed": False}
+
+        entry_price = status.get("entry_price", 0)
+        if entry_price <= 0:
+            return {"executed": False}
+
+        # 現在価格の取得
+        ticker = self.client.get_ticker(self.symbol_id)
+        current_price = float(ticker.get('last', 0))
+        if current_price <= 0:
+            return {"executed": False}
+
+        pnl_rate = (current_price - entry_price) / entry_price
+        logger.info(f"📈 ポジション監視中: Entry={entry_price}, Current={current_price}, PnL={pnl_rate:.2%}")
+
+        # 損切り (-3%) または 利確 (+2%) の判定
+        reason = ""
+        if pnl_rate <= -0.03:
+            reason = "🚨 損切りアラート (-3%到達)"
+        elif pnl_rate >= 0.02:
+            reason = "💰 利確アラート (+2%到達)"
+
+        if reason:
+            logger.warning(f"⚡ {reason} 自律決済を実行します。")
+            send_discord_notification(reason, f"Entry: {entry_price}\nExit: {current_price}\nPnL: {pnl_rate:.2%}\n自動決済を開始します。", color=0xe74c3c if pnl_rate < 0 else 0x2ecc71)
+            # 承認なしで決済実行
+            res = self.execute_approved_trade(side='SELL')
+            return {"executed": True, "reason": reason, "result": res}
+
+        return {"executed": False}
 
     def execute_approved_trade(self, side: str, analysis_id: Optional[str] = None) -> Dict[str, Any]:
         """人間による承認後の実注文執行 (三段階冪等性チェック)"""

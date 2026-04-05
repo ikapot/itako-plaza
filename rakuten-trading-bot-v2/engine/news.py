@@ -12,13 +12,21 @@ HEADERS = {
 
 def fetch_crypto_news(interval_seconds=1800):
     """
-    仮想通貨関連の主要RSSフィードから最新ニュースを取得する。
-    interval_seconds: 何秒前までのニュースを対象にするか (デフォルト: 30分)
+    仮想通貨関連の主要RSSフィードから最新ニュースを取得後、潮目感知用のキーワードでフィルタリングする。
     """
     feeds = [
         "https://www.coindeskjapan.com/feed/",
         "https://coinpost.jp/?feed=rss2",
+        "https://cointelegraph.com/feed",
+        "https://www.theblock.co/rss.xml",
         "https://www.coindesk.com/arc/outboundfeeds/rss/"
+    ]
+    
+    # 潮目感知のための重点キーワード（ユーザー指定）
+    FOCUS_KEYWORDS = [
+        "中間選挙", "election", "規制", "regulation", "SEC", "金利", "FED", "FRB",
+        "ホルムズ", "Hormuz", "地政学", "geopolitics", "原油", "石油", "米ドル", "USD",
+        "BlackRock", "ブラックロック", "RWA", "エージェント", "決済", "インフラ", "障害"
     ]
     
     news_items = []
@@ -27,45 +35,51 @@ def fetch_crypto_news(interval_seconds=1800):
     for url in feeds:
         try:
             logger.info(f"📰 フィードを取得中: {url}")
-            # requests経由で取得することでタイムアウトとヘッダーを制御
             response = requests.get(url, headers=HEADERS, timeout=15)
             response.raise_for_status()
             
             feed = feedparser.parse(response.content)
             
-            if feed.bozo:
-                logger.warning(f"⚠️ 解析エラー（非致命的）: {url}")
-
             for entry in feed.entries:
-                # published_parsed が無い場合はスキップ
                 if not hasattr(entry, 'published_parsed') or not entry.published_parsed:
-                    # 更新日付がないニュースは一旦無視
                     continue
 
                 published_time = time.mktime(entry.published_parsed)
                 diff = now - published_time
                 
-                # 指定時間内のニュースのみ抽出
+                # 指定時間内（デフォルト30分）のニュースを抽出
                 if diff < interval_seconds:
-                    source_name = "CoinDesk Japan" if "coindeskjapan" in url else \
-                                  "CoinDesk (EN)" if "coindesk.com" in url else \
-                                  "CoinPost"
+                    title = entry.title
+                    summary = getattr(entry, 'summary', title)
+                    
+                    # 重要キーワードが含まれているかチェック
+                    is_focus = any(kw.lower() in (title + summary).lower() for kw in FOCUS_KEYWORDS)
+                    
+                    source_name = "CoinDesk JP" if "coindeskjapan" in url else \
+                                  "Cointelegraph" if "cointelegraph" in url else \
+                                  "The Block" if "theblock" in url else \
+                                  "CoinDesk EN" if "coindesk.com" in url else "CoinPost"
+
                     news_items.append({
-                        "title": entry.title,
-                        "summary": getattr(entry, 'summary', entry.title), 
+                        "title": title,
+                        "summary": summary, 
                         "link": entry.link,
-                        "source": source_name,
-                        "published_at": time.strftime('%Y-%m-%d %H:%M:%S', entry.published_parsed)
+                        "base_source": source_name,
+                        "published_at": time.strftime('%Y-%m-%d %H:%M:%S', entry.published_parsed),
+                        "is_focus": is_focus
                     })
                     
-        except requests.exceptions.Timeout:
-            logger.error(f"⌛ タイムアウト発生 ({url})")
         except Exception as e:
             logger.error(f"❌ ニュース取得中にエラー発生 ({url}): {e}")
             
     # 重複削除
     unique_news = {item['link']: item for item in news_items}.values()
-    return list(unique_news)
+    
+    # フォーカスされている（キーワード一致した）ニュースを優先してソート
+    sorted_news = sorted(unique_news, key=lambda x: x['is_focus'], reverse=True)
+    
+    # 解析負荷を抑えるため、最大10件に絞り込み
+    return list(sorted_news)[:10]
 
 if __name__ == "__main__":
     # テスト用

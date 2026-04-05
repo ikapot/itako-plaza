@@ -46,8 +46,11 @@ def analyze_sentiment(news_items):
         
         # 文字列として返ってきたJSONをパース
         analysis_result = json.loads(content)
-        logger.info(f"✅ 解析完了: Decision={analysis_result.get('decision')} | Score={analysis_result.get('sentiment_score')}")
-        
+        logger.info(f"✅ 解析完了: Tide={analysis_result.get('tide_status')} | Impact={analysis_result.get('impact')} | Decision={analysis_result.get('decision')}")
+        if "scenario_prediction" in analysis_result:
+            pred = analysis_result["scenario_prediction"]
+            logger.info(f"🔮 3h予測: {pred.get('target_3h')} (確信度: {pred.get('confidence')}%)")
+            
         return analysis_result
 
     except Exception as e:

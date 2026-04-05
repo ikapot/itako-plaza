@@ -35,23 +35,30 @@ def send_discord_notification(title, message, color=0x3498db, fields=None):
 
 def request_trade_approval(news_titles, analysis_result, ticker_data):
     """
-    トレードの承認を依頼するための特殊な通知。
+    潮目感知AIによる解析結果とトレード承認依頼を Discord に送る。
     """
     decision = analysis_result.get('decision', 'HOLD')
-    reason = analysis_result.get('reason', 'N/A')
-    score = analysis_result.get('sentiment_score', 0)
+    tide = analysis_result.get('tide_status', '不明')
     impact = analysis_result.get('impact', 0)
+    reason = analysis_result.get('reason', 'N/A')
     
+    div = analysis_result.get('divergence_check', {})
+    pred = analysis_result.get('scenario_prediction', {})
+    
+    # 彩色決定
     color = 0x2ecc71 if decision == 'BUY' else 0xe74c3c if decision == 'SELL' else 0x95a5a6
+    if impact >= 8: color = 0x9b59b6 # 重大インパクトは紫
     
     fields = [
-        {"name": "🤖 AI 判定", "value": f"`{decision}` (Score: {score})", "inline": True},
-        {"name": "💥 インパクト", "value": str(impact), "inline": True},
-        {"name": "💰 現在価格", "value": f"{ticker_data.get('last', 'N/A')} JPY", "inline": True},
-        {"name": "📖 理由", "value": reason, "inline": False},
-        {"name": "📰 ニュースソース", "value": "\n".join([f"• {t}" for t in news_titles]), "inline": False}
+        {"name": "🌊 潮目判定", "value": f"**`{tide}`**", "inline": True},
+        {"name": "🤖 意思決定", "value": f"`{decision}`", "inline": True},
+        {"name": "💥 衝撃度", "value": f"{impact}/10", "inline": True},
+        {"name": "⚖️ 市場の乖離", "value": f"Score: {div.get('score', 0)}\n*{div.get('comment', '特になし')}*", "inline": False},
+        {"name": "🔮 3hシナリオ予測", "value": f"**{pred.get('target_3h', '不明')}**\n(確信度: {pred.get('confidence', 0)}%)", "inline": False},
+        {"name": "📖 戦略的背景", "value": reason, "inline": False},
+        {"name": "📰 監視センサー検知", "value": "\n".join([f"• {t}" for t in news_titles[:5]]), "inline": False}
     ]
     
-    message = "⚠️ **AIが売買判断を下しました。承認しますか？**\n(現状は手動実行、または別途ボットでの承認ボタン待ちとなります)"
+    message = "🌊 **世界の潮目に変化を検知しました。戦略的エントリを承認しますか？**"
     
-    return send_discord_notification("🚀 トレード承認リクエスト", message, color=color, fields=fields)
+    return send_discord_notification("🛰️ 潮目感知・承認リクエスト", message, color=color, fields=fields)

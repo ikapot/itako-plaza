@@ -2,6 +2,8 @@ import os
 import logging
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from engine.trading import NewsTradingEngine
+from engine.summary import generate_daily_summary
+from lib.discord_util import send_discord_notification
 from dotenv import load_dotenv
 
 # 環境変数の読み込み
@@ -84,6 +86,21 @@ async def approve_trade(side: str, analysis_id: str = None):
         "status": "success" if res.get('success') else "failure",
         "execution_details": res
     }
+
+@app.post("/daily-summary")
+async def daily_summary(background_tasks: BackgroundTasks):
+    """
+    1日の終わりに市場とトレードを抽象画的に総括します。
+    """
+    def task():
+        logger.info("🎨 日次総括（アーティスト用）の生成を開始します...")
+        summary = generate_daily_summary()
+        # Discordへ投稿
+        send_discord_notification("🎨 本日の市場総括 (Abstract Interpretation)", summary, color=0x9b59b6)
+        return summary
+        
+    background_tasks.add_task(task)
+    return {"message": "Daily summary generation started in background"}
 
 if __name__ == "__main__":
     import uvicorn

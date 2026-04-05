@@ -39,5 +39,10 @@ with mock.patch('lib.rakuten_api.RakutenWalletClient', mock.MagicMock()):
     
     # 実際のリクエスト時に get_ticker が呼ばれるので、広範囲で patch する
     with mock.patch('engine.trading.RakutenWalletClient.get_ticker', mock_ticker):
+        mock_news = [
+            {"title": "ホルムズ海峡で緊張高まる：原油運搬船への威嚇射撃を検知、原油先物が急騰", "source": "Geo-Alert"},
+            {"title": "米中間選挙を控え、次期政権の仮想通貨規制案がリーク：超党派での厳格化の動き", "source": "Policy Inside"},
+            {"title": "アジア圏の主要データセンターで大規模な通信障害が発生、金融インフラに一部影響", "source": "Tech Guard"}
+        ]
         print("🧪 [Mock Mode] Starting server with mocked external APIs and Firestore...")
         uvicorn.run(app, host="127.0.0.1", port=8080)
