@@ -150,11 +150,18 @@
     - `lib/rakuten_api.py`: `requests.Session()` による接続再利用とリクエストの効率化。
     - `engine/trading.py` & `main.py`: 環境変数 (`DRY_RUN`, `TRADE_AMOUNT`) による動的な構成設定への移行。
 
+### 4. Cloud Run 最低コスト最適化と新規エージェント設計 (Cost Optimization & New Agent)
+- **[完了] 既存サービスのゼロ・コスト化設定**: `gcloud run services update` により、`itako-bridge` と `itako-news-trade` の `min-instances` を 0 に、`cpu-throttling` を有効化し、アイドル時の課金を完全にゼロにしました。
+- **[保留] Artifact Registry の自動削除**: コマンド実行エラーのため、GUI（Google Cloud Console）からの設定方法をユーザーに案内することとしました。
+- **[完了] ブラウザ操作（browser-use）エージェントの雛形作成**: `rakuten-browser-agent/agent.py` を作成し、Gemini 1.5 Flash と Cloud Scheduler を組み合わせた「短時間・超節約型」自動売買基盤と、Discord を使った 2FA（二段階認証）突破フローを設計しました。
+- **[完了] 領収書解析 API のバグ修正**: `Receipts` フォルダがない場合の自動作成ロジックにおける `logger` 参照エラーを修正（`console.info`へ変更）。
+
 ---
 ## 次回への申し送り（随時更新）
-- [ ] **実売買の有効化**: `env` にて `DRY_RUN=False` を設定し、本格的な実働テストを開始。
-- [ ] **MarketSpeed II 株連携 (ペンディング中)**: ユーザー様のPC環境の安定後に `archive_pending/` から引き揚げて作業再開予定。
-- [ ] **思い出してプロトコルのテスト**: 次回フリーズや再起動時に、実際に「思い出して」と声をかけ、復旧の精度を確認する。
+- [ ] **【ユーザー作業】Artifact Registry のクリーンアップ設定**: Google Cloud Console にて、「古いイメージの自動削除」ルールを設定していただく。
+- [ ] **株・自動売買の続き**: `rakuten-browser-agent/agent.py` をベースに実際の楽天証券ログイン・売買フローを実装する。
+- [ ] **Painter Tax Assist の仕上げ**: ブラウザ上での動作確認と細部のUI調整。
+- [x] **仮想通貨 (V2) ボットの本番テスト**: Secret Manager への API キー登録完了を確認済み。`DRY_RUN=False` での本番稼働が可能。
 
 ---
 ## AI運用ルール (Communication & Persistence)

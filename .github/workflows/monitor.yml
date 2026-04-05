@@ -1,0 +1,35 @@
+name: Tide Monitor Agent
+
+on:
+  schedule:
+    # 毎時00分と30分に実行 (30分間隔)
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # 手動実行用トリガー
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          cd tide-monitor-agent
+          pip install -r requirements.txt
+
+      - name: Run Brain Logic
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+        run: |
+          cd tide-monitor-agent
+          python brain.py
