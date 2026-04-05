@@ -27,7 +27,7 @@ export async function GET() {
     let folderId = folderRes.data.files?.[0]?.id;
     
     if (!folderId) {
-      logger.info("ℹ️ 'Receipts' フォルダが見つからないため、新規作成します。");
+      console.info("ℹ️ 'Receipts' フォルダが見つからないため、新規作成します。");
       const newFolder = await drive.files.create({
         requestBody: {
           name: 'Receipts',

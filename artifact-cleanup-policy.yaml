@@ -1,0 +1,9 @@
+- name: delete-old-images
+  action:
+    type: Delete
+  condition:
+    olderThan: 30d
+- name: keep-recent-versions
+  action:
+    type: Keep
+  mostRecentVersions: 5
