@@ -145,22 +145,37 @@ class NewsTradingEngine:
         send_discord_notification("🚨 注文執行エラー", f"理由: {err_msg}", color=0xe74c3c)
         return {"success": False, "error": err_msg}
     def get_dashboard_data(self) -> Dict[str, Any]:
-        """ダッシュボード表示用の統合データを取得"""
-        ticker = self.client.get_ticker(self.symbol_id)
-        balance = self.client.get_balance()
-        margin = self.client.get_margin_info()
-        status = self.state.get_status() or {}
+        """ダッシュボード表示用の統合データを取得 (堅牢なフォールバック付き)"""
+        try:
+            ticker = self.client.get_ticker(self.symbol_id)
+            balance = self.client.get_balance()
+            margin = self.client.get_margin_info()
+            status = self.state.get_status() or {}
 
-        return {
-            "mode": "Live" if not self.dry_run else "DryRun",
-            "symbol": "BTC/JPY",
-            "last_price": ticker.get("last", 0),
-            "ask": ticker.get("ask", 0),
-            "bid": ticker.get("bid", 0),
-            "balance": balance.get("assets", []),
-            "equity": margin.get("equity", 0),
-            "margin_usage": margin.get("marginUsageRate", 0),
-            "position": status.get("position"),
-            "entry_price": status.get("entry_price", 0),
-            "last_updated": status.get("last_updated", time.time())
-        }
+            # 型チェックと安全な値の抽出 (APIがリストやエラー文字列を返す可能性を考慮)
+            def safe_get(data, key, default):
+                if isinstance(data, dict):
+                    return data.get(key, default)
+                return default
+
+            return {
+                "mode": "本番 (Live)" if not self.dry_run else "模擬 (DryRun)",
+                "symbol": "BTC/JPY",
+                "last_price": safe_get(ticker, "last", 0),
+                "ask": safe_get(ticker, "ask", 0),
+                "bid": safe_get(ticker, "bid", 0),
+                "balance": safe_get(balance, "assets", []),
+                "equity": safe_get(margin, "equity", 0),
+                "margin_usage": safe_get(margin, "marginUsageRate", 0),
+                "position": status.get("position", "なし"),
+                "entry_price": status.get("entry_price", 0),
+                "last_updated": status.get("last_updated", time.time())
+            }
+        except Exception as e:
+            logger.error(f"❌ ダッシュボードデータ構築中に予期せぬエラー: {e}")
+            return {
+                "mode": "ERROR",
+                "symbol": "BTC/JPY",
+                "last_price": 0,
+                "error": str(e)
+            }

@@ -42,7 +42,9 @@ async def get_status():
         data = engine.get_dashboard_data()
         return data
     except Exception as e:
+        import traceback
         logger.error(f"❌ APIデータ取得エラー: {e}")
+        logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/trigger")

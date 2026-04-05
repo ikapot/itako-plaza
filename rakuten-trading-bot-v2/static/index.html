@@ -3,68 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Itako News-Trade V2 | Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Spectral Trader | Itako News-Trade V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
         :root {
-            --bg-color: #050a14;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent-blue: #00d2ff;
-            --accent-green: #00ff88;
-            --text-color: #e0e0e0;
+            --bg-color: #020617;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-cyan: #22d3ee;
+            --accent-purple: #a855f7;
+            --accent-green: #4ade80;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            color: var(--text-main);
             min-height: 100vh;
-            background-image: radial-gradient(circle at 20% 30%, rgba(0, 210, 255, 0.05) 0%, transparent 40%);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; letter-spacing: 2px; color: var(--accent-blue); }
-        .status-badge { padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; background: var(--glass-bg); border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 8px; }
-        .pulse { width: 8px; height: 8px; background-color: var(--accent-green); border-radius: 50%; box-shadow: 0 0 10px var(--accent-green); animation: pulse 2s infinite; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--glass-bg); backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; transition: 0.3s; }
-        .card:hover { border-color: rgba(0, 210, 255, 0.3); transform: translateY(-5px); }
-        .label { font-size: 0.75rem; color: #888; text-transform: uppercase; margin-bottom: 10px; }
-        .value { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; color: #fff; }
-        .unit { font-size: 0.9rem; color: #666; margin-left: 5px; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* Spectral Background */
+        .spectral-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(34, 211, 238, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+            filter: blur(80px);
+            animation: moveBg 20s infinite alternate;
+        }
+
+        @keyframes moveBg {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1) translate(2% 2%); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            padding: 40px 24px;
+            opacity: 0; /* JSでフェードイン */
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 60px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .brand h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+        .brand p { font-size: 0.75rem; color: var(--text-dim); letter-spacing: 1px; }
+
+        .status-area { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .mode-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 12px var(--accent-green); }
+
+        /* Grid System */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .card:hover {
+            border-color: rgba(34, 211, 238, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+            transform: translateX(-100%);
+            transition: 0.6s;
+        }
+        .card:hover::before { transform: translateX(100%); }
+
+        .label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .value-wrapper { display: flex; align-items: baseline; gap: 8px; }
+        .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .unit { font-size: 1rem; color: var(--text-dim); }
+
+        .sub-data {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .sub-item { display: flex; flex-direction: column; gap: 4px; }
+        .sub-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; }
+        .sub-value { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; color: var(--accent-cyan); }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .value { font-size: 1.8rem; }
+            header { flex-direction: column; align-items: flex-start; gap: 20px; }
+            .status-area { align-items: flex-start; }
+        }
     </style>
 </head>
 <body>
+    <div class="spectral-bg"></div>
+    
     <div class="container">
         <header>
-            <h1>ITAKO V2 DASHBOARD</h1>
-            <div class="status-badge"><div class="pulse"></div><span id="bot-mode">LOADING...</span></div>
+            <div class="brand">
+                <h1>SPECTRAL TRADER</h1>
+                <p>ITAKO NEWS-TRADE SYSTEM V2.1</p>
+            </div>
+            <div class="status-area">
+                <div class="mode-badge">
+                    <div class="dot" id="status-dot"></div>
+                    <span id="bot-mode">接続中...</span>
+                </div>
+            </div>
         </header>
+
         <div class="grid">
-            <div class="card"><div class="label">BTC Price</div><div class="value" id="btc-price">--</div></div>
-            <div class="card"><div class="label">Equity Balance</div><div class="value" id="equity">--<span class="unit">JPY</span></div></div>
-            <div class="card"><div class="label">Current Position</div><div class="value" id="position">--</div></div>
+            <!-- Market Price -->
+            <div class="card">
+                <div class="label">市場価格 <span>BTC/JPY</span></div>
+                <div class="value-wrapper">
+                    <div class="value" id="btc-price">0</div>
+                    <div class="unit">JPY</div>
+                </div>
+                <div class="sub-data">
+                    <div class="sub-item">
+                        <span class="sub-label">Bid (売)</span>
+                        <span class="sub-value" id="price-bid">---</span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="sub-label">Ask (買)</span>
+                        <span class="sub-value" id="price-ask">---</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equity -->
+            <div class="card">
+                <div class="label">有効証拠金 <span>Equity</span></div>
+                <div class="value-wrapper">
+                    <div class="value" id="equity">0</div>
+                    <div class="unit">JPY</div>
+                </div>
+                <div class="sub-data">
+                    <div class="sub-item">
+                        <span class="sub-label">維持率</span>
+                        <span class="sub-value" id="margin-usage">--- %</span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="sub-label">モード</span>
+                        <span class="sub-value" id="sub-mode">---</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Position -->
+            <div class="card">
+                <div class="label">現在ポジション <span>Active State</span></div>
+                <div class="value-wrapper">
+                    <div class="value" id="position" style="font-size: 1.8rem;">LOADING</div>
+                </div>
+                <div class="sub-data">
+                    <div class="sub-item">
+                        <span class="sub-label">参入価格</span>
+                        <span class="sub-value" id="entry-price">---</span>
+                    </div>
+                    <div class="sub-item">
+                        <span class="sub-label">最終更新</span>
+                        <span class="sub-value" id="last-updated">---</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
     <script>
+        // Init Animation
+        gsap.to(".container", { opacity: 1, y: 0, duration: 1, ease: "power2.out", delay: 0.2 });
+
+        let currentData = {
+            last_price: 0,
+            equity: 0
+        };
+
         async function update() {
             try {
                 const res = await fetch('/api/status');
                 if (!res.ok) throw new Error('API Error');
                 const data = await res.json();
+
+                // モード表示
                 document.getElementById('bot-mode').innerText = data.mode;
-                document.getElementById('btc-price').innerText = Number(data.last_price).toLocaleString();
-                document.getElementById('equity').innerHTML = Number(data.equity).toLocaleString() + '<span class="unit">JPY</span>';
-                document.getElementById('position').innerText = data.position || 'IDLE';
+                document.getElementById('sub-mode').innerText = data.mode;
+                
+                // 価格アニメーション (GSAP)
+                animateValue("btc-price", currentData.last_price, data.last_price);
+                animateValue("equity", currentData.equity, data.equity);
+
+                // サブデータ
+                document.getElementById('price-bid').innerText = Number(data.bid).toLocaleString();
+                document.getElementById('price-ask').innerText = Number(data.ask).toLocaleString();
+                document.getElementById('margin-usage').innerText = Number(data.margin_usage).toFixed(1) + ' %';
+                document.getElementById('entry_price').innerText = data.entry_price > 0 ? Number(data.entry_price).toLocaleString() : 'なし';
+                
+                // ポジション
+                const posEl = document.getElementById('position');
+                posEl.innerText = data.position || '待機中 (IDLE)';
+                posEl.style.color = data.position === 'LONG' ? 'var(--accent-green)' : (data.position === 'SHORT' ? '#f87171' : '#fff');
+
+                // 更新時刻
+                const date = new Date(data.last_updated * 1000);
+                document.getElementById('last-updated').innerText = date.toLocaleTimeString();
+
+                // データの保存
+                currentData.last_price = data.last_price;
+                currentData.equity = data.equity;
+                
+                // ドットのアニメーション
+                gsap.to("#status-dot", { scale: 1.5, duration: 0.2, yoyo: true, repeat: 1 });
+
             } catch (e) {
                 console.error(e);
-                document.getElementById('bot-mode').innerText = 'ERROR';
+                document.getElementById('bot-mode').innerText = 'ERROR (通信失敗)';
+                document.getElementById('status-dot').style.background = '#f87171';
+                document.getElementById('status-dot').style.boxShadow = '0 0 12px #f87171';
             }
         }
-        setInterval(update, 15000);
+
+        function animateValue(id, start, end) {
+            const obj = { val: start };
+            gsap.to(obj, {
+                val: end,
+                duration: 1.5,
+                ease: "power3.out",
+                onUpdate: () => {
+                    document.getElementById(id).innerText = Math.floor(obj.val).toLocaleString();
+                }
+            });
+        }
+
+        setInterval(update, 10000); // 10秒おき
         update();
     </script>
 </body>
