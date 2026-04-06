@@ -38,29 +38,38 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const [tickerRes, balanceRes, state] = await Promise.all([
-      fetch(`${RAKUTEN_BASE}/api/v1/ticker?symbolId=${BTC_SYMBOL_ID}`).then(r => r.json()),
-      rakutenGet('/api/v1/asset'),
-      loadState(),
-    ]);
+    // 公開ティッカーは常に取得可能
+    const tickerRes = await fetch(`${RAKUTEN_BASE}/api/v1/ticker?symbolId=${BTC_SYMBOL_ID}`);
+    const ticker = await tickerRes.json();
+    const btcPrice = parseFloat(ticker.last || ticker.ltp || 0);
 
-    const btcPrice = parseFloat(tickerRes.last || tickerRes.ltp || 0);
-    const jpyAsset = balanceRes?.assets?.find(a => a.asset === 'JPY');
-    const btcAsset = balanceRes?.assets?.find(a => a.asset === 'BTC');
+    // APIキーがある場合のみ残高を取得
+    let balance = { jpy: 'APIキー未設定', btc: 'APIキー未設定' };
+    if (API_KEY && API_SECRET) {
+      const balanceRes = await rakutenGet('/api/v1/asset');
+      if (!balanceRes.error) {
+        const jpyAsset = balanceRes?.assets?.find(a => a.asset === 'JPY');
+        const btcAsset = balanceRes?.assets?.find(a => a.asset === 'BTC');
+        balance = {
+          jpy: jpyAsset ? `¥${parseFloat(jpyAsset.amount).toLocaleString()}` : '0',
+          btc: btcAsset ? `${btcAsset.amount} BTC` : '0',
+        };
+      }
+    }
+
+    const state = await loadState();
 
     return res.status(200).json({
       ok: true,
-      btcPrice: `¥${btcPrice.toLocaleString()}`,
-      balance: {
-        jpy: jpyAsset ? `¥${parseFloat(jpyAsset.amount).toLocaleString()}` : '不明',
-        btc: btcAsset ? `${btcAsset.amount} BTC` : '不明',
-      },
+      btcPrice: isNaN(btcPrice) ? '取得失敗' : `¥${btcPrice.toLocaleString()}`,
+      balance,
       lastTrade: state,
       config: {
         dryRun: process.env.DRY_RUN !== 'false',
-        buyThreshold: `${process.env.BUY_THRESHOLD || 1.5}%`,
-        sellThreshold: `${process.env.SELL_THRESHOLD || 2.0}%`,
+        buyThreshold:   `${process.env.BUY_THRESHOLD  || 1.5}%`,
+        sellThreshold:  `${process.env.SELL_THRESHOLD || 2.0}%`,
         tradeAmountJpy: `¥${process.env.TRADE_AMOUNT_JPY || 1000}`,
+        walletApiConfigured: !!(API_KEY && API_SECRET),
       }
     });
   } catch (err) {
