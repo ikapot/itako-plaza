@@ -1,0 +1,44 @@
+﻿node.exe : Retrieving project窶ｦ
+発生場所 C:\Users\ikapo\AppData\Roaming\np
+m\vercel.ps1:24 文字:5
++     & "node$exe"  "$basedir/node_mod
+ules/vercel/dist/vc.js" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpec 
+   ified: (Retrieving project窶ｦ:Stri  
+  ng) [], RemoteException
+    + FullyQualifiedErrorId : NativeC 
+   ommandError
+ 
+> Environment Variables found for ikap
+otem-8005s-projects/itako-plaza [235ms
+]
+
+ name                                       value               environments        created    
+ BUY_THRESHOLD                              Encrypted           Production          1m ago     
+ DRY_RUN                                    Encrypted           Production          1m ago     
+ TRADE_SECRET                               Encrypted           Production          1m ago     
+ SELL_THRESHOLD                             Encrypted           Production          1m ago     
+ TRADE_AMOUNT_JPY                           Encrypted           Production          1m ago     
+ VITE_GEMINI_API_KEY                        Encrypted           Development         11h ago    
+ VITE_GEMINI_API_KEY                        Encrypted           Production          11h ago    
+ VITE_PROXY_URL                             Encrypted           Development         11h ago    
+ VITE_PROXY_URL                             Encrypted           Production          11h ago    
+ FIREBASE_PRIVATE_KEY                       Encrypted           Development         23h ago    
+ FIREBASE_PRIVATE_KEY                       Encrypted           Production          23h ago    
+ FIREBASE_CLIENT_EMAIL                      Encrypted           Development         23h ago    
+ FIREBASE_CLIENT_EMAIL                      Encrypted           Production          23h ago    
+ FIREBASE_PROJECT_ID                        Encrypted           Development         23h ago    
+ FIREBASE_PROJECT_ID                        Encrypted           Production          23h ago    
+ VITE_FIREBASE_APP_ID                       Encrypted           Production          8d ago     
+ VITE_FIREBASE_MESSAGING_SENDER_ID          Encrypted           Production          8d ago     
+ VITE_FIREBASE_STORAGE_BUCKET               Encrypted           Production          8d ago     
+ VITE_FIREBASE_PROJECT_ID                   Encrypted           Production          8d ago     
+ VITE_FIREBASE_AUTH_DOMAIN                  Encrypted           Production          8d ago     
+ VITE_FIREBASE_API_KEY                      Encrypted           Production          8d ago     
+
+Common next commands:
+- `vercel env add`
+- `vercel env rm`
+- `vercel env pull`
