@@ -17,22 +17,14 @@ if (!admin.apps.length) {
 }
 
 export default async function handler(req, res) {
-    // CORS対応
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
-    );
+    try {
+        if (req.method === 'OPTIONS') {
+            return res.status(200).end();
+        }
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
-    }
+        if (req.method !== 'POST') {
+            return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+        }
 
     // トークン検証
     const authHeader = req.headers.authorization || '';
@@ -130,5 +122,11 @@ export default async function handler(req, res) {
 
     if (!res.writableEnded) {
         res.status(500).json({ error: lastError?.message || "All models failed" });
+    }
+    } catch (globalError) {
+        console.error("Global Proxy Error:", globalError);
+        if (!res.writableEnded) {
+            res.status(500).json({ error: globalError.message || "Internal Void Collapse" });
+        }
     }
 }
