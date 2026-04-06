@@ -1,0 +1,19 @@
+﻿
+ name                                       value               environments        created    
+ VITE_GEMINI_API_KEY                        Encrypted           Development         1h ago     
+ VITE_GEMINI_API_KEY                        Encrypted           Production          1h ago     
+ VITE_PROXY_URL                             Encrypted           Development         1h ago     
+ VITE_PROXY_URL                             Encrypted           Production          1h ago     
+ FIREBASE_PRIVATE_KEY                       Encrypted           Development         14h ago    
+ FIREBASE_PRIVATE_KEY                       Encrypted           Production          14h ago    
+ FIREBASE_CLIENT_EMAIL                      Encrypted           Development         14h ago    
+ FIREBASE_CLIENT_EMAIL                      Encrypted           Production          14h ago    
+ FIREBASE_PROJECT_ID                        Encrypted           Development         14h ago    
+ FIREBASE_PROJECT_ID                        Encrypted           Production          14h ago    
+ VITE_FIREBASE_APP_ID                       Encrypted           Production          8d ago     
+ VITE_FIREBASE_MESSAGING_SENDER_ID          Encrypted           Production          8d ago     
+ VITE_FIREBASE_STORAGE_BUCKET               Encrypted           Production          8d ago     
+ VITE_FIREBASE_PROJECT_ID                   Encrypted           Production          8d ago     
+ VITE_FIREBASE_AUTH_DOMAIN                  Encrypted           Production          8d ago     
+ VITE_FIREBASE_API_KEY                      Encrypted           Production          8d ago     
+
