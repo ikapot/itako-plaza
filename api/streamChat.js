@@ -36,7 +36,8 @@ export default async function handler(req, res) {
     try {
         await admin.auth().verifyIdToken(idToken);
     } catch (authError) {
-        return res.status(401).json({ error: 'Invalid Token' });
+        console.error('Firebase Token Verification Failed:', authError.message, authError.code);
+        return res.status(401).json({ error: 'Invalid Token', detail: authError.message });
     }
 
     const API_KEY = process.env.OPENROUTER_API_KEY;

@@ -1,0 +1,6 @@
+browser-use
+langchain-openai
+google-cloud-firestore
+python-dotenv
+requests
+playwright

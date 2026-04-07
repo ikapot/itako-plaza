@@ -12,9 +12,16 @@ export default async function handler(req, res) {
 
   try {
     // --- 公開ティッカー (認証不要) ---
-    const tickerRes = await fetch(`${RAKUTEN_BASE}/api/v1/ticker?symbolId=${BTC_SYMBOL_ID}`);
-    const ticker = await tickerRes.json();
-    const btcPrice = parseFloat(ticker.last || ticker.ltp || ticker.close || 0);
+    let btcPrice = 0;
+    try {
+      const tickerRes = await fetch(`${RAKUTEN_BASE}/api/v1/ticker?symbolId=${BTC_SYMBOL_ID}`);
+      if (tickerRes.ok) {
+        const ticker = await tickerRes.json();
+        btcPrice = parseFloat(ticker.last || ticker.ltp || ticker.close || 0);
+      }
+    } catch (tickerErr) {
+      console.error('Ticker Fetch Error:', tickerErr.message);
+    }
 
     const API_KEY    = process.env.WALLET_API_KEY    || '';
     const API_SECRET = process.env.WALLET_API_SECRET || '';

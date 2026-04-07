@@ -1,25 +1,31 @@
 import asyncio
 import os
-import json
 import logging
-from browser_use import Agent
-from langchain_openai import ChatOpenAI # Using OpenRouter
+from browser_use import Agent, BrowserConfig, Browser
+from langchain_openai import ChatOpenAI
 import requests
-import time
+from dotenv import load_dotenv
+from google.cloud import firestore
 
-# --- 最安設計の肝: logger設定 ---
+# 環境変数の読み込み
+load_dotenv()
+
+# --- logger設定 ---
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- 1. 最安のモデル設定 (OpenRouter 経由の Gemini 1.5 Flash) ---
-# Gemini Flash は視覚タスク（スクリーンショット解析）において、GPT-4o等の 1/10 以下のコスト。
+# --- 1. モデル設定 (OpenRouter 経由の Gemini 1.5 Flash) ---
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
+if not OPENROUTER_API_KEY:
+    logger.error("❌ OPENROUTER_API_KEY が設定されていません。")
+
 llm = ChatOpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=os.environ.get("OPENROUTER_API_KEY", "your_key_here"),
+    api_key=OPENROUTER_API_KEY,
     model="google/gemini-1.5-flash", 
 )
 
-# --- 2. Discord Notification ユーティリティ ---
+# --- 2. Discord Notification ---
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
 def send_discord_msg(content: str):
     if not DISCORD_WEBHOOK_URL: return
@@ -28,70 +34,96 @@ def send_discord_msg(content: str):
     except Exception as e:
          logger.error(f"Discord通知エラー: {e}")
 
-# --- 3. Firestore 状態管理 (モック) ---
-# ※実装時は本物の Firestore クライアントを使用します
+# --- 3. Firestore 状態管理 ---
+db = firestore.Client()
+DOC_PATH = "bot_status/rakuten_agent"
+
 def check_firestore_2fa_status():
-    # Firestoreの "bot_status" ドキュメントを読み込み
-    # もし status が "2FA_PROVIDED" ならコードを返す、"WAITING" なら None を返す
+    """Firestore から 2FA コードが書き込まれているか確認"""
+    try:
+        doc = db.document(DOC_PATH).get()
+        if doc.exists:
+            data = doc.to_dict()
+            if data.get("status") == "2FA_PROVIDED" and data.get("code"):
+                return data.get("code")
+    except Exception as e:
+        logger.error(f"Firestore 読み取りエラー: {e}")
     return None
 
-def set_firestore_status(status_str: str):
-    # Firestore に現在の状態を書き込む（例: "IDLE", "WAITING_2FA", "LOGGED_IN"）
-    pass
+def set_firestore_status(status_str: str, extra_data=None):
+    """Firestore にステータスを書き込む"""
+    try:
+        data = {"status": status_str, "updated_at": firestore.SERVER_TIMESTAMP}
+        if extra_data:
+            data.update(extra_data)
+        db.document(DOC_PATH).set(data, merge=True)
+    except Exception as e:
+        logger.error(f"Firestore 書き込みエラー: {e}")
 
-# --- 4. Agent メインロジック (Cloud Scheduler から 30分おきに呼ばれる) ---
-async def run_trading_sequence():
-    """
-    Cloud Scheduler等から定期実行（30分毎）されるエントリーポイント。
-    Cloud Runのインスタンス起動中に短時間で以下の操作を完了させ、すぐ終了（インスタンス数を0に戻す）させる。
-    """
-    logger.info("🚀 自動売買エージェントが起動しました...")
+# --- 4. Agent メインロジック ---
+async def run_trading_sequence(headless=True):
+    logger.info("🚀 楽天証券自動売買エージェント起動...")
+    
+    user_id = os.environ.get("RAKUTEN_SEC_USER_ID", "USER_ID_HERE")
+    password = os.environ.get("RAKUTEN_SEC_PASSWORD", "PASSWORD_HERE")
 
-    # 最安運用のため、タスク指示は極端にシンプルに（トークン消費の抑制）
-    login_task = """
+    # ブラウザ設定
+    config = BrowserConfig(headless=headless)
+    browser = Browser(config=config)
+
+    login_task = f"""
     1. https://www.rakuten-sec.co.jp/ にアクセス。
-    2. 'ログイン'ボタンをクリックし、IDとパスワードを入力（仮: USER_ID / PASSWORD）。
-    3. もし2段階認証（MFA/2FA）のコード入力画面が出たら、いったんそこで操作を止めてください。
+    2. ログインボタンをクリックし、ログインフォームを表示。
+    3. ログインIDに '{user_id}'、パスワードに '{password}' を入力し、ログインボタンを押す。
+    4. 2段階認証（ワンタイムパスワード）の入力画面が表示されたら、そこで待機し、画面の内容を報告してください。
+    5. 既にログイン済みの場合は、資産合計ページが表示されていることを確認してください。
     """
 
     agent = Agent(
         task=login_task,
         llm=llm,
+        browser=browser
     )
 
-    # Agent の実行（ブラウザ操作開始）
-    logger.info("ブラウザ操作を開始します...")
+    set_firestore_status("LOGGING_IN")
     result = await agent.run()
 
-    # == ここの判定は、Agentの出力結果やDOMステータスに基づいて行います ==
-    if "2段階認証" in str(result) or "ワンタイムパスワード" in str(result):
+    # 2FA 判定
+    result_str = str(result)
+    if "2段階認証" in result_str or "ワンタイムパスワード" in result_str:
         logger.info("⚠️ 2段階認証が要求されました。")
-        send_discord_msg("🤖 楽天証券から2段階認証が求められました！Discordにコードを書き込んでください。")
+        send_discord_msg("🤖 楽天証券: 2段階認証が必要です。コードを Firestore/Discord 経由で入力してください。")
         set_firestore_status("WAITING_2FA")
         
-        # Cloud Runの課金を抑えるため、ここで最大1分だけ待機し、来なければプロセスを終了して次回起動に回す
-        for i in range(12):
-            await asyncio.sleep(5)
+        # 最大2分待機 (10秒おきにチェック)
+        for _ in range(12):
+            await asyncio.sleep(10)
             code = check_firestore_2fa_status()
             if code:
-                logger.info("🔑 ユーザーからの2FAコードを受信しました！入力を続行します。")
-                
-                # 2FA入力のための追加タスク
-                code_task = f"テキストボックスに '{code}' を入力し、'認証する'ボタンをクリックしてください。"
-                agent_2fa = Agent(task=code_task, llm=llm)
+                logger.info(f"🔑 2FAコード受信: {code}")
+                # 2FA入力フェーズ
+                agent_2fa = Agent(
+                    task=f"入力欄にコード '{code}' を入力して、認証（ログイン）を完了させてください。",
+                    llm=llm,
+                    browser=browser # 同じブラウザインスタンスを継続使用
+                )
                 await agent_2fa.run()
-                
-                send_discord_msg("✅ ログインに成功しました。株価のチェックを実施します。")
+                set_firestore_status("LOGGED_IN", {"code": None})
+                send_discord_msg("✅ ログインに成功しました。")
                 break
         else:
-             logger.warning("⏳ 2FAの入力がタイムアウトしました。次回の起動サイクルでリトライします。")
-             # インスタンスが終了し、課金はここでストップする
+             logger.warning("⏳ 2FAタイムアウト。")
+             set_firestore_status("TIMEOUT_2FA")
+             await browser.close()
              return
 
-    # ログイン成功後、実際の注文や保有チェックなどの処理を続ける
+    # ログイン成功後の処理（保有銘柄チェックなど）
     # ...
     
-    logger.info("🏁 処理が完了しました。インスタンスをシャットダウンします。")
+    logger.info("🏁 処理完了。")
+    await browser.close()
 
 if __name__ == "__main__":
-    asyncio.run(run_trading_sequence())
+    # デフォルトは headless=True (Cloud Run 向け)
+    # ローカルテスト時は headless=False にすると挙動が見える
+    asyncio.run(run_trading_sequence(headless=True))
