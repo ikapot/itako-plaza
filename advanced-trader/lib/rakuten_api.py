@@ -38,9 +38,8 @@ class RakutenWalletClient:
         body_str = json.dumps(body, separators=(',', ':')) if body else ""
         nonce = str(int(time.time() * 1000))
         
-        api_id = os.getenv("RAKUTEN_API_ID", self.api_key)
         headers = {
-            "API-KEY": api_id or "",
+            "API-KEY": self.api_key or "",
             "NONCE": nonce,
             "SIGNATURE": self._get_signature(nonce, method, path, body_str),
             "Content-Type": "application/json"
