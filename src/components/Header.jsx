@@ -25,6 +25,7 @@ const Header = React.memo(({
         { id: 'library', icon: <Library size={14} />, label: 'LIBRARY', color: '#f15a24' },
         { id: 'directory', icon: <User size={14} />, label: 'Registry', color: '#EAE0D5' },
         { id: 'consult', icon: <MessageSquare size={14} />, label: 'Consult', color: '#5865F2' },
+        { id: 'trading', icon: <TrendingUp size={14} />, label: 'Trading', color: '#f15a24' },
         { id: 'connect', icon: <Cpu size={14} />, label: 'Connect', color: apiStatus === 'connected' ? '#10b981' : '#f15a24' },
         { id: 'account', icon: <Settings size={14} />, label: 'Account', color: '#b45309' },
     ];

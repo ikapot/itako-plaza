@@ -6,6 +6,7 @@ import WarholAvatar from './WarholAvatar';
 import PortalGrimoire from './PortalGrimoire';
 import DiscordConsultation from './DiscordConsultation';
 import { CHARACTER_PROFILES } from '../data/profiles';
+import TradingDashboard from './TradingDashboard';
 
 const getGenreColors = (index) => {
     const isOrange = index % 2 === 0;
@@ -356,6 +357,18 @@ const ManagerContent = React.memo(({
                                 <DiscordConsultation />
                             </motion.div>
                         ) : null}
+                
+                {activeManagerTab === 'trading' ? (
+                    <motion.div
+                        key="trading"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="w-full h-full"
+                    >
+                        <TradingDashboard user={user} />
+                    </motion.div>
+                ) : null}
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {stats.map((s, i) => (
