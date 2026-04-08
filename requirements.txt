@@ -1,0 +1,9 @@
+discord.py
+aiohttp
+python-dotenv
+requests
+browser-use
+playwright
+google-cloud-firestore
+pandas
+ccxt

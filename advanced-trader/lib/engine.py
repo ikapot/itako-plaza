@@ -1,5 +1,4 @@
 import pandas as pd
-import pandas_ta as ta
 import ccxt
 import logging
 from typing import Dict, Optional, Tuple
@@ -120,47 +119,58 @@ class AdvancedExitManager:
 
         return signals
 
+# import pandas_ta as ta  # 3.14 非対応のため手動計算に切り替え
+
 def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    テクニカル指標の計算（pandas_ta 使用）
+    テクニカル指標の計算 (手動実装版)
     """
-    # 既存の DataFrame に指標を追加
-    df.ta.ema(length=20, append=True)
-    df.ta.rsi(length=14, append=True)
-    df.ta.atr(length=22, append=True)
+    # EMA 20
+    df['EMA_20'] = df['close'].ewm(span=20, adjust=False).mean()
     
-    # 列名の正規化（pandas_ta のデフォルト名に対応）
-    df.rename(columns={
-        'EMA_20': 'EMA_20',
-        'RSI_14': 'RSI_14',
-        'ATRr_22': 'ATR_22'
-    }, inplace=True)
+    # RSI 14
+    delta = df['close'].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+    rs = gain / loss
+    df['RSI_14'] = 100 - (100 / (1 + rs))
+    
+    # ATR 22
+    high_low = df['high'] - df['low']
+    high_close = abs(df['high'] - df['close'].shift())
+    low_close = abs(df['low'] - df['close'].shift())
+    ranges = pd.concat([high_low, high_close, low_close], axis=1)
+    true_range = ranges.max(axis=1)
+    df['ATR_22'] = true_range.rolling(window=22).mean()
     
     return df
 
-# --- 使用例 (ボットへの組み込みイメージ) ---
-if __name__ == "__main__":
-    # モックデータの作成
-    data = {
-        "close": [100, 102, 105, 110, 115, 120, 118, 115],
-        "high":  [101, 103, 106, 112, 118, 122, 120, 118],
-        "low":   [99, 101, 104, 108, 112, 117, 116, 114]
-    }
-    df = pd.DataFrame(data)
-    df = preprocess_data(df) # 実際はより長い期間の OHLCV が必要
+class TrendEntryManager:
+    """
+    エントリー（参入）エンジン: EMAとRSIを組み合わせたトレンドフォロー戦略
+    """
+    def __init__(self):
+        pass
 
-    # 1. 資金管理
-    rm = RiskManager(risk_percent=0.02)
-    pos_size = rm.calculate_position_size(total_equity=1000000, entry_price=100.0, stop_loss_price=95.0)
-    
-    # 2. 決済管理
-    exit_mgr = AdvancedExitManager(entry_price=100.0, initial_qty=pos_size)
-    
-    # ループ内での判定イメージ
-    current_market_price = 115.0 
-    signals = exit_mgr.get_exit_signals(df, current_market_price)
-    
-    if signals["scale_out"]:
-        print(">>> 50% 利確を実行し、ストップロスを建値に移動します。")
-    if signals["peak_exit"] or signals["chandelier_exit"]:
-        print(">>> 全ポジションを決済します。")
+    def get_entry_signal(self, df: pd.DataFrame) -> bool:
+        """
+        ゴールデンクロスまたはEMAトレンド継続を判定
+        """
+        last_row = df.iloc[-1]
+        prev_row = df.iloc[-2]
+        
+        close = last_row['close']
+        ema_20 = last_row['EMA_20']
+        rsi = last_row['RSI_14']
+        
+        # 条件1: 価格がEMA20を上抜けている（トレンド方向）
+        trend_up = close > ema_20
+        # 条件2: 前回はEMAの下だったか、あるいは価格がEMAに向かって反発している（押し目）
+        breakout = trend_up and prev_row['close'] <= prev_row['EMA_20']
+        # 条件3: RSIが55以上（勢いがあるが買われすぎではない）
+        momentum = rsi > 55 and rsi < 75
+        
+        if trend_up and (breakout or momentum):
+            logger.info(f"✨ Entry Signal Detected: Price({close:.0f}) > EMA20({ema_20:.0f}), RSI({rsi:.1f})")
+            return True
+        return False

@@ -30,7 +30,7 @@ class RakutenWalletClient:
             self.api_secret.encode(),
             message.encode(),
             hashlib.sha256
-        ).hexdigest()
+        ).hexdigest().upper()
 
     def _request(self, method: str, path: str, body: dict = None) -> dict:
         """汎用リクエストメソッド"""
@@ -38,8 +38,9 @@ class RakutenWalletClient:
         body_str = json.dumps(body, separators=(',', ':')) if body else ""
         nonce = str(int(time.time() * 1000))
         
+        api_id = os.getenv("RAKUTEN_API_ID", self.api_key)
         headers = {
-            "API-KEY": self.api_key or "",
+            "API-KEY": api_id or "",
             "NONCE": nonce,
             "SIGNATURE": self._get_signature(nonce, method, path, body_str),
             "Content-Type": "application/json"
@@ -68,19 +69,26 @@ class RakutenWalletClient:
         """有効証拠金(Equity)データの取得"""
         return self._request("GET", "/api/v1/cfd/equitydata")
 
-    def get_btc_balance(self) -> float:
-        """現在のビットコイン保有量（証拠金含む）を数値で取得"""
+    def get_spot_balance(self) -> dict:
+        """現物残高（JPY, BTC）を辞書で取得"""
         try:
             res = self.get_balance()
-            if not res or "assets" not in res:
-                return 0.0
-            for asset in res["assets"]:
-                if asset.get("asset") == "BTC":
-                    return float(asset.get("amount", 0))
-            return 0.0
+            balances = {"JPY": 0.0, "BTC": 0.0}
+            if not res or not isinstance(res, list):
+                return balances
+            for asset in res:
+                cur = asset.get("currency")
+                amt = asset.get("onhandAmount", 0)
+                if cur in ["JPY", "BTC"]:
+                    balances[cur] = float(amt)
+            return balances
         except Exception as e:
-            logger.error(f"❌ BTC残高取得失敗: {e}")
-            return 0.0
+            logger.error(f"❌ 現物残高取得失敗: {e}")
+            return {"JPY": 0.0, "BTC": 0.0}
+
+    def get_btc_balance(self) -> float:
+        """現在のビットコイン保有量（現物・証拠金合算）を取得"""
+        return self.get_spot_balance().get("BTC", 0.0)
 
     def get_ticker(self, symbol_id: int = 7) -> dict:
         """現在の価格を取得 (7=BTC/JPY)"""
@@ -95,11 +103,7 @@ class RakutenWalletClient:
 
     def place_order(self, symbol_id: int, side: str, amount: float, order_type: str = "MARKET", price: float = None) -> dict:
         """
-        注文実行
-        symbol_id: 7 (BTC/JPY)
-        side: 'BUY' or 'SELL'
-        amount: 数量 (位単位: 0.001 BTC 刻み等)
-        order_type: 'MARKET' or 'LIMIT'
+        現物注文実行 (/api/v1/order)
         """
         body = {
             "symbolId": symbol_id,
@@ -110,8 +114,8 @@ class RakutenWalletClient:
         if price:
             body["price"] = float(price)
             
-        return self._request("POST", "/api/v1/cfd/order", body)
+        return self._request("POST", "/api/v1/order", body)
 
     def get_active_orders(self) -> dict:
-        """有効な注文の一覧取得"""
-        return self._request("GET", "/api/v1/cfd/activeorder")
+        """現物の有効な注文の一覧取得"""
+        return self._request("GET", "/api/v1/activeorder")

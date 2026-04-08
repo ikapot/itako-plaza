@@ -1,74 +1,104 @@
 import discord
+from discord.ext import commands
 import os
 import logging
-import requests
+import aiohttp
+import asyncio
+import socket
 from dotenv import load_dotenv
 
 # --- 設定 ---
-load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env.production"))
-TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
-MODEL = "google/gemini-1.5-flash"
+env_path = os.path.join(os.path.dirname(__file__), "..", ".env.production")
+load_dotenv(env_path)
 
-logging.basicConfig(level=logging.INFO)
+TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip().strip('"')
+OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "").strip().strip('"')
+
+# 現在OpenRouterで確実に「無料」かつ「有効」なモデルリスト
+FALLBACK_MODELS = [
+    "google/gemma-3-4b-it:free",
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "google/gemma-4-31b-it:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "mistralai/mistral-7b-instruct:free"
+]
+
+# ロギング設定
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
 logger = logging.getLogger("ConsultBot")
 
-# --- システムプロンプト (Itako Plaza の文脈を注入) ---
 SYSTEM_PROMPT = """
 あなたは 'Itako Plaza 専属コンサルタント AI' です。
 ユーザー (ikapot) が構築した仮想通貨自動売買システムの詳細をすべて把握しています。
-
-【システム構成】
-- 拠点: GitHub Actions (10分おき実行)
-- 取引所: 楽天ウォレット (BTC/JPY 証拠金取引)
-- 状態管理: GitHub Gist (position.json) で買付価格等を永続化
-- 戦略: クオンツ決済エンジン (2%リスクルール, 分割利確, 天井反転検知, ATRストップ)
-- 通知: Discord Webhook 連携
-
-あなたはユーザーの相談に乗り、コードの解説、戦略の改善案、エラーのデバッグ、または将来的な楽天証券（株）との統合案などを親身にアドバイスしてください。
-回答は常に日本語で、プロフェッショナルかつフレンドリーに行ってください。
+日本語で、プロフェッショナルかつフレンドリーにアドバイスを提供してください。
 """
 
-class ConsultBot(discord.Client):
+class ConsultBot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.message_content = True
+        super().__init__(command_prefix="!", intents=intents)
+        self.session = None
+
+    async def setup_hook(self):
+        connector = aiohttp.TCPConnector(family=socket.AF_INET, use_dns_cache=False)
+        self.session = aiohttp.ClientSession(connector=connector)
+        logger.info("Aiohttp ClientSession opened (IPv4 Forced).")
+
     async def on_ready(self):
-        logger.info(f"Logged on as {self.user}!")
-        await self.change_presence(activity=discord.Game(name="Itako Plaza 相談受付中"))
+        logger.info(f"🚀 Logged in as {self.user} (ID: {self.user.id})")
+        await self.change_presence(activity=discord.Game(name="!help | 相談受付中"))
+
+    async def get_ai_response(self, user_text):
+        if not OPENROUTER_KEY:
+            return "❌ OPENROUTER_API_KEY が設定されていません。"
+        
+        last_error = ""
+        for model in FALLBACK_MODELS:
+            try:
+                headers = {
+                    "Authorization": f"Bearer {OPENROUTER_KEY}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://itako-plaza.vercel.app",
+                    "X-Title": "Itako Plaza Consult Bot"
+                }
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": SYSTEM_PROMPT},
+                        {"role": "user", "content": user_text}
+                    ],
+                    "max_tokens": 512,
+                    "temperature": 0.7
+                }
+                async with self.session.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=30) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        return data["choices"][0]["message"]["content"]
+                    else:
+                        error_text = await resp.text()
+                        last_error = f"{model} ({resp.status})"
+                        logger.warning(f"Failed with {last_error}: {error_text}")
+            except Exception as e:
+                last_error = f"{model} (Error: {str(e)})"
+                logger.error(last_error)
+        
+        return f"❌ 接続エラー（残高不足またはAPI制限）。\n最終試行: {last_error}"
 
     async def on_message(self, message):
-        # 自分自身のメッセージは無視
         if message.author == self.user:
             return
-
-        # メンションされたか、DMの場合に応答
+        await self.process_commands(message)
         if self.user.mentioned_in(message) or isinstance(message.channel, discord.DMChannel):
             async with message.channel.typing():
-                response = self.get_ai_response(message.content)
+                clean_content = message.content.replace(f"<@!{self.user.id}>", "").replace(f"<@{self.user.id}>", "").strip()
+                response = await self.get_ai_response(clean_content or "こんにちは")
                 await message.reply(response)
 
-    def get_ai_response(self, user_text):
-        try:
-            headers = {
-                "Authorization": f"Bearer {OPENROUTER_KEY}",
-                "Content-Type": "application/json",
-            }
-            payload = {
-                "model": MODEL,
-                "messages": [
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": user_text}
-                ]
-            }
-            resp = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=30)
-            data = resp.json()
-            return data["choices"][0]["message"]["content"]
-        except Exception as e:
-            return f"❌ 相談エラーが発生しました: {e}"
+bot = ConsultBot()
 
 if __name__ == "__main__":
     if not TOKEN:
         logger.error("DISCORD_BOT_TOKEN が設定されていません。")
     else:
-        intents = discord.Intents.default()
-        intents.message_content = True
-        client = ConsultBot(intents=intents)
-        client.run(TOKEN)
+        bot.run(TOKEN)

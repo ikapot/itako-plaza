@@ -4,6 +4,7 @@ import { User, Globe, Cpu, MapPin, Search, Settings, Bookmark, MessageCircle, Ac
 import LibraryView from './Library';
 import WarholAvatar from './WarholAvatar';
 import PortalGrimoire from './PortalGrimoire';
+import DiscordConsultation from './DiscordConsultation';
 import { CHARACTER_PROFILES } from '../data/profiles';
 
 const getGenreColors = (index) => {
@@ -343,6 +344,18 @@ const ManagerContent = React.memo(({
                                 )}
                             </div>
                         </div>
+
+                        {activeManagerTab === 'consult' ? (
+                            <motion.div
+                                key="consult"
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                className="w-full h-full overflow-y-auto itako-scrollbar-thin"
+                            >
+                                <DiscordConsultation />
+                            </motion.div>
+                        ) : null}
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {stats.map((s, i) => (
