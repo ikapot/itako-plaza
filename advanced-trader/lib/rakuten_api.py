@@ -3,62 +3,83 @@ import hmac
 import hashlib
 import time
 import json
-import os
 import logging
+from typing import Dict, List, Optional, Any, Union
+from functools import wraps
 
-# --- Logger 設定 ---
+# --- Logger ---
 logger = logging.getLogger("RakutenWallet")
+
+def retry_request(max_retries: int = 3, delay: float = 2.0):
+    """リクエスト失敗時に指数バックオフでリトライするデコレータ"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            retries = 0
+            while retries < max_retries:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    retries += 1
+                    if retries >= max_retries:
+                        logger.error(f"❌ Max retries reached for {func.__name__}: {e}")
+                        raise e
+                    wait_time = delay * (2 ** (retries - 1))
+                    logger.warning(f"⚠️ Request failed ({e}). Retrying in {wait_time}s... ({retries}/{max_retries})")
+                    time.sleep(wait_time)
+            return None
+        return wrapper
+    return decorator
 
 class RakutenWalletClient:
     """
-    楽天ウォレット(証拠金取引) API クライアント
+    Rakuten Wallet API Client (Spot/CFD Unified)
+    Optimization: Enhanced reliability and structured outputs.
     """
     def __init__(self, api_key: str, api_secret: str):
+        if not api_key or not api_secret:
+            raise ValueError("API Key and Secret are required.")
         self.api_key = api_key
         self.api_secret = api_secret
         self.base_url = "https://exchange.rakuten-wallet.co.jp"
         self.session = requests.Session()
-        self.timeout = 10
+        self.timeout = 15
 
     def _get_signature(self, nonce: str, method: str, path: str, body: str = "") -> str:
-        """署名生成 (HMAC-SHA256)"""
-        if not self.api_secret:
-            return ""
-        # 楽天ウォレットの仕様: nonce + path (GET) または nonce + body (POST)
+        """署名の生成 (HMAC-SHA256, Uppercase Hex)"""
         message = f"{nonce}{path}" if method in ["GET", "DELETE"] else f"{nonce}{body}"
-        return hmac.new(
-            self.api_secret.encode(),
-            message.encode(),
+        signature = hmac.new(
+            self.api_secret.encode('utf-8'),
+            message.encode('utf-8'),
             hashlib.sha256
         ).hexdigest().upper()
+        return signature
 
-    def _request(self, method: str, path: str, body: dict = None) -> dict:
-        """汎用リクエストメソッド"""
+    @retry_request(max_retries=3)
+    def _request(self, method: str, path: str, body: Optional[Dict] = None) -> Union[Dict, List]:
+        """汎用リクエストメソッド (自動リトライ・署名付与)"""
         url = self.base_url + path
         body_str = json.dumps(body, separators=(',', ':')) if body else ""
         nonce = str(int(time.time() * 1000))
         
         headers = {
-            "API-KEY": self.api_key or "",
+            "API-KEY": self.api_key,
             "NONCE": nonce,
             "SIGNATURE": self._get_signature(nonce, method, path, body_str),
             "Content-Type": "application/json"
         }
+
+        resp = self.session.request(method, url, headers=headers, data=body_str, timeout=self.timeout)
         
-        try:
-            resp = self.session.request(
-                method, url, headers=headers, 
-                data=body_str if body else None, 
-                timeout=self.timeout
-            )
-            resp.raise_for_status()
-            return resp.json()
-        except requests.exceptions.HTTPError as e:
-            logger.error(f"❌ HTTP Error ({path}): {e.response.text}")
-            return {"error": str(e), "status_code": e.response.status_code}
-        except Exception as e:
-            logger.error(f"❌ API Request Error ({path}): {e}")
-            return {"error": str(e)}
+        if resp.status_code != 200:
+            error_data = {"error": f"{resp.status_code} {resp.reason} for {url}", "status_code": resp.status_code}
+            try:
+                error_data["raw"] = resp.json()
+            except:
+                pass
+            raise Exception(f"HTTP Error: {error_data}")
+            
+        return resp.json()
 
     def get_balance(self) -> dict:
         """保有資産(現物・証拠金)の取得"""
