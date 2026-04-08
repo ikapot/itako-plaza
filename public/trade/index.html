@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itako Quants Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Oswald', sans-serif;
+            overflow: hidden;
+        }
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(241, 90, 36, 0.5);
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        @keyframes pulse-border {
+            0% { border-color: rgba(241, 90, 36, 0.2); }
+            50% { border-color: rgba(241, 90, 36, 0.8); }
+            100% { border-color: rgba(241, 90, 36, 0.2); }
+        }
+        .active-border {
+            animation: pulse-border 2s infinite;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen p-4 md:p-8 space-y-6">
+
+    <!-- Header -->
+    <header class="flex justify-between items-center">
+        <div class="flex flex-col">
+            <h1 class="text-3xl font-bold tracking-[0.3em] uppercase text-[#f15a24] glow-text">Itako Quants Terminal</h1>
+            <p class="text-[10px] tracking-[0.5em] text-white/30 uppercase">Protocol V3.2.0 / Alpha-Zero Engine</p>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex flex-col items-end">
+                <span id="status-tag" class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">● System Synchronized</span>
+                <span id="clock" class="text-xs text-white/40 mono uppercase">--:--:--</span>
+            </div>
+            <div class="w-12 h-12 bg-[#f15a24] rounded-lg flex items-center justify-center">
+                <span class="text-2xl font-bold text-black font-serif">魂</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden">
+        
+        <!-- Sidebar: Assets & Risk -->
+        <div class="lg:col-span-1 flex flex-col gap-6">
+            <div class="glass-panel rounded-[40px] p-8 flex-1 flex flex-col justify-center space-y-8">
+                <div class="space-y-2">
+                    <p class="text-[10px] text-white/30 tracking-[0.3em] uppercase">Total Assets (JPY)</p>
+                    <h2 class="text-5xl font-bold tracking-tighter" id="jpy-balance">¥1,200</h2>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-[10px] text-white/30 tracking-[0.3em] uppercase">Total Assets (BTC)</p>
+                    <h2 class="text-3xl font-bold tracking-tighter text-blue-400" id="btc-balance">0.00006877</h2>
+                </div>
+                <div class="pt-8 border-t border-white/5 space-y-4">
+                    <div class="flex justify-between items-center text-[10px] text-white/40 tracking-widest uppercase font-bold">
+                        <span>Risk Tolerance</span>
+                        <span class="text-emerald-500">2.0%</span>
+                    </div>
+                    <div class="h-1 bg-white/5 w-full rounded-full overflow-hidden">
+                        <div class="h-full bg-[#f15a24] w-1/4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-[40px] p-8 h-48 flex items-center justify-center relative overflow-hidden active-border border-2">
+                <div class="text-center z-10">
+                    <p class="text-[10px] text-emerald-500 tracking-[0.5em] uppercase mb-2 font-bold">Action Signal</p>
+                    <h3 class="text-4xl font-bold italic uppercase tracking-widest" id="signal-text">MONITORING</h3>
+                </div>
+                <div class="absolute inset-0 opacity-10 flex items-center justify-center">
+                    <div class="w-full h-full border-4 border-emerald-500 rounded-full animate-ping scale-75"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Interactive Chart / Visualizer -->
+        <div class="lg:col-span-2 glass-panel rounded-[45px] relative overflow-hidden flex flex-col">
+            <div class="p-8 border-b border-white/5 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="px-4 py-1.5 bg-[#f15a24] text-black text-xs font-bold rounded-full">BTC / JPY</div>
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-bold mono" id="live-price-main">¥10,642,891</span>
+                        <span class="text-[9px] text-emerald-500 font-bold mono uppercase">+0.42% (24H)</span>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center active:bg-[#f15a24]/20 transition-all cursor-pointer">1H</div>
+                    <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center active:bg-[#f15a24]/20 transition-all cursor-pointer">4H</div>
+                </div>
+            </div>
+
+            <!-- Fake Chart Canvas -->
+            <div class="flex-1 relative bg-black/20 group">
+                <canvas id="chart-canvas" class="w-full h-full"></canvas>
+                <div class="absolute inset-x-0 bottom-0 p-8 flex justify-between items-end opacity-40">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                            <span class="text-[10px] tracking-widest uppercase font-bold">EMA-20 TREND: BULLISH</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                            <span class="text-[10px] tracking-widest uppercase font-bold">RSI-14 DIVERGENCE: NONE</span>
+                        </div>
+                    </div>
+                    <div class="text-[10px] mono uppercase text-right leading-relaxed">
+                        ENT: 10,650,230<br>STP: 10,422,000<br>TGT: 10,950,000
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Real-time Logs -->
+        <div class="lg:col-span-1 glass-panel rounded-[40px] flex flex-col overflow-hidden border-orange-500/10 border">
+            <div class="p-6 border-b border-white/5 bg-white/5">
+                <h3 class="text-xs font-bold tracking-[0.3em] uppercase">Communication Log / 霊的交信録</h3>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 itako-scrollbar-thin mono text-[10px]" id="log-container">
+                <!-- Logs will be injected here -->
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // 1. Clock Update
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ja-JP', { hour12: false });
+            document.getElementById('clock').textContent = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. Mock Logs
+        const logs = [
+            { t: '21:03:22', m: 'QUANTS: RAKUTEN_WALLET 接続開始...' },
+            { t: '21:03:25', m: 'SYSTEM: 認証成功。API_ID: 2095。' },
+            { t: '21:04:10', m: 'FEED: BINANCE_BTCUSDT データを同期完了。' },
+            { t: '21:05:00', m: 'ANALYSIS: EMA20トレンド強気を維持。' },
+            { t: '21:05:01', m: 'ALERT: 日本円残高 ¥1,200。最小ロット待機中。' }
+        ];
+
+        const logContainer = document.getElementById('log-container');
+        function addLog(msg, color='text-white/40') {
+            const div = document.createElement('div');
+            div.className = `flex gap-3 items-start ${color}`;
+            div.innerHTML = `<span class="opacity-30 shrink-0">[${new Date().toLocaleTimeString()}]</span><span>${msg}</span>`;
+            logContainer.prepend(div);
+            gsap.from(div, { x: -10, opacity: 0, duration: 0.5 });
+        }
+        logs.forEach(l => addLog(l.m));
+
+        // 3. Price Simulation
+        let lastPrice = 10642891;
+        function updatePrice() {
+            const diff = (Math.random() - 0.45) * 4000;
+            lastPrice += diff;
+            const priceEl = document.getElementById('live-price-main');
+            priceEl.textContent = '¥' + Math.floor(lastPrice).toLocaleString();
+            
+            if (diff > 0) {
+                gsap.to(priceEl, { color: '#10b981', duration: 0.2, yoyo: true, repeat: 1 });
+            } else {
+                gsap.to(priceEl, { color: '#ef4444', duration: 0.2, yoyo: true, repeat: 1 });
+            }
+        }
+        setInterval(updatePrice, 2000);
+
+        // 4. Fake Chart Drawing
+        const canvas = document.getElementById('chart-canvas');
+        const ctx = canvas.getContext('2d');
+        function resize() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function drawChart() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.strokeStyle = 'rgba(241, 90, 36, 0.4)';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height/2);
+            ctx.lineTo(canvas.width, canvas.height/2);
+            ctx.stroke();
+            
+            // Random Wave
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#f15a24';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height * 0.7);
+            for(let x=0; x<canvas.width; x+=10) {
+                ctx.lineTo(x, canvas.height * 0.7 - Math.sin(x*0.02 + Date.now()*0.001)*50 - Math.random()*20);
+            }
+            ctx.stroke();
+        }
+        function animate() {
+            drawChart();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+    </script>
+</body>
+</html>
