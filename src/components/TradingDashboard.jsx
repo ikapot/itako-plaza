@@ -4,20 +4,20 @@ import { TrendingUp, Wallet, Activity, Shield, ArrowUpRight, ArrowDownRight, Zap
 import gsap from 'gsap';
 
 const TradingDashboard = ({ user }) => {
-    const [price, setPrice] = useState(10600000);
+    const [price, setPrice] = useState(11150); // LTC/JPY approx
     const [priceChange, setPriceChange] = useState(0);
     const [tradeData, setTradeData] = useState({
         jpy_balance: 1200,
-        btc_balance: 0.00006877,
+        ltc_balance: 0.18, // Simulated
         status: 'MONITORING',
         signal: 'NEUTRAL',
         last_action: 'NONE'
     });
 
-    // Binance WebSocket / Polling Simulation for UI WOW Factor
+    // LTC WebSocket simulation
     useEffect(() => {
         const interval = setInterval(() => {
-            const diff = (Math.random() - 0.5) * 5000;
+            const diff = (Math.random() - 0.5) * 50;
             setPrice(prev => prev + diff);
             setPriceChange(diff);
         }, 3000);
@@ -42,18 +42,18 @@ const TradingDashboard = ({ user }) => {
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-6 bg-black/60 border border-white/5 rounded-[35px] backdrop-blur-xl group hover:border-[#f15a24]/30 transition-all"
+                    className="p-6 bg-black/60 border border-white/5 rounded-[35px] backdrop-blur-xl group hover:border-[#325ba0]/30 transition-all"
                 >
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-[10px] font-black tracking-[0.3em] text-white/40 uppercase">Market Price / 市場価格</span>
-                        <Zap size={14} className="text-[#f15a24]" />
+                        <Zap size={14} className="text-[#325ba0]" />
                     </div>
                     <div className="flex items-baseline gap-3">
                         <span className="text-4xl font-black price-number tracking-tighter">
                             ¥{Math.floor(price).toLocaleString()}
                         </span>
                         <span className={`text-xs font-bold ${priceChange >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                            {priceChange >= 0 ? '+' : ''}{Math.floor(priceChange).toLocaleString()}
+                            {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}
                         </span>
                     </div>
                 </motion.div>
@@ -80,17 +80,17 @@ const TradingDashboard = ({ user }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="p-6 bg-black/60 border border-white/5 rounded-[35px] backdrop-blur-xl group hover:border-blue-500/30 transition-all"
+                    className="p-6 bg-black/60 border border-white/5 rounded-[35px] backdrop-blur-xl group hover:border-[#325ba0]/30 transition-all"
                 >
                     <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] font-black tracking-[0.3em] text-white/40 uppercase">BTC Holdings / 保有数量</span>
-                        <TrendingUp size={14} className="text-blue-500" />
+                        <span className="text-[10px] font-black tracking-[0.3em] text-white/40 uppercase">LTC Holdings / 保有数量</span>
+                        <TrendingUp size={14} className="text-[#325ba0]" />
                     </div>
                     <div className="flex items-baseline gap-3">
                         <span className="text-4xl font-black tracking-tighter">
-                            {tradeData.btc_balance.toFixed(8)}
+                            {tradeData.ltc_balance.toFixed(2)}
                         </span>
-                        <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">BTC</span>
+                        <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">LTC</span>
                     </div>
                 </motion.div>
             </div>
@@ -99,7 +99,7 @@ const TradingDashboard = ({ user }) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Engine Status */}
                 <div className="space-y-6">
-                    <h2 className="text-sm font-bold text-white/30 tracking-[0.4em] uppercase px-4 border-l-2 border-[#f15a24]">Execution Engine / 執行エンジン</h2>
+                    <h2 className="text-sm font-bold text-white/30 tracking-[0.4em] uppercase px-4 border-l-2 border-[#325ba0]">Execution Engine / 執行エンジン</h2>
                     <div className="p-8 bg-black/80 border-2 border-white/5 rounded-[40px] relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-5">
                             <Activity size={120} />
@@ -116,18 +116,18 @@ const TradingDashboard = ({ user }) => {
                                 </div>
                                 <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                                     <span className="text-[8px] font-bold text-white/30 uppercase tracking-[0.3em] block mb-1">Current Strategy</span>
-                                    <span className="text-xs font-black text-[#f15a24]">TREND_ALPHA_V3</span>
+                                    <span className="text-xs font-black text-[#325ba0]">ZEN_GRID_LTC_V1</span>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-4 bg-white/5 rounded-2xl">
                                     <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest block mb-2">Signal</span>
-                                    <span className="text-lg font-black text-white/80">NEUTRAL</span>
+                                    <span className="text-lg font-black text-white/80">MONITORING</span>
                                 </div>
                                 <div className="p-4 bg-white/5 rounded-2xl">
-                                    <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest block mb-2">Trend (EMA20)</span>
-                                    <span className="text-lg font-black text-emerald-500">UPWARD</span>
+                                    <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest block mb-2">Z-Score (MA30)</span>
+                                    <span className="text-lg font-black text-emerald-500">-1.24 σ</span>
                                 </div>
                             </div>
 
@@ -135,12 +135,12 @@ const TradingDashboard = ({ user }) => {
                                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block mb-4">Operational Guardrails</span>
                                 <div className="flex flex-wrap gap-3">
                                     <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full">
-                                        <Shield size={12} className="text-[#f15a24]" />
-                                        <span className="text-[9px] font-bold tracking-wider">2% RISK LIMIT</span>
+                                        <Shield size={12} className="text-[#325ba0]" />
+                                        <span className="text-[9px] font-bold tracking-wider">FEE_GUARD: ACTIVE (06:50)</span>
                                     </div>
                                     <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full opacity-40">
                                         <Ban size={12} />
-                                        <span className="text-[9px] font-bold tracking-wider">DRY_RUN: OFF</span>
+                                        <span className="text-[9px] font-bold tracking-wider">DRY_RUN: ON</span>
                                     </div>
                                 </div>
                             </div>
@@ -150,7 +150,7 @@ const TradingDashboard = ({ user }) => {
 
                 {/* Ritual Logs */}
                 <div className="space-y-6">
-                    <h2 className="text-sm font-bold text-white/30 tracking-[0.4em] uppercase px-4 border-l-2 border-[#f15a24]">Trade Logs / 霊界通信記録</h2>
+                    <h2 className="text-sm font-bold text-white/30 tracking-[0.4em] uppercase px-4 border-l-2 border-[#325ba0]">Trade Logs / 霊界通信記録</h2>
                     <div className="bg-black/40 border border-white/5 rounded-[40px] overflow-hidden">
                         <div className="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center px-8">
                             <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Activity Feed</span>
@@ -162,12 +162,11 @@ const TradingDashboard = ({ user }) => {
                         </div>
                         <div className="p-2 h-[300px] overflow-y-auto itako-scrollbar-thin space-y-2">
                             {[
-                                { t: '20:41', m: '認証成功。楽天現物口座へ接続完了。', c: 'text-emerald-500' },
-                                { t: '20:41', m: '残高検知: JPY 1,200 / BTC 0.00006', c: 'text-white/60' },
-                                { t: '20:18', m: 'シグナル検知: 買い推奨(強)。', c: 'text-[#f15a24]' },
-                                { t: '20:18', m: 'エラー: 証拠金不足により発注をスキップしました。', c: 'text-red-400' },
-                                { t: '20:05', m: 'EMA20トレンド転換を検知。監視レベル引き上げ。', c: 'text-white/40' },
-                                { t: '19:55', m: 'Binance API 同期中...', c: 'text-white/20' }
+                                { t: '21:13', m: 'LTC WebSocket 接続成功。購読開始 (symbolId: 10)', c: 'text-emerald-500' },
+                                { t: '21:10', m: 'Zen-Grid エンジン起動。Z-score 監視中...', c: 'text-white/60' },
+                                { t: '21:05', m: '戦略切り替え: BTC -> LTC (ライトコイン)', c: 'text-[#325ba0]' },
+                                { t: '21:00', m: 'NotebookLM 調査完了。署名ロジックを更新。', c: 'text-white/40' },
+                                { t: '20:55', m: 'デイ・グリッド戦略案を承認。', c: 'text-white/20' }
                             ].map((log, i) => (
                                 <div key={i} className="flex items-start gap-4 p-4 hover:bg-white/5 rounded-2xl transition-all group">
                                     <span className="text-[9px] font-mono text-white/30 mt-1">{log.t}</span>

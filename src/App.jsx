@@ -248,6 +248,7 @@ export default function App() {
                 {[
                   { id: 'library', label: 'THE LIBRARY', icon: <Library size={18} />, color: '#f15a24' },
                   { id: 'directory', label: 'SPIRIT_INDEX', icon: <User size={18} />, color: '#EAE0D5' },
+                  { id: 'trading', label: 'AUTOMATED TRADING', icon: <Activity size={18} />, color: '#325ba0' },
                   { id: 'connect', label: 'CONDUIT', icon: <Cpu size={18} />, color: '#f15a24' },
                   { id: 'account', label: 'RECORDS', icon: <Bookmark size={18} />, color: '#b45309' },
                 ].map(item => (

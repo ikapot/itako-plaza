@@ -104,6 +104,22 @@ const DashboardSidebar = React.memo(({
                     <span className="text-[7px] font-bold text-white/70 uppercase tracking-[0.4em] font-oswald">霊界の刷新</span>
                 </div>
             </motion.button>
+
+            {/* 6. Trading Dashboard Button */}
+            <motion.button
+                whileHover={{ scale: 1.05, x: 5 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveManagerTab('trading')}
+                className="pointer-events-auto flex items-center gap-4 p-3 pr-6 glass-spectral rounded-3xl border border-white/5 hover:border-[#325ba0]/50 transition-all group/trad"
+            >
+                <div className="w-10 h-10 rounded-xl bg-[#325ba0]/10 flex items-center justify-center border border-white/5 group-hover/trad:bg-[#325ba0]/20 transition-all">
+                    <Activity size={16} className="text-[#325ba0]" />
+                </div>
+                <div className="flex flex-col items-start text-left">
+                    <span className="text-xs font-black tracking-widest text-[#325ba0] uppercase font-oswald">AUTOMATED TRADING</span>
+                    <span className="text-[7px] font-bold text-white/70 uppercase tracking-[0.4em] font-oswald">楽天自動売買</span>
+                </div>
+            </motion.button>
         </div>
     );
 });

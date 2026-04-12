@@ -10,8 +10,9 @@ class RakutenWebSocketClient:
     """
     Rakuten Wallet WebSocket Client (CFD)
     """
-    def __init__(self, ws_url: str = "wss://exchange.rakuten-wallet.co.jp/ws"):
+    def __init__(self, symbol_id: int = 10, ws_url: str = "wss://exchange.rakuten-wallet.co.jp/ws"):
         self.ws_url = ws_url
+        self.symbol_id = symbol_id
         self.websocket = None
         self.running = False
         self.on_ticker: Optional[Callable] = None
@@ -28,8 +29,8 @@ class RakutenWebSocketClient:
                     self.websocket = ws
                     logger.info("✅ WebSocket connected.")
                     
-                    # 購読の開始 (BTC/JPY Ticker: ID=7)
-                    await self.subscribe("TICKER", 7)
+                    # 購読の開始
+                    await self.subscribe("TICKER", self.symbol_id)
                     
                     # メッセージループ
                     async for message in ws:
@@ -47,10 +48,11 @@ class RakutenWebSocketClient:
         """特定のチャンネルを購読する"""
         if not self.websocket:
             return
+        # 正確な仕様に基づいたフラットな JSON 構造
         payload = {
-            "action": "SUBSCRIBE",
-            "channel": channel,
-            "params": {"symbolId": symbol_id}
+            "symbolId": symbol_id,
+            "type": "subscribe",
+            "data": channel  # channel は "TICKER", "ORDERBOOK", "TRADES"
         }
         await self.websocket.send(json.dumps(payload))
         logger.info(f"📡 Subscribed to {channel} for Symbol {symbol_id}")
