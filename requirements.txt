@@ -7,3 +7,5 @@ playwright
 google-cloud-firestore
 pandas
 ccxt
+notebooklm-py
+websockets
