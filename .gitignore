@@ -46,3 +46,8 @@ _temp_design.md
 
 .vercel
 .env*.local
+
+
+# ?? Security: Protecting secrets and activity logs
+.env.all
+trader.log
