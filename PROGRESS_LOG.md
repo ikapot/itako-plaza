@@ -50,11 +50,25 @@
 - **[重要] アーキテクチャの憲法化**: すべての機能において「無料枠（Free Tier）」を最優先し、クレジットカード登録や従量課金を回避する設計を徹底。
 - **ガイドラインの策定**: [ZERO_COST_GUIDE.md](file:///C:/Users/ikapo/.gemini/antigravity/brain/29b78929-d589-47b9-a7be-759f1f00a8cc/ZERO_COST_GUIDE.md) を作成。Vercel, Firestore Spark, GitHub Gist, OpenRouter Free Models 等を組み合わせた「維持費0円」のシステム構成をプロジェクトの絶対条件として明文化しました。
 
+## 2026-04-12 作業ログ（LTC Zen-Grid 構築）
+- **LTC/JPY 自動売買エンジンの実装**: 最小単位 0.1 LTC でのグリッドトレード戦略を構築。
+- **FEE_GUARD プロトコル**: 楽天ウォレットCFDの管理料回避（06:50 JST）ロジックを統合。
+- **WebSocket 連携**: symbolId: 10（LTC）のリアルタイム価格購読を安定化。
+
+## 2026-04-13 作業ログ（Itako Mobile Bridge V2 完遂）
+- **Itako Mobile Bridge V2 の実装**: 
+    - Discord DM 経由で PC 側の AI（Antigravity）に直接指示を出せるエージェント・エンジンを構築。
+    - **Diff 確認フロー**: コード修正前に差分を表示し、ユーザーの承認（OK）を得てから反映する安全機構を導入。
+    - **マルチツール搭載**: ファイル操作、スクリーンショット撮影、資産取得を iPhone から実行可能に。
+- **PWA 最適化**: 
+    - `manifest.json` と PWA アイコンを生成し、iPhone のホーム画面から専用アプリとして起動可能に。
+- **セキュリティ強化**: 
+    - `ALLOWED_DISCORD_USER_ID` による厳格な本人認証を導入。
+
 ---
 ## 次回への申し送り（随時更新）
-- [ ] **【ユーザー作業】認証情報の提供**: `RAKUTEN_SEC_USER_ID`, `RAKUTEN_SEC_PASSWORD` 等を `.env` または環境変数にセットする。
-- [ ] **実機ログインテスト**: `python rakuten-browser-agent/test_launch.py` を実行し、実際のログイン・2FAフローの完走を確認する。
-- [ ] **クオンツ・エンジンの本番統合**: `advanced-trader/lib/engine.py` を実際の注文ループに接続し、バックテストまたは少額での運用を開始する。
+- [ ] **Mobile Agent の実運用テスト**: 外出先から iPhone で実際にコード修正指示や画像取得を行い、安定性を確認する。
+- [ ] **LTC ボットの本格稼働**: DRY_RUN から実運用への移行タイミングの決定。
 - [ ] **Painter Tax Assist の仕上げ**: ブラウザ上での動作確認と細部のUI調整。
 
 ---

@@ -14,8 +14,8 @@ logging.basicConfig(
 logger = logging.getLogger("ZenGridTrader")
 
 async def main():
-    # 環境変数の読み込
-    load_dotenv(".env.all")
+    # 環境変数の読み込み (強制的に上書き)
+    load_dotenv("advanced-trader/.env.all", override=True)
     api_key = os.environ.get("WALLET_API_KEY")
     api_secret = os.environ.get("WALLET_API_SECRET")
     dry_run = os.environ.get("DRY_RUN", "true").lower() == "true"

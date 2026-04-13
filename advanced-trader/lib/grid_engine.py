@@ -1,11 +1,14 @@
 import asyncio
 import logging
 import datetime
+import json
+import re
 from typing import List, Dict, Optional, Deque
 from collections import deque
 import statistics
 from lib.rakuten_api import RakutenWalletClient
 from lib.rakuten_ws import RakutenWebSocketClient
+# from .browser_facade import get_browser_executor  # APIへ移行するため廃止
 
 logger = logging.getLogger("ZenGrid")
 
@@ -22,7 +25,6 @@ class ZenGridEngine:
         self.symbol_id = symbol_id
         self.last_price = 0.0
         self.last_spread = 0.0
-        self.is_running = False
         
         # テクニカル分析用バッファ (30分間/1分足相当の保存を想定)
         self.price_history = deque(maxlen=30)
@@ -30,7 +32,7 @@ class ZenGridEngine:
         # 戦略パラメータ (NotebookLM リサーチに基づく)
         self.target_profit_jpy = 50       # 1回あたりの目標純利益
         self.min_grid_width_factor = 3.0  # スプレッドの何倍をグリッド幅にするか
-        self.trade_amount = 1.0           # LTC (最小単位は 0.1 だが利益額を考慮して 1.0 推奨)
+        self.trade_amount = 0.1           # LTC (最小単位 0.1)
 
     async def start(self):
         """エンジンを起動する"""
@@ -43,10 +45,14 @@ class ZenGridEngine:
         # WebSocket 接続をバックグラウンドで開始
         asyncio.create_task(self.ws.connect())
         
-        # メインループ (管理料回避監視)
+        # メインループ (管理料回避監視 ＆ ハートビート)
         while self.is_running:
+            # 1分おきに心拍（Heartbeat）として価格をログに刻む
+            if self.last_price > 0:
+                logger.info(f"💓 Heartbeat | LTC Price: {self.last_price} | Spread: {self.last_spread:.1f}")
+            
             await self._check_time_and_manage_fees()
-            await asyncio.sleep(60) # 1分おきに時間をチェック
+            await asyncio.sleep(60) # 1分おきにチェック
 
     def _on_ticker_update(self, data: dict):
         """リアルタイム価格更新時の処理"""
@@ -74,32 +80,35 @@ class ZenGridEngine:
             await self._force_close_all()
 
     async def _force_close_all(self):
-        """全ポジションの強制決済"""
+        """全ポジションの強制決済 (API経由)"""
         try:
-            # 証拠金ポジションの取得
+            logger.info("🛡️ 強制決済フェーズ: APIで保有ポジションを確認します...")
             positions = self.rest.get_cfd_positions()
-            if not positions:
-                logger.info("✅ No positions to close.")
-                return
             
+            if not positions:
+                logger.info("✅ 保有ポジションは現在ありません。")
+                return
+
             for pos in positions:
-                # 指定したシンボルIDのポジションのみ対象とする
-                if pos.get("symbol_id") != self.symbol_id:
-                    continue
-                side = pos.get("side") # BUY or SELL
-                # 逆の注文を出して決済
-                close_side = "SELL" if side == "BUY" else "BUY"
-                amount = pos.get("amount")
-                logger.info(f"🔥 Closing position: {side} {amount}")
-                self.rest.place_cfd_order(
-                    symbol_id=self.symbol_id, 
-                    side=close_side, 
-                    amount=amount, 
-                    behavior="CLOSE"
-                )
-            logger.info("✨ All positions closed to avoid management fees.")
+                # LTC のポジションのみを対象とする
+                if int(pos.get("symbolId")) == self.symbol_id:
+                    side = pos.get("side") # BUY or SELL
+                    close_side = "SELL" if side == "BUY" else "BUY"
+                    amount = float(pos.get("amount", 0))
+                    
+                    logger.warning(f"⚠️ ポジション決済開始: {side} {amount} LTC")
+                    res = self.rest.place_cfd_order(
+                        symbol_id=self.symbol_id,
+                        side=close_side,
+                        amount=amount,
+                        order_type="MARKET",
+                        behavior="CLOSE"
+                    )
+                    logger.info(f"✨ 決済完了: {res}")
+            
+            logger.info("✨ 全LTCポジションの強制決済シーケンスを完了しました。")
         except Exception as e:
-            logger.error(f"❌ Force close error: {e}")
+            logger.error(f"❌ Force close error (API): {e}")
 
     async def execute_grid_logic(self):
         """グリッドトレードの実行ロジック"""
@@ -120,14 +129,63 @@ class ZenGridEngine:
             
             # -2.0 sigma 以下（売られすぎ）なら 買グリッド 開始
             if z_score < -2.0:
-                logger.info(f"📉 Mean Reversion Signal: Price is low (Z={z_score:.2f}). Opening Buy Grid...")
-                await self._open_grid("BUY")
+                logger.info(f"📉 Mean Reversion Signal: Price is low (Z={z_score:.2f}). Requesting Approval...")
+                from lib.trade_signal import create_signal, get_signal_status, clear_signal
+                from lib.agent_notify import send_notification
+                
+                # シグナルを保留状態で作成
+                create_signal("BUY", self.last_price, z_score)
+                # iPhone に通知 (asyncio.create_task で非同期送信)
+                asyncio.create_task(send_notification(f"📉 LTCシグナル(BUY)検知: Price={self.last_price}, Z={z_score:.2f}. 承認しますか？"))
+                
+                # 承認待ちループ (最大10分)
+                approved = False
+                for _ in range(60): # 10秒 x 60 = 600秒 (10分)
+                    sig = get_signal_status()
+                    if sig and sig.get("status") == "approved":
+                        approved = True
+                        break
+                    elif sig and sig.get("status") == "rejected":
+                        logger.info("❌ Trade rejected by Master.")
+                        break
+                    await asyncio.sleep(10)
+                
+                if approved:
+                    logger.info("✅ Trade APPROVED. Opening Buy Grid...")
+                    await self._open_grid("BUY")
+                else:
+                    logger.info("⌛ Trade TIMEOUT or REJECTED. Signal cleared.")
+                
+                clear_signal()
                 await asyncio.sleep(300) # 次の判定まで5分待機
                 
             # +2.0 sigma 以上（買われすぎ）なら 売グリッド 開始
             elif z_score > 2.0:
-                logger.info(f"📈 Mean Reversion Signal: Price is high (Z={z_score:.2f}). Opening Sell Grid...")
-                await self._open_grid("SELL")
+                logger.info(f"📈 Mean Reversion Signal: Price is high (Z={z_score:.2f}). Requesting Approval...")
+                from lib.trade_signal import create_signal, get_signal_status, clear_signal
+                from lib.agent_notify import send_notification
+                
+                create_signal("SELL", self.last_price, z_score)
+                asyncio.create_task(send_notification(f"📈 LTCシグナル(SELL)検知: Price={self.last_price}, Z={z_score:.2f}. 承認しますか？"))
+                
+                approved = False
+                for _ in range(60):
+                    sig = get_signal_status()
+                    if sig and sig.get("status") == "approved":
+                        approved = True
+                        break
+                    elif sig and sig.get("status") == "rejected":
+                        logger.info("❌ Trade rejected by Master.")
+                        break
+                    await asyncio.sleep(10)
+
+                if approved:
+                    logger.info("✅ Trade APPROVED. Opening Sell Grid...")
+                    await self._open_grid("SELL")
+                else:
+                    logger.info("⌛ Trade TIMEOUT or REJECTED. Signal cleared.")
+                
+                clear_signal()
                 await asyncio.sleep(300)
                 
             await asyncio.sleep(10)
@@ -142,11 +200,20 @@ class ZenGridEngine:
                 price_offset = grid_interval * i
                 target_price = self.last_price - price_offset if side == "BUY" else self.last_price + price_offset
                 
-                logger.info(f"📝 Placing Grid {i}: {side} at {target_price}")
-                # 現状は簡易化のためマーケット注文で代行（本来は指値が望ましいがAPI制限を考慮）
-                # ユーザーが「コードは書かなくていい」と言っていたのを踏まえ、ロジックのみを精緻化
-                # 実際の注文実行は DRY_RUN 設定などを考慮して慎重に行う
+                logger.info(f"📝 Placing Grid {i}: {side} at {target_price} (API Execution)")
+                # REST API を使用して実注文を出す (NEW注文)
+                try:
+                    res = self.rest.place_cfd_order(
+                        symbol_id=self.symbol_id,
+                        side=side,
+                        amount=self.trade_amount,
+                        order_type="MARKET",
+                        behavior="NEW"
+                    )
+                    logger.info(f"✅ Grid {i} 執行成功: {res}")
+                except Exception as e:
+                    logger.error(f"❌ Grid {i} 執行失敗: {e}")
                 
-            logger.info(f"✅ Grid of 3 {side} orders initiated logic-wise.")
+            logger.info(f"✅ Grid of 3 {side} orders sequence completed.")
         except Exception as e:
             logger.error(f"❌ Grid opening error: {e}")

@@ -54,25 +54,32 @@ class RakutenWalletClient:
             
         self.session = requests.Session()
         self.timeout = 15
+        self._last_request_time = 0.0  # レートリミット管理用
+        self._min_interval = 1.05       # 1,000ms + 余裕50ms
 
-    def _get_signature(self, nonce: str, method: str, path: str, query: str = "", body: str = "") -> str:
-        """署名の生成 (HMAC-SHA256) - NotebookLM の仕様に基づく"""
+    def _wait_for_rate_limit(self):
+        """1,000ms (1秒) のリクエスト間隔を確保する (2024年11月改定対応)"""
+        now = time.time()
+        elapsed = now - self._last_request_time
+        if elapsed < self._min_interval:
+            wait_time = self._min_interval - elapsed
+            logger.debug(f"⏳ Rate Limit Guard: Waiting {wait_time:.3f}s...")
+            time.sleep(wait_time)
+        self._last_request_time = time.time()
+
+    def _get_signature(self, nonce: str, method: str, path: str, query: str = "", body_str: str = "") -> str:
+        """署名の生成 (HMAC-SHA256) - NotebookLM 最新仕様"""
         # 仕様:
-        # GET/DELETE: NONCE + URI + query
-        # POST/PUT: NONCE + body
-        
-        # URI の調整 (冒頭のスラッシュを含む、/api を含むか含まないかは API 側の期待値に合わせる)
-        # 以前のコードでは /api を削除していましたが、NotebookLM 調査結果に基づきまずはパス全体で試行
+        # GET/DELETE: nonce + uri + ?queryString (uriは / から始まる)
+        # POST/PUT: nonce + json_body
         
         if method in ["GET", "DELETE"]:
-            # クエリパラメータがある場合は path?query になる
+            # クエリパラメータがあれば ? を含めて連結
             full_uri = f"{path}?{query}" if query else path
             message = f"{nonce}{full_uri}"
         else:
-            # POST/PUT: NONCE + body (JSON)
-            message = f"{nonce}{body}"
-        
-        logger.debug(f"🔑 Signing Message: [{message}]")
+            # POST/PUT: nonce + 厳密な JSON 文字列 (空白なし)
+            message = f"{nonce}{body_str}"
         
         signature = hmac.new(
             self.api_secret.encode('utf-8'),
@@ -84,32 +91,36 @@ class RakutenWalletClient:
     @retry_request(max_retries=3)
     def _request(self, method: str, path: str, params: Optional[Dict] = None, body: Optional[Dict] = None) -> Union[Dict, List]:
         """汎用リクエストメソッド (自動リトライ・署名付与)"""
+        # レートリミット待機 (1,000msの壁)
+        self._wait_for_rate_limit()
+
         # パラメータがあればクエリ文字列に変換
         query_str = ""
         if params:
-            from urllib.parse import urlencode
+            from urllib.parse import urlencode, quote
+            # NotebookLM: クエリ文字列のエンコード形式に注意 (quote_via=quote)
             query_str = urlencode(params)
             
         url = self.base_url + path
         if query_str:
             url += f"?{query_str}"
             
+        # 最重要: separators=(',', ':') で空白を完全に除去 (20006エラー対策)
         body_str = json.dumps(body, separators=(',', ':')) if body else ""
         
-        # 13桁（ミリ秒）の Nonce
+        # 13桁（ミリ秒）の Nonce (20004エラー対策)
         nonce = str(int(time.time() * 1000))
         
-        # 署名生成 (クエリパラメータを渡す)
+        # 署名生成 (NotebookLM 仕様に合わせたメッセージ構築)
         signature = self._get_signature(nonce, method, path, query_str, body_str)
         
-        # NotebookLM 仕様: TIMESTAMP ヘッダーの存在（NONCEと同じ値）
+        # ヘッダー: ハイフン区切りの正確なキー名
         headers = {
             "API-KEY": self.api_key,
             "NONCE": nonce,
-            "TIMESTAMP": nonce,
+            "TIMESTAMP": nonce,  # NONCE と同値を期待
             "SIGNATURE": signature,
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            "Content-Type": "application/json"
         }
         
         logger.debug(f"📡 Request: {method} {url} | Nonce: {nonce}")

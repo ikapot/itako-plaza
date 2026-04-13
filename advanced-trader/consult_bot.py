@@ -1,99 +1,115 @@
+import sys
+import os
+
+# Windows環境での aiodns による DNS解決エラー回避パッチ
+# aiodns が存在すると aiohttp がそれを使用しようとして失敗するため、インポートをブロックする
+sys.modules['aiodns'] = None
+
 import discord
 from discord.ext import commands
-import os
+from discord import app_commands
 import logging
+import json
+import socket
 import aiohttp
 import asyncio
-import socket
+import aiohttp.resolver
+from datetime import datetime
 from dotenv import load_dotenv
+
+# 強制的に ThreadedResolver を使用
+aiohttp.resolver.DefaultResolver = aiohttp.resolver.ThreadedResolver
+
+# --- 追加ライブラリ (libフォルダから) ---
+sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+from rakuten_api import RakutenWalletClient
 
 # --- 設定 ---
 env_path = os.path.join(os.path.dirname(__file__), "..", ".env.production")
 load_dotenv(env_path)
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip().strip('"')
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "").strip().strip('"')
+WALLET_API_KEY = os.getenv("WALLET_API_KEY", "").strip().strip('"')
+WALLET_API_SECRET = os.getenv("WALLET_API_SECRET", "").strip().strip('"')
+ALLOWED_USER_ID = int(os.getenv("ALLOWED_DISCORD_USER_ID", "0"))
 
-# 現在OpenRouterで確実に「無料」かつ「有効」なモデルリスト
-FALLBACK_MODELS = [
-    "google/gemma-3-4b-it:free",
-    "meta-llama/llama-3.2-3b-instruct:free",
-    "google/gemma-4-31b-it:free",
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "mistralai/mistral-7b-instruct:free"
-]
+# キューファイルのパス
+WORKSPACE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+QUEUE_PATH = os.path.join(WORKSPACE_ROOT, "brain", "mobile_queue.json")
 
 # ロギング設定
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-logger = logging.getLogger("ConsultBot")
-
-SYSTEM_PROMPT = """
-あなたは 'Itako Plaza 専属コンサルタント AI' です。
-ユーザー (ikapot) が構築した仮想通貨自動売買システムの詳細をすべて把握しています。
-日本語で、プロフェッショナルかつフレンドリーにアドバイスを提供してください。
-"""
+logger = logging.getLogger("ConsultBot (Forwarder)")
 
 class ConsultBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
         intents.message_content = True
         super().__init__(command_prefix="!", intents=intents)
-        self.session = None
+        
+        self.wallet = RakutenWalletClient(WALLET_API_KEY, WALLET_API_SECRET) if WALLET_API_KEY else None
 
     async def setup_hook(self):
-        connector = aiohttp.TCPConnector(family=socket.AF_INET, use_dns_cache=False)
+        resolver = aiohttp.ThreadedResolver()
+        connector = aiohttp.TCPConnector(resolver=resolver, family=socket.AF_INET)
         self.session = aiohttp.ClientSession(connector=connector)
-        logger.info("Aiohttp ClientSession opened (IPv4 Forced).")
+        await self.tree.sync()
+        logger.info("Bot (Forwarder) initialized and synced.")
 
     async def on_ready(self):
-        logger.info(f"🚀 Logged in as {self.user} (ID: {self.user.id})")
-        await self.change_presence(activity=discord.Game(name="!help | 相談受付中"))
+        logger.info(f"🚀 Forwarder online as {self.user} (ID: {self.user.id})")
+        await self.change_presence(activity=discord.Game(name="AGへの伝言受け付け中"))
 
-    async def get_ai_response(self, user_text):
-        if not OPENROUTER_KEY:
-            return "❌ OPENROUTER_API_KEY が設定されていません。"
-        
-        last_error = ""
-        for model in FALLBACK_MODELS:
-            try:
-                headers = {
-                    "Authorization": f"Bearer {OPENROUTER_KEY}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "https://itako-plaza.vercel.app",
-                    "X-Title": "Itako Plaza Consult Bot"
-                }
-                payload = {
-                    "model": model,
-                    "messages": [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": user_text}
-                    ],
-                    "max_tokens": 512,
-                    "temperature": 0.7
-                }
-                async with self.session.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=30) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        return data["choices"][0]["message"]["content"]
-                    else:
-                        error_text = await resp.text()
-                        last_error = f"{model} ({resp.status})"
-                        logger.warning(f"Failed with {last_error}: {error_text}")
-            except Exception as e:
-                last_error = f"{model} (Error: {str(e)})"
-                logger.error(last_error)
-        
-        return f"❌ 接続エラー（残高不足またはAPI制限）。\n最終試行: {last_error}"
+    # --- Slash Commands (Stateless) ---
+    @app_commands.command(name="status", description="資産概況を表示します")
+    async def status(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        try:
+            embed = discord.Embed(title="📊 ITKO System Status", color=0x325ba0)
+            if self.wallet:
+                res = self.wallet.get_margin_info()
+                equity = res[0].get("equity", 0) if isinstance(res, list) and res else 0
+                embed.add_field(name="有効証拠金", value=f"¥{equity:,.0f}", inline=True)
+            embed.set_footer(text=f"Check time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            await interaction.followup.send(embed=embed)
+        except Exception as e:
+            await interaction.followup.send(f"❌ エラー: {e}")
 
+    # --- DM Forwarding to AG Queue ---
     async def on_message(self, message):
         if message.author == self.user:
             return
-        await self.process_commands(message)
-        if self.user.mentioned_in(message) or isinstance(message.channel, discord.DMChannel):
-            async with message.channel.typing():
-                clean_content = message.content.replace(f"<@!{self.user.id}>", "").replace(f"<@{self.user.id}>", "").strip()
-                response = await self.get_ai_response(clean_content or "こんにちは")
-                await message.reply(response)
+
+        # ユーザー認証 & DMのみ
+        is_dm = isinstance(message.channel, discord.DMChannel)
+        if not is_dm or (ALLOWED_USER_ID != 0 and message.author.id != ALLOWED_USER_ID):
+            return
+
+        # 伝言板への書き込み
+        try:
+            os.makedirs(os.path.dirname(QUEUE_PATH), exist_ok=True)
+            
+            queue = []
+            if os.path.exists(QUEUE_PATH):
+                with open(QUEUE_PATH, "r", encoding="utf-8") as f:
+                    queue = json.load(f)
+            
+            new_task = {
+                "timestamp": datetime.now().isoformat(),
+                "author": message.author.name,
+                "content": message.content,
+                "status": "pending"
+            }
+            queue.append(new_task)
+            
+            with open(QUEUE_PATH, "w", encoding="utf-8") as f:
+                json.dump(queue, f, indent=2, ensure_ascii=False)
+            
+            await message.reply("📝 **Antigravityへの伝言として記録しました。**\n次回のAGセッション開始時に処理されます。")
+            logger.info(f"Message from {message.author} queued: {message.content[:20]}...")
+            
+        except Exception as e:
+            await message.reply(f"❌ 記録失敗: {e}")
 
 bot = ConsultBot()
 

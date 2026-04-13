@@ -59,6 +59,9 @@ class RakutenWebSocketClient:
 
     async def _handle_message(self, message: str):
         """受信メッセージの振り分け"""
+        if not message or message.strip() == "":
+            return # 空メッセージは無視
+            
         try:
             data = json.loads(message)
             channel = data.get("channel")
@@ -69,8 +72,11 @@ class RakutenWebSocketClient:
                 self.on_orderbook(data.get("data"))
             else:
                 logger.debug(f"📩 WS Message: {message}")
+        except json.JSONDecodeError:
+            # JSON ではないメッセージ（接続確認など）はデバッグログに留める
+            logger.debug(f"📩 Non-JSON Message: {message}")
         except Exception as e:
-            logger.error(f"❌ Message parsing error: {e}")
+            logger.error(f"❌ Message processing error: {e}")
 
     def stop(self):
         """クライアントを停止する"""
