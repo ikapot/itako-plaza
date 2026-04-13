@@ -146,9 +146,9 @@ class RakutenWalletClient:
         # CFD APIでは /api/v1/cfd/equitydata
         return self._request("GET", "/api/v1/cfd/equitydata")
 
-    def get_cfd_positions(self) -> List[dict]:
-        """保有している建玉（ポジション）の一覧取得"""
-        return self._request("GET", "/api/v1/cfd/position")
+    def get_cfd_positions(self, symbol_id: int = 10) -> List[dict]:
+        """保有している建玉（ポジション）の一覧取得 (symbolIdは必須)"""
+        return self._request("GET", "/api/v1/cfd/position", params={"symbolId": symbol_id})
 
     def place_cfd_order(self, symbol_id: int, side: str, amount: float, order_type: str = "MARKET", behavior: str = "NEW") -> dict:
         """
