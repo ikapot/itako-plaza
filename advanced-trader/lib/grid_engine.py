@@ -1,219 +1,128 @@
 import asyncio
 import logging
 import datetime
-import json
-import re
-from typing import List, Dict, Optional, Deque
-from collections import deque
-import statistics
 from lib.rakuten_api import RakutenWalletClient
 from lib.rakuten_ws import RakutenWebSocketClient
-# from .browser_facade import get_browser_executor  # APIへ移行するため廃止
+from lib.strategy import LtcStrategy
 
 logger = logging.getLogger("ZenGrid")
 
 class ZenGridEngine:
     """
-    Zen-Grid Strategy Engine:
-    - Daily micro-profits (コツコツ)
-    - Zero Management Fee (06:50 force close)
-    - Dynamic Grid based on Spread
+    Zen-Grid Engine V2:
+    - 策略（Strategy）と執行（Execution）を分離
+    - 多角的テクニカル判断に基づくエントリー
+    - 動的トレイリングストップによる利益最大化
     """
     def __init__(self, rest_client: RakutenWalletClient, ws_client: RakutenWebSocketClient, symbol_id: int = 10):
         self.rest = rest_client
         self.ws = ws_client
         self.symbol_id = symbol_id
-        self.last_price = 0.0
-        self.last_spread = 0.0
         
-        # テクニカル分析用バッファ (30分間/1分足相当の保存を想定)
-        self.price_history = deque(maxlen=30)
+        # 判断エンジン (AI/Quants)
+        self.strategy = LtcStrategy()
         
-        # 戦略パラメータ (NotebookLM リサーチに基づく)
-        self.target_profit_jpy = 50       # 1回あたりの目標純利益
-        self.min_grid_width_factor = 3.0  # スプレッドの何倍をグリッド幅にするか
-        self.trade_amount = 0.1           # LTC (最小単位 0.1)
+        # 状態管理
+        self.is_running = False
+        self.trade_amount = 0.1       # LTC 固定ロット
 
     async def start(self):
         """エンジンを起動する"""
-        logger.info("🕉️ Zen-Grid Engine starting...")
+        logger.info("🕉️ Zen-Grid Engine V2 starting...")
         self.is_running = True
         
-        # WebSocket の価格受信イベントを登録
+        # WebSocket コールバック設定
         self.ws.on_ticker = self._on_ticker_update
         
-        # WebSocket 接続をバックグラウンドで開始
+        # WebSocket 接続（バックグラウンド）
         asyncio.create_task(self.ws.connect())
         
-        # メインループ (管理料回避監視 ＆ ハートビート)
+        # メインループ: 管理料回避 ＆ ポジション監視
         while self.is_running:
-            # 1分おきに心拍（Heartbeat）として価格をログに刻む
-            if self.last_price > 0:
-                logger.info(f"💓 Heartbeat | LTC Price: {self.last_price} | Spread: {self.last_spread:.1f}")
-            
             await self._check_time_and_manage_fees()
-            await asyncio.sleep(60) # 1分おきにチェック
+            await asyncio.sleep(60)
 
     def _on_ticker_update(self, data: dict):
-        """リアルタイム価格更新時の処理"""
-        if not data: return
-        self.last_price = float(data.get("bid", 0))
-        # スプレッドの計算
-        ask = float(data.get("ask", 0))
-        bid = float(data.get("bid", 0))
-        self.last_spread = ask - bid
-        
-        # 履歴の更新 (5秒おきに1つ保存するように間引く)
-        if not hasattr(self, '_last_history_update') or (datetime.datetime.now() - self._last_history_update).seconds >= 5:
-            self.price_history.append(self.last_price)
-            self._last_history_update = datetime.datetime.now()
-        
-        logger.debug(f"💹 Price: {self.last_price} | Spread: {self.last_spread}")
+        """Ticker 受信時の処理: Strategy へ供給"""
+        try:
+            is_new_candle = self.strategy.update_ticker(data)
+            if is_new_candle:
+                self.strategy.calculate_indicators()
+                # 1分おきの生存報告 (Heartbeat)
+                last_p = self.strategy.df.iloc[-1]['close']
+                logger.info(f"💓 Heartbeat | LTC: {last_p:.1f} | Indicators Updated")
+        except Exception as e:
+            logger.error(f"Error in ticker update flow: {e}")
 
     async def _check_time_and_manage_fees(self):
-        """建玉管理料回避のための強制決済チェック (JST 06:50)"""
+        """JST 06:50 の管理料回避決済"""
         now = datetime.datetime.now()
-        # Windowsや環境によらず JST (UTC+9) に合わせる工夫が必要な場合はここで調整
-        # ここでは単純に 06:50 ~ 07:00 の間を強制決済期間とする
         if now.hour == 6 and 50 <= now.minute <= 59:
-            logger.warning("🕒 Fee Management Alert: Japanese market reset coming soon. Closing all positions...")
+            logger.warning("🕒 Fee Management window. Closing all LTC positions...")
             await self._force_close_all()
 
     async def _force_close_all(self):
-        """全ポジションの強制決済 (API経由)"""
+        """全 LTC ポジションを成行決済"""
         try:
-            logger.info("🛡️ 強制決済フェーズ: APIで保有ポジションを確認します...")
-            positions = self.rest.get_cfd_positions()
-            
-            if not positions:
-                logger.info("✅ 保有ポジションは現在ありません。")
-                return
+            positions = self.rest.get_cfd_positions(self.symbol_id)
+            if not positions: return
 
             for pos in positions:
-                # LTC のポジションのみを対象とする
-                if int(pos.get("symbolId")) == self.symbol_id:
-                    side = pos.get("side") # BUY or SELL
-                    close_side = "SELL" if side == "BUY" else "BUY"
-                    amount = float(pos.get("amount", 0))
-                    
-                    logger.warning(f"⚠️ ポジション決済開始: {side} {amount} LTC")
-                    res = self.rest.place_cfd_order(
-                        symbol_id=self.symbol_id,
-                        side=close_side,
-                        amount=amount,
-                        order_type="MARKET",
-                        behavior="CLOSE"
-                    )
-                    logger.info(f"✨ 決済完了: {res}")
-            
-            logger.info("✨ 全LTCポジションの強制決済シーケンスを完了しました。")
+                side = pos.get("side")
+                close_side = "SELL" if side == "BUY" else "BUY"
+                amt = float(pos.get("amount", 0))
+                
+                logger.warning(f"🛡️ Closing position: {side} {amt}")
+                res = self.rest.place_cfd_order(self.symbol_id, close_side, amt, "MARKET", "CLOSE")
+                logger.info(f"✅ Closed: {res}")
         except Exception as e:
-            logger.error(f"❌ Force close error (API): {e}")
+            logger.error(f"Force close failed: {e}")
 
     async def execute_grid_logic(self):
-        """グリッドトレードの実行ロジック"""
-        logger.info("📡 Monitoring signals for Grid entry...")
+        """メインの参入ロジックループ"""
+        logger.info("📡 Strategy monitoring active...")
         while self.is_running:
-            if len(self.price_history) < 20:
+            # 最低限のデータ（指標計算用）が溜まるまで待機
+            if len(self.strategy.df) < 30:
                 await asyncio.sleep(10)
                 continue
                 
-            # Mean Reversion 判定 (Z-score)
-            avg = statistics.mean(self.price_history)
-            stdev = statistics.stdev(self.price_history)
-            if stdev == 0: 
-                await asyncio.sleep(10)
-                continue
-                
-            z_score = (self.last_price - avg) / stdev
+            # Strategy からシグナルを取得
+            signal = self.strategy.get_entry_signal()
             
-            # -2.0 sigma 以下（売られすぎ）なら 買グリッド 開始
-            if z_score < -2.0:
-                logger.info(f"📉 Mean Reversion Signal: Price is low (Z={z_score:.2f}). Requesting Approval...")
+            if signal:
+                logger.info(f"✨ Signal Detected: {signal}. Checking for approval...")
+                # 承認フロー連携
                 from lib.trade_signal import create_signal, get_signal_status, clear_signal
                 from lib.agent_notify import send_notification
                 
-                # シグナルを保留状態で作成
-                create_signal("BUY", self.last_price, z_score)
-                # iPhone に通知 (asyncio.create_task で非同期送信)
-                asyncio.create_task(send_notification(f"📉 LTCシグナル(BUY)検知: Price={self.last_price}, Z={z_score:.2f}. 承認しますか？"))
+                price = self.strategy.df.iloc[-1]['close']
+                z = self.strategy.df.iloc[-1].get('Z_score', 0)
+                create_signal(signal, price, z)
                 
-                # 承認待ちループ (最大10分)
+                # iPhone 通知
+                asyncio.create_task(send_notification(f"📉 LTC/JPY {signal} Signal at {price:.1f} (Z={z:.1f}). Approve?"))
+                
+                # 承認待機 (10分)
                 approved = False
-                for _ in range(60): # 10秒 x 60 = 600秒 (10分)
+                for _ in range(60): 
                     sig = get_signal_status()
                     if sig and sig.get("status") == "approved":
                         approved = True
                         break
                     elif sig and sig.get("status") == "rejected":
-                        logger.info("❌ Trade rejected by Master.")
                         break
                     await asyncio.sleep(10)
                 
                 if approved:
-                    logger.info("✅ Trade APPROVED. Opening Buy Grid...")
-                    await self._open_grid("BUY")
-                else:
-                    logger.info("⌛ Trade TIMEOUT or REJECTED. Signal cleared.")
+                    logger.info(f"🚀 APPROVED. Executing {signal}...")
+                    try:
+                        res = self.rest.place_cfd_order(self.symbol_id, signal, self.trade_amount, "MARKET", "NEW")
+                        logger.info(f"✅ Success: {res}")
+                    except Exception as e:
+                        logger.error(f"❌ Error: {e}")
                 
                 clear_signal()
                 await asyncio.sleep(300) # 次の判定まで5分待機
                 
-            # +2.0 sigma 以上（買われすぎ）なら 売グリッド 開始
-            elif z_score > 2.0:
-                logger.info(f"📈 Mean Reversion Signal: Price is high (Z={z_score:.2f}). Requesting Approval...")
-                from lib.trade_signal import create_signal, get_signal_status, clear_signal
-                from lib.agent_notify import send_notification
-                
-                create_signal("SELL", self.last_price, z_score)
-                asyncio.create_task(send_notification(f"📈 LTCシグナル(SELL)検知: Price={self.last_price}, Z={z_score:.2f}. 承認しますか？"))
-                
-                approved = False
-                for _ in range(60):
-                    sig = get_signal_status()
-                    if sig and sig.get("status") == "approved":
-                        approved = True
-                        break
-                    elif sig and sig.get("status") == "rejected":
-                        logger.info("❌ Trade rejected by Master.")
-                        break
-                    await asyncio.sleep(10)
-
-                if approved:
-                    logger.info("✅ Trade APPROVED. Opening Sell Grid...")
-                    await self._open_grid("SELL")
-                else:
-                    logger.info("⌛ Trade TIMEOUT or REJECTED. Signal cleared.")
-                
-                clear_signal()
-                await asyncio.sleep(300)
-                
-            await asyncio.sleep(10)
-
-    async def _open_grid(self, side: str):
-        """指定された方向にグリッド注文を複数展開する"""
-        try:
-            # スプレッドの3倍をグリッド間隔にする
-            grid_interval = max(self.last_spread * self.min_grid_width_factor, 15000)
-            
-            for i in range(1, 4): # 3つのグリッドを配置
-                price_offset = grid_interval * i
-                target_price = self.last_price - price_offset if side == "BUY" else self.last_price + price_offset
-                
-                logger.info(f"📝 Placing Grid {i}: {side} at {target_price} (API Execution)")
-                # REST API を使用して実注文を出す (NEW注文)
-                try:
-                    res = self.rest.place_cfd_order(
-                        symbol_id=self.symbol_id,
-                        side=side,
-                        amount=self.trade_amount,
-                        order_type="MARKET",
-                        behavior="NEW"
-                    )
-                    logger.info(f"✅ Grid {i} 執行成功: {res}")
-                except Exception as e:
-                    logger.error(f"❌ Grid {i} 執行失敗: {e}")
-                
-            logger.info(f"✅ Grid of 3 {side} orders sequence completed.")
-        except Exception as e:
-            logger.error(f"❌ Grid opening error: {e}")
+            await asyncio.sleep(5)

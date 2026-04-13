@@ -24,13 +24,13 @@ async def main():
         logger.error("❌ APIキーが設定されていません。")
         return
 
-    logger.info(f"🚀 Zen-Grid Trader Starting... (DRY_RUN={dry_run})")
+    logger.info(f"🚀 Zen-LTC-Quant V2 Starting... (DRY_RUN={dry_run})")
     
     # クライアントの初期化 (CFD)
     rest_client = RakutenWalletClient(api_key, api_secret, is_spot=False)
     ws_client = RakutenWebSocketClient()
     
-    # エンジンの初期化
+    # エンジンの初期化 (V2)
     engine = ZenGridEngine(rest_client, ws_client)
     
     # 実行タスクのリスト
@@ -40,6 +40,10 @@ async def main():
     ]
     
     try:
+        # 初期バランスの確認 (テストを兼ねて)
+        balance = await rest_client.get_balance()
+        logger.info(f"💰 Current Balance: {balance}")
+        
         await asyncio.gather(*tasks)
     except KeyboardInterrupt:
         logger.info("🛑 Stopping trader...")

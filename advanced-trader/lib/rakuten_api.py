@@ -4,6 +4,7 @@ import hashlib
 import time
 import json
 import logging
+import asyncio
 from typing import Dict, List, Optional, Any, Union
 from functools import wraps
 
@@ -56,123 +57,109 @@ class RakutenWalletClient:
         self.timeout = 15
         self._last_request_time = 0.0  # レートリミット管理用
         self._min_interval = 1.05       # 1,000ms + 余裕50ms
+        self._lock = asyncio.Lock()    # 追加：非同期排他制御
 
-    def _wait_for_rate_limit(self):
+    async def _wait_for_rate_limit(self):
         """1,000ms (1秒) のリクエスト間隔を確保する (2024年11月改定対応)"""
-        now = time.time()
-        elapsed = now - self._last_request_time
-        if elapsed < self._min_interval:
-            wait_time = self._min_interval - elapsed
-            logger.debug(f"⏳ Rate Limit Guard: Waiting {wait_time:.3f}s...")
-            time.sleep(wait_time)
-        self._last_request_time = time.time()
+        async with self._lock:
+            now = time.time()
+            elapsed = now - self._last_request_time
+            if elapsed < self._min_interval:
+                wait_time = self._min_interval - elapsed
+                logger.debug(f"⏳ Rate Limit Guard: Waiting {wait_time:.3f}s...")
+                await asyncio.sleep(wait_time)
+            self._last_request_time = time.time()
 
     def _get_signature(self, nonce: str, method: str, path: str, query: str = "", body_str: str = "") -> str:
         """署名の生成 (HMAC-SHA256) - NotebookLM 最新仕様"""
         # 仕様:
         # GET/DELETE: nonce + uri + ?queryString (uriは / から始まる)
         # POST/PUT: nonce + json_body
-        
+        """署名の生成 (HMAC-SHA256)"""
         if method in ["GET", "DELETE"]:
-            # クエリパラメータがあれば ? を含めて連結
             full_uri = f"{path}?{query}" if query else path
             message = f"{nonce}{full_uri}"
         else:
-            # POST/PUT: nonce + 厳密な JSON 文字列 (空白なし)
             message = f"{nonce}{body_str}"
         
-        signature = hmac.new(
+        return hmac.new(
             self.api_secret.encode('utf-8'),
             message.encode('utf-8'),
             hashlib.sha256
         ).hexdigest()
-        return signature
 
-    @retry_request(max_retries=3)
-    def _request(self, method: str, path: str, params: Optional[Dict] = None, body: Optional[Dict] = None) -> Union[Dict, List]:
-        """汎用リクエストメソッド (自動リトライ・署名付与)"""
-        # レートリミット待機 (1,000msの壁)
-        self._wait_for_rate_limit()
+    async def _request(self, method: str, path: str, params: Optional[Dict] = None, body: Optional[Dict] = None) -> Union[Dict, List]:
+        """非同期リクエストメソッド (自動レート制限・署名付与)"""
+        await self._wait_for_rate_limit()
 
-        # パラメータがあればクエリ文字列に変換
         query_str = ""
         if params:
-            from urllib.parse import urlencode, quote
-            # NotebookLM: クエリ文字列のエンコード形式に注意 (quote_via=quote)
+            from urllib.parse import urlencode
             query_str = urlencode(params)
             
         url = self.base_url + path
         if query_str:
             url += f"?{query_str}"
             
-        # 最重要: separators=(',', ':') で空白を完全に除去 (20006エラー対策)
         body_str = json.dumps(body, separators=(',', ':')) if body else ""
-        
-        # 13桁（ミリ秒）の Nonce (20004エラー対策)
         nonce = str(int(time.time() * 1000))
-        
-        # 署名生成 (NotebookLM 仕様に合わせたメッセージ構築)
         signature = self._get_signature(nonce, method, path, query_str, body_str)
         
-        # ヘッダー: ハイフン区切りの正確なキー名
         headers = {
             "API-KEY": self.api_key,
             "NONCE": nonce,
-            "TIMESTAMP": nonce,  # NONCE と同値を期待
+            "TIMESTAMP": nonce,
             "SIGNATURE": signature,
             "Content-Type": "application/json"
         }
         
-        logger.debug(f"📡 Request: {method} {url} | Nonce: {nonce}")
-
+        # 外部リクエスト自体はブロッキングだが、asyncio.to_thread を使うことも検討可能
+        # ここではシンプルに sleep のみを非同期化
         resp = self.session.request(method, url, headers=headers, params=params, data=body_str, timeout=self.timeout)
         
         if resp.status_code != 200:
-            error_data = {"error": f"{resp.status_code} {resp.reason} for {url}", "status_code": resp.status_code}
+            error_msg = f"HTTP {resp.status_code} {resp.reason} for {path}"
             try:
-                error_data["raw"] = resp.json()
+                error_msg += f" | Response: {resp.json()}"
             except:
                 pass
-            raise Exception(f"HTTP Error: {error_data}")
+            logger.error(f"❌ API Error: {error_msg}")
+            raise Exception(error_msg)
             
         return resp.json()
 
-    def get_balance(self) -> dict:
-        """保有資産(現物・証拠金)の取得"""
-        return self._request("GET", "/api/v1/asset")
+    # --- Wrapper Methods ---
+    async def get_balance(self):
+        return await self._request("GET", "/api/v1/asset")
 
-    def get_margin_info(self) -> dict:
-        """有効証拠金(Equity)データの取得"""
-        # CFD APIでは /api/v1/cfd/equitydata
-        return self._request("GET", "/api/v1/cfd/equitydata")
+    async def get_margin_info(self):
+        return await self._request("GET", "/api/v1/cfd/equitydata")
 
-    def get_cfd_positions(self, symbol_id: int = 10) -> List[dict]:
-        """保有している建玉（ポジション）の一覧取得 (symbolIdは必須)"""
-        return self._request("GET", "/api/v1/cfd/position", params={"symbolId": symbol_id})
+    async def get_cfd_positions(self, symbol_id: int = 10):
+        return await self._request("GET", "/api/v1/cfd/position", params={"symbolId": symbol_id})
 
-    def place_cfd_order(self, symbol_id: int, side: str, amount: float, order_type: str = "MARKET", behavior: str = "NEW") -> dict:
-        """
-        証拠金取引（CFD）注文実行 (/api/v1/cfd/order)
-        """
-        # CFD独自の構造: symbolId, orderPattern, orderData の入れ子
+    async def place_cfd_order(self, symbol_id: int, side: str, amount: float, order_type: str = "MARKET", behavior: str = "NEW"):
         body = {
             "symbolId": symbol_id,
             "orderPattern": "NORMAL",
             "orderData": {
-                "orderBehavior": behavior,      # NEW or CLOSE
-                "orderSide": side,             # BUY or SELL
-                "orderType": order_type,       # MARKET, LIMIT etc.
+                "orderBehavior": behavior,
+                "orderSide": side,
+                "orderType": order_type,
                 "amount": float(amount),
-                "leverage": 2.0,               # デフォルト2倍
-                "closeBehavior": "FIFO"        # 両建てなし（古い順から決済）
+                "leverage": 2.0,
+                "closeBehavior": "FIFO"
             }
         }
-        return self._request("POST", "/api/v1/cfd/order", body)
+        return await self._request("POST", "/api/v1/cfd/order", body=body)
 
-    def get_spot_balance(self) -> dict:
+    async def get_ticker(self, symbol_id: int = 10):
+        return await self._request("GET", "/api/v1/ticker", params={"symbolId": symbol_id})
+
+    async def get_spot_balance(self) -> dict:
         """現物残高（JPY, BTC）を辞書で取得"""
         try:
-            res = self.get_balance()
+            res = await self.get_balance()
             balances = {"JPY": 0.0, "BTC": 0.0}
             if not res or not isinstance(res, list):
                 return balances
@@ -186,19 +173,13 @@ class RakutenWalletClient:
             logger.error(f"❌ 現物残高取得失敗: {e}")
             return {"JPY": 0.0, "BTC": 0.0}
 
-    def get_btc_balance(self) -> float:
+    async def get_btc_balance(self) -> float:
         """現在のビットコイン保有量（現物・証拠金合算）を取得"""
-        return self.get_spot_balance().get("BTC", 0.0)
+        res = await self.get_spot_balance()
+        return res.get("BTC", 0.0)
 
-    def get_ticker(self, symbol_id: int = 7) -> dict:
-        """現在の価格を取得 (7=BTC/JPY)"""
-        # クエリパラメータ付きのリクエストテスト
-        return self._request("GET", "/api/v1/ticker", params={"symbolId": symbol_id})
-
-    def place_order(self, symbol_id: int, side: str, amount: float, order_type: str = "MARKET", price: float = None) -> dict:
-        """
-        現物注文実行 (/api/v1/order)
-        """
+    async def place_order(self, symbol_id: int, side: str, amount: float, order_type: str = "MARKET", price: float = None) -> dict:
+        """現物注文実行 (/api/v1/order)"""
         body = {
             "symbolId": symbol_id,
             "side": side,
@@ -208,8 +189,8 @@ class RakutenWalletClient:
         if price:
             body["price"] = float(price)
             
-        return self._request("POST", "/api/v1/order", body)
+        return await self._request("POST", "/api/v1/order", body=body)
 
-    def get_active_orders(self) -> dict:
+    async def get_active_orders(self) -> dict:
         """現物の有効な注文の一覧取得"""
-        return self._request("GET", "/api/v1/activeorder")
+        return await self._request("GET", "/api/v1/activeorder")
