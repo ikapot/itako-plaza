@@ -97,7 +97,7 @@ const triggerAuthChange = (user) => {
     authCallbacks.forEach(cb => cb(user));
 };
 
-export { auth, db, triggerAuthChange };
+export { auth, db, triggerAuthChange, isConfigValid };
 
 const googleProvider = isConfigValid ? new GoogleAuthProvider() : null;
 
@@ -196,7 +196,7 @@ export const fetchBookmarks = async () => {
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
-        console.error("Fetch Error:", e);
+        console.error("Fetch Bookmarks Error (Possible Permissions Issues):", e);
         return [];
     }
 };
@@ -234,7 +234,8 @@ export const fetchNotebookAccumulations = async () => {
         );
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    } catch {
+    } catch (e) {
+        console.error("Fetch Accumulations Error (Possible Permissions Issues):", e);
         return [];
     }
 };

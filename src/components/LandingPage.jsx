@@ -98,9 +98,23 @@ export default function LandingPage({
                                         <h1 className="text-xl md:text-3xl font-black tracking-[-0.05em] text-black leading-none uppercase font-oswald">
                                             ITAKO PLAZA
                                         </h1>
-                                        <span className="text-[6px] md:text-[8px] font-bold text-black/40 uppercase tracking-[0.4em] mt-1 ml-0.5">
-                                            Ethereal Protocol v1.2
-                                        </span>
+                                        <motion.p 
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: 2.5 }}
+                                            className="text-[8px] md:text-[10px] text-black/40 font-bold tracking-[0.4em] uppercase"
+                                        >
+                                            Terminal established.
+                                        </motion.p>
+                                        
+                                        {import.meta.env.DEV && (
+                                            <button 
+                                                onClick={() => onLoginComplete('PROXY_MODE')}
+                                                className="mt-10 text-[8px] text-black/10 hover:text-black/40 transition-colors uppercase tracking-widest"
+                                            >
+                                                /bypass-firewall
+                                            </button>
+                                        )}
                                     </div>
                                     <div className="text-[6px] md:text-[8px] font-bold text-black uppercase tracking-tight text-right leading-tight max-w-[120px] md:max-w-[180px]">
                                         A Digital Archive Reimagining the Boundary <br/> 

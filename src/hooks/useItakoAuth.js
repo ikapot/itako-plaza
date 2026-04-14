@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { auth, loginWithGoogle, fetchBookmarks, fetchNotebookAccumulations, logout, fetchAlayaFromFirestore, saveBookmark } from '../firebase';
+import { auth, loginWithGoogle, fetchBookmarks, fetchNotebookAccumulations, logout, fetchAlayaFromFirestore, saveBookmark, isConfigValid } from '../firebase';
 
 export function useItakoAuth() {
   const [user, setUser] = useState(null);
-  const [userName, setUserName] = useState('彷徨える魂');
+  const [userName, setUserName] = useState('無名の参列者');
   const [firstVisitDate, setFirstVisitDate] = useState(() => {
     return localStorage.getItem('itako_first_visit') || null;
   });
@@ -33,31 +33,44 @@ export function useItakoAuth() {
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         setDaysRemaining(Math.max(0, 3650 - diffDays));
 
-        const [savedBookMarks, data, cloudAlaya] = await Promise.all([
-          fetchBookmarks(), 
-          fetchNotebookAccumulations(),
-          fetchAlayaFromFirestore()
-        ]);
+        let savedBookMarks = [];
+        let data = [];
+        let cloudAlaya = null;
+
+        try {
+          const results = await Promise.allSettled([
+            fetchBookmarks(), 
+            fetchNotebookAccumulations(),
+            fetchAlayaFromFirestore()
+          ]);
+          if (results[0].status === 'fulfilled') savedBookMarks = results[0].value;
+          if (results[1].status === 'fulfilled') data = results[1].value;
+          if (results[2].status === 'fulfilled') cloudAlaya = results[2].value;
+        } catch (err) {
+          console.error('Firebase Initial Fetch Error:', err);
+        }
         
         // --- データマージ処理 ---
         // 1. ブックマークのマージ
-        const localBookmarks = JSON.parse(localStorage.getItem('itako_bookmarks') || '[]');
-        if (localBookmarks.length > 0 && savedBookMarks.length === 0) {
-            // ローカルにはあるがクラウドにない場合、移行を促すか自動移行する
-            // ここでは簡易的に、クラウドが空ならローカルをアップロードする
-            for (const bm of localBookmarks) {
-                await saveBookmark(bm.userMsg, bm.aiMsg, bm.charId);
-            }
-            const updatedBookmarks = await fetchBookmarks();
-            setBookmarks(updatedBookmarks);
-        } else {
-            setBookmarks(savedBookMarks);
+        try {
+          const localBookmarks = JSON.parse(localStorage.getItem('itako_bookmarks') || '[]');
+          if (localBookmarks.length > 0 && savedBookMarks.length === 0) {
+              // ローカルにはあるがクラウドにない場合、移行を促すか自動移行する
+              for (const bm of localBookmarks) {
+                  await saveBookmark(bm.userMsg, bm.aiMsg, bm.charId).catch(() => {});
+              }
+              const updatedBookmarks = await fetchBookmarks().catch(() => []);
+              setBookmarks(updatedBookmarks);
+          } else {
+              setBookmarks(savedBookMarks);
+          }
+        } catch (e) {
+          setBookmarks(savedBookMarks);
         }
 
         // 2. 名前の同期
         const localName = localStorage.getItem('itako_user_name');
         if (localName && localName !== '彷徨える魂' && !currentUser.displayName) {
-            // ローカルに名前があり、かつ Google 側に未設定の場合は優先
             setUserName(localName);
         }
 
@@ -69,9 +82,11 @@ export function useItakoAuth() {
         } else {
           // クラウドにない場合、ローカルの Alaya をアップロード
           const localAlaya = localStorage.getItem('itako_alaya');
-          if (localAlaya) {
-            await saveAlayaToFirestore(localAlaya);
-            setAlaya(localAlaya);
+          if (localAlaya && isConfigValid) {
+            try {
+              await saveAlayaToFirestore(localAlaya);
+              setAlaya(localAlaya);
+            } catch (e) {}
           }
         }
         setIsAppReady(true);
@@ -81,7 +96,7 @@ export function useItakoAuth() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isConfigValid]);
 
   const handleSetName = useCallback((newName) => {
       setUserName(newName);
