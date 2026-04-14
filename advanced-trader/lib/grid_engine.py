@@ -90,7 +90,7 @@ class ZenGridEngine:
             logger.warning(f"AI Analysis failed: {e}")
 
     async def _save_strategy_state(self):
-        """最新の指標データをダッシュボード用に Gist へ保存"""
+        """最新の指標データをダッシュボード用に Gist へ保存 (Hybrid 構造)"""
         if self.strategy.df.empty: return
         
         last = self.strategy.df.iloc[-1]
@@ -102,23 +102,35 @@ class ZenGridEngine:
         except:
             balance = 0.0
 
+        # 指標計算
+        ema_val = last.get('EMA_20', 0)
+        ema_trend = "UP" if last['close'] > ema_val else "DOWN"
+        rsi_val = float(last.get('RSI_14', 0))
+
         state = {
             "timestamp": datetime.datetime.now().isoformat(),
+            # --- フラット項目 (Step 1 対応) ---
+            "bestBid": float(last['close']),
+            "bestAsk": float(last['close']),
+            "rsi": rsi_val,
+            "ema_trend": ema_trend,
+            
+            # --- 入れ子項目 (アトリエ UI 継続用) ---
             "price": float(last['close']),
             "status": "ACTIVE" if self.is_running else "IDLE",
             "indicators": {
                 "ATR": float(last.get('ATR_22', 0)),
-                "EMA_direction": "UP" if last['close'] > last.get('EMA_20', 0) else "DOWN",
-                "RSI": float(last.get('RSI_14', 0)),
+                "EMA_direction": ema_trend,
+                "RSI": rsi_val,
                 "Z_score": float(last.get('Z_score', 0))
             },
             "capital": {
                 "balance": balance,
                 "gain_loss_percent": ((balance - 2000) / 2000) * 100 if balance > 0 else 0
             },
-            "history": self.history[:5], # 最新 5 件
-            "ai_bias": self.ai_bias,
-            "ai_reason": self.ai_reason
+            "history": getattr(self, "history", [])[:5],
+            "ai_bias": getattr(self, "ai_bias", "NEUTRAL"),
+            "ai_reason": getattr(self, "ai_reason", "No AI Configured")
         }
         self.gist.save(state)
 

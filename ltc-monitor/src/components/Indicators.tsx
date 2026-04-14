@@ -1,9 +1,8 @@
-import React from 'react';
-import { TrendingUp, TrendingDown, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Zap, Activity } from 'lucide-react';
 
 interface Props {
   atr: number;
-  emaDirection: 'UP' | 'DOWN';
+  emaDirection: 'UP' | 'DOWN' | 'NEUTRAL';
   rsi: number;
 }
 
@@ -24,13 +23,21 @@ export default function Indicators({ atr, emaDirection, rsi }: Props) {
       <div className={`p-6 rounded-3xl space-y-4 border transition-all duration-500 ${
         emaDirection === 'UP' 
           ? 'bg-emerald-500/10 border-emerald-500/20' 
-          : 'bg-red-500/10 border-red-500/20'
+          : emaDirection === 'DOWN'
+          ? 'bg-red-500/10 border-red-500/20'
+          : 'bg-white/5 border-white/10'
       }`}>
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold text-white/40 tracking-widest uppercase">EMA Trend</span>
-          {emaDirection === 'UP' ? <TrendingUp size={14} className="text-emerald-500" /> : <TrendingDown size={14} className="text-red-500" />}
+          {emaDirection === 'UP' ? <TrendingUp size={14} className="text-emerald-500" /> : 
+           emaDirection === 'DOWN' ? <TrendingDown size={14} className="text-red-500" /> :
+           <Activity size={14} className="text-white/20" />}
         </div>
-        <div className={`text-3xl font-black ${emaDirection === 'UP' ? 'text-emerald-500' : 'text-red-500'}`}>
+        <div className={`text-3xl font-black ${
+          emaDirection === 'UP' ? 'text-emerald-500' : 
+          emaDirection === 'DOWN' ? 'text-red-500' : 
+          'text-white/20'
+        }`}>
           {emaDirection}
         </div>
         <div className="text-[9px] font-medium text-white/20 uppercase">Current Bias / 現在のモメンタム</div>

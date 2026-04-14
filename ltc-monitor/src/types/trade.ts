@@ -1,10 +1,17 @@
 export interface TradeStatus {
   timestamp: string;
+  // --- Flat Fields (Hybrid) ---
+  bestBid: number;
+  bestAsk: number;
+  rsi: number;
+  ema_trend: 'UP' | 'DOWN' | 'NEUTRAL';
+  
+  // --- Nested Fields (Atelier UI) ---
   price: number;
-  status: 'ACTIVE' | 'IDLE';
+  status: 'ACTIVE' | 'IDLE' | 'INITIALIZING';
   indicators: {
     ATR: number;
-    EMA_direction: 'UP' | 'DOWN';
+    EMA_direction: 'UP' | 'DOWN' | 'NEUTRAL';
     RSI: number;
     Z_score: number;
   };
@@ -20,4 +27,7 @@ export interface TradeStatus {
   }>;
   ai_bias: string;
   ai_reason: string;
+  
+  // --- Meta ---
+  error?: string; // For API-level errors
 }
