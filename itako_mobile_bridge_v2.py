@@ -102,7 +102,7 @@ class ItakoAgent:
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "google/gemini-2.0-flash-exp:free",
+            "model": "google/gemini-2.0-flash-exp",
             "messages": self.history
         }
         try:
