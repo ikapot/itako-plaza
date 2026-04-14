@@ -30,7 +30,7 @@ async def main():
     # クライアントの初期化 (CFD)
     rest_client = RakutenWalletClient(api_key, api_secret, is_spot=False)
     ws_client = RakutenWebSocketClient(symbol_id=10)
-    engine = ZenGridEngine(rest_client, ws_client)
+    engine = ZenGridEngine(rest_client, ws_client, dry_run=dry_run)
     
     tasks = [
         engine.start(),

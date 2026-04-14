@@ -19,10 +19,11 @@ class ZenGridEngine:
     - Gemini AI による環境認識（潮目判定）を統合
     - 状態管理は Gist へ同期
     """
-    def __init__(self, rest_client: RakutenWalletClient, ws_client: RakutenWebSocketClient, symbol_id: int = 10):
+    def __init__(self, rest_client: RakutenWalletClient, ws_client: RakutenWebSocketClient, symbol_id: int = 10, dry_run: bool = True):
         self.rest = rest_client
         self.ws = ws_client
         self.symbol_id = symbol_id
+        self.dry_run = dry_run        # 追加
         
         # 判断エンジン (AI/Quants)
         self.strategy = LtcStrategy()
@@ -164,7 +165,10 @@ class ZenGridEngine:
                 amt = float(pos.get("amount", 0))
                 
                 logger.warning(f"Closing position: {side} {amt}")
-                res = self.rest.place_cfd_order(self.symbol_id, close_side, amt, "MARKET", "CLOSE")
+                if self.dry_run:
+                    logger.info(f"DRY_RUN: Would close {side} {amt} for symbol {self.symbol_id}")
+                    continue
+                res = await self.rest.place_cfd_order(self.symbol_id, close_side, amt, "MARKET", "CLOSE")
                 logger.info(f"Closed: {res}")
         except Exception as e:
             logger.error(f"Force close failed: {e}")
@@ -221,7 +225,11 @@ class ZenGridEngine:
                 if approved:
                     try:
                         logger.info(f"APPROVED. Executing {signal}...")
-                        res = await self.rest.place_cfd_order(self.symbol_id, signal, self.trade_amount, "MARKET", "NEW")
+                        if self.dry_run:
+                            logger.info(f"DRY_RUN: Would execute {signal} {self.trade_amount}")
+                            res = {"status": "DRY_RUN_OK", "orderId": "SIM-123"}
+                        else:
+                            res = await self.rest.place_cfd_order(self.symbol_id, signal, self.trade_amount, "MARKET", "NEW")
                         logger.info(f"Success: {res}")
                         # 履歴に追加
                         self.history.insert(0, {
