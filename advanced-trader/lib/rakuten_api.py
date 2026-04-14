@@ -1,4 +1,5 @@
 import requests
+import os
 import hmac
 import hashlib
 import time
@@ -58,6 +59,7 @@ class RakutenWalletClient:
         self._last_request_time = 0.0  # レートリミット管理用
         self._min_interval = 1.05       # 1,000ms + 余裕50ms
         self._lock = asyncio.Lock()    # 追加：非同期排他制御
+        self.api_id = os.getenv("RAKUTEN_API_ID") # 追加
         self.time_offset = 0.0         # サーバーとの時刻ズレ補正
         
         # 初期化時に時刻補正を実行
@@ -90,24 +92,19 @@ class RakutenWalletClient:
             self._last_request_time = time.time()
 
     def _get_signature(self, nonce: str, method: str, path: str, query: str = "", body_str: str = "") -> str:
-        """署名の生成 (HMAC-SHA256) - 最終修正版: unhexlify シークレット & Nonce+URI"""
+        """署名の生成 (HMAC-SHA256) - NotebookLM 同期・最終確定版"""
         import binascii
         
+        # NotebookLMの掟: パスは必ず /api を含めたフルパスを使用する
         if method in ["GET", "DELETE"]:
             full_uri = f"{path}?{query}" if query else path
             message = f"{nonce}{full_uri}"
         else:
-            # POST/PUT の場合も path を含める仕様に合わせる (nonce + path + body)
             message = f"{nonce}{path}{body_str}"
         
-        try:
-            secret_bin = binascii.unhexlify(self.api_secret)
-        except Exception:
-            # 万が一 hex でない場合はフォールバック
-            secret_bin = self.api_secret.encode('utf-8')
-            
+        # NotebookLMの掟: SecretはBase64デコードせず生の文字列(UTF-8)として扱う
         return hmac.new(
-            secret_bin,
+            self.api_secret.encode('utf-8'),
             message.encode('utf-8'),
             hashlib.sha256
         ).hexdigest()
@@ -136,6 +133,8 @@ class RakutenWalletClient:
             "SIGNATURE": signature,
             "Content-Type": "application/json"
         }
+        if self.api_id:
+            headers["RAKUTEN-API-ID"] = self.api_id
         
         # 外部リクエスト自体はブロッキングだが、asyncio.to_thread を使うことも検討可能
         # ここではシンプルに sleep のみを非同期化

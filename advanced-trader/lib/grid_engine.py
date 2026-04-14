@@ -41,6 +41,7 @@ class ZenGridEngine:
         self.trade_amount = 0.1       # LTC 固定ロット
         self.ai_bias = "NEUTRAL"
         self.ai_reason = "No AI Configured"
+        self.history = []             # 追加
 
         # Gist 連携 (ダッシュボード表示用)
         pat = os.environ.get("GITHUB_PAT_GIST")
@@ -72,6 +73,13 @@ class ZenGridEngine:
                 await self._save_strategy_state()
         except Exception as e:
             logger.error(f"Error in engine main loop: {e}")
+
+    def _on_ticker_update(self, data: dict):
+        """WebSocket からの価格更新を受信"""
+        try:
+            self.strategy.update_ticker(data)
+        except Exception as e:
+            logger.error(f"Ticker update error: {e}")
 
     async def get_ai_tide_sense(self):
         """Gemini による市場の「潮目」解析"""
