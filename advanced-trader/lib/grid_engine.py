@@ -66,7 +66,7 @@ class ZenGridEngine:
                 # 1分おきの生存報告 (Heartbeat) & Gist 同期
                 last_p = self.strategy.df.iloc[-1]['close']
                 logger.info(f"Heartbeat | LTC: {last_p:.1f} | Indicators Updated")
-                self._save_strategy_state()
+                await self._save_strategy_state()
         except Exception as e:
             logger.error(f"Error in ticker update flow: {e}")
 
@@ -89,19 +89,34 @@ class ZenGridEngine:
         except Exception as e:
             logger.warning(f"AI Analysis failed: {e}")
 
-    def _save_strategy_state(self):
+    async def _save_strategy_state(self):
         """最新の指標データをダッシュボード用に Gist へ保存"""
         if self.strategy.df.empty: return
         
         last = self.strategy.df.iloc[-1]
+        
+        # 資産情報の取得 (CFD 証拠金残高)
+        try:
+            equity_res = await self.rest.get_margin_info()
+            balance = float(equity_res.get("equity", 0))
+        except:
+            balance = 0.0
+
         state = {
             "timestamp": datetime.datetime.now().isoformat(),
             "price": float(last['close']),
-            "EMA_20": float(last.get('EMA_20', 0)),
-            "RSI_14": float(last.get('RSI_14', 0)),
-            "ATR_22": float(last.get('ATR_22', 0)),
-            "Z_score": float(last.get('Z_score', 0)),
-            "signal": self.strategy.get_entry_signal() or "WAIT",
+            "status": "ACTIVE" if self.is_running else "IDLE",
+            "indicators": {
+                "ATR": float(last.get('ATR_22', 0)),
+                "EMA_direction": "UP" if last['close'] > last.get('EMA_20', 0) else "DOWN",
+                "RSI": float(last.get('RSI_14', 0)),
+                "Z_score": float(last.get('Z_score', 0))
+            },
+            "capital": {
+                "balance": balance,
+                "gain_loss_percent": ((balance - 2000) / 2000) * 100 if balance > 0 else 0
+            },
+            "history": self.history[:5], # 最新 5 件
             "ai_bias": self.ai_bias,
             "ai_reason": self.ai_reason
         }
@@ -182,10 +197,16 @@ class ZenGridEngine:
                 
                 if approved:
                     logger.info(f"APPROVED. Executing {signal}...")
-                    try:
-                        res = self.rest.place_cfd_order(self.symbol_id, signal, self.trade_amount, "MARKET", "NEW")
+                        res = await self.rest.place_cfd_order(self.symbol_id, signal, self.trade_amount, "MARKET", "NEW")
                         logger.info(f"Success: {res}")
-                    except Exception as e:
+                        # 履歴に追加
+                        self.history.insert(0, {
+                            "side": signal,
+                            "price": float(price),
+                            "timestamp": datetime.datetime.now().isoformat(),
+                            "amount": self.trade_amount
+                        })
+                        await self._save_strategy_state()
                         logger.error(f"Error: {e}")
                 
                 clear_signal()
