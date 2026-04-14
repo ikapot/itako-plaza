@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, Settings, Ghost, Globe, MapPin, BookOpen, RotateCw, LogOut } from 'lucide-react';
+import { User, Settings, Ghost, Globe, MapPin, BookOpen, RotateCw, LogOut, Activity } from 'lucide-react';
 import WarholAvatar from './WarholAvatar';
 
 const DashboardSidebar = React.memo(({
