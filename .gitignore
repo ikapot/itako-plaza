@@ -51,3 +51,4 @@ _temp_design.md
 # ?? Security: Protecting secrets and activity logs
 .env.all
 trader.log
+advanced-trader/position.json
