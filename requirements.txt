@@ -9,3 +9,4 @@ pandas
 ccxt
 notebooklm-py
 websockets
+google-generativeai

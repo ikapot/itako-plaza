@@ -65,10 +65,17 @@
 - **セキュリティ強化**: 
     - `ALLOWED_DISCORD_USER_ID` による厳格な本人認証を導入。
 
+## 2026-04-15 作業ログ（Itako Mobile Bridge V2 起動準備）
+- **Itako Mobile Bridge V2 の実装完遂**: 
+    - Discord DM 経由で PC 側の AI（Antigravity）に直接指示を出せるエージェント・エンジンを `itako_mobile_bridge_v2.py` に構築。
+    - Gemini 1.5 Flash による Function Calling (ファイル読み書き、コマンド実行) を統合。
+    - **セキュア承認フロー**: Discord 上で Diff を提示し、ユーザーが「OK」と答えた時のみコードを書き換える安全機構を実装。
+- **依存関係の更新**: `requirements.txt` に `google-generativeai` を追加。
+
 ---
 ## 次回への申し送り（随時更新）
-- [ ] **Mobile Agent の実運用テスト**: 外出先から iPhone で実際にコード修正指示や画像取得を行い、安定性を確認する。
-- [ ] **LTC ボットの本格稼働**: DRY_RUN から実運用への移行タイミングの決定。
+- [ ] **Mobile Bridge V2 のバックグラウンド起動**: ユーザーによる手動起動、または `pm2` 等での常駐化。
+- [ ] **LTC ボットの本格稼働**: 実弾取引の初エントリー監視。
 - [ ] **Painter Tax Assist の仕上げ**: ブラウザ上での動作確認と細部のUI調整。
 
 ---
@@ -94,3 +101,4 @@
 ### 4. モニター環境の復旧 (LTC Dashboard)
 - **[完了] Gist 同期パラメータの整合**: エンジンとモニター間のファイル名（strategy_state.json）および環境変数を同期。
 - **[完了] ローカルテストサイト起動**: `http://localhost:3001` での正常表示を確認。
+- **[完了] Vercel ライブサイトの完全正常化**: `GIST_ID` の typo と、初期データ書き込みタイミングのズレを修正し、`https://ltc-monitor.vercel.app` への完全なリアルタイム同期を実現。
