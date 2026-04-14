@@ -57,6 +57,20 @@ class ZenGridEngine:
         # WebSocket コールバック設定
         self.ws.on_ticker = self._on_ticker_update
         
+        # 起動直後に初期状態を Gist へ書き込む（モニター向け）
+        self.gist.save({
+            "timestamp": datetime.datetime.now().isoformat(),
+            "bestBid": 0, "bestAsk": 0, "rsi": 0, "ema_trend": "NEUTRAL",
+            "price": 0,
+            "status": "INITIALIZING",
+            "indicators": {"ATR": 0, "EMA_direction": "NEUTRAL", "RSI": 0, "Z_score": 0},
+            "capital": {"balance": 0, "gain_loss_percent": 0},
+            "history": [],
+            "ai_bias": "NEUTRAL",
+            "ai_reason": "Engine Starting..."
+        })
+        logger.info("Initial state written to Gist.")
+        
         # WebSocket 接続（バックグラウンド）
         asyncio.create_task(self.ws.connect())
         
