@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import datetime
+import os
+import json
 import google.generativeai as genai
 from lib.rakuten_api import RakutenWalletClient
 from lib.rakuten_ws import RakutenWebSocketClient
@@ -57,18 +59,19 @@ class ZenGridEngine:
         asyncio.create_task(self.ws.connect())
         
         # メインループ: 管理料回避 ＆ ポジション監視
-        while self.is_running:
-            await self._check_time_and_manage_fees()
-            await asyncio.sleep(60)
+        try:
+            while self.is_running:
+                await self._check_time_and_manage_fees()
+                await asyncio.sleep(60)
 
-            if is_new_candle:
+                # キャンドル更新チェック (簡略化)
                 self.strategy.calculate_indicators()
                 # 1分おきの生存報告 (Heartbeat) & Gist 同期
                 last_p = self.strategy.df.iloc[-1]['close']
                 logger.info(f"Heartbeat | LTC: {last_p:.1f} | Indicators Updated")
                 await self._save_strategy_state()
         except Exception as e:
-            logger.error(f"Error in ticker update flow: {e}")
+            logger.error(f"Error in engine main loop: {e}")
 
     async def get_ai_tide_sense(self):
         """Gemini による市場の「潮目」解析"""
@@ -208,7 +211,8 @@ class ZenGridEngine:
                     await asyncio.sleep(10)
                 
                 if approved:
-                    logger.info(f"APPROVED. Executing {signal}...")
+                    try:
+                        logger.info(f"APPROVED. Executing {signal}...")
                         res = await self.rest.place_cfd_order(self.symbol_id, signal, self.trade_amount, "MARKET", "NEW")
                         logger.info(f"Success: {res}")
                         # 履歴に追加
@@ -219,7 +223,8 @@ class ZenGridEngine:
                             "amount": self.trade_amount
                         })
                         await self._save_strategy_state()
-                        logger.error(f"Error: {e}")
+                    except Exception as e:
+                        logger.error(f"Execution Error: {e}")
                 
                 clear_signal()
                 await asyncio.sleep(300) # 次の判定まで5分待機

@@ -58,6 +58,25 @@ class RakutenWalletClient:
         self._last_request_time = 0.0  # レートリミット管理用
         self._min_interval = 1.05       # 1,000ms + 余裕50ms
         self._lock = asyncio.Lock()    # 追加：非同期排他制御
+        self.time_offset = 0.0         # サーバーとの時刻ズレ補正
+        
+        # 初期化時に時刻補正を実行
+        self._calibrate_time()
+
+    def _calibrate_time(self):
+        """サーバーの Date ヘッダーから時刻ズレを計算して補正する"""
+        try:
+            # 認証不要な GET または HEAD で Date ヘッダーを取得
+            resp = requests.head(self.base_url, timeout=5)
+            server_date_str = resp.headers.get('Date')
+            if server_date_str:
+                from email.utils import parsedate_to_datetime
+                server_time = parsedate_to_datetime(server_date_str).timestamp()
+                local_time = time.time()
+                self.time_offset = server_time - local_time
+                logger.info(f"Time calibrated. Offset: {self.time_offset:.3f}s")
+        except Exception as e:
+            logger.warning(f"Time calibration failed: {e}. Using local time.")
 
     async def _wait_for_rate_limit(self):
         """1,000ms (1秒) のリクエスト間隔を確保する (2024年11月改定対応)"""
@@ -71,19 +90,24 @@ class RakutenWalletClient:
             self._last_request_time = time.time()
 
     def _get_signature(self, nonce: str, method: str, path: str, query: str = "", body_str: str = "") -> str:
-        """署名の生成 (HMAC-SHA256) - NotebookLM 最新仕様"""
-        # 仕様:
-        # GET/DELETE: nonce + uri + ?queryString (uriは / から始まる)
-        # POST/PUT: nonce + json_body
-        """署名の生成 (HMAC-SHA256)"""
+        """署名の生成 (HMAC-SHA256) - 最終修正版: unhexlify シークレット & Nonce+URI"""
+        import binascii
+        
         if method in ["GET", "DELETE"]:
             full_uri = f"{path}?{query}" if query else path
             message = f"{nonce}{full_uri}"
         else:
-            message = f"{nonce}{body_str}"
+            # POST/PUT の場合も path を含める仕様に合わせる (nonce + path + body)
+            message = f"{nonce}{path}{body_str}"
         
+        try:
+            secret_bin = binascii.unhexlify(self.api_secret)
+        except Exception:
+            # 万が一 hex でない場合はフォールバック
+            secret_bin = self.api_secret.encode('utf-8')
+            
         return hmac.new(
-            self.api_secret.encode('utf-8'),
+            secret_bin,
             message.encode('utf-8'),
             hashlib.sha256
         ).hexdigest()
@@ -102,7 +126,8 @@ class RakutenWalletClient:
             url += f"?{query_str}"
             
         body_str = json.dumps(body, separators=(',', ':')) if body else ""
-        nonce = str(int(time.time() * 1000))
+        # 補正済みのタイムスタンプで Nonce を生成
+        nonce = str(int((time.time() + self.time_offset) * 1000))
         signature = self._get_signature(nonce, method, path, query_str, body_str)
         
         headers = {

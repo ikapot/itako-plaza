@@ -14,8 +14,9 @@ logging.basicConfig(
 logger = logging.getLogger("ZenGridTrader")
 
 async def main():
-    # 成功パターンと同様に .env.all を明示的に読み込む
-    load_dotenv("advanced-trader/.env.all", override=True)
+    # カレントディレクトリまたは相対パスで .env.all を読み込む
+    dotenv_path = ".env.all" if os.path.exists(".env.all") else "advanced-trader/.env.all"
+    load_dotenv(dotenv_path, override=True)
     api_key = os.environ.get("WALLET_API_KEY")
     api_secret = os.environ.get("WALLET_API_SECRET")
     dry_run = os.environ.get("DRY_RUN", "true").lower() == "true"
@@ -41,9 +42,9 @@ async def main():
         # 非同期ループが完全に回るまで僅かに待機
         await asyncio.sleep(1)
         
-        # 初期バランスの確認
-        balance = await rest_client.get_balance()
-        logger.info(f"Current Balance: {balance}")
+        # 初期バランスの確認 (CFD 証拠金情報の取得)
+        equity_data = await rest_client.get_margin_info()
+        logger.info(f"Current Equity: {equity_data}")
         
         await asyncio.gather(*tasks)
     except KeyboardInterrupt:
