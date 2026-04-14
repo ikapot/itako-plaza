@@ -20,7 +20,7 @@ export async function fetchTradeStatus(): Promise<TradeStatus | null> {
     if (!res.ok) throw new Error(`Gist fetch failed: ${res.status}`);
 
     const gistData = await res.json();
-    const file = gistData.files['trade_status.json'];
+    const file = gistData.files['strategy_state.json'];
     
     if (!file || !file.content) return null;
 

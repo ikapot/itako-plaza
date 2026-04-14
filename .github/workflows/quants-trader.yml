@@ -23,7 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install ccxt pandas requests python-dotenv google-generativeai
 
-      - name: 🚀 Run Trading Bot
+      - name: 🚀 Run Trading Bot (One-Shot Mode)
         env:
           WALLET_API_KEY: ${{ secrets.WALLET_API_KEY }}
           WALLET_API_SECRET: ${{ secrets.WALLET_API_SECRET }}
@@ -32,4 +32,5 @@ jobs:
           GITHUB_PAT_GIST: ${{ secrets.GITHUB_PAT_GIST }}
           GIST_ID: ${{ secrets.GIST_ID }}
           DRY_RUN: false
-        run: python advanced-trader/bot.py
+          EXECUTION_DURATION: 840
+        run: python advanced-trader/zen_grid_trader.py

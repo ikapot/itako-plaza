@@ -39,13 +39,23 @@ async def main():
     ]
     
     try:
-        # 非同期ループが完全に回るまで僅かに待機
-        await asyncio.sleep(1)
-        
-        # 初期バランスの確認 (CFD 証拠金情報の取得)
-        equity_data = await rest_client.get_margin_info()
-        logger.info(f"Current Equity: {equity_data}")
-        
+        # 稼働時間制限 (1-shot用)
+        duration = os.environ.get("EXECUTION_DURATION")
+        if duration:
+            try:
+                d_sec = int(duration)
+                logger.info(f"⏳ One-shot mode: Will stop in {d_sec} seconds")
+                
+                async def shutdown_timer(seconds):
+                    await asyncio.sleep(seconds)
+                    logger.info("⏰ Time is up! Shutting down...")
+                    engine.is_running = False
+                    ws_client.stop()
+                
+                asyncio.create_task(shutdown_timer(d_sec))
+            except ValueError:
+                logger.warning(f"Invalid EXECUTION_DURATION: {duration}")
+
         await asyncio.gather(*tasks)
     except KeyboardInterrupt:
         logger.info("🛑 Stopping trader...")

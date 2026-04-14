@@ -15,8 +15,10 @@ class LtcStrategy:
     """
     def __init__(self, history_len: int = 100):
         self.history_len = history_len
-        # OHLCV の初期化
-        self.df = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        # OHLCV の初期化 (dtype を明示して警告を回避)
+        self.df = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'volume']).astype({
+            'open': 'float64', 'high': 'float64', 'low': 'float64', 'close': 'float64', 'volume': 'float64'
+        })
         self.last_candle_time = None
         
         # パラメータ
