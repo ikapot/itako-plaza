@@ -71,73 +71,32 @@ const aozoraPlugin = () => ({
 const ndlPlugin = () => ({
   name: 'ndl-api',
   configureServer(server) {
-    server.middlewares.use('/api/ndl', async (req, res, next) => {
-      if (req.method !== 'GET') return next();
-      
+    // ... (keep ndl logic)
+  }
+});
+
+const tradingPlugin = () => ({
+  name: 'trading-api',
+  configureServer(server) {
+    server.middlewares.use('/api/status', async (req, res, next) => {
       try {
-        const searchParams = new URL(req.url, 'http://localhost').searchParams;
-        const keyword = searchParams.get('keyword');
-        if (!keyword) {
-            res.statusCode = 400;
-            return res.end(JSON.stringify({ error: 'Keyword is required' }));
-        }
-
-        const baseUrl = "https://ndlsearch.ndl.go.jp/api/opensearch";
-        const query = `?cnt=8&mediatype=1&title=${encodeURIComponent(keyword)}`;
-        const digitalQuery = `?cnt=5&mediatype=9&title=${encodeURIComponent(keyword)}`;
+        // 動的にインポートして実行
+        const { default: handler } = await import('./api/status.js');
         
-        const [res1, res2] = await Promise.all([
-           fetch(baseUrl + query),
-           fetch(baseUrl + digitalQuery)
-        ]);
-        
-        const xmlData = (await res1.text()) + (await res2.text());
-        const items = [];
-        const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-        let match;
-
-        while ((match = itemRegex.exec(xmlData)) !== null) {
-          const itemContent = match[1];
-          const getVal = (tag) => {
-            const m = itemContent.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`)) || 
-                      itemContent.match(new RegExp(`<dc:${tag}>([\\s\\S]*?)<\\/dc:${tag}>`));
-            return m ? m[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() : "";
-          };
-
-          const title = getVal('title');
-          if (title) {
-            const rawLink = getVal('link') || "#";
-            let description = getVal('description');
-            let finalLink = rawLink.startsWith('http') ? rawLink : `https://ndlsearch.ndl.go.jp/books/${rawLink}`;
-
-            if (description.includes("青空文庫")) {
-               description = `【青空文庫】${description}`;
-               const extLink = getVal('dcndl:extLink');
-               if (extLink) finalLink = extLink;
-            }
-            
-            items.push({
-              id: `ndl-${Math.random().toString(36).substr(2, 9)}`,
-              title,
-              creator: getVal('author') || getVal('creator') || "Unknown Author",
-              quote: description.substring(0, 100) + (description.length > 100 ? "..." : ""),
-              link: finalLink,
-              issued: getVal('date') || "Unknown Date"
-            });
+        // Vercel の res に模した簡易 mock
+        const mockRes = {
+          status: (code) => {
+            res.statusCode = code;
+            return mockRes;
+          },
+          json: (data) => {
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
+            res.end(JSON.stringify(data));
           }
-        }
-
-        const uniqueItems = items.reduce((acc, current) => {
-          if (!acc.find(item => item.title === current.title)) acc.push(current);
-          return acc;
-        }, []);
-
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.statusCode = 200;
-        res.end(JSON.stringify(uniqueItems));
+        };
+        
+        await handler(req, mockRes);
       } catch (e) {
-        console.error("NDL Proxy Error:", e);
         res.statusCode = 500;
         res.end(JSON.stringify({ error: e.message }));
       }
@@ -148,5 +107,5 @@ const ndlPlugin = () => ({
 // https://vite.dev/config/
 export default defineConfig({
   base: './',
-  plugins: [react(), aozoraPlugin(), ndlPlugin()],
+  plugins: [react(), aozoraPlugin(), ndlPlugin(), tradingPlugin()],
 })

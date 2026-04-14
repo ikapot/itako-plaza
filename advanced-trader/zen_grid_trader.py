@@ -24,7 +24,7 @@ async def main():
         logger.error("API or Secret key not found.")
         return
 
-    logger.info(f"Zen-LTC-Quant V2.2 Starting... (DRY_RUN={dry_run})")
+    logger.info(f"Zen-LTC-Quant V2.5 [AI-Integrated] Starting... (DRY_RUN={dry_run})")
     
     # クライアントの初期化 (CFD)
     rest_client = RakutenWalletClient(api_key, api_secret, is_spot=False)

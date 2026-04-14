@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import datetime
+import google.generativeai as genai
 from lib.rakuten_api import RakutenWalletClient
 from lib.rakuten_ws import RakutenWebSocketClient
 from lib.strategy import LtcStrategy
@@ -10,10 +11,11 @@ logger = logging.getLogger("ZenGrid")
 
 class ZenGridEngine:
     """
-    Zen-Grid Engine V2:
+    Zen-Grid Engine V2.5:
     - 策略（Strategy）と執行（Execution）を分離
     - 多角的テクニカル判断に基づくエントリー
-    - 動的トレイリングストップによる利益最大化
+    - Gemini AI による環境認識（潮目判定）を統合
+    - 状態管理は Gist へ同期
     """
     def __init__(self, rest_client: RakutenWalletClient, ws_client: RakutenWebSocketClient, symbol_id: int = 10):
         self.rest = rest_client
@@ -23,9 +25,20 @@ class ZenGridEngine:
         # 判断エンジン (AI/Quants)
         self.strategy = LtcStrategy()
         
+        # AI 配置
+        self.gemini_key = os.environ.get("VITE_GEMINI_API_KEY") 
+        if self.gemini_key == "PROXY_MODE": self.gemini_key = os.environ.get("GEMINI_API_KEY")
+        if self.gemini_key:
+            genai.configure(api_key=self.gemini_key)
+            self.model = genai.GenerativeModel('gemini-1.5-flash')
+        else:
+            self.model = None
+
         # 状態管理
         self.is_running = False
         self.trade_amount = 0.1       # LTC 固定ロット
+        self.ai_bias = "NEUTRAL"
+        self.ai_reason = "No AI Configured"
 
         # Gist 連携 (ダッシュボード表示用)
         pat = os.environ.get("GITHUB_PAT_GIST")
@@ -57,6 +70,25 @@ class ZenGridEngine:
         except Exception as e:
             logger.error(f"Error in ticker update flow: {e}")
 
+    async def get_ai_tide_sense(self):
+        """Gemini による市場の「潮目」解析"""
+        if not self.model or self.strategy.df.empty:
+            return
+            
+        try:
+            # 最新の指標を文字列化
+            last_stats = self.strategy.df.tail(5).to_dict(orient='records')
+            prompt = f"Analyze LTC/JPY market (5m data): {json.dumps(last_stats)}. Provide 1-word bias (BULLISH, BEARISH, NEUTRAL) and a very short 1-line reason in Japanese."
+            
+            # 非同期で実行
+            response = await asyncio.to_thread(self.model.generate_content, prompt)
+            text = response.text.strip().split("\n")
+            self.ai_bias = text[0].upper()
+            self.ai_reason = text[1] if len(text) > 1 else "Continuum"
+            logger.info(f"🧠 AI Tide Sense: {self.ai_bias} | {self.ai_reason}")
+        except Exception as e:
+            logger.warning(f"AI Analysis failed: {e}")
+
     def _save_strategy_state(self):
         """最新の指標データをダッシュボード用に Gist へ保存"""
         if self.strategy.df.empty: return
@@ -69,7 +101,9 @@ class ZenGridEngine:
             "RSI_14": float(last.get('RSI_14', 0)),
             "ATR_22": float(last.get('ATR_22', 0)),
             "Z_score": float(last.get('Z_score', 0)),
-            "signal": self.strategy.get_entry_signal() or "WAIT"
+            "signal": self.strategy.get_entry_signal() or "WAIT",
+            "ai_bias": self.ai_bias,
+            "ai_reason": self.ai_reason
         }
         self.gist.save(state)
 
@@ -101,6 +135,11 @@ class ZenGridEngine:
         """メインの参入ロジックループ"""
         logger.info("Strategy monitoring active...")
         while self.is_running:
+            # 1. AI 判定の更新 (1時間おき想定だが、ここではループごと。実際は負荷を考慮)
+            # 判定ロジックが負荷になるため、一定時間おきにするのが定石
+            if datetime.datetime.now().minute % 15 == 0: 
+                await self.get_ai_tide_sense()
+
             # 最低限のデータ（指標計算用）が溜まるまで待機
             if len(self.strategy.df) < 30:
                 await asyncio.sleep(10)
@@ -110,6 +149,14 @@ class ZenGridEngine:
             signal = self.strategy.get_entry_signal()
             
             if signal:
+                # --- AI フィルタリング ---
+                if signal == "BUY" and "BEARISH" in self.ai_bias:
+                    logger.info("⏸ AI BEARISH signal. Skipping BUY.")
+                    continue
+                if signal == "SELL" and "BULLISH" in self.ai_bias:
+                    logger.info("⏸ AI BULLISH signal. Skipping SELL.")
+                    continue
+
                 logger.info(f"Signal Detected: {signal}. Checking for approval...")
                 # 承認フロー連携
                 from lib.trade_signal import create_signal, get_signal_status, clear_signal

@@ -10,7 +10,6 @@ const TradingDashboard = ({ user }) => {
         strategy: null,
         config: { dryRun: true, symbol: 'LTC/JPY' }
     });
-    const [loading, setLoading] = useState(true);
 
     const fetchData = async () => {
         try {
@@ -21,8 +20,6 @@ const TradingDashboard = ({ user }) => {
             }
         } catch (err) {
             console.error('Fetch Error:', err);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -125,6 +122,14 @@ const TradingDashboard = ({ user }) => {
                                 {data.strategy?.signal || 'MONITORING'}
                             </span>
                         </div>
+                        {data.strategy?.ai_bias && (
+                            <div className="pt-2 border-t border-[#f15a24]/10">
+                                <span className={`text-[10px] font-black tracking-widest uppercase ${data.strategy.ai_bias === 'BULLISH' ? 'text-emerald-400' : data.strategy.ai_bias === 'BEARISH' ? 'text-red-400' : 'text-white/40'}`}>
+                                    AI Tide: {data.strategy.ai_bias}
+                                </span>
+                                <p className="text-[9px] text-white/30 truncate">{data.strategy.ai_reason}</p>
+                            </div>
+                        )}
                         <span className="text-[9px] font-bold text-[#f15a24]/40 tracking-widest block uppercase">
                             Last Updated: {data.strategy?.timestamp ? new Date(data.strategy.timestamp).toLocaleTimeString() : 'N/A'}
                         </span>
