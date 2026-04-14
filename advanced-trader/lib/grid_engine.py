@@ -4,6 +4,7 @@ import datetime
 from lib.rakuten_api import RakutenWalletClient
 from lib.rakuten_ws import RakutenWebSocketClient
 from lib.strategy import LtcStrategy
+from lib.gist_sync import GistSync
 
 logger = logging.getLogger("ZenGrid")
 
@@ -26,6 +27,11 @@ class ZenGridEngine:
         self.is_running = False
         self.trade_amount = 0.1       # LTC 固定ロット
 
+        # Gist 連携 (ダッシュボード表示用)
+        pat = os.environ.get("GITHUB_PAT_GIST")
+        gist_id = os.environ.get("GIST_ID")
+        self.gist = GistSync(pat, gist_id, "strategy_state.json")
+
     async def start(self):
         """エンジンを起動する"""
         logger.info("Zen-Grid Engine V2 starting...")
@@ -42,17 +48,30 @@ class ZenGridEngine:
             await self._check_time_and_manage_fees()
             await asyncio.sleep(60)
 
-    def _on_ticker_update(self, data: dict):
-        """Ticker 受信時の処理: Strategy へ供給"""
-        try:
-            is_new_candle = self.strategy.update_ticker(data)
             if is_new_candle:
                 self.strategy.calculate_indicators()
-                # 1分おきの生存報告 (Heartbeat)
+                # 1分おきの生存報告 (Heartbeat) & Gist 同期
                 last_p = self.strategy.df.iloc[-1]['close']
                 logger.info(f"Heartbeat | LTC: {last_p:.1f} | Indicators Updated")
+                self._save_strategy_state()
         except Exception as e:
             logger.error(f"Error in ticker update flow: {e}")
+
+    def _save_strategy_state(self):
+        """最新の指標データをダッシュボード用に Gist へ保存"""
+        if self.strategy.df.empty: return
+        
+        last = self.strategy.df.iloc[-1]
+        state = {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "price": float(last['close']),
+            "EMA_20": float(last.get('EMA_20', 0)),
+            "RSI_14": float(last.get('RSI_14', 0)),
+            "ATR_22": float(last.get('ATR_22', 0)),
+            "Z_score": float(last.get('Z_score', 0)),
+            "signal": self.strategy.get_entry_signal() or "WAIT"
+        }
+        self.gist.save(state)
 
     async def _check_time_and_manage_fees(self):
         """JST 06:50 の管理料回避決済"""

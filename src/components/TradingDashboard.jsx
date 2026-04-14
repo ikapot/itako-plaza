@@ -1,180 +1,203 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Wallet, Activity, Shield, ArrowUpRight, ArrowDownRight, Zap, Ban } from 'lucide-react';
+import { TrendingUp, Wallet, Activity, Shield, Zap, Ban, Cpu, Gavel } from 'lucide-react';
 import gsap from 'gsap';
 
 const TradingDashboard = ({ user }) => {
-    const [price, setPrice] = useState(11150); // LTC/JPY approx
-    const [priceChange, setPriceChange] = useState(0);
-    const [tradeData, setTradeData] = useState({
-        jpy_balance: 1200,
-        ltc_balance: 0.18, // Simulated
-        status: 'MONITORING',
-        signal: 'NEUTRAL',
-        last_action: 'NONE'
+    const [data, setData] = useState({
+        price: 0,
+        balance: { jpy: '---', ltc: '---' },
+        strategy: null,
+        config: { dryRun: true, symbol: 'LTC/JPY' }
     });
+    const [loading, setLoading] = useState(true);
 
-    // LTC WebSocket simulation
+    const fetchData = async () => {
+        try {
+            const res = await fetch('/api/status');
+            const result = await res.json();
+            if (result.ok) {
+                setData(result);
+            }
+        } catch (err) {
+            console.error('Fetch Error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const interval = setInterval(() => {
-            const diff = (Math.random() - 0.5) * 50;
-            setPrice(prev => prev + diff);
-            setPriceChange(diff);
-        }, 3000);
+        fetchData();
+        const interval = setInterval(fetchData, 10000); // 10s refresh
         return () => clearInterval(interval);
     }, []);
 
-    // GSAP Animation for numbers
+    // GSAP Animation for price
     useEffect(() => {
-        gsap.to(".price-number", {
-            scale: 1.02,
-            duration: 0.1,
-            yoyo: true,
-            repeat: 1,
-            ease: "power2.inOut"
-        });
-    }, [price]);
+        if (data.price > 0) {
+            gsap.to(".price-number", {
+                color: "#f15a24",
+                duration: 0.2,
+                yoyo: true,
+                repeat: 1,
+            });
+        }
+    }, [data.price]);
+
+    const IndicatorTile = ({ label, value, unit = "", sublabel = "" }) => (
+        <div className="p-4 bg-black/40 border border-[#f15a24]/20 rounded-2xl group hover:border-[#f15a24]/50 transition-all">
+            <span className="text-[10px] font-bold text-[#f15a24]/40 uppercase tracking-[0.2em] block mb-2">{label}</span>
+            <div className="flex items-baseline gap-1">
+                <span className="text-xl font-black tracking-tight">{value}</span>
+                <span className="text-[10px] font-bold text-white/30">{unit}</span>
+            </div>
+            {sublabel && <span className="text-[8px] font-medium text-white/20 uppercase mt-1 block">{sublabel}</span>}
+        </div>
+    );
 
     return (
-        <div className="p-4 md:p-8 space-y-8 font-oswald text-white h-full overflow-y-auto itako-scrollbar-thin pb-32">
-            {/* Header Stats */}
+        <div className="p-4 md:p-8 space-y-8 font-oswald text-white h-full overflow-y-auto itako-scrollbar-thin pb-32 editorial-grid">
+            {/* Top Bar / Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#f15a24] shadow-[0_0_10px_#f15a24] animate-pulse" />
+                        <h1 className="text-2xl font-black tracking-tighter uppercase italic">Zen-LTC-Quant V2.2</h1>
+                    </div>
+                    <p className="text-[10px] font-bold text-[#f15a24]/60 tracking-[0.3em] uppercase">Autonomous Trading Interface / 自律執行界面</p>
+                </div>
+                <div className="flex gap-4">
+                    <div className={`px-4 py-2 rounded-full border border-white/5 bg-black/40 backdrop-blur-md flex items-center gap-2 ${data.config.dryRun ? 'opacity-50' : ''}`}>
+                        {data.config.dryRun ? <Ban size={12} className="text-white/40" /> : <Shield size={12} className="text-[#f15a24]" />}
+                        <span className="text-[9px] font-bold tracking-widest">{data.config.dryRun ? 'DRY_RUN: ACTIVE' : 'LIVE_TRADING: ON'}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-6 bg-black/60 border border-white/5 rounded-[35px] backdrop-blur-xl group hover:border-[#325ba0]/30 transition-all"
-                >
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] font-black tracking-[0.3em] text-white/40 uppercase">Market Price / 市場価格</span>
-                        <Zap size={14} className="text-[#325ba0]" />
+                {/* Price Tile */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-8 glass-spectral group relative overflow-hidden">
+                    <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-6">
+                            <span className="text-[10px] font-black tracking-[0.4em] text-[#f15a24]/50 uppercase">Market / 市場</span>
+                            <Zap size={14} className="text-[#f15a24]" />
+                        </div>
+                        <div className="space-y-1">
+                            <span className="text-5xl font-black price-number tracking-tighter">
+                                ¥{data.price ? Math.floor(data.price).toLocaleString() : '---'}
+                            </span>
+                            <span className="text-[10px] font-bold text-white/20 block tracking-widest uppercase">LTC / JPY PAIR</span>
+                        </div>
                     </div>
-                    <div className="flex items-baseline gap-3">
-                        <span className="text-4xl font-black price-number tracking-tighter">
-                            ¥{Math.floor(price).toLocaleString()}
-                        </span>
-                        <span className={`text-xs font-bold ${priceChange >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                            {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}
-                        </span>
-                    </div>
-                </motion.div>
-
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="p-6 bg-black/60 border border-white/5 rounded-[35px] backdrop-blur-xl group hover:border-emerald-500/30 transition-all"
-                >
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] font-black tracking-[0.3em] text-white/40 uppercase">JPY Balance / 日本円残高</span>
-                        <Wallet size={14} className="text-emerald-500" />
-                    </div>
-                    <div className="flex items-baseline gap-3">
-                        <span className="text-4xl font-black tracking-tighter">
-                            ¥{tradeData.jpy_balance.toLocaleString()}
-                        </span>
-                        <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">RAKUTEN WALLET</span>
+                    <div className="absolute -bottom-4 -right-4 opacity-[0.03] rotate-12">
+                        <Activity size={120} />
                     </div>
                 </motion.div>
 
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="p-6 bg-black/60 border border-white/5 rounded-[35px] backdrop-blur-xl group hover:border-[#325ba0]/30 transition-all"
-                >
-                    <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] font-black tracking-[0.3em] text-white/40 uppercase">LTC Holdings / 保有数量</span>
-                        <TrendingUp size={14} className="text-[#325ba0]" />
+                {/* Balance Tile */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-8 glass-spectral group">
+                    <div className="flex items-center justify-between mb-6">
+                        <span className="text-[10px] font-black tracking-[0.4em] text-[#f15a24]/50 uppercase">Capital / 資産</span>
+                        <Wallet size={14} className="text-[#f15a24]" />
                     </div>
-                    <div className="flex items-baseline gap-3">
-                        <span className="text-4xl font-black tracking-tighter">
-                            {tradeData.ltc_balance.toFixed(2)}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <span className="text-2xl font-black tracking-tight">{data.balance.jpy}</span>
+                            <span className="text-[9px] font-bold text-white/20 block tracking-widest uppercase">JPY</span>
+                        </div>
+                        <div className="space-y-1">
+                            <span className="text-2xl font-black tracking-tight">{data.balance.ltc}</span>
+                            <span className="text-[9px] font-bold text-white/20 block tracking-widest uppercase">LTC</span>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Strategy Status Tile */}
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="p-8 glass-spectral group">
+                    <div className="flex items-center justify-between mb-6">
+                        <span className="text-[10px] font-black tracking-[0.4em] text-[#f15a24]/50 uppercase">Signal / 信号</span>
+                        <Cpu size={14} className="text-[#f15a24]" />
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                            <span className={`text-3xl font-black italic uppercase ${data.strategy?.signal === 'BUY' ? 'text-emerald-500' : data.strategy?.signal === 'SELL' ? 'text-red-500' : 'text-white/60'}`}>
+                                {data.strategy?.signal || 'MONITORING'}
+                            </span>
+                        </div>
+                        <span className="text-[9px] font-bold text-[#f15a24]/40 tracking-widest block uppercase">
+                            Last Updated: {data.strategy?.timestamp ? new Date(data.strategy.timestamp).toLocaleTimeString() : 'N/A'}
                         </span>
-                        <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">LTC</span>
                     </div>
                 </motion.div>
             </div>
 
-            {/* Main Trading View */}
+            {/* Tactical View */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Engine Status */}
+                {/* Indicators Panel */}
                 <div className="space-y-6">
-                    <h2 className="text-sm font-bold text-white/30 tracking-[0.4em] uppercase px-4 border-l-2 border-[#325ba0]">Execution Engine / 執行エンジン</h2>
-                    <div className="p-8 bg-black/80 border-2 border-white/5 rounded-[40px] relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-5">
-                            <Activity size={120} />
-                        </div>
-                        
-                        <div className="relative z-10 space-y-8">
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-1">
-                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">System Status</span>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span className="text-xl font-black uppercase italic">Healthy / 霊的同調中</span>
-                                    </div>
-                                </div>
-                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                                    <span className="text-[8px] font-bold text-white/30 uppercase tracking-[0.3em] block mb-1">Current Strategy</span>
-                                    <span className="text-xs font-black text-[#325ba0]">ZEN_GRID_LTC_V1</span>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-white/5 rounded-2xl">
-                                    <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest block mb-2">Signal</span>
-                                    <span className="text-lg font-black text-white/80">MONITORING</span>
-                                </div>
-                                <div className="p-4 bg-white/5 rounded-2xl">
-                                    <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest block mb-2">Z-Score (MA30)</span>
-                                    <span className="text-lg font-black text-emerald-500">-1.24 σ</span>
-                                </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-white/5">
-                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block mb-4">Operational Guardrails</span>
-                                <div className="flex flex-wrap gap-3">
-                                    <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full">
-                                        <Shield size={12} className="text-[#325ba0]" />
-                                        <span className="text-[9px] font-bold tracking-wider">FEE_GUARD: ACTIVE (06:50)</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full opacity-40">
-                                        <Ban size={12} />
-                                        <span className="text-[9px] font-bold tracking-wider">DRY_RUN: ON</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-4 px-4">
+                        <Gavel size={14} className="text-[#f15a24]" />
+                        <h2 className="text-xs font-bold text-white/50 tracking-[0.4em] uppercase">Quants Triage / 三段階トリアージ</h2>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <IndicatorTile 
+                            label="EMA 20" 
+                            value={data.strategy?.EMA_20?.toFixed(1) || '---'} 
+                            sublabel="Trend Baseline"
+                        />
+                        <IndicatorTile 
+                            label="RSI 14" 
+                            value={data.strategy?.RSI_14?.toFixed(1) || '---'} 
+                            unit="%"
+                            sublabel={data.strategy?.RSI_14 > 70 ? "Overbought" : data.strategy?.RSI_14 < 30 ? "Oversold" : "Neutral"}
+                        />
+                        <IndicatorTile 
+                            label="ATR 22" 
+                            value={data.strategy?.ATR_22?.toFixed(1) || '---'} 
+                            sublabel="Volatility Range"
+                        />
+                        <IndicatorTile 
+                            label="Z-Score" 
+                            value={data.strategy?.Z_score?.toFixed(2) || '---'} 
+                            unit="σ"
+                            sublabel="Mean Reversion (30m)"
+                        />
                     </div>
                 </div>
 
-                {/* Ritual Logs */}
+                {/* System Monitor Area */}
                 <div className="space-y-6">
-                    <h2 className="text-sm font-bold text-white/30 tracking-[0.4em] uppercase px-4 border-l-2 border-[#325ba0]">Trade Logs / 霊界通信記録</h2>
-                    <div className="bg-black/40 border border-white/5 rounded-[40px] overflow-hidden">
-                        <div className="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center px-8">
-                            <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Activity Feed</span>
-                            <div className="flex gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
-                                <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
-                                <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
+                    <div className="flex items-center gap-4 px-4">
+                        <Activity size={14} className="text-[#f15a24]" />
+                        <h2 className="text-xs font-bold text-white/50 tracking-[0.4em] uppercase">System Pulse / 執行パルス</h2>
+                    </div>
+                    <div className="p-8 bg-black/60 border border-white/5 rounded-[40px] space-y-6">
+                        <div className="flex justify-between items-end border-b border-white/5 pb-6">
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Fee Guard</span>
+                                <p className="text-sm font-black tracking-wide">ACTIVE: 06:50 JST</p>
+                            </div>
+                            <div className="text-right space-y-1">
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Rate Limit</span>
+                                <p className="text-sm font-black tracking-wide">1,000 ms (HARD)</p>
                             </div>
                         </div>
-                        <div className="p-2 h-[300px] overflow-y-auto itako-scrollbar-thin space-y-2">
-                            {[
-                                { t: '21:13', m: 'LTC WebSocket 接続成功。購読開始 (symbolId: 10)', c: 'text-emerald-500' },
-                                { t: '21:10', m: 'Zen-Grid エンジン起動。Z-score 監視中...', c: 'text-white/60' },
-                                { t: '21:05', m: '戦略切り替え: BTC -> LTC (ライトコイン)', c: 'text-[#325ba0]' },
-                                { t: '21:00', m: 'NotebookLM 調査完了。署名ロジックを更新。', c: 'text-white/40' },
-                                { t: '20:55', m: 'デイ・グリッド戦略案を承認。', c: 'text-white/20' }
-                            ].map((log, i) => (
-                                <div key={i} className="flex items-start gap-4 p-4 hover:bg-white/5 rounded-2xl transition-all group">
-                                    <span className="text-[9px] font-mono text-white/30 mt-1">{log.t}</span>
-                                    <span className={`text-xs font-medium tracking-wide ${log.c} group-hover:text-white transition-colors`}>
-                                        {log.m}
-                                    </span>
+                        <div className="pt-2">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="p-2 bg-[#f15a24]/10 rounded-lg">
+                                    <Shield size={16} className="text-[#f15a24]" />
                                 </div>
-                            ))}
+                                <span className="text-[10px] font-bold tracking-[0.2em] text-white/60 uppercase">Operational Guardrails Engaged / 安全機構作動中</span>
+                            </div>
+                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: "100%" }}
+                                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                                    className="h-full bg-[#f15a24]"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
