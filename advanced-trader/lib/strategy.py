@@ -34,8 +34,8 @@ class LtcStrategy:
         新しい足が確定した場合は True を返す。
         """
         try:
-            bid = float(ticker_data.get("bid", 0))
-            ask = float(ticker_data.get("ask", 0))
+            bid = float(ticker_data.get("bestBid", ticker_data.get("bid", 0)))
+            ask = float(ticker_data.get("bestAsk", ticker_data.get("ask", 0)))
             price = (bid + ask) / 2.0
             ts_ms = ticker_data.get("timestamp", datetime.now().timestamp() * 1000)
             # ミリ秒を秒へ、さらに1分単位へ切り捨てる

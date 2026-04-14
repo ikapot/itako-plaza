@@ -28,7 +28,7 @@ class ZenGridEngine:
 
     async def start(self):
         """エンジンを起動する"""
-        logger.info("🕉️ Zen-Grid Engine V2 starting...")
+        logger.info("Zen-Grid Engine V2 starting...")
         self.is_running = True
         
         # WebSocket コールバック設定
@@ -50,7 +50,7 @@ class ZenGridEngine:
                 self.strategy.calculate_indicators()
                 # 1分おきの生存報告 (Heartbeat)
                 last_p = self.strategy.df.iloc[-1]['close']
-                logger.info(f"💓 Heartbeat | LTC: {last_p:.1f} | Indicators Updated")
+                logger.info(f"Heartbeat | LTC: {last_p:.1f} | Indicators Updated")
         except Exception as e:
             logger.error(f"Error in ticker update flow: {e}")
 
@@ -58,7 +58,7 @@ class ZenGridEngine:
         """JST 06:50 の管理料回避決済"""
         now = datetime.datetime.now()
         if now.hour == 6 and 50 <= now.minute <= 59:
-            logger.warning("🕒 Fee Management window. Closing all LTC positions...")
+            logger.warning("Fee Management window. Closing all LTC positions...")
             await self._force_close_all()
 
     async def _force_close_all(self):
@@ -72,15 +72,15 @@ class ZenGridEngine:
                 close_side = "SELL" if side == "BUY" else "BUY"
                 amt = float(pos.get("amount", 0))
                 
-                logger.warning(f"🛡️ Closing position: {side} {amt}")
+                logger.warning(f"Closing position: {side} {amt}")
                 res = self.rest.place_cfd_order(self.symbol_id, close_side, amt, "MARKET", "CLOSE")
-                logger.info(f"✅ Closed: {res}")
+                logger.info(f"Closed: {res}")
         except Exception as e:
             logger.error(f"Force close failed: {e}")
 
     async def execute_grid_logic(self):
         """メインの参入ロジックループ"""
-        logger.info("📡 Strategy monitoring active...")
+        logger.info("Strategy monitoring active...")
         while self.is_running:
             # 最低限のデータ（指標計算用）が溜まるまで待機
             if len(self.strategy.df) < 30:
@@ -91,7 +91,7 @@ class ZenGridEngine:
             signal = self.strategy.get_entry_signal()
             
             if signal:
-                logger.info(f"✨ Signal Detected: {signal}. Checking for approval...")
+                logger.info(f"Signal Detected: {signal}. Checking for approval...")
                 # 承認フロー連携
                 from lib.trade_signal import create_signal, get_signal_status, clear_signal
                 from lib.agent_notify import send_notification
@@ -101,7 +101,7 @@ class ZenGridEngine:
                 create_signal(signal, price, z)
                 
                 # iPhone 通知
-                asyncio.create_task(send_notification(f"📉 LTC/JPY {signal} Signal at {price:.1f} (Z={z:.1f}). Approve?"))
+                asyncio.create_task(send_notification(f"LTC/JPY {signal} Signal at {price:.1f} (Z={z:.1f}). Approve?"))
                 
                 # 承認待機 (10分)
                 approved = False
@@ -115,12 +115,12 @@ class ZenGridEngine:
                     await asyncio.sleep(10)
                 
                 if approved:
-                    logger.info(f"🚀 APPROVED. Executing {signal}...")
+                    logger.info(f"APPROVED. Executing {signal}...")
                     try:
                         res = self.rest.place_cfd_order(self.symbol_id, signal, self.trade_amount, "MARKET", "NEW")
-                        logger.info(f"✅ Success: {res}")
+                        logger.info(f"Success: {res}")
                     except Exception as e:
-                        logger.error(f"❌ Error: {e}")
+                        logger.error(f"Error: {e}")
                 
                 clear_signal()
                 await asyncio.sleep(300) # 次の判定まで5分待機

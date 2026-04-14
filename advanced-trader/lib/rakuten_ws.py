@@ -20,7 +20,7 @@ class RakutenWebSocketClient:
         
     async def connect(self):
         """WebSocket に接続し、待機ループを開始する (自動再接続付き)"""
-        logger.info(f"🔌 Initializing WebSocket connection to {self.ws_url}...")
+        logger.info(f"Initializing WebSocket connection to {self.ws_url}...")
         self.running = True
         retry_delay = 1
         
@@ -28,7 +28,7 @@ class RakutenWebSocketClient:
             try:
                 async with websockets.connect(self.ws_url, ping_interval=20, ping_timeout=10) as ws:
                     self.websocket = ws
-                    logger.info("✅ WebSocket connected and active.")
+                    logger.info("WebSocket connected and active.")
                     retry_delay = 1 # 成功時にリトライ遅延をリセット
                     
                     # 購読の開始 (TICKER)
@@ -41,7 +41,7 @@ class RakutenWebSocketClient:
                         
             except (websockets.exceptions.ConnectionClosed, Exception) as e:
                 if not self.running: break
-                logger.warning(f"⚠️ WebSocket disconnected ({e}). Reconnecting in {retry_delay}s...")
+                logger.warning(f"WebSocket disconnected ({e}). Reconnecting in {retry_delay}s...")
                 await asyncio.sleep(retry_delay)
                 retry_delay = min(retry_delay * 2, 60) # 最大60秒まで指数バックオフ
 
@@ -54,7 +54,7 @@ class RakutenWebSocketClient:
             "data": channel
         }
         await self.websocket.send(json.dumps(payload))
-        logger.info(f"📡 Subscribed to {channel} for Symbol {symbol_id}")
+        logger.info(f"Subscribed to {channel} for Symbol {symbol_id}")
 
     async def _handle_message(self, message: str):
         """受信した Raw メッセージの解析と配信"""
@@ -62,13 +62,9 @@ class RakutenWebSocketClient:
         
         try:
             data = json.loads(message)
-            channel = data.get("channel")
-            
-            # TICKER 情報の抽出
-            if channel == "TICKER" and self.on_ticker:
-                ticker_data = data.get("data")
-                if ticker_data:
-                    self.on_ticker(ticker_data)
+            # サーバーはフラットな JSON (symbolId 等を含む) を送ってくることを特定
+            if "symbolId" in data and self.on_ticker:
+                self.on_ticker(data)
                     
         except json.JSONDecodeError:
             pass # PONG 等の非JSONメッセージは無視

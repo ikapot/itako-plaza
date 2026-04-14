@@ -66,7 +66,7 @@ class RakutenWalletClient:
             elapsed = now - self._last_request_time
             if elapsed < self._min_interval:
                 wait_time = self._min_interval - elapsed
-                logger.debug(f"⏳ Rate Limit Guard: Waiting {wait_time:.3f}s...")
+                logger.debug(f"Rate Limit Guard: Waiting {wait_time:.3f}s...")
                 await asyncio.sleep(wait_time)
             self._last_request_time = time.time()
 
@@ -108,7 +108,6 @@ class RakutenWalletClient:
         headers = {
             "API-KEY": self.api_key,
             "NONCE": nonce,
-            "TIMESTAMP": nonce,
             "SIGNATURE": signature,
             "Content-Type": "application/json"
         }
@@ -123,7 +122,7 @@ class RakutenWalletClient:
                 error_msg += f" | Response: {resp.json()}"
             except:
                 pass
-            logger.error(f"❌ API Error: {error_msg}")
+            logger.error(f"API Error: {error_msg}")
             raise Exception(error_msg)
             
         return resp.json()

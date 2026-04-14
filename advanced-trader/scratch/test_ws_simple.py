@@ -13,13 +13,19 @@ async def main():
     
     # ティッカーを受け取った時の処理（マスターの案を採用）
     def handle_ticker(data):
-        # データの構造に合わせて抽出
-        price = data.get('last', data.get('bid'))
-        print(f"📡 LTC価格受信: {price} JPY")
+        print(f"LTC価格受信: {data}", flush=True)
 
     client.on_ticker = handle_ticker
     
-    print("🚀 WebSocket Test Starting... (Press Ctrl+C to stop)")
+    # 生メッセージを確認するためのデバッグ用フック (もしあれば)
+    # ここでは既存の _handle_message をラップして生出力させる
+    original_handle = client._handle_message
+    async def debug_handle(message):
+        print(f"RAW MESSAGE: {message}", flush=True)
+        await original_handle(message)
+    client._handle_message = debug_handle
+    
+    print("WebSocket Test Starting... Connecting to server...", flush=True)
     await client.connect()
 
 if __name__ == "__main__":

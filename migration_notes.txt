@@ -1,0 +1,21 @@
+# 🕉️ Zen-LTC-Quant Migration Notes (V1 to V2.2)
+
+## 1. 到達したアーキテクチャ (V2.2)
+- **Engine (V2)**: `ZenGridEngine` が `LtcStrategy` と `RakutenWalletClient (Async)` を統括。
+- **Strategy**: Pandas を使用し OHLCV (1m足) を生成。RSI, EMA, ATR, Z-score によるアンサンブル判定。
+- **API Client**: `asyncio.Lock` による 1,000ms 厳守リミッター搭載。`TIMESTAMP` ヘッダーは 20004 回避のため削除済み。
+- **WS Client**: 楽天 Wallet CFD の「フラットな JSON Ticker」に完全対応。自動再接続機能付き。
+
+## 2. 解決済みの重要課題
+- **20004 (Invalid Nonce)**: ヘッダーから `TIMESTAMP` を削除し、`NONCE` を 13 桁ミリ秒に固定することで解消。
+- **WS 沈黙事件**: データの入れ子構造（`channel/data`）が存在しないことを特定し、トップレベルを直接参照するように修正。
+- **Windows エンコード**: ログから絵文字を全排出し、CP932 環境下での `UnicodeEncodeError` を根絶。
+
+## 3. 次のスレッドで開始すべきこと
+1. `RULES_RAKUTEN.md` の読み込みと遵守の宣言。
+2. ボットの生存確認 ( `trader.log` の Heartbeat 監視)。
+3. `agent_notify.py` による連携テストの実施。
+
+## 4. 未解決・検討事項
+- `LtcStrategy` におけるシグナル強度のさらなる調整。
+- 利確後の「ドローダウン最小化」のためのエグジットルールの微調整。
