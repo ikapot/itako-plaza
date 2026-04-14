@@ -25,44 +25,47 @@ async def main():
         logger.error("API or Secret key not found.")
         return
 
-    logger.info(f"Zen-LTC-Quant V2.5 [AI-Integrated] Starting... (DRY_RUN={dry_run})")
-    
+    logger.info(f"Zen-LTC-Quant V2.5 Starting... (DRY_RUN={dry_run})")
+
     # クライアントの初期化 (CFD)
     rest_client = RakutenWalletClient(api_key, api_secret, is_spot=False)
     ws_client = RakutenWebSocketClient(symbol_id=10)
     engine = ZenGridEngine(rest_client, ws_client, dry_run=dry_run)
-    
-    tasks = [
-        engine.start(),
-        engine.execute_grid_logic(),
-        ws_client.connect()
-    ]
-    
+
+    # 稼働時間制限 (1-shot用)
+    duration = os.environ.get("EXECUTION_DURATION")
+    d_sec = None
+    if duration:
+        try:
+            d_sec = int(duration)
+            logger.info(f"One-shot mode: Will stop in {d_sec} seconds")
+        except ValueError:
+            logger.warning(f"Invalid EXECUTION_DURATION: {duration}")
+
+    async def shutdown_timer(seconds):
+        await asyncio.sleep(seconds)
+        logger.info("Time is up! Shutting down...")
+        engine.is_running = False
+        ws_client.stop()
+
     try:
-        # 稼働時間制限 (1-shot用)
-        duration = os.environ.get("EXECUTION_DURATION")
-        if duration:
-            try:
-                d_sec = int(duration)
-                logger.info(f"⏳ One-shot mode: Will stop in {d_sec} seconds")
-                
-                async def shutdown_timer(seconds):
-                    await asyncio.sleep(seconds)
-                    logger.info("⏰ Time is up! Shutting down...")
-                    engine.is_running = False
-                    ws_client.stop()
-                
-                asyncio.create_task(shutdown_timer(d_sec))
-            except ValueError:
-                logger.warning(f"Invalid EXECUTION_DURATION: {duration}")
+        # NOTE: engine.start() の内部で ws_client.connect() を create_task しているため
+        # ここで ws_client.connect() を gather に入れると 2重接続になるため除外
+        tasks = [
+            asyncio.create_task(engine.start()),
+            asyncio.create_task(engine.execute_grid_logic()),
+        ]
+        if d_sec:
+            tasks.append(asyncio.create_task(shutdown_timer(d_sec)))
 
         await asyncio.gather(*tasks)
+
     except KeyboardInterrupt:
-        logger.info("🛑 Stopping trader...")
+        logger.info("Stopping trader...")
         engine.is_running = False
         ws_client.stop()
     except Exception as e:
-        logger.error(f"Fatal error: {e}")
+        logger.error(f"Fatal error: {e}", exc_info=True)
     finally:
         logger.info("Finished.")
 
