@@ -76,21 +76,29 @@ class ZenGridEngine:
         
         # メインループ: 管理料回避 ＆ ポジション監視
         try:
+            print("[ZEN_DIAG] Entering engine main loop...")
             while self.is_running:
                 await self._check_time_and_manage_fees()
-                await asyncio.sleep(60)
-
+                
                 # キャンドル更新チェック (簡略化)
                 self.strategy.calculate_indicators()
+                
                 # 1分おきの生存報告 (Heartbeat) & Gist 同期
                 if not self.strategy.df.empty:
                     last_p = self.strategy.df.iloc[-1]['close']
-                    logger.info(f"Heartbeat | LTC: {last_p:.1f} | Indicators Updated")
+                    msg = f"Heartbeat | LTC: {last_p:.1f} | Indicators Updated"
+                    logger.info(msg)
+                    print(f"[ZEN_DIAG] {msg}")
                     await self._save_strategy_state()
                 else:
-                    logger.info("Heartbeat | Waiting for market data...")
+                    msg_wait = "Heartbeat | Waiting for market data (WebSocket)..."
+                    logger.info(msg_wait)
+                    print(f"[ZEN_DIAG] {msg_wait}")
+                
+                await asyncio.sleep(60)
         except Exception as e:
             logger.error(f"Error in engine main loop: {e}")
+            print(f"[ZEN_DIAG] Main loop exception: {e}")
 
     def _on_ticker_update(self, data: dict):
         """WebSocket からの価格更新を受信"""
