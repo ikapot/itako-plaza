@@ -94,11 +94,12 @@ AG: 「ルートディレクトリを確認します。」
 # モデル優先リスト (高性能→フォールバック順)
 # ==============================================================================
 FREE_MODELS = [
-    "meta-llama/llama-4-maverick:free",   # 最強レベルの無料マルチモーダルLLM
-    "deepseek/deepseek-r1:free",           # 推論特化・高精度
-    "google/gemma-4-31b-it:free",          # Google製
-    "google/gemma-3-27b-it:free",          # バックアップ
-    "openrouter/free",                     # 最終フォールバック
+    "openai/gpt-oss-120b:free",               # OpenAI OSS 120B (最大規模・高品質)
+    "nvidia/nemotron-3-super-120b-a12b:free", # NVIDIA 120B 超大型
+    "meta-llama/llama-3.3-70b-instruct:free", # Llama 3.3 70B (高精度・高速)
+    "google/gemma-4-31b-it:free",             # Google Gemma 4 31B
+    "google/gemma-3-27b-it:free",             # バックアップ
+    "openrouter/free",                        # 最終フォールバック
 ]
 
 # ==============================================================================
