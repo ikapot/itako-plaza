@@ -26,7 +26,9 @@ class RakutenWebSocketClient:
         
         while self.running:
             try:
-                async with websockets.connect(self.ws_url, ping_interval=20, ping_timeout=10) as ws:
+                # 403 Forbidden 回避のために Origin ヘッダーを指定
+                headers = {"Origin": "https://exchange.rakuten-wallet.co.jp"}
+                async with websockets.connect(self.ws_url, ping_interval=20, ping_timeout=10, extra_headers=headers) as ws:
                     self.websocket = ws
                     logger.info("WebSocket connected and active.")
                     retry_delay = 1 # 成功時にリトライ遅延をリセット
