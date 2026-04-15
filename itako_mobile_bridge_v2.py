@@ -8,6 +8,8 @@ import socket
 import aiohttp
 import aiohttp.resolver
 import requests
+import re
+import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -34,284 +36,342 @@ WORKSPACE = os.path.abspath(os.path.dirname(__file__))
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
 logger = logging.getLogger("MobileBridgeV2")
 
-# --- Tool Definitions for Gemini ---
+# ==============================================================================
+# SYSTEM PROMPT (Claude-Style: Structured + Chain-of-Thought)
+# ==============================================================================
+SYSTEM_PROMPT = """あなたは「Antigravity (AG)」— ユーザーのPC上で稼働する、超優秀なエンジニアリングAIエージェントです。
 
-def list_dir(path: str = "."):
-    """Lists files and directories in the specified path."""
+## 基本的な振る舞い
+- 常に日本語で答えてください
+- 返答は簡潔・具体的・即実行可能なものにしてください
+- 不明な点は正直に「わかりません」と言い、推測で答えないでください
+- ユーザーを「マスター」と呼んでください
+
+## あなたが使えるアクション語法
+
+### 即座実行（読み込み系 — 承認不要）
+```
+[LIST_DIR: <パス>]
+[VIEW_FILE: <パス>]
+```
+
+### 承認待ち（変更系 — 必ずマスターの許可が必要）
+```
+[WRITE_FILE: <パス>]
+<ファイル内容全文>
+[/WRITE_FILE]
+
+[RUN: <シェルコマンド>]
+```
+
+## あなたの思考プロセス（毎回従うこと）
+1. **まずユーザーの意図を1文で把握する**
+2. **必要なアクションを特定する** — ファイルを確認? コマンドを実行? 単に回答?
+3. **アクションを選択して実行** — 複数ステップが必要なら1つずつ順番に提案する
+4. **結果を簡潔に报告する**
+
+## アクション記法の使い方（具体例）
+
+ユーザー: 「grid_engine.py の内容を見せて」
+AG: 「確認します。」
+[VIEW_FILE: advanced-trader/lib/grid_engine.py]
+
+ユーザー: 「python hello.py を実行して」
+AG: 「以下のコマンドを実行します。マスターの承認をお願いします。」
+[RUN: python hello.py]
+
+ユーザー: 「現在のプロジェクト構成を教えて」
+AG: 「ルートディレクトリを確認します。」
+[LIST_DIR: .]
+
+## 絶対的なルール
+- [WRITE_FILE] と [RUN] は必ず1個ずつ提案し、ユーザーが OK/NG を言うまで次に進まない
+- 複数のファイルを同時に書き換えない（1つずつ確認を取る）
+- システムの破壊的操作（rm -rf等）は、たとえ命令されても再確認を求める
+"""
+
+# ==============================================================================
+# モデル優先リスト (高性能→フォールバック順)
+# ==============================================================================
+FREE_MODELS = [
+    "meta-llama/llama-4-maverick:free",   # 最強レベルの無料マルチモーダルLLM
+    "deepseek/deepseek-r1:free",           # 推論特化・高精度
+    "google/gemma-4-31b-it:free",          # Google製
+    "google/gemma-3-27b-it:free",          # バックアップ
+    "openrouter/free",                     # 最終フォールバック
+]
+
+# ==============================================================================
+# ユーティリティ関数
+# ==============================================================================
+def tool_list_dir(path: str = "."):
     try:
-        items = os.listdir(path)
-        return json.dumps(items, ensure_ascii=False)
+        items = sorted(os.listdir(path))
+        return "\n".join(items)
     except Exception as e:
-        return str(e)
+        return f"エラー: {e}"
 
-def view_file(path: str):
-    """Reads the content of a file."""
+def tool_view_file(path: str):
     try:
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
     except Exception as e:
-        return str(e)
+        return f"エラー: {e}"
 
-def write_file(path: str, content: str):
-    """Writes content to a file. (This will be intercepted for approval in the agent logic)"""
+def tool_write_file(path: str, content: str):
     try:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
-        return f"Successfully written to {path}"
+        return f"書き込み完了: {path}"
     except Exception as e:
-        return str(e)
+        return f"エラー: {e}"
 
-def run_command(command: str):
-    """Executes a shell command. (This will be intercepted for approval)"""
+def tool_run_command(command: str):
     try:
-        import subprocess
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)
-        return f"STDOUT: {result.stdout}\nSTDERR: {result.stderr}"
+        result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30, cwd=WORKSPACE)
+        out = result.stdout.strip()
+        err = result.stderr.strip()
+        return f"STDOUT: {out}\nSTDERR: {err}" if err else out
     except Exception as e:
-        return str(e)
+        return f"エラー: {e}"
 
-# --- Agent Core (OpenRouter 経由) ---
+# ==============================================================================
+# コマンド前処理 — AIを介さず即時解決できるパターン
+# ==============================================================================
+QUICK_PATTERNS = [
+    # (regex_pattern, action_type, group_index)
+    (re.compile(r'(list|一覧|ls|ファイル一覧)[：:\s]*([\./\w\-\.]*)', re.IGNORECASE), 'list_dir', 2),
+    (re.compile(r'(view|見せて|show|cat)[：:\s]*([\./\w\-\.]+)', re.IGNORECASE), 'view_file', 2),
+    (re.compile(r'(status|ステータス|状態)$', re.IGNORECASE), 'status', 0),
+]
 
-SYSTEM_PROMPT = """あなたは 'Antigravity (AG)' と呼ばれる高度なエンジニアリングAIです。
-Discord 経由でマスター（ユーザー）から指示を受け、PC上のファイルを操作したり、システムの状態を報告したりします。
-あなたは以下の「アクション」語法を使って操作を要求できます。
+def quick_dispatch(text: str):
+    """AIなしで即時解決できるコマンドを事前処理。(result, handled)を返す。"""
+    stripped = text.strip()
+    
+    # 単純な状態確認
+    if re.match(r'^(status|ステータス|状態確認)$', stripped, re.IGNORECASE):
+        return "🟢 AG Bridge V2 オンライン\nワークスペース: " + WORKSPACE, True
 
-**読み込み系（即座実行）:**
-- [LIST_DIR: <パス>] -> ディレクトリの一覧を表示
-- [VIEW_FILE: <パス>] -> ファイルの内容を表示
+    # LIST_DIR ショートカット: 「一覧」「ls .」など
+    m = re.match(r'^(?:ls|list|一覧)\s*([\./\w\-\.]*)\s*$', stripped, re.IGNORECASE)
+    if m:
+        path = m.group(1).strip() or "."
+        result = tool_list_dir(path)
+        return f"📁 `{path}` の一覧:\n```\n{result}\n```", True
 
-**変更系（承認待ち）:**
-- [WRITE_FILE: <パス>]\n<内容全文>[/WRITE_FILE] -> ファイルを書き換え (差分を提示します)
-- [RUN: <コマンド>] -> シェルコマンドを実行 (内容を提示します)
+    # VIEW_FILE ショートカット: 「cat <file>」「見せて <file>」
+    m = re.match(r'^(?:cat|view|見せて)\s+(.+)$', stripped, re.IGNORECASE)
+    if m:
+        path = m.group(1).strip()
+        result = tool_view_file(path)
+        display = result[:1500] + "\n...(省略)" if len(result) > 1500 else result
+        return f"📄 `{path}`:\n```\n{display}\n```", True
 
-これらの記法を正確に使ってください。アクションが不要な場合は普通の日本語で回答してください。"""
+    return None, False
 
+# ==============================================================================
+# Agent Core
+# ==============================================================================
 class ItakoAgent:
-    def __init__(self, api_key):
+    def __init__(self, api_key: str):
         self.api_key = api_key
         self.history = [{"role": "system", "content": SYSTEM_PROMPT}]
 
     def ask(self, user_message: str) -> str:
-        """OpenRouter 経由で応答を生成する。"""
+        """OpenRouter 経由で応答を生成する (フォールバック & 詳細エラー対応)。"""
         self.history.append({"role": "user", "content": user_message})
+
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "HTTP-Referer": "https://itako-plaza.vercel.app",
             "X-Title": "Itako Mobile Bridge V2",
             "Content-Type": "application/json"
         }
-        payload = {
-            "model": "google/gemma-4-31b-it:free",
-            "messages": self.history
-        }
-        try:
-            resp = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers=headers, json=payload, timeout=30
-            )
-            resp.raise_for_status()
-            content = resp.json()["choices"][0]["message"]["content"]
-            self.history.append({"role": "assistant", "content": content})
-            # 履歴が長すぎる場合は古いメッセージを切り捨てる・systemは常に保持
-            if len(self.history) > 21:
-                self.history = [self.history[0]] + self.history[-20:]
-            return content
-        except Exception as e:
-            logger.error(f"OpenRouter Error: {e}")
-            return None
 
-# --- Discord Bot ---
+        last_error = ""
+        for model in FREE_MODELS:
+            payload = {
+                "model": model,
+                "messages": self.history,
+                "max_tokens": 1500,
+            }
+            try:
+                resp = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers, json=payload, timeout=45
+                )
+                if resp.status_code == 429:
+                    last_error = f"Rate Limit (429) - {model}"
+                    logger.warning(f"Fallback: {last_error}")
+                    continue
+                if resp.status_code == 402:
+                    last_error = f"残高不足 (402) - {model}"
+                    logger.warning(f"Fallback: {last_error}")
+                    continue
 
+                resp.raise_for_status()
+                data = resp.json()
+                content = data["choices"][0]["message"]["content"]
+                used_model = data.get("model", model)
+                logger.info(f"Response from: {used_model}")
+
+                self.history.append({"role": "assistant", "content": content})
+
+                # 履歴制限 (system + 最新20件)
+                if len(self.history) > 22:
+                    self.history = [self.history[0]] + self.history[-20:]
+
+                return content
+
+            except Exception as e:
+                last_error = f"{model}: {str(e)}"
+                logger.error(f"OpenRouter Error: {last_error}")
+                if "429" in str(e) or "402" in str(e):
+                    continue
+                break
+
+        return (
+            f"❌ **AI思考エラー**\n"
+            f"原因: `{last_error}`\n"
+            f"無料枠の全モデルが混雑中か、APIキーに問題があります。\n"
+            f"少し待ってから再試行するか、OpenRouterにチャージしてください。"
+        )
+
+# ==============================================================================
+# Discord Bot
+# ==============================================================================
 class MobileBridgeBot(commands.Bot):
     def __init__(self, agent: ItakoAgent):
         intents = discord.Intents.default()
         intents.message_content = True
         super().__init__(command_prefix="!", intents=intents)
         self.agent = agent
-        self.pending_action = None # { "type": "write", "path": "...", "content": "..." }
+        self.pending_action = None  # 承認待ちアクション
 
     async def setup_hook(self):
-        """discord.py の内部 HTTP クライアントに IPv4 強制コネクターを適用する。"""
         resolver = aiohttp.ThreadedResolver()
-        connector = aiohttp.TCPConnector(
-            resolver=resolver,
-            family=socket.AF_INET,
-            ssl=None
-        )
-        # discord.py v2 の内部 http オブジェクトへコネクターを注入
+        connector = aiohttp.TCPConnector(resolver=resolver, family=socket.AF_INET, ssl=None)
         self.http.connector = connector
         self.http.connector_owner = True
         logger.info("setup_hook: AF_INET connector injected into discord.http.")
 
     async def on_ready(self):
-        logger.info(f"✅ Bridge V2 Online: {self.user}")
+        logger.info(f"Bridge V2 Online: {self.user}")
         await self.change_presence(activity=discord.Game(name="AG Direct Access"))
 
     async def on_message(self, message):
         if message.author == self.user:
             return
-        
-        # ユーザー制限
         if ALLOWED_USER_ID != 0 and message.author.id != ALLOWED_USER_ID:
             return
 
-        # 承認待ち状態の処理
+        # 承認フロー
         if self.pending_action:
-            if message.content.lower() in ["ok", "はい", "実行", "y"]:
+            resp_lower = message.content.strip().lower()
+            if resp_lower in ["ok", "はい", "実行", "y", "yes"]:
                 await self.execute_pending(message)
-            elif message.content.lower() in ["ng", "いいえ", "キャンセル", "n"]:
+            elif resp_lower in ["ng", "いいえ", "キャンセル", "n", "no"]:
                 self.pending_action = None
-                await message.reply("🛑 操作をキャンセルしました。")
+                await message.reply("🛑 キャンセルしました。")
             else:
-                await message.reply("⚠️ 現在承認待ちの操作があります。「OK」か「NG」で答えてください。")
+                await message.reply("⚠️ 承認待ちの操作があります。**OK** か **NG** で返答してください。")
             return
 
-        # 通常の指示処理
+        # DM または メンション
         if isinstance(message.channel, discord.DMChannel) or self.user.mentioned_in(message):
-            await self.process_ag_instruction(message)
+            await self.process_instruction(message)
 
-    async def process_ag_instruction(self, message):
+    async def process_instruction(self, message):
+        prompt = message.content.replace(f"<@{self.user.id}>", "").strip()
+        if not prompt:
+            return
+
         async with message.channel.typing():
-            prompt = message.content.replace(f"<@{self.user.id}>", "").strip()
-            response_text = await asyncio.to_thread(self.agent.ask, prompt)
-            
-            if not response_text:
-                await message.reply("❌ AGの思考プロセスでエラーが発生しました。")
+            # ① まず前処理で即時解決を試みる
+            quick_result, handled = quick_dispatch(prompt)
+            if handled:
+                await message.reply(quick_result[:1990])
                 return
 
-            await self.parse_and_execute(message, response_text)
+            # ② AI に投げる
+            response_text = await asyncio.to_thread(self.agent.ask, prompt)
 
-    async def parse_and_execute(self, message, text: str):
-        """AG の返答を解析し、アクションがあればインターセプトする。"""
-        import re
+        if not response_text:
+            await message.reply("❌ AGの思考プロセスでエラーが発生しました。")
+            return
 
-        # [LIST_DIR: ...] の処理
+        await self.parse_and_respond(message, response_text)
+
+    async def parse_and_respond(self, message, text: str):
+        """AG の返答を解析し、アクションをインターセプトまたはそのまま送信する。"""
+
+        # [LIST_DIR: ...]
         m = re.search(r'\[LIST_DIR:\s*(.+?)\]', text)
         if m:
             path = m.group(1).strip()
-            result = list_dir(path)
-            reply = f"📁 `{path}` の内容:\n```\n{result}\n```"
-            # 長すぎる場合は切り詰める
-            if len(reply) > 1900: reply = reply[:1900] + "\n...(省略)"
-            await message.reply(reply)
+            result = tool_list_dir(path)
+            reply = f"📁 `{path}` の一覧:\n```\n{result}\n```"
+            await message.reply(reply[:1990])
             return
 
-        # [VIEW_FILE: ...] の処理
+        # [VIEW_FILE: ...]
         m = re.search(r'\[VIEW_FILE:\s*(.+?)\]', text)
         if m:
             path = m.group(1).strip()
-            result = view_file(path)
-            reply = f"📄 `{path}`:\n```\n{result}\n```"
-            if len(reply) > 1900: reply = reply[:1800] + "\n...(省略)"
-            await message.reply(reply)
+            result = tool_view_file(path)
+            display = result[:1500] + "\n...(省略)" if len(result) > 1500 else result
+            await message.reply(f"📄 `{path}`:\n```\n{display}\n```")
             return
 
-        # [WRITE_FILE: ...] ... [/WRITE_FILE] の処理
-        m = re.search(r'\[WRITE_FILE:\s*(.+?)\]\s*\n([\s\S]+?)\[/WRITE_FILE\]', text)
+        # [WRITE_FILE: ...] ... [/WRITE_FILE]
+        m = re.search(r'\[WRITE_FILE:\s*(.+?)\]\n([\s\S]+?)\[/WRITE_FILE\]', text)
         if m:
             path = m.group(1).strip()
             new_content = m.group(2)
-            old_content = view_file(path) if os.path.exists(path) else ""
+            old_content = tool_view_file(path) if os.path.exists(path) else ""
             diff = "".join(difflib.unified_diff(
                 old_content.splitlines(keepends=True),
                 new_content.splitlines(keepends=True),
-                fromfile=f'old/{os.path.basename(path)}',
-                tofile=f'new/{os.path.basename(path)}'
+                fromfile=f"old/{os.path.basename(path)}",
+                tofile=f"new/{os.path.basename(path)}"
             ))
             self.pending_action = {"type": "write", "path": path, "content": new_content}
-            msg = f"📝 **書き換え提案:** `{path}`\n```diff\n{diff if diff else '(新規作成)'}\n```\n実行してよろしいですか？ **(OK/NG)**"
-            if len(msg) > 1900: msg = msg[:1800] + "\n...(省略)...\n実行してよろしいですか？ **(OK/NG)**"
+            msg = f"📝 **書き換え提案**: `{path}`\n```diff\n{diff if diff else '(新規作成)'}\n```\n実行しますか？ **(OK/NG)**"
+            if len(msg) > 1900:
+                msg = msg[:1800] + "\n...(省略)...\n実行しますか？ **(OK/NG)**"
             await message.reply(msg)
             return
 
-        # [RUN: ...] の処理
+        # [RUN: ...]
         m = re.search(r'\[RUN:\s*(.+?)\]', text)
         if m:
             cmd = m.group(1).strip()
             self.pending_action = {"type": "command", "command": cmd}
-            await message.reply(f"💻 **コマンド実行提案:**\n`{cmd}`\n実行してよろしいですか？ **(OK/NG)**")
+            await message.reply(f"💻 **コマンド実行提案**:\n```\n{cmd}\n```\n実行しますか？ **(OK/NG)**")
             return
 
-        # 通常テキスト返答
-        if len(text) > 1900: text = text[:1900] + "..."
+        # 通常テキスト
+        if len(text) > 1990:
+            text = text[:1990] + "..."
         await message.reply(text)
-
-    async def handle_gemini_response(self, message, response):
-        # Function Calling のチェック
-        for part in response.candidates[0].content.parts:
-            if fn := part.function_call:
-                # ツール呼び出しをインターセプト
-                if fn.name == "write_file":
-                    args = fn.args
-                    path = args['path']
-                    new_content = args['content']
-                    
-                    old_content = ""
-                    if os.path.exists(path):
-                        with open(path, "r", encoding="utf-8") as f:
-                            old_content = f.read()
-                    
-                    # Diff 生成
-                    diff = "".join(difflib.unified_diff(
-                        old_content.splitlines(keepends=True),
-                        new_content.splitlines(keepends=True),
-                        fromfile=f'old/{os.path.basename(path)}',
-                        tofile=f'new/{os.path.basename(path)}'
-                    ))
-                    
-                    self.pending_action = {"type": "write", "path": path, "content": new_content, "fn_id": "temp"}
-                    
-                    msg = f"📝 **ファイルの書き換え提案:** `{path}`\n```diff\n{diff if diff else '(新規作成)'}\n```\n実行してよろしいですか？ (OK/NG)"
-                    # Discord の 2000文字制限対策
-                    if len(msg) > 1900:
-                        msg = msg[:1800] + "\n... (Diff too long) ...\n実行してよろしいですか？ (OK/NG)"
-                    await message.reply(msg)
-                    return
-                
-                elif fn.name == "run_command":
-                    cmd = fn.args['command']
-                    self.pending_action = {"type": "command", "command": cmd, "fn_id": "temp"}
-                    await message.reply(f"💻 **コマンド実行提案:**\n`{cmd}`\n実行してよろしいですか？ (OK/NG)")
-                    return
-                
-                else:
-                    # 読み込み系はそのまま実行
-                    result = self.execute_tool_immediately(fn.name, fn.args)
-                    # 結果をAGに戻して続きを聞く
-                    next_resp = self.agent.chat.send_message(
-                        genai.types.Content(
-                            parts=[genai.types.Part(
-                                function_response=genai.types.FunctionResponse(name=fn.name, response={'result': result})
-                            )]
-                        )
-                    )
-                    await self.handle_gemini_response(message, next_resp)
-                    return
-
-        # ツール呼び出しが無ければテキスト返答
-        await message.reply(response.text)
-
-    def execute_tool_immediately(self, name, args):
-        if name == "list_dir": return list_dir(**args)
-        if name == "view_file": return view_file(**args)
-        return "Unknown tool"
 
     async def execute_pending(self, message):
         action = self.pending_action
         self.pending_action = None
-        try:
-            if action['type'] == "write":
-                res = write_file(action['path'], action['content'])
-            elif action['type'] == "command":
-                res = run_command(action['command'])
+        async with message.channel.typing():
+            if action["type"] == "write":
+                result = await asyncio.to_thread(tool_write_file, action["path"], action["content"])
+            elif action["type"] == "command":
+                result = await asyncio.to_thread(tool_run_command, action["command"])
             else:
-                res = "Unknown action"
-            reply = f"✅ **実行完了:**\n{res}"
-            if len(reply) > 1900: reply = reply[:1900]
-            await message.reply(reply)
-        except Exception as e:
-            await message.reply(f"❌ 実行エラー: {e}")
+                result = "不明なアクション"
+        reply = f"✅ **実行完了**:\n```\n{result}\n```"
+        if len(reply) > 1990:
+            reply = reply[:1990]
+        await message.reply(reply)
+
 
 async def main():
     agent = ItakoAgent(OPENROUTER_API_KEY)
@@ -319,9 +379,9 @@ async def main():
     async with bot:
         await bot.start(DISCORD_TOKEN)
 
+
 if __name__ == "__main__":
     if not DISCORD_TOKEN or not OPENROUTER_API_KEY:
         print("Error: DISCORD_BOT_TOKEN and OPENROUTER_API_KEY must be set in .env.production")
         sys.exit(1)
-
     asyncio.run(main())
