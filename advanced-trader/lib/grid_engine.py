@@ -83,9 +83,12 @@ class ZenGridEngine:
                 # キャンドル更新チェック (簡略化)
                 self.strategy.calculate_indicators()
                 # 1分おきの生存報告 (Heartbeat) & Gist 同期
-                last_p = self.strategy.df.iloc[-1]['close']
-                logger.info(f"Heartbeat | LTC: {last_p:.1f} | Indicators Updated")
-                await self._save_strategy_state()
+                if not self.strategy.df.empty:
+                    last_p = self.strategy.df.iloc[-1]['close']
+                    logger.info(f"Heartbeat | LTC: {last_p:.1f} | Indicators Updated")
+                    await self._save_strategy_state()
+                else:
+                    logger.info("Heartbeat | Waiting for market data...")
         except Exception as e:
             logger.error(f"Error in engine main loop: {e}")
 
