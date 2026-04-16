@@ -181,7 +181,7 @@ class ZenGridEngine:
     async def _force_close_all(self):
         """全 LTC ポジションを成行決済"""
         try:
-            positions = self.rest.get_cfd_positions(self.symbol_id)
+            positions = await self.rest.get_cfd_positions(self.symbol_id)
             if not positions: return
 
             for pos in positions:

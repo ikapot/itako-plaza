@@ -102,3 +102,28 @@
 - **[完了] Gist 同期パラメータの整合**: エンジンとモニター間のファイル名（strategy_state.json）および環境変数を同期。
 - **[完了] ローカルテストサイト起動**: `http://localhost:3001` での正常表示を確認。
 - **[完了] Vercel ライブサイトの完全正常化**: `GIST_ID` の typo と、初期データ書き込みタイミングのズレを修正し、`https://ltc-monitor.vercel.app` への完全なリアルタイム同期を実現。
+
+## 2026-04-16 作業ログ（NotebookLM 調査と接続安定化）
+
+### 1. NotebookLM による深層リサーチ
+- **[完了] 楽天MD（仕様書）の再検証**: 
+    - WebSocket の TICKER 構造が「フラット」であることを再確認。
+    - 市場データ購読には認証不要であることを確認。
+    - 購読メッセージの `symbolId` が数値型である必要があることを特定。
+
+### 2. WebSocket 接続不良の根本解決 (Bug Fix)
+- **[完了] websockets ライブラリの互換性修正**: 
+    - `websockets 14.0+` で引数名が `extra_headers` から `additional_headers` に変更されていたことによる TypeError を発見し修正。
+    - GitHub Actions のワークフローを `websockets>=14.0` に更新。
+- **[完了] 欠落していた await の補完**: 
+    - `grid_engine.py` 内の `get_cfd_positions` 呼び出しに `await` が欠落していたバグを修正。
+- **[完了] ロギングの可視化**: 
+    - GitHub Actions のログに確実に出るよう、`[WS_DIAG]` 等のタグ付き print 文を追加。
+
+### 3. 実弾環境の正常化
+- **[完了] GitHub Actions での接続確認**: ローカルでの `DRY_RUN` で正常な WebSocket 接続と購読を確認。GitHub へプッシュ済。
+
+### 4. Discord Bot の常駐化 (Persistence)
+- **[完了] PM2 の導入**: `npm install -g pm2` を実行。
+- **[完了] エコシステム構築**: `ecosystem.config.json` を作成し、ボットを PM2 管理下に配置。
+- **[完了] 自動起動スクリプト**: Windows 再起動時に PM2 を復旧させる `start_discord_bot.bat` を用意。
