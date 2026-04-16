@@ -1,9 +1,9 @@
 name: 📈 Itako Quants Trader 24/7
 
 on:
-  schedule:
-    # 15分ごとに実行 (24時間体制)
-    - cron: '*/15 * * * *'
+#   schedule:
+#     # 15分ごとに実行 (24時間体制)
+#     - cron: '*/15 * * * *'
   workflow_dispatch: # 手動ボタンでも実行可能
 
 jobs:

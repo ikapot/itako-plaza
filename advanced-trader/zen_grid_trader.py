@@ -16,10 +16,18 @@ logger = logging.getLogger("ZenGridTrader")
 async def main():
     # カレントディレクトリまたは相対パスで .env.all を読み込む
     dotenv_path = ".env.all" if os.path.exists(".env.all") else "advanced-trader/.env.all"
-    load_dotenv(dotenv_path, override=True)
+    load_dotenv(dotenv_path)  # override=True を外して、既存の環境変数（PM2設定等）を尊重する
+    
     api_key = os.environ.get("WALLET_API_KEY")
     api_secret = os.environ.get("WALLET_API_SECRET")
     dry_run = os.environ.get("DRY_RUN", "true").lower() == "true"
+    gist_id = os.environ.get("GIST_ID")
+    gist_token = os.environ.get("GIST_TOKEN") or os.environ.get("GITHUB_PAT_GIST")
+
+    if gist_id and gist_token:
+        logger.info(f"Gist Sync config detected (ID: {gist_id[:4]}... / Token: {gist_token[:4]}...)")
+    else:
+        logger.warning("Gist Sync config missing in .env.all or environment!")
 
     if not api_key or not api_secret:
         logger.error("API or Secret key not found.")

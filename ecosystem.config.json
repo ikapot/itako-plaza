@@ -14,6 +14,22 @@
       "error_file": "logs/discord_error.log",
       "out_file": "logs/discord_out.log",
       "merge_logs": true
+    },
+    {
+      "name": "LtcTrader",
+      "script": "advanced-trader/zen_grid_trader.py",
+      "interpreter": "C:\\Users\\ikapo\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "cwd": "C:\\Users\\ikapo\\Desktop\\itako",
+      "watch": false,
+      "autorestart": true,
+      "max_memory_restart": "500M",
+      "env": {
+        "DRY_RUN": "false"
+      },
+      "log_date_format": "YYYY-MM-DD HH:mm:ss",
+      "error_file": "logs/trader_error.log",
+      "out_file": "logs/trader_out.log",
+      "merge_logs": true
     }
   ]
 }

@@ -42,10 +42,20 @@ class GistSync:
             logger.warning("⚠️ Gist 連携に必要な設定がありません。保存をスキップします。")
             return False
             
+        # NaN を JSON で扱える 0.0 に置換（再帰的に処理）
+        def sanitize(obj):
+            if isinstance(obj, dict):
+                return {k: sanitize(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [sanitize(v) for v in obj]
+            elif isinstance(obj, float) and obj != obj: # NaN check
+                return 0.0
+            return obj
+
         payload = {
             "files": {
                 self.filename: {
-                    "content": json.dumps(data, indent=4)
+                    "content": json.dumps(sanitize(data), indent=4)
                 }
             }
         }

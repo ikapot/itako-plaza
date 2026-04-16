@@ -14,7 +14,7 @@ export async function fetchTradeStatus(): Promise<TradeStatus | null> {
 
     const res = await fetch(`https://api.github.com/gists/${gistId}`, {
       headers,
-      next: { revalidate: 30 } // 30s cache
+      cache: 'no-store'
     });
 
     if (!res.ok) throw new Error(`Gist fetch failed: ${res.status}`);

@@ -45,7 +45,7 @@ class ZenGridEngine:
         self.history = []             # 追加
 
         # Gist 連携 (ダッシュボード表示用)
-        pat = os.environ.get("GITHUB_PAT_GIST")
+        pat = os.environ.get("GIST_TOKEN") or os.environ.get("GITHUB_PAT_GIST")
         gist_id = os.environ.get("GIST_ID")
         self.gist = GistSync(pat, gist_id, "strategy_state.json")
 
