@@ -1,166 +1,126 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
-import Header from '../components/Header';
-import Indicators from '../components/Indicators';
-import Capital from '../components/Capital';
-import History from '../components/History';
-import LtcWaveChart from '../components/LtcWaveChart';
-import { TradeStatus } from '../types/trade';
-import { format } from 'date-fns';
-
-const MAX_POINTS = 100; // チャートに表示する最大データ点数
-
-const DEFAULT_STATE: TradeStatus = {
-  timestamp: new Date().toISOString(),
-  bestBid: 0,
-  bestAsk: 0,
-  rsi: 50,
-  ema_trend: 'NEUTRAL',
-  price: 0,
-  status: 'IDLE',
-  indicators: {
-    ATR: 0,
-    EMA_direction: 'NEUTRAL',
-    RSI: 50,
-    Z_score: 0
-  },
-  capital: {
-    balance: 0,
-    gain_loss_percent: 0
-  },
-  history: [],
-  ai_bias: 'NEUTRAL',
-  ai_reason: 'Awaiting updates...'
-};
+import { useTideData } from '@/hooks/useTideData';
+import LtcWaveChart from '@/components/LtcWaveChart';
+import Indicators from '@/components/Indicators';
+import Capital from '@/components/Capital';
+import History from '@/components/History';
 
 export default function Home() {
-  const [data, setData] = useState<TradeStatus | null>(null);
-  const [waveData, setWaveData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [errorStatus, setErrorStatus] = useState<string | null>(null);
-  const mainRef = useRef(null);
+  const { status, waveData, loading, error } = useTideData();
+  const [pulse, setPulse] = useState(false);
 
-  const fetchData = async () => {
-    try {
-      const res = await fetch('/api/status');
-      const json = await res.json();
-      
-      if (json.error) {
-        setErrorStatus(json.error);
-      } else {
-        setData(json);
-        setErrorStatus(null);
-        
-        // チャートデータの履歴蓄積
-        const newPoint = {
-          time: json.timestamp,
-          displayTime: format(new Date(json.timestamp), 'HH:mm'),
-          price: json.price,
-          zScore: json.indicators?.Z_score ?? 0
-        };
-
-        setWaveData(prev => {
-          // 重複チェック（タイムスタンプが変わっていない場合は追加しない）
-          if (prev.length > 0 && prev[prev.length - 1].time === newPoint.time) {
-            return prev;
-          }
-          const updated = [...prev, newPoint];
-          return updated.slice(-MAX_POINTS); // 直近100件に制限
-        });
-      }
-    } catch (error) {
-      console.error('Fetch error:', error);
-      setErrorStatus('Network error occurred.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 価格変動時のパルス演出
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 30000); // 30s refresh
-
-    // GSAP Entrance Animation
-    if (mainRef.current) {
-        gsap.fromTo(mainRef.current, 
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }
-        );
+    if (status?.price) {
+      setPulse(true);
+      const timer = setTimeout(() => setPulse(false), 800);
+      return () => clearTimeout(timer);
     }
+  }, [status?.price]);
 
-    return () => clearInterval(interval);
-  }, []);
+  // 初期読み込みアニメーション
+  useEffect(() => {
+    if (!loading) {
+      gsap.from('.stunning-element', {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'power3.out',
+      });
+    }
+  }, [loading]);
 
-  if (loading && !data) {
-    return (
-      <div className="min-h-screen bg-[#121212] flex items-center justify-center">
-        <div className="text-[#f15a24] font-black tracking-[1em] animate-pulse">INITIATING...</div>
-      </div>
-    );
+  if (loading) {
+     return (
+        <main className="min-h-screen bg-black flex flex-col items-center justify-center p-8">
+          <div className="relative">
+            <div className="w-16 h-16 border-t-2 border-[#f15a24] rounded-full animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[8px] font-black tracking-widest text-white/40 animate-pulse uppercase">Syncing...</span>
+            </div>
+          </div>
+        </main>
+      );
   }
 
-  // Use data or fallback to DEFAULT_STATE
-  const displayData = data ?? DEFAULT_STATE;
-
   return (
-    <main ref={mainRef} className="min-h-screen bg-[#080808] text-white p-6 md:p-12 lg:px-24 max-w-6xl mx-auto selection:bg-[#f15a24] selection:text-black">
-      <Header 
-        price={displayData.price} 
-        timestamp={displayData.timestamp} 
-        status={displayData.status} 
-      />
-      
-      {errorStatus && (
-        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-between animate-pulse">
-          <span className="text-[10px] font-black text-red-400 tracking-widest uppercase">Connectivity Warning</span>
-          <span className="text-[9px] text-red-500/60 font-medium truncate ml-4">{errorStatus}</span>
-        </div>
-      )}
-
-      {/* Visual Waves Chart */}
-      <LtcWaveChart data={waveData} history={displayData.history ?? []} />
-
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-8">
-            {displayData.ai_bias && (
-                <div className="py-6 border-b border-white/5 bg-white/[0.02] p-6 rounded-3xl border border-white/5">
-                <div className="flex flex-col gap-3">
-                    <span className={`text-[10px] w-fit font-black px-3 py-1 rounded-sm border ${
-                    displayData.ai_bias === 'BULLISH' ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30' :
-                    displayData.ai_bias === 'BEARISH' ? 'bg-red-500/20 text-red-500 border-red-500/30' :
-                    'bg-white/5 text-white/40 border-white/10'
-                    }`}>
-                    AI_TIDE: {displayData.ai_bias}
-                    </span>
-                    <p className="text-sm font-serif italic text-white/70 leading-relaxed">{displayData.ai_reason}</p>
-                </div>
-                </div>
-            )}
-
-            <Indicators 
-                atr={displayData.indicators?.ATR ?? 0} 
-                emaDirection={displayData.indicators?.EMA_direction ?? 'NEUTRAL'} 
-                rsi={displayData.indicators?.RSI ?? 50} 
-            />
-            
-            <Capital 
-                balance={displayData.capital?.balance ?? 0} 
-                gainLossPercent={displayData.capital?.gain_loss_percent ?? 0} 
-            />
-        </div>
-
-        <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-6 h-fit">
-            <h3 className="text-[10px] font-black tracking-[0.4em] text-white/20 uppercase mb-6">Trade Log</h3>
-            <History history={displayData.history ?? []} />
-        </div>
+    <main className="min-h-screen bg-[#050505] text-white selection:bg-[#f15a24]/30 overflow-x-hidden relative">
+      {/* Background Orbs */}
+      <div className="fixed inset-0 pointer-events-none opacity-20 overflow-hidden">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#f15a24] rounded-full blur-[180px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-cyan-700 rounded-full blur-[150px] opacity-40" />
       </div>
 
-      <footer className="mt-20 pt-8 border-t border-white/5 flex flex-col items-center gap-2">
-        <span className="text-[8px] font-bold text-white/10 tracking-[0.6em] uppercase">Autonomous Strategy Monitoring V2.5</span>
-        <span className="text-[8px] font-mono text-white/5 uppercase">No Emojis | No Distractions | Pure Quant</span>
-      </footer>
+      {/* Pulse Flash */}
+      <div className={`transition-opacity duration-700 ${pulse ? 'opacity-100' : 'opacity-0'} fixed inset-0 pointer-events-none bg-[#f15a24]/5 blur-[100px] z-0`} />
+
+      <div className="max-w-[1200px] mx-auto p-4 md:p-8 relative z-10">
+        
+        {/* Header - 375px Optimized */}
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-16 stunning-element">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+              <span className="text-[8px] font-black tracking-[0.4em] text-white/50 uppercase">Live Monitor / LTC_JPY</span>
+            </div>
+            {/* Price: Using text-5xl to fit 375px width safely */}
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tightest whitespace-nowrap overflow-hidden">
+                ¥{status?.price.toLocaleString() || '0'}
+            </h1>
+            <p className="text-[9px] font-bold tracking-[0.2em] text-white/20 uppercase">Real-time Trading Battle Monitor</p>
+          </div>
+          
+          <div className="p-4 md:px-8 bg-white/[0.03] backdrop-blur-2xl rounded-3xl border border-white/5 max-w-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`px-1.5 py-0.5 rounded-[4px] text-[7px] font-black tracking-widest ${
+                status?.ai_bias === 'BULLISH' ? 'bg-emerald-500 text-black' : 
+                status?.ai_bias === 'BEARISH' ? 'bg-red-500 text-white' : 
+                'bg-white/10 text-white/40'
+              }`}>AI_STATUS: {status?.ai_bias}</span>
+            </div>
+            <p className="text-[12px] italic font-serif text-white/80 leading-relaxed">&quot;{status?.ai_reason}&quot;</p>
+          </div>
+        </header>
+
+        {/* Responsive Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          
+          {/* Charts & Indicators (Main Area) */}
+          <div className="lg:col-span-2 space-y-6 md:space-y-8 stunning-element">
+            <Indicators 
+              atr={status?.indicators.ATR || 0} 
+              emaDirection={status?.indicators.EMA_direction || 'NEUTRAL'} 
+              rsi={status?.indicators.RSI || 0} 
+            />
+
+            <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] border border-white/5 p-4 md:p-8">
+              <LtcWaveChart data={waveData} history={status?.history || []} />
+            </div>
+          </div>
+
+          {/* Capital & History (Sidebar) */}
+          <div className="space-y-6 md:space-y-8 stunning-element">
+            <Capital 
+              balance={status?.capital.balance || 0} 
+              gainLoss={status?.capital.gain_loss_percent || 0} 
+            />
+            <div className="h-[400px]">
+                <History history={status?.history || []} />
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer */}
+        <footer className="mt-16 py-8 border-t border-white/5 flex items-center justify-between opacity-20 stunning-element">
+          <span className="text-[8px] font-black tracking-widest uppercase">Itako Battle V2.5 Pro</span>
+          <span className="text-[8px] font-mono uppercase">{status?.timestamp}</span>
+        </footer>
+      </div>
     </main>
   );
 }

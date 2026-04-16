@@ -108,21 +108,34 @@ class ZenGridEngine:
             logger.error(f"Ticker update error: {e}")
 
     async def get_ai_tide_sense(self):
-        """Gemini による市場の「潮目」解析"""
+        """Gemini による市場の「潮目」高度解析"""
         if not self.model or self.strategy.df.empty:
             return
             
         try:
-            # 最新の指標を文字列化
-            last_stats = self.strategy.df.tail(5).to_dict(orient='records')
-            prompt = f"Analyze LTC/JPY market (5m data): {json.dumps(last_stats)}. Provide 1-word bias (BULLISH, BEARISH, NEUTRAL) and a very short 1-line reason in Japanese."
+            last = self.strategy.df.iloc[-1]
+            last_stats = {
+                "price": float(last['close']),
+                "EMA_20": float(last.get('EMA_20', 0)),
+                "RSI_14": float(last.get('RSI_14', 0)),
+                "ATR_22": float(last.get('ATR_22', 0)),
+                "Z_score": float(last.get('Z_score', 0)),
+                "trend": "UP" if last['close'] > last.get('EMA_20', 0) else "DOWN"
+            }
+            
+            prompt = (
+                f"You are a professional quant trader specializing in LTC/JPY. "
+                f"Market Indicators: {json.dumps(last_stats)}. "
+                f"Analyze the market tide. First line: 1 word (BULLISH, BEARISH, or NEUTRAL). "
+                f"Second line: A professional 1-line logical reason in Japanese (short and concise)."
+            )
             
             # 非同期で実行
             response = await asyncio.to_thread(self.model.generate_content, prompt)
             text = response.text.strip().split("\n")
-            self.ai_bias = text[0].upper()
-            self.ai_reason = text[1] if len(text) > 1 else "Continuum"
-            logger.info(f"🧠 AI Tide Sense: {self.ai_bias} | {self.ai_reason}")
+            self.ai_bias = text[0].upper().strip()
+            self.ai_reason = text[1].strip() if len(text) > 1 else "Analyzing current tide..."
+            logger.info(f"🧠 Advanced AI Tide Sense: {self.ai_bias} | {self.ai_reason}")
         except Exception as e:
             logger.warning(f"AI Analysis failed: {e}")
 
@@ -204,7 +217,7 @@ class ZenGridEngine:
         while self.is_running:
             # 1. AI 判定の更新 (1時間おき想定だが、ここではループごと。実際は負荷を考慮)
             # 判定ロジックが負荷になるため、一定時間おきにするのが定石
-            if datetime.datetime.now().minute % 15 == 0: 
+            if datetime.datetime.now().minute % 5 == 0: 
                 await self.get_ai_tide_sense()
 
             # 最低限のデータ（指標計算用）が溜まるまで待機

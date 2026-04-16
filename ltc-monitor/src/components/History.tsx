@@ -1,46 +1,71 @@
 import React from 'react';
-import { History as HistoryIcon } from 'lucide-react';
+import { History as HistoryIcon, ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
+interface HistoryItem {
+  side: 'BUY' | 'SELL';
+  price: number;
+  timestamp: string;
+  amount: number;
+}
+
 interface Props {
-  history: Array<{
-    side: 'BUY' | 'SELL';
-    price: number;
-    timestamp: string;
-    amount: number;
-  }>;
+  history: HistoryItem[];
 }
 
 export default function History({ history }: Props) {
   return (
-    <div className="py-8 space-y-6">
-      <div className="flex items-center gap-4 text-white/50">
-        <HistoryIcon size={14} />
-        <h2 className="text-[10px] font-bold tracking-[0.4em] uppercase">Operation History / 執行履歴（直近5件）</h2>
+    <div className="bg-white/5 backdrop-blur-3xl rounded-3xl border border-white/5 overflow-hidden flex flex-col h-full stunning-element">
+      <div className="p-4 md:p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+        <div className="flex items-center gap-3">
+          <HistoryIcon size={14} className="text-white/40" />
+          <span className="text-[10px] md:text-xs font-black tracking-widest uppercase">Trade Log</span>
+        </div>
+        <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em]">Recent 5 Nodes</span>
       </div>
 
-      <div className="space-y-3">
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
         {history.length === 0 ? (
-          <div className="text-[10px] text-white/20 uppercase tracking-widest italic py-4">No recent operations / 履歴なし</div>
+          <div className="h-32 flex items-center justify-center">
+            <span className="text-[10px] font-bold text-white/10 uppercase tracking-widest">Awaiting execution...</span>
+          </div>
         ) : (
-          history.map((item, i) => (
-            <div key={i} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/5 transition-all group">
-              <div className="flex items-center gap-4">
-                <div className={`px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase ${
-                  item.side === 'BUY' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-red-500/20 text-red-500'
-                }`}>
-                  {item.side}
+          <div className="divide-y divide-white/5">
+            {history.map((item, i) => (
+              <div key={i} className="p-3 md:p-4 hover:bg-white/[0.03] transition-colors group">
+                <div className="flex items-center justify-between mb-1.5 md:mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`p-1 rounded-md ${
+                      item.side === 'BUY' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                    }`}>
+                      {item.side === 'BUY' ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                    </div>
+                    <span className={`text-[10px] md:text-xs font-black tracking-widest ${
+                      item.side === 'BUY' ? 'text-emerald-400' : 'text-red-400'
+                    }`}>
+                      {item.side}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 opacity-30 group-hover:opacity-50 transition-opacity">
+                    <Clock size={10} />
+                    <span className="text-[8px] md:text-[9px] font-mono">
+                      {format(new Date(item.timestamp), 'HH:mm:ss')}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-white/80">¥{item.price.toLocaleString()}</span>
-                  <span className="text-[8px] text-white/20 font-medium">{format(new Date(item.timestamp), 'MM/dd HH:mm')}</span>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-sm md:text-base font-mono font-bold text-white/90">
+                    ¥{item.price.toLocaleString()}
+                  </div>
+                  <div className="flex items-center gap-1 text-white/40">
+                    <span className="text-[8px] md:text-[9px] font-bold uppercase tracking-widest">Qty:</span>
+                    <span className="text-[10px] md:text-xs font-black text-white/60">{item.amount.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-[10px] font-mono text-white/40">{item.amount.toFixed(1)} LTC</span>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>
